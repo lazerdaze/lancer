@@ -44,9 +44,13 @@ if __name__ == 'lancer':
 
 	addToSysPath()
 
-	print '\n\n\n{0} LANCER {0}\n\n\n'.format('-' * 50)
-	print '{}\n{}\n{}\n'.format(MAYAVERSION, OSPLATFORM, DIRPATH)
+	print
+	'\n\n\n{0} LANCER {0}\n\n\n'.format('-' * 50)
+	print
+	'{}\n{}\n{}\n'.format(MAYAVERSION, OSPLATFORM, DIRPATH)
 	for x in SUBDIR:
-		print x[0]
+		print
+		x[0]
 
-	print '\n\n\n{0}\n\n\n'.format('-' * 111)
+	print
+	'\n\n\n{0}\n\n\n'.format('-' * 111)
