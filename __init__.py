@@ -1,4 +1,4 @@
-# LANCER. Copyright 2018 Justin Tirado. All Rights Reserved.
+# LANCER
 #
 #
 #
