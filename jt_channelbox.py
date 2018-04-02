@@ -1,4 +1,4 @@
-# LANCER. JT CHANNELBOX. Copyright 2018 Justin Tirado. All Rights Reserved.
+# LANCER. JT CHANNELBOX
 #
 #
 #
