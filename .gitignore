@@ -1,1 +1,8 @@
 *.pyc
+*.axie
+*.cup
+*.ui
+legacy_axie.py
+legacy_eixml.py
+studiolibrary
+
