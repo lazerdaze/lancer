@@ -474,7 +474,10 @@ def deleteKeys(selected, *args):
     for attr in ['t', 'r']:
         for axis in ['x', 'y', 'z']:
             for typ in ['TU', 'TL', 'TA']:
-                con = cmds.listConnections(selected, s=True, type='animCurve{}'.format(typ))
+                con = cmds.listConnections('{}.{}{}'.format(selected, attr, axis),
+                                           s=True,
+                                           type='animCurve{}'.format(typ)
+                                           )
                 if con:
                     cmds.delete(con)
 
