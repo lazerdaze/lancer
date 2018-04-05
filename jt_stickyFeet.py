@@ -1,32 +1,103 @@
-# Sticky Feet
-# Justin Tirado
-# v 1.0
+########################################################################################################################
+#
+# jt_stickyFeet.py
+# Author: Justin Tirado
 #
 #
-#
-
+########################################################################################################################
 '''
 # Install Instructions:
 import stickyFeet
 stickyFeet.ui()
-
 '''
+
+__version__ = 1.1
 
 import os
 import math
+import collections
 from maya import cmds, mel, OpenMayaUI
 from maya.api import OpenMaya
 
+########################################################################################################################
+#
+#
+#	Utility Functions & Classes
+#
+#
+########################################################################################################################
+
+DEBUGMODE = False
+
+
+def convertStrToList(var, *args):
+    var = str(var).replace('[', '').replace(']', '').replace("u'", '').replace("'", '').replace(" ", '').split(',')
+    return var
+
+
+class intField():
+    def __init__(self, value=0, bc=None, *args):
+        self.value = value
+
+        self.layout = cmds.rowLayout(nc=3, ad3=2, rat=[1, 'both', -1])
+        self.control = cmds.intField(v=self.value, w=60)
+        b1 = cmds.button(l='<', c=lambda *x: self.update('remove'))
+        b2 = cmds.button(l='>', c=lambda *x: self.update('add'))
+        cmds.setParent('..')
+
+        if bc:
+            for x in [b1, b2]:
+                cmds.button(x, e=True, bgc=bc)
+
+    def get(self, *args):
+        return cmds.intField(self.control, q=True, v=True)
+
+    def update(self, typ='add', *args):
+        if typ == 'add':
+            value = self.get() + 1
+        elif typ == 'remove':
+            value = self.get() - 1
+        cmds.intField(self.control, e=True, v=value)
+
+
+class textField():
+    def __init__(self, l='Get', value='', bw=None, bc=None, fc=[0.25, 0.25, 0.25], *args):
+        self.value = value
+
+        self.layout = cmds.rowLayout(nc=2, ad2=2, rat=[2, 'both', 0], cat=[2, 'left', 5])
+        self.button = cmds.button(l=l, c=lambda *x: self.update())
+        self.control = cmds.text(l=self.value, bgc=fc, al='left')
+        cmds.setParent('..')
+
+        if bw:
+            cmds.button(self.button, e=True, w=bw)
+
+        if bc:
+            cmds.button(self.button, e=True, bgc=bc)
+
+    def get(self, *args):
+        return cmds.intField(self.control, q=True, v=True)
+
+    def update(self, *args):
+        selected = getSelected()
+        self.value = selected[0] if selected else ''
+        cmds.text(self.control, e=True, l=self.value)
+
+
+########################################################################################################################
+#
+#
+#	Foot Plant UI & Functions
+#
+#
+########################################################################################################################
+
+
+ATTRIBUTES = ["translate", "rotate", "scale"]
+CHANNELS = ["X", "Y", "Z"]
+
 
 class UndoChunkContext(object):
-    """
-    The undo context is used to combine a chain of commands into one undo.
-    Can be used in combination with the "with" statement.
-
-    with UndoChunkContext():
-        # code
-    """
-
     def __enter__(self):
         cmds.undoInfo(openChunk=True)
 
@@ -35,22 +106,10 @@ class UndoChunkContext(object):
 
 
 def getMayaTimeline():
-    """
-    Get the object name of Maya's timeline.
-
-    :return: Object name of Maya's timeline
-    :rtype: str
-    """
     return mel.eval("$tmpVar=$gPlayBackSlider")
 
 
 def getFrameRangeFromTimeControl():
-    """
-    Get frame range from time control.
-
-    :return: Frame range
-    :rtype: list/None
-    """
     rangeVisible = cmds.timeControl(
         getMayaTimeline(),
         q=True,
@@ -68,52 +127,7 @@ def getFrameRangeFromTimeControl():
     return [int(r[0]), int(r[-1]) - 1]
 
 
-def findIcon(icon):
-    """
-    Loop over all icon paths registered in the XBMLANGPATH environment
-    variable ( appending the tools icon path to that list ). If the
-    icon exist a full path will be returned.
-
-    :param str icon: icon name including extention
-    :return: icon path
-    :rtype: str or None
-    """
-    paths = []
-
-    # get maya icon paths
-    if os.environ.get("XBMLANGPATH"):
-        paths = os.environ.get("XBMLANGPATH").split(os.pathsep)
-
-    # append tool icon path
-    paths.insert(
-        0,
-        os.path.join(
-            os.path.split(__file__)[0],
-            "icons"
-        )
-    )
-
-    # loop all potential paths
-    for path in paths:
-        filepath = os.path.join(path, icon)
-        if os.path.exists(filepath):
-            return filepath
-
-
-ATTRIBUTES = ["translate", "rotate", "scale"]
-CHANNELS = ["X", "Y", "Z"]
-
-
 def getInvalidAttributes(transform):
-    """
-    Loop over the transform attributes of the transform and see if the
-    attributes are locked or connected to anything other than a animation
-    curve. If this is the case the attribute is invalid.
-
-    :param str transform: Path to transform
-    :return: List of invalid attributes.
-    :rtype: list
-    """
     invalidChannels = []
     for attr in ATTRIBUTES:
         # get connection of parent attribute
@@ -151,17 +165,6 @@ def getInvalidAttributes(transform):
 
 
 def getMatrix(transform, time=None, matrixType="worldMatrix"):
-    """
-    Get the matrix of the desired matrix type from the transform in a specific
-    moment in time. If the transform doesn't exist an empty matrix will be
-    returned. If not time is specified, the current time will be used.
-
-    :param str transform: Path to transform
-    :param float/int time: Time value
-    :param str matrixType: Matrix type to query
-    :return: Matrix
-    :rtype: OpenMaya.MMatrix
-    """
     if not transform:
         return OpenMaya.MMatrix()
 
@@ -175,17 +178,6 @@ def getMatrix(transform, time=None, matrixType="worldMatrix"):
 
 
 def decomposeMatrix(matrix, rotOrder, rotPivot):
-    """
-    Decompose a matrix into translation, rotation and scale values. A
-    rotation order has to be provided to make sure the euler values are
-    correct.
-
-    :param OpenMaya.MMatrix matrix:
-    :param int rotOrder: Rotation order
-    :param list rotPivot: Rotation pivot
-    :return: Translate, rotate and scale values
-    :rtype: list
-    """
     matrixTransform = OpenMaya.MTransformationMatrix(matrix)
 
     # set pivots
@@ -217,15 +209,6 @@ def decomposeMatrix(matrix, rotOrder, rotPivot):
 
 
 def getInTangent(animCurve, time):
-    """
-    Query the in tangent type of the key frame closest but higher than the
-    parsed time.
-
-    :param str animCurve: Animation curve to query
-    :param int time:
-    :return: In tangent type
-    :rtype: str
-    """
     times = cmds.keyframe(animCurve, query=True, timeChange=True) or []
     for t in times:
         if t <= time:
@@ -244,15 +227,6 @@ def getInTangent(animCurve, time):
 
 
 def getOutTangent(animCurve, time):
-    """
-    Query the out tangent type of the key frame closest but lower than the
-    parsed time.
-
-    :param str animCurve: Animation curve to query
-    :param int time:
-    :return: Out tangent type
-    :rtype: str
-    """
     times = cmds.keyframe(animCurve, query=True, timeChange=True) or []
     for t in times:
         if t >= time:
@@ -271,12 +245,6 @@ def getOutTangent(animCurve, time):
 
 
 def applyEulerFilter(transform):
-    """
-    Apply an euler filter to fix euler issues on curves connected to the
-    transforms rotation attributes.
-
-    :param str transform: Path to transform
-    """
     # get anim curves connected to the rotate attributes
     rotationCurves = []
     for channel in CHANNELS:
@@ -298,15 +266,6 @@ def applyEulerFilter(transform):
 
 
 def anchorTransform(transform, start, end):
-    """
-    Anchor a transform for the parsed time range, ideal to fix sliding feet.
-    Function will take into account the in and out tangents in case the
-    transform is already animated.
-
-    :param str transform: Path to transform
-    :param int start: Start time value
-    :param int end: End time value
-    """
     # wrap in an undo chunk
     with UndoChunkContext():
         # get parent
@@ -379,6 +338,62 @@ def anchorTransform(transform, start, end):
 
         # apply euler filter
         applyEulerFilter(transform)
+
+
+def footPlantUI(padding=10, lc=[0.12, 0.18, 0.15], bgc=[.2, .3, .25]):
+    ui = cmds.frameLayout(l='Foot Plant', bgs=True, bgc=lc, )
+    form = cmds.formLayout(bgc=bgc)
+    col = cmds.columnLayout(adj=True)
+    cmds.text(
+        l="Select foot control, set start and end frame, then plant. \n "
+          "Time slider selection works.\n "
+          "Works in local and global space.")
+
+    cmds.separator(st='none', h=10, ebg=False)
+
+    r1 = cmds.rowLayout(nc=2)
+    cmds.text(l='Start:\t')
+    iui1 = intField(getTimeRange()[0], bc=[.314, .4, .310])
+    cmds.setParent('..')
+
+    r2 = cmds.rowLayout(nc=2)
+    cmds.text(l='End:\t')
+    iui2 = intField(getTimeRange()[0], bc=[.314, .4, .310])
+    cmds.setParent('..')
+
+    row([r1, r2])
+    cmds.separator(st='none', h=10, ebg=False)
+    cmds.button(l='PLANT',
+                bgc=[.25, 1, .45],
+                c=lambda *x: anchorTransform(cmds.ls(sl=True)[0],
+                                             iui1.get() if not getFrameRangeFromTimeControl() else
+                                             getFrameRangeFromTimeControl()[0],
+                                             iui2.get() if not getFrameRangeFromTimeControl() else
+                                             getFrameRangeFromTimeControl()[1]))
+
+    cmds.setParent('..')  # column end
+    cmds.setParent('..')  # form end
+    cmds.setParent('..')  # frame end
+
+    cmds.formLayout(form,
+                    e=True,
+                    attachForm=((col, 'left', padding),
+                                (col, 'top', padding),
+                                (col, 'right', padding),
+                                (col, 'bottom', padding)
+                                )
+                    )
+
+    return ui
+
+
+########################################################################################################################
+#
+#
+#	Bake UI & Functions
+#
+#
+########################################################################################################################
 
 
 def bakeToWorld(selected=None, globalObject=None, smart=False, *args):
@@ -518,30 +533,40 @@ def bakeAnimation(selected, start, end, smart=False, *args):
         )
 
 
-class intField():
-    def __init__(self, value=0, *args):
-        self.value = value
+def bakeToolUI(padding=10, lc=[.27, .137, 0.172], bgc=[0.27, 0.188, 0.209]):
+    ui = cmds.frameLayout(l='Bake To World', bgs=True, bgc=lc, )
+    form = cmds.formLayout(bgc=bgc)
+    col = cmds.columnLayout(adj=True, rs=padding)
 
-        self.layout = cmds.rowLayout(nc=3, ad3=2)
-        self.control = cmds.intField(v=self.value, w=60)
-        cmds.button(l='<', c=lambda *x: self.update('remove'))
-        cmds.button(l='>', c=lambda *x: self.update('add'))
-        cmds.setParent('..')
+    cmds.text(l='First get Global Object, then select all objects to bake.')
+    tui1 = textField(l='Global Object', bw=80, bc=[.409, .310, .327], fc=lc)
 
-    def get(self, *args):
-        return cmds.intField(self.control, q=True, v=True)
+    cui1 = cmds.checkBox(l='Smart Bake')
+    cmds.button(l='BAKE', bgc=[1, .25, .45],
+                c=lambda *x: bakeToWorld(getSelected(), globalObject=cmds.textFieldButtonGrp(tui1, q=True, tx=True),
+                                         smart=bool(cmds.checkBox(cui1, q=True, v=True))))
+    cmds.setParent('..')  # column end
+    cmds.setParent('..')  # form end
+    cmds.setParent('..')  # frame end
 
-    def update(self, typ='add', *args):
-        if typ == 'add':
-            value = self.get() + 1
-        elif typ == 'remove':
-            value = self.get() - 1
-        cmds.intField(self.control, e=True, v=value)
+    cmds.formLayout(form,
+                    e=True,
+                    attachForm=((col, 'left', padding),
+                                (col, 'top', padding),
+                                (col, 'right', padding),
+                                (col, 'bottom', padding)
+                                )
+                    )
+    return ui
 
 
-def convertStrToList(var, *args):
-    var = str(var).replace('[', '').replace(']', '').replace("u'", '').replace("'", '').replace(" ", '').split(',')
-    return var
+########################################################################################################################
+#
+#
+#	Path Tool UI & Functions
+#
+#
+########################################################################################################################
 
 
 class cyclePath():
@@ -575,6 +600,30 @@ class cyclePath():
                     cmds.warning('Timewarp skipped. Nothing selected.')
                 self.connectNodesToNetwork()
 
+    def saveExistingAnim(self):
+        selected = self.globalObject
+        network = self.curve
+        attrDict = collections.OrderedDict()
+
+        for attr in ['t', 'r', 's']:
+            for ax in ['x', 'y', 'z']:
+                attrName = '{}.{}{}'.format(selected, attr, ax)
+                isKeyable = cmds.getAttr(attrName, k=True)
+
+                if isKeyable:
+                    conn = cmds.listConnections(attrName)
+                    if conn:
+                        for c in conn:
+                            if 'animCurve' in cmds.objectType(c):
+                                attrDict['{}{}'.format(attr, ax)] = c
+
+        for attr in attrDict:
+            cmds.addAttr(network, ln='savedAnim_{}'.format(attr))
+            dup = cmds.duplicate(attrDict[attr])[0]
+            cmds.connectAttr('{}.output'.format(dup), '{}.savedAnim_{}'.format(network, attr), f=True)
+
+
+
     def setupGlobalObject(self):
         self.checkSelected()
         self.bakeList.append(self.globalObject)
@@ -597,9 +646,44 @@ class cyclePath():
         endValue = cmds.keyframe(self.translateZ, q=True, t=(self.end, self.end), vc=True)[0]
         return (self.end - self.start) / endValue
 
+    def setOnMotionPath(self, selected, curve, name='motionPath', uValue=0):
+        # Create Nodes
+        mp = cmds.createNode('motionPath', n='{}_mp'.format(name))
+
+        mpAttr = {'follow': 1,
+                  'fractionMode': 1,
+                  'worldUpType': 3,
+                  'frontAxis': 2,
+                  'upAxis': 1,
+                  }
+        for attr in mpAttr:
+            cmds.setAttr('{}.{}'.format(mp, attr), mpAttr[attr])
+
+        add = []
+        for x in range(3):
+            a = cmds.createNode('addDoubleLinear', n='{}_add{}'.format(name, x))
+            add.append(a)
+            self.nodeList.append(a)
+
+        # Make Connections
+        cmds.connectAttr('{}.worldSpace[0]'.format(curve), '{}.geometryPath'.format(mp), f=True)
+        cmds.connectAttr('{}.rotateOrder'.format(mp), '{}.rotateOrder'.format(selected), f=True)
+
+        i = 0
+        for axis in ['x', 'y', 'z']:
+            cmds.connectAttr('{}.{}Coordinate'.format(mp, axis), '{}.input2'.format(add[i]), f=True)
+            cmds.connectAttr('{}.output'.format(add[i]), '{}.t{}'.format(selected, axis), f=True)
+            cmds.connectAttr('{}.r{}'.format(mp, axis), '{}.r{}'.format(selected, axis), f=True)
+            cmds.connectAttr('{}.transMinusRotatePivot{}'.format(selected, axis.upper()), '{}.input1'.format(add[i]))
+            i += 1
+
+        cmds.setAttr('{0}.uValue'.format(mp), uValue)
+
+        return mp
+
     def createPathNetwork(self, curve, globalObject, *args):
         cmds.cycleCheck(e=False)
-        mp = setOnMotionPath(globalObject, curve)
+        mp = self.setOnMotionPath(globalObject, curve)
         cmds.addAttr(curve, ln='curveLength', dv=0, k=True)
         for attr in ['uValue', 'frontTwist', 'upTwist', 'sideTwist']:
             try:
@@ -799,6 +883,18 @@ class bakeCyclePath():
         cmds.delete(layer, 'BaseAnimation')
 
 
+def detachCyclePath(curve, *args):
+    attrs = ['curveLength',
+             'uValue',
+             'frontTwist',
+             'upTwist',
+             'sideTwist',
+             'uValueOffset',
+             'bank',
+             'bankScale',
+             'bankLimit']
+
+
 def createTimeWarpNode(name='timeWarp1', *args):
     node = cmds.createNode('animCurveTT', name=name)
     timeRange = getTimeRange()
@@ -824,12 +920,13 @@ def connectTimeWarpToObject(selected, timewarp=None, *args):
 def getAnimCurvesFromObject(selected, *args):
     attrs = cmds.listAttr(selected, k=True)
     animCurveList = []
-    for at in attrs:
-        # anim = getConnectedObj(selected, at)
-        anim = cmds.listConnections('{}.{}'.format(selected, at))
-        if anim:
-            if 'animCurve' in cmds.objectType(anim[0]):
-                animCurveList.append(anim[0])
+    if attrs:
+        for at in attrs:
+            conn = cmds.listConnections('{}.{}'.format(selected, at))
+            if conn:
+                for c in conn:
+                    if 'animCurve' in cmds.objectType(c):
+                        animCurveList.append(c)
 
     return animCurveList
 
@@ -850,68 +947,26 @@ def getConnectedObj(obj, attr, *args):
             return None
 
 
-def setOnMotionPath(selected, curve, name='motionPath', uValue=0, *args):
-    # Create Nodes
-    mp = cmds.createNode('motionPath', n='{}_mp'.format(name))
-
-    mpAttr = {'follow': 1,
-              'fractionMode': 1,
-              'worldUpType': 3,
-              'frontAxis': 2,
-              'upAxis': 1,
-              }
-    for attr in mpAttr:
-        cmds.setAttr('{}.{}'.format(mp, attr), mpAttr[attr])
-
-    add = []
-    for x in range(3):
-        a = cmds.createNode('addDoubleLinear', n='{}_add{}'.format(name, x))
-        add.append(a)
-
-    # Make Connections
-    cmds.connectAttr('{}.worldSpace[0]'.format(curve), '{}.geometryPath'.format(mp), f=True)
-    cmds.connectAttr('{}.rotateOrder'.format(mp), '{}.rotateOrder'.format(selected), f=True)
-
-    i = 0
-    for axis in ['x', 'y', 'z']:
-        cmds.connectAttr('{}.{}Coordinate'.format(mp, axis), '{}.input2'.format(add[i]), f=True)
-        cmds.connectAttr('{}.output'.format(add[i]), '{}.t{}'.format(selected, axis), f=True)
-        cmds.connectAttr('{}.r{}'.format(mp, axis), '{}.r{}'.format(selected, axis), f=True)
-        cmds.connectAttr('{}.transMinusRotatePivot{}'.format(selected, axis.upper()), '{}.input1'.format(add[i]))
-        i += 1
-
-    cmds.setAttr('{0}.uValue'.format(mp), uValue)
-
-    return mp
-
-
-def pathToolUI():
-    cmds.frameLayout(l='Animation Cycle Path Tool', bgs=True, mw=10, mh=10, bgc=[0, 0, 0])
+def pathToolUI(padding=10, lc=[0.125, 0.187, 0.25], bgc=[.185, .217, .250]):
+    ui = cmds.frameLayout(l='Animation Cycle Path Tool', bgc=lc)
+    form = cmds.formLayout(bgc=bgc)
+    col = cmds.columnLayout(adj=True, rs=padding)
     cmds.text(
         l='First get Curve. Then get Global Object. \n '
           'Select all animated objects and attach for timewarp. (Optional)\n '
           'Creates new attributes on Curve. Select Curve to bake.')
 
-    tui1 = cmds.textFieldButtonGrp(ad2=1, ed=False, bl='      Curve      ',
-                                   bc=lambda *x: cmds.textFieldButtonGrp(tui1, e=True,
-                                                                         tx=cmds.ls(sl=True)[0] if cmds.ls(
-                                                                             sl=True) else ''))
-    tui2 = cmds.textFieldButtonGrp(ad2=1, ed=False, bl='Global Object',
-                                   bc=lambda *x: cmds.textFieldButtonGrp(tui2, e=True,
-                                                                         tx=cmds.ls(sl=True)[0] if cmds.ls(
-                                                                             sl=True) else ''))
+    tui1 = textField(l='Curve', bw=80, bc=[.310, .358, .409], fc=lc)
+    tui2 = textField(l='Global Object', bw=80, bc=[.310, .358, .409], fc=lc)
+
     cui1 = cmds.checkBox(l='Smart Bake')
     cui2 = cmds.checkBox(l='Bake To World', vis=False)
     row([cui1, cui2])
 
     bui1 = cmds.button(l='ATTACH',
                        bgc=[0, .5, 1],
-                       c=lambda *x: cyclePath(globalObject=cmds.textFieldButtonGrp(tui2,
-                                                                                   q=True,
-                                                                                   tx=True),
-                                              curve=cmds.textFieldButtonGrp(tui1,
-                                                                            q=True,
-                                                                            tx=True)
+                       c=lambda *x: cyclePath(globalObject=tui2.value,
+                                              curve=tui1.value
                                               )
                        )
 
@@ -923,26 +978,99 @@ def pathToolUI():
                                                   bakeWorld=bool(cmds.checkBox(cui2,
                                                                                q=True,
                                                                                v=True))))
-    row([bui1, bui2])
-    cmds.setParent('..')
+
+    s1 = cmds.separator(st='none', ebg=False)
+    bui3 = cmds.button(l='DETACH', bgc=[0, .5, 1])
+
+    row([bui1, bui3, s1, bui2])
+
+    cmds.setParent('..')  # column end
+    cmds.setParent('..')  # form end
+    cmds.setParent('..')  # frame end
+
+    cmds.formLayout(form,
+                    e=True,
+                    attachForm=((col, 'left', padding),
+                                (col, 'top', padding),
+                                (col, 'right', padding),
+                                (col, 'bottom', padding)
+                                )
+                    )
+
+    return ui
+
+
+########################################################################################################################
+#
+#
+#	Menu UI & Functions
+#
+#
+########################################################################################################################
+
+def mayaMotionTrail(selected, *args):
+    timeRange = getTimeRange()
+    mt = cmds.snapshot(selected,
+                       n='{}_motionTrail1'.format(selected),
+                       mt=True,
+                       i=1,
+                       startTime=timeRange[0],
+                       endTime=timeRange[1],
+                       ch=True,
+                       )
+
+    mtShape = cmds.listRelatives(mt[0], shapes=True)[0]
+
+    cmds.setAttr('{}.trailDrawMode'.format(mtShape), 1)
+    cmds.setAttr('{}.keyframeSize'.format(mtShape), 0.1)
+    return mt
 
 
 def motionTrailToCurve(selected, *args):
+    curve = None
     if cmds.objectType(selected, isType='motionTrailShape'):
         pts = cmds.getAttr('{}.pts'.format(selected))
         ptList = [[p[0], p[1], p[2]] for p in pts]
-        cmds.curve(d=3, p=ptList)
-    return
+        curve = cmds.curve(d=3, p=ptList)
+    return curve
+
+
+def curveMotionTrail(selected, *args):
+    mt = mayaMotionTrail(selected)[0]
+    mtShape = cmds.listRelatives(mt, shapes=True)[0]
+    curve = motionTrailToCurve(mtShape)
+    cmds.delete(mt)
+    return curve
+
+
+def updateDebug():
+    global DEBUGMODE
+    DEBUGMODE = True if DEBUGMODE == False else False
+    return DEBUGMODE
 
 
 def menuUI(*args):
-    cmds.menuBarLayout()
-    cmds.menu(l='Extras')
-    cmds.menuItem(l='Rebuild Curve', c= lambda *x: mel.eval('RebuildCurveOptions;'))
-    cmds.menuItem(l='Curve from Motion Trail', c= lambda *x: motionTrailToCurve(getSelected()[0]))
+    ui = cmds.menuBarLayout()
+    cmds.menu(l='Curve Tools')
+    cmds.menuItem(l='Rebuild Curve', c=lambda *x: mel.eval('RebuildCurveOptions;'))
+    cmds.menu(l='Motion Trail Tools')
+    cmds.menuItem(l='Create Maya Motion Trail', c=lambda *x: mayaMotionTrail(getSelected()[0]))
+    cmds.menuItem(l='Create Curve Motion Trail', c=lambda *x: curveMotionTrail(getSelected()[0]))
+    cmds.menuItem(d=True)
+    cmds.menuItem(l='Convert Motion Trail To Curve', c=lambda *x: motionTrailToCurve(getSelected()[0]))
+    cmds.menu(l='Debug')
+    cmds.menuItem(l='Debug Mode', cb=False, c=updateDebug)
     cmds.setParent('..')
-    return
+    return ui
 
+
+########################################################################################################################
+#
+#
+#	UI Functions
+#
+#
+########################################################################################################################
 
 def row(items, label='', *args):
     if label:
@@ -990,64 +1118,18 @@ def row(items, label='', *args):
 def ui(*args):
     winName = 'bltwUI'
 
-    if cmds.window(winName, q=True, ex=True, w=100, h=100):
+    if cmds.window(winName, q=True, ex=True):
         cmds.deleteUI(winName)
 
-    cmds.window(winName, t='JT Sticky Feet')
+    cmds.window(winName, t='JT Sticky Feet v.{}'.format(__version__), w=100, h=100, s=False, bgc=[0, 0, 0])
 
-    cmds.frameLayout(lv=False, mw=2, mh=2)
+    cmds.frameLayout(lv=False, mw=10, mh=10)
     menuUI()
-
-    cmds.columnLayout(adj=True)
-
+    cmds.columnLayout(adj=True, rs=10)
     pathToolUI()
-    cmds.separator(st='none', h=10, ebg=False)
-
-    cmds.frameLayout(l='Bake To World', bgs=True, mw=10, mh=10, bgc=[0, 0, 0])
-    cmds.columnLayout(adj=True)
-    cmds.text(l='First get Global Object, then select all objects to bake.')
-    cmds.separator(st='none', h=10, ebg=False)
-    tui1 = cmds.textFieldButtonGrp(ad2=1, ed=False, bl='Global Object',
-                                   bc=lambda *x: cmds.textFieldButtonGrp(tui1, e=True,
-                                                                         tx=cmds.ls(sl=True)[0] if cmds.ls(
-                                                                             sl=True) else ''))
-    cmds.separator(st='none', h=10, ebg=False)
-    cui1 = cmds.checkBox(l='Smart Bake')
-    cmds.separator(st='none', h=10, ebg=False)
-    cmds.button(l='BAKE', bgc=[1, .25, .45],
-                c=lambda *x: bakeToWorld(getSelected(), globalObject=cmds.textFieldButtonGrp(tui1, q=True, tx=True),
-                                         smart=bool(cmds.checkBox(cui1, q=True, v=True))))
+    bakeToolUI()
+    footPlantUI()
     cmds.setParent('..')
     cmds.setParent('..')
 
-    cmds.separator(st='none', h=10, ebg=False)
-
-    cmds.frameLayout(l='Foot Plant', bgs=True, mw=10, mh=10, bgc=[0, 0, 0])
-    cmds.columnLayout(adj=True)
-    cmds.text(
-        l="Select foot control, set start and end frame, then plant. \n "
-          "Time slider selection works.\n "
-          "Works in local and global space.")
-    
-    cmds.separator(st='none', h=10, ebg=False)
-    r1 = cmds.rowLayout(nc=2)
-    cmds.text(l='Start:\t')
-    iui1 = intField(getTimeRange()[0])
-    cmds.setParent('..')
-    r2 = cmds.rowLayout(nc=2)
-    cmds.text(l='End:\t')
-    iui2 = intField(getTimeRange()[0])
-    cmds.setParent('..')
-    row([r1, r2])
-    cmds.separator(st='none', h=10, ebg=False)
-    cmds.button(l='PLANT', bgc=[.25, 1, .45], c=lambda *x: anchorTransform(cmds.ls(sl=True)[0],
-                                                                           iui1.get() if not getFrameRangeFromTimeControl() else
-                                                                           getFrameRangeFromTimeControl()[0],
-                                                                           iui2.get() if not getFrameRangeFromTimeControl() else
-                                                                           getFrameRangeFromTimeControl()[1]))
-
-    cmds.setParent('..')
-    cmds.setParent('..')
-    cmds.setParent('..')
-    cmds.setParent('..')
     cmds.showWindow(winName)
