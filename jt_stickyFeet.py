@@ -602,7 +602,7 @@ class cyclePath():
 
     def saveExistingAnim(self):
         selected = self.globalObject
-
+        network = self.curve
         attrDict = collections.OrderedDict()
 
         for attr in ['t', 'r', 's']:
@@ -618,7 +618,9 @@ class cyclePath():
                                 attrDict['{}{}'.format(attr, ax)] = c
 
         for attr in attrDict:
-            print attr
+            cmds.addAttr(network, ln='savedAnim_{}'.format(attr))
+            dup = cmds.duplicate(attrDict[attr])[0]
+            cmds.connectAttr('{}.output'.format(dup), '{}.savedAnim_{}'.format(network, attr), f=True)
 
 
 
