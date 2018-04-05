@@ -1,23 +1,25 @@
-########################################################################################################################
-#
-# jt_stickyFeet.py
-# Author: Justin Tirado
-#
-#
-########################################################################################################################
 '''
-# Install Instructions:
+
+
+jt_stickyFeet.py
+
+
+Install Instructions:
+
 import stickyFeet
 stickyFeet.ui()
+
+
 '''
 
+__author__ = 'Justin Tirado'
 __version__ = 1.1
 
-import os
 import math
 import collections
 from maya import cmds, mel, OpenMayaUI
 from maya.api import OpenMaya
+
 
 ########################################################################################################################
 #
@@ -77,7 +79,6 @@ class intField():
 class textField():
 	def __init__(self, l='Get', value='', bw=None, bc=None, fc=[0.25, 0.25, 0.25], *args):
 		self.value = value
-
 		self.layout = cmds.rowLayout(nc=2, ad2=2, rat=[2, 'both', 0], cat=[2, 'left', 5])
 		self.button = cmds.button(l=l, c=lambda *x: self.update())
 		self.control = cmds.text(l=self.value, bgc=fc, al='left')
@@ -98,11 +99,8 @@ class textField():
 		cmds.text(self.control, e=True, l=self.value)
 
 
-ALLFRAMES = []
-
-
 class frameLayout():
-	global ALLFRAMES, WINDOWNAME
+	global WINDOWNAME
 
 	def __init__(self, label='Frame', bgc=None):
 		self.ui = cmds.frameLayout(l=label,
@@ -114,8 +112,6 @@ class frameLayout():
 
 		if bgc:
 			cmds.frameLayout(self.ui, e=True, bgc=bgc)
-
-		ALLFRAMES.append(self)
 
 	def __str__(self):
 		return str(cmds.layout(self.ui, q=True, fpn=True))
@@ -410,26 +406,24 @@ def anchorTransform(transform, start, end):
 def footPlantUI(label='Foot Plant', padding=10, lc=[.067, .298, .165], bgc=[.114, .494, .271], bc=[.25, 1, .45]):
 	ui = frameLayout(label=label, bgc=lc)
 	form = cmds.formLayout(bgc=bgc)
-	col = cmds.columnLayout(adj=True)
-	cmds.text(
-			l="Select foot control, set start and end frame, then plant. \n "
-			  "Time slider selection works.\n "
-			  "Works in local and global space.")
+	col = cmds.columnLayout(adj=True, rs=padding)
+	cmds.text(align='left',
+			l="- Select foot control, then PLANT. \n"
+			  "- Use the Time slider to select frame range.\n"
+			  "- Works in both local and global space.")
 
-	cmds.separator(st='none', h=10, ebg=False)
+	cmds.separator()
 
 	r1 = cmds.rowLayout(nc=2)
 	cmds.text(l='Start:\t')
 	iui1 = intField(getTimeRange()[0], bc=bc)
 	cmds.setParent('..')
-
 	r2 = cmds.rowLayout(nc=2)
 	cmds.text(l='End:\t')
 	iui2 = intField(getTimeRange()[0], bc=bc)
 	cmds.setParent('..')
-
 	row([r1, r2])
-	cmds.separator(st='none', h=10, ebg=False)
+
 	cmds.button(l='PLANT',
 	            bgc=bc,
 	            c=lambda *x: anchorTransform(cmds.ls(sl=True)[0],
@@ -605,7 +599,12 @@ def bakeToolUI(label='Bake To World', padding=10, lc=[.408, .114, .133], bgc=[.4
 	form = cmds.formLayout(bgc=bgc)
 	col = cmds.columnLayout(adj=True, rs=padding)
 
-	cmds.text(l='First get Global Object, then select all objects to bake.')
+	cmds.text(align='left',
+	          l='- First get Global Object, then select all objects to bake. (IK, COG)')
+
+	cmds.separator()
+
+
 	tui1 = textField(l='Global Object', bw=80, bc=bc, fc=lc)
 
 	cui1 = cmds.checkBox(l='Smart Bake')
@@ -651,16 +650,17 @@ class cyclePath():
 		self.selected = getSelected()
 		self.network = None
 		self.null = None
+		self.animCurves = {}
 
-		if self.isDebug:
-			self.getDebugInfo()
+		self.getDebugInfo()
 
 	def getDebugInfo(self):
-		print ''
-		for x in sorted(vars(self)):
-			print '{}: {}'.format(x, vars(self)[x])
-		print ''
-		return vars(self)
+		if self.isDebug:
+			print ''
+			for x in sorted(vars(self)):
+				print '{}: {}'.format(x, vars(self)[x])
+			print ''
+		return
 
 	def attach(self):
 		if not self.curve:
@@ -681,7 +681,10 @@ class cyclePath():
 				else:
 					cmds.warning('Timewarp skipped. Nothing selected.')
 				self.connectNodesToNetwork()
+
+				cmds.select(self.curve)
 		return
+
 
 	def createNetwork(self):
 		self.network = cmds.createNode('network', n='{}_network1'.format(self.name))
@@ -692,7 +695,7 @@ class cyclePath():
 	def saveExistingAnim(self, selected, network):
 		attrDict = collections.OrderedDict()
 
-		for attr in ['t', 'r', 's']:
+		for attr in ['t', 'r']:
 			for ax in ['x', 'y', 'z']:
 				attrName = '{}.{}{}'.format(selected, attr, ax)
 				isKeyable = cmds.getAttr(attrName, k=True)
@@ -701,15 +704,17 @@ class cyclePath():
 					conn = cmds.listConnections(attrName)
 					if conn:
 						for c in conn:
-							if 'animCurve' in cmds.objectType(c):
+							if 'animCurve' in cmds.objectType(c) or 'unitConversion' in cmds.objectType(c):
 								if attr == 't' and ax == 'z':
 									self.translateZ = c
+									attrDict['{}{}'.format(attr, ax)] = cmds.duplicate(c)[0]
 								else:
 									attrDict['{}{}'.format(attr, ax)] = c
 
 		for attr in attrDict:
 			cmds.addAttr(network, ln='savedAnim_{}'.format(attr))
 			cmds.connectAttr('{}.output'.format(attrDict[attr]), '{}.savedAnim_{}'.format(network, attr), f=True)
+
 		return attrDict
 
 	def checkSelected(self):
@@ -848,7 +853,7 @@ class cyclePath():
 		try:
 			cmds.addAttr(self.curve, ln='parent', at='message')
 		except:
-			print '{}.parent already exists. Skipped.'
+			print '{}.parent already exists. Skipped.'.format(self.curve)
 
 		cmds.connectAttr('{}.curve'.format(network), '{}.parent'.format(self.curve), f=True)
 		cmds.connectAttr('{}.parent'.format(self.curve), '{}.curve'.format(network), f=True)
@@ -863,6 +868,95 @@ class cyclePath():
 			cmds.connectAttr('{}.nodes'.format(network), '{}.parent'.format(node), f=True)
 
 		return
+
+	def getConnected(self, obj, attr, *args):
+		name = '{}.{}'.format(obj, attr)
+		if cmds.attributeQuery(attr, node=obj, ex=True):
+
+			if cmds.connectionInfo(name, id=True):
+				query = cmds.listConnections(cmds.connectionInfo(name, ged=True))[0]
+				return query
+			else:
+				query = cmds.listConnections(name)
+				if query:
+					query = query[0]
+					return query
+
+				else:
+					return None
+		else:
+			return None
+
+	def queryNetwork(self, network):
+		# Get global
+		if cmds.attributeQuery('globalObject', node=network, ex=True):
+			self.globalObject = cmds.getAttr('{}.globalObject'.format(network))
+
+		# Get bake objects
+		if cmds.attributeQuery('bakeObjects', node=network, ex=True):
+			self.bakeList = convertStrToList(cmds.getAttr('{}.bakeObjects'.format(network)))
+
+		# Get nodes
+		if cmds.attributeQuery('nodes', node=network, ex=True):
+			self.nodeList = cmds.listConnections('{}.nodes'.format(network))
+
+		# Get saved anim curves
+		attrDict = {}
+		for attr in cmds.listAttr(network):
+			if 'saved' in attr:
+				conn = cmds.listConnections('{}.{}'.format(network, attr))
+				if conn:
+					attrDict[attr.split('_')[-1]] = conn[0]
+
+		self.animCurves = attrDict
+
+
+	def detach(self):
+		attrs = ['curveLength',
+		         'uValue',
+		         'frontTwist',
+		         'upTwist',
+		         'sideTwist',
+		         'uValueOffset',
+		         'bank',
+		         'bankScale',
+		         'bankLimit',
+		         'timeWarpOffset',
+		         'parent']
+
+		if not self.selected:
+			cmds.warning('First select a curve. Then DETACH.')
+		else:
+			for obj in self.selected:
+				shape = cmds.listRelatives(obj, shapes=True)
+				if shape:
+					if cmds.objectType(shape[0]) == 'nurbsCurve':
+						network = self.getConnected(obj, 'parent')
+						if network:
+							self.queryNetwork(network)
+
+							if self.animCurves:
+								for anim in self.animCurves:
+									cmds.connectAttr('{}.output'.format(self.animCurves[anim]),
+									                 '{}.{}'.format(self.globalObject, anim), f=True)
+
+							cmds.delete(network)
+
+							if self.nodeList:
+								for n in self.nodeList:
+									if cmds.objExists(n):
+										cmds.delete(n)
+
+						for attr in attrs:
+							if cmds.attributeQuery(attr, node=obj, ex=True):
+								attrName = '{}.{}'.format(obj, attr)
+								cmds.setAttr(attrName, lock=False)
+								cmds.deleteAttr(attrName)
+
+
+
+
+
 
 
 class bakeCyclePath():
@@ -966,17 +1060,6 @@ class bakeCyclePath():
 		cmds.delete(layer, 'BaseAnimation')
 
 
-def detachCyclePath(curve, *args):
-	attrs = ['curveLength',
-	         'uValue',
-	         'frontTwist',
-	         'upTwist',
-	         'sideTwist',
-	         'uValueOffset',
-	         'bank',
-	         'bankScale',
-	         'bankLimit']
-
 
 def createTimeWarpNode(name='timeWarp1', *args):
 	node = cmds.createNode('animCurveTT', name=name)
@@ -1039,14 +1122,15 @@ def pathToolUI(label='Animation Cycle Path Tool',
 	ui = frameLayout(label=label, bgc=lc)
 	form = cmds.formLayout(bgc=bgc)
 	col = cmds.columnLayout(adj=True, rs=padding)
-	cmds.text(
-			l='First get Curve. Then get Global Object. \n '
-			  'Select all animated objects and attach for timewarp. (Optional)\n '
-			  'Creates new attributes on Curve. Select Curve to bake.')
+	cmds.text(align= 'left',
+			l='- First get Curve. Then get Global Object.\n'
+			  '- Select all animated objects and ATTACH for timewarp. (Optional)\n'
+			  '- Creates new attributes on Curve. Select Curve to BAKE.')
 
+	cmds.separator()
 	tui1 = textField(l='Curve', bw=80, bc=bc, fc=lc)
 	tui2 = textField(l='Global Object', bw=80, bc=bc, fc=lc)
-
+	cmds.separator()
 	cui1 = cmds.checkBox(l='Smart Bake')
 
 	bui1 = cmds.button(l='ATTACH',
@@ -1061,12 +1145,12 @@ def pathToolUI(label='Animation Cycle Path Tool',
 	                   c=lambda *x: bakeCyclePath(smart=bool(cmds.checkBox(cui1,
 	                                                                       q=True,
 	                                                                       v=True)),
-	                                              bakeWorld=bool(cmds.checkBox(cui2,
-	                                                                           q=True,
-	                                                                           v=True))))
+	                                              bakeWorld=bool(False)))
 
 	s1 = cmds.separator(st='none', ebg=False)
-	bui3 = cmds.button(l='DETACH', bgc=[0, .5, 1])
+	bui3 = cmds.button(l='DETACH',
+	                   bgc=[0, .5, 1],
+	                   c= lambda *x: cyclePath().detach())
 
 	row([bui1, bui3, s1, bui2])
 
@@ -1211,9 +1295,9 @@ def ui(padding=5):
 	            t='JT Sticky Feet v.{}'.format(__version__),
 	            s=False,
 	            rtf=True,
-	            h=109,
-	            w=358,
-	            bgc=[.05, .05, .05]
+	            h=10,
+	            w=390,
+	            bgc=[.1, .1, .1]
 	            )
 
 	form = cmds.formLayout()
