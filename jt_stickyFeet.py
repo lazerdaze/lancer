@@ -1,25 +1,21 @@
-'''
-
-
-jt_stickyFeet.py
-
-
-Install Instructions:
-
-import stickyFeet
-stickyFeet.ui()
-
-
-'''
+#
+#
+# jt_stickyFeet.py
+#
+# Install Instructions:
+#
+# import stickyFeet
+# stickyFeet.ui()
+#
+#
 
 __author__ = 'Justin Tirado'
 __version__ = 1.1
 
 import math
 import collections
-from maya import cmds, mel, OpenMayaUI
+from maya import cmds, mel
 from maya.api import OpenMaya
-
 
 ########################################################################################################################
 #
@@ -49,6 +45,23 @@ def getDebug(*args):
 def convertStrToList(var, *args):
 	var = str(var).replace('[', '').replace(']', '').replace("u'", '').replace("'", '').replace(" ", '').split(',')
 	return var
+
+
+def updateWindowSize(amount, *args):
+	winName = WINDOWNAME
+
+	winHeight = cmds.window(winName, q=True, h=True)
+	offset = 22
+
+	if amount > 0:
+		offset = offset * -1
+
+	winHeight = (winHeight + amount) + offset
+
+	if winHeight > 0:
+		cmds.window(winName, e=True, h=winHeight)
+
+	return
 
 
 class intField():
@@ -81,8 +94,19 @@ class textField():
 		self.value = value
 		self.layout = cmds.rowLayout(nc=2, ad2=2, rat=[2, 'both', 0], cat=[2, 'left', 5])
 		self.button = cmds.button(l=l, c=lambda *x: self.update())
-		self.control = cmds.text(l=self.value, bgc=fc, al='left')
+		form = cmds.formLayout(bgc=fc)
+		self.control = cmds.text(l=self.value, al='left')
 		cmds.setParent('..')
+		cmds.setParent('..')
+
+		cmds.formLayout(form,
+		                e=True,
+		                attachForm=((self.control, 'left', 5),
+		                            (self.control, 'top', 0),
+		                            (self.control, 'right', 5),
+		                            (self.control, 'bottom', 0)
+		                            ),
+		                )
 
 		if bw:
 			cmds.button(self.button, e=True, w=bw)
@@ -118,33 +142,26 @@ class frameLayout():
 
 	def open(self):
 		self.collapse(False)
-		self.updateWindow(cmds.frameLayout(self.ui, q=True, h=True))
+		updateWindowSize(cmds.frameLayout(self.ui, q=True, h=True))
 		return
 
 	def close(self, skip=False):
 		self.collapse(True)
-		self.updateWindow(-(cmds.frameLayout(self.ui, q=True, h=True)))
+		updateWindowSize(-(cmds.frameLayout(self.ui, q=True, h=True)))
 		return
 
 	def collapse(self, value):
 		cmds.frameLayout(self.ui, e=True, cl=value)
 		return
 
-	def updateWindow(self, amount, *args):
-		winName = WINDOWNAME
 
-		winHeight = cmds.window(winName, q=True, h=True)
-		offset = 22
+class radioLayout():
+	def __init__(self, label=None, items=None):
+		self.label = label
+		self.items = items
 
-		if amount > 0:
-			offset = offset * -1
-
-		winHeight = (winHeight + amount) + offset
-
-		if winHeight > 0:
-			cmds.window(winName, e=True, h=winHeight)
-
-		return
+	def get(self):
+		pass
 
 
 ########################################################################################################################
@@ -408,9 +425,9 @@ def footPlantUI(label='Foot Plant', padding=10, lc=[.067, .298, .165], bgc=[.114
 	form = cmds.formLayout(bgc=bgc)
 	col = cmds.columnLayout(adj=True, rs=padding)
 	cmds.text(align='left',
-			l="- Select foot control, then PLANT. \n"
-			  "- Use the Time slider to select frame range.\n"
-			  "- Works in both local and global space.")
+	          l="- Select foot control, then PLANT. \n"
+	            "- Use the Time slider to select frame range.\n"
+	            "- Works in both local and global space.")
 
 	cmds.separator()
 
@@ -604,7 +621,6 @@ def bakeToolUI(label='Bake To World', padding=10, lc=[.408, .114, .133], bgc=[.4
 
 	cmds.separator()
 
-
 	tui1 = textField(l='Global Object', bw=80, bc=bc, fc=lc)
 
 	cui1 = cmds.checkBox(l='Smart Bake')
@@ -671,33 +687,48 @@ class cyclePath():
 			else:
 				self.createNetwork()
 				self.setupGlobalObject()
-				self.createPathNetwork(self.curve, self.globalObject)
+				self.createPathNetwork(self.curve, self.null[0])
 				if self.selected:
 					if self.translateZ:
 						self.createTimewarpNetwork(self.selected, self.curve, self.globalObject)
 					else:
-						cmds.warning(
-								'Timewarp skipped. No "TranslateZ" animation curves on "{}".'.format(self.globalObject))
+						print(
+							'No "TranslateZ" animation curves found on "{}". Timewarp skipped'.format(
+								self.globalObject))
 				else:
-					cmds.warning('Timewarp skipped. Nothing selected.')
+					print('Timewarp skipped. Nothing selected.')
 				self.connectNodesToNetwork()
 
 				cmds.select(self.curve)
 		return
 
+	def createNull(self):
+		child = cmds.group(n='{}_offset_null#'.format(self.name), em=True)
+		parent = cmds.group(child, n='{}_world_null#'.format(self.name))
+		cmds.parentConstraint(child, self.globalObject)
+		self.null = [child, parent]
+		for x in self.null:
+			self.nodeList.append(x)
+		return
+
+	def connectNullToGlobalObject(self):
+		for attr in ['t', 'r']:
+			for axis in ['x', 'y', 'z']:
+				try:
+					cmds.connectAttr('{}.{}{}'.format(self.null[0], attr, axis),
+					                 '{}.{}{}'.format(self.globalObject, attr, axis))
+				except:
+					print('Connect to Global Object attribute {}{}. Skipped.'.format(attr, axis))
 
 	def createNetwork(self):
 		self.network = cmds.createNode('network', n='{}_network1'.format(self.name))
-		self.null = cmds.group(n='{}_offset_null'.format(self.name), em=True)
-		self.nodeList.append(self.null)
-		return self.network
+		return
 
 	def saveExistingAnim(self, selected, network):
-		attrDict = collections.OrderedDict()
 
 		for attr in ['t', 'r']:
-			for ax in ['x', 'y', 'z']:
-				attrName = '{}.{}{}'.format(selected, attr, ax)
+			for axis in ['x', 'y', 'z']:
+				attrName = '{}.{}{}'.format(selected, attr, axis)
 				isKeyable = cmds.getAttr(attrName, k=True)
 
 				if isKeyable:
@@ -705,17 +736,14 @@ class cyclePath():
 					if conn:
 						for c in conn:
 							if 'animCurve' in cmds.objectType(c) or 'unitConversion' in cmds.objectType(c):
-								if attr == 't' and ax == 'z':
+								if attr == 't' and axis == 'z':
 									self.translateZ = c
-									attrDict['{}{}'.format(attr, ax)] = cmds.duplicate(c)[0]
-								else:
-									attrDict['{}{}'.format(attr, ax)] = c
 
-		for attr in attrDict:
-			cmds.addAttr(network, ln='savedAnim_{}'.format(attr))
-			cmds.connectAttr('{}.output'.format(attrDict[attr]), '{}.savedAnim_{}'.format(network, attr), f=True)
-
-		return attrDict
+								cmds.disconnectAttr('{}.output'.format(c),
+								                    '{}.{}{}'.format(selected, attr, axis))
+								cmds.addAttr(network, ln='savedAnim_{}{}'.format(attr, axis))
+								cmds.connectAttr('{}.output'.format(c),
+								                 '{}.savedAnim_{}{}'.format(network, attr, axis), f=True)
 
 	def checkSelected(self):
 		if self.selected:
@@ -730,18 +758,20 @@ class cyclePath():
 		self.saveExistingAnim(self.globalObject, self.network)
 
 		if self.translateZ:
-			cmds.disconnectAttr('{}.output'.format(self.translateZ), '{}.translateZ'.format(self.globalObject))
 			self.start = cmds.findKeyframe(self.translateZ, which='first')
 			self.end = cmds.findKeyframe(self.translateZ, which='last')
+
+		self.createNull()
+		self.connectNullToGlobalObject()
 		return
 
 	def calculateValueCorrection(self):
 		endValue = cmds.keyframe(self.translateZ, q=True, t=(self.end, self.end), vc=True)[0]
 		return (self.end - self.start) / endValue
 
-	def setOnMotionPath(self, selected, curve, name='motionPath', uValue=0):
+	def setOnMotionPath(self, selected, curve, uValue=0):
 		# Create Nodes
-		mp = cmds.createNode('motionPath', n='{}_mp'.format(name))
+		mp = cmds.createNode('motionPath', n='{}_mp1'.format(self.name))
 
 		mpAttr = {
 			'follow'      : 1,
@@ -755,7 +785,7 @@ class cyclePath():
 
 		add = []
 		for x in range(3):
-			a = cmds.createNode('addDoubleLinear', n='{}_add{}'.format(name, x))
+			a = cmds.createNode('addDoubleLinear', n='{}_add{}'.format(self.name, x))
 			add.append(a)
 			self.nodeList.append(a)
 
@@ -794,15 +824,15 @@ class cyclePath():
 		for attr in ['bank', 'bankScale', 'bankLimit']:
 			cmds.connectAttr('{}.{}'.format(curve, attr), '{}.{}'.format(mp, attr))
 
-		ci = cmds.createNode('curveInfo')
+		ci = cmds.createNode('curveInfo', name='{}_curveInfo1'.format(self.name))
 		curveShape = cmds.listRelatives(curve, shapes=True)
 		cmds.connectAttr('{}.worldSpace'.format(curveShape[0]), '{}.inputCurve'.format(ci))
 
-		plus = cmds.createNode('plusMinusAverage')
+		plus = cmds.createNode('plusMinusAverage', name='{}_sum1'.format(self.name))
 		cmds.connectAttr('{}.uValue'.format(curve), '{}.input1D[0]'.format(plus))
 		cmds.connectAttr('{}.uValueOffset'.format(curve), '{}.input1D[1]'.format(plus))
 
-		setR = cmds.createNode('setRange')
+		setR = cmds.createNode('setRange', name='{}_range1'.format(self.name))
 		cmds.setAttr('{}.maxX'.format(setR), 1)
 		cmds.connectAttr('{}.output1D'.format(plus), '{}.valueX'.format(setR))
 		cmds.connectAttr('{}.arcLength'.format(ci), '{}.curveLength'.format(curve))
@@ -820,20 +850,28 @@ class cyclePath():
 	def createTimewarpNetwork(self, selected, network, *args):
 		cmds.addAttr(network, ln='timeWarpOffset', dv=0, k=True)
 
-		mul = cmds.createNode('multiplyDivide')
+		mul = cmds.createNode('multiplyDivide', name='{}_mul1'.format(self.name))
 		cmds.connectAttr('{}.uValue'.format(network), '{}.input1X'.format(mul))
 		cmds.setAttr('{}.input2X'.format(mul), self.calculateValueCorrection())
 
-		add = cmds.createNode('addDoubleLinear')
+		add = cmds.createNode('addDoubleLinear', name='{}_add1'.format(self.name))
 		cmds.setAttr('{}.input1'.format(add), self.start)
 		cmds.connectAttr('{}.outputX'.format(mul), '{}.input2'.format(add))
 
-		add2 = cmds.createNode('addDoubleLinear')
+		add2 = cmds.createNode('addDoubleLinear', name='{}_add2'.format(self.name))
 		cmds.connectAttr('{}.output'.format(add), '{}.input1'.format(add2))
 		cmds.connectAttr('{}.timeWarpOffset'.format(network), '{}.input2'.format(add2))
 
 		for obj in selected:
 			animCurves = getAnimCurvesFromObject(obj)
+			shapes = cmds.listRelatives(obj, shapes=True)
+			if shapes:
+				for shape in shapes:
+					shapeCurves = getAnimCurvesFromObject(shape)
+					if shapeCurves:
+						for sc in shapeCurves:
+							animCurves.append(sc)
+						self.bakeList.append(shape)
 			for anim in animCurves:
 				cmds.connectAttr('{}.output'.format(add2), '{}.input'.format(anim))
 			self.bakeList.append(obj)
@@ -910,7 +948,6 @@ class cyclePath():
 
 		self.animCurves = attrDict
 
-
 	def detach(self):
 		attrs = ['curveLength',
 		         'uValue',
@@ -953,10 +990,8 @@ class cyclePath():
 								cmds.setAttr(attrName, lock=False)
 								cmds.deleteAttr(attrName)
 
-
-
-
-
+	def bake(self):
+		pass
 
 
 class bakeCyclePath():
@@ -967,7 +1002,7 @@ class bakeCyclePath():
 		self.globalObject = self.getGlobalObject()
 
 		if not self.curve:
-			cmds.warning('No curve selected.')
+			cmds.warning('First select a curve. Then BAKE.')
 		else:
 			if not self.network:
 				cmds.error('Curve does not have a path network.')
@@ -1060,7 +1095,6 @@ class bakeCyclePath():
 		cmds.delete(layer, 'BaseAnimation')
 
 
-
 def createTimeWarpNode(name='timeWarp1', *args):
 	node = cmds.createNode('animCurveTT', name=name)
 	timeRange = getTimeRange()
@@ -1085,14 +1119,16 @@ def connectTimeWarpToObject(selected, timewarp=None, *args):
 
 def getAnimCurvesFromObject(selected, *args):
 	attrs = cmds.listAttr(selected, k=True)
+	print attrs
 	animCurveList = []
 	if attrs:
 		for at in attrs:
-			conn = cmds.listConnections('{}.{}'.format(selected, at))
-			if conn:
-				for c in conn:
-					if 'animCurve' in cmds.objectType(c):
-						animCurveList.append(c)
+			if cmds.attributeQuery(at, node=selected, exists=True):
+				conn = cmds.listConnections('{}.{}'.format(selected, at))
+				if conn:
+					for c in conn:
+						if 'animCurve' in cmds.objectType(c):
+							animCurveList.append(c)
 
 	return animCurveList
 
@@ -1122,15 +1158,16 @@ def pathToolUI(label='Animation Cycle Path Tool',
 	ui = frameLayout(label=label, bgc=lc)
 	form = cmds.formLayout(bgc=bgc)
 	col = cmds.columnLayout(adj=True, rs=padding)
-	cmds.text(align= 'left',
-			l='- First get Curve. Then get Global Object.\n'
-			  '- Select all animated objects and ATTACH for timewarp. (Optional)\n'
-			  '- Creates new attributes on Curve. Select Curve to BAKE.')
+	cmds.text(align='left',
+	          l='- First get Curve. Then get Global Object.\n'
+	            '- Select all animated objects and ATTACH for timewarp. (Optional)\n'
+	            '- Creates new attributes on Curve. Select Curve to BAKE.')
 
 	cmds.separator()
 	tui1 = textField(l='Curve', bw=80, bc=bc, fc=lc)
 	tui2 = textField(l='Global Object', bw=80, bc=bc, fc=lc)
 	cmds.separator()
+
 	cui1 = cmds.checkBox(l='Smart Bake')
 
 	bui1 = cmds.button(l='ATTACH',
@@ -1150,7 +1187,7 @@ def pathToolUI(label='Animation Cycle Path Tool',
 	s1 = cmds.separator(st='none', ebg=False)
 	bui3 = cmds.button(l='DETACH',
 	                   bgc=[0, .5, 1],
-	                   c= lambda *x: cyclePath().detach())
+	                   c=lambda *x: cyclePath().detach())
 
 	row([bui1, bui3, s1, bui2])
 
@@ -1286,17 +1323,22 @@ def ui(padding=5):
 	global WINDOWNAME, WINDOWLAYOUT
 	winName = WINDOWNAME
 	layName = WINDOWLAYOUT
+	winH = 10
+	winW = 390
 
 	if cmds.window(winName, q=True, ex=True):
 		cmds.deleteUI(winName)
-		cmds.windowPref(winName, r=True)
+
+	winPref = cmds.windowPref(winName, exists=True)
+	if winPref:
+		cmds.windowPref(winName, e=True, h=winH, w=winW)
 
 	cmds.window(winName,
 	            t='JT Sticky Feet v.{}'.format(__version__),
 	            s=False,
 	            rtf=True,
-	            h=10,
-	            w=390,
+	            h=winH,
+	            w=winW,
 	            bgc=[.1, .1, .1]
 	            )
 
