@@ -1,6 +1,6 @@
 #
 #
-# jt_stickyFeet.py
+# stickyFeet.py
 #
 # Install Instructions:
 #
@@ -13,6 +13,7 @@ __author__ = 'Justin Tirado'
 __version__ = 1.1
 
 import math
+from math import *
 import collections
 from maya import cmds, mel
 from maya.api import OpenMaya
@@ -63,6 +64,7 @@ def updateWindowSize(amount, *args):
 
     return
 
+
 def addAttr(item, attr, value=0):
     attrName = '{}.{}'.format(item, attr)
     if cmds.attributeQuery(attr, node=obj, ex=False):
@@ -99,8 +101,44 @@ class intField():
         cmds.intField(self.control, e=True, v=value)
 
 
+class textScrollList():
+    def __init__(self, bw=None, h=100, bc=None):
+        self.layout = cmds.rowLayout(nc=2, ad2=2, h=h, cw=[1, bw], cat=[2, 'left', 5], ct2=['both', 'both'],
+                                     rat=[1, 'top', 0])
+        cmds.columnLayout(adj=True)
+        b1 = cmds.button(l='Add', c=lambda *x: self.add())
+        b2 = cmds.button(l='Remove', c=lambda *x: self.remove())
+        b3 = cmds.button(l='Clear', c=lambda *x: self.clear())
+        cmds.setParent('..')
+        self.control = cmds.textScrollList()
+        cmds.setParent('..')
+
+        if bc:
+            for b in [b1, b2, b3]:
+                cmds.button(b, e=True, bgc=bc)
+
+    def selected(self):
+        return cmds.textScrollList(self.control, q=True, si=True)
+
+    def add(self):
+        selected = getSelected()
+        if selected:
+            for obj in selected:
+                cmds.textScrollList(self.control, e=True, append=obj)
+        return
+
+    def remove(self):
+        return cmds.textScrollList(self.control, e=True, ri=self.selected())
+
+    def clear(self):
+        return cmds.textScrollList(self.control, e=True, ra=True)
+
+    def get(self):
+        return cmds.textScrollList(self.control, q=True, ai=True)
+
+
 class textField():
-    def __init__(self, l='Get', value='', bw=None, bc=None, fc=[0.25, 0.25, 0.25], *args):
+    def __init__(self, l='Get', value='', bw=None, bc=None, fc=[0.25, 0.25, 0.25]):
         self.value = value
         self.layout = cmds.rowLayout(nc=2, ad2=2, rat=[2, 'both', 0], cat=[2, 'left', 5])
         self.button = cmds.button(l=l, c=lambda *x: self.update())
@@ -124,10 +162,10 @@ class textField():
         if bc:
             cmds.button(self.button, e=True, bgc=bc)
 
-    def get(self, *args):
-        return cmds.intField(self.control, q=True, v=True)
+    def get(self):
+        return cmds.text(self.control, q=True, txt=True)
 
-    def update(self, *args):
+    def update(self):
         selected = getSelected()
         self.value = selected[0] if selected else ''
         cmds.text(self.control, e=True, l=self.value)
@@ -582,7 +620,10 @@ def deleteKeys(selected, *args):
                                            type='animCurve{}'.format(typ)
                                            )
                 if con:
-                    cmds.delete(con)
+                    try:
+                        cmds.delete(con)
+                    except:
+                        'Delete {}. Skipped'.format(con)
 
 
 def bakeAnimation(selected, start, end, smart=False, *args):
@@ -772,7 +813,7 @@ class cyclePath():
             self.end = cmds.findKeyframe(self.translateZ, which='last')
 
         self.createNull()
-        #self.connectNullToGlobalObject()
+        # self.connectNullToGlobalObject()
         return
 
     def calculateValueCorrection(self):
@@ -986,8 +1027,10 @@ class cyclePath():
                                 for anim in self.animCurves:
                                     cmds.connectAttr('{}.output'.format(self.animCurves[anim]),
                                                      '{}.{}'.format(self.globalObject, anim), f=True)
-
-                            cmds.delete(network)
+                            try:
+                                cmds.delete(network)
+                            except:
+                                print'Network {} does not exist. Delete skipped.'.format(network)
 
                             if self.nodeList:
                                 for n in self.nodeList:
@@ -998,10 +1041,10 @@ class cyclePath():
                             if cmds.attributeQuery(attr, node=obj, ex=True):
                                 attrName = '{}.{}'.format(obj, attr)
                                 cmds.setAttr(attrName, lock=False)
-                                cmds.deleteAttr(attrName)
-
-    def bake(self):
-        pass
+                                try:
+                                    cmds.deleteAttr(attrName)
+                                except:
+                                    print 'Curve does not have attribute {}. Delete Atrribute Skipped.'.format(attr)
 
 
 class bakeCyclePath():
@@ -1020,13 +1063,53 @@ class bakeCyclePath():
                 cmds.cycleCheck(e=True)
                 bakeObjects = convertStrToList(cmds.getAttr('{}.bakeObjects'.format(self.network)))
                 self.bake(bakeObjects, smart=smart)
-                if bakeWorld:
-                    if not self.globalObject:
-                        cmds.warning('No Global Object in path network.')
-                    else:
-                        bakeObjects.remove(self.globalObject)
-                        if bakeObjects:
-                            bakeToWorld(selected=bakeObjects, globalObject=self.globalObject, smart=smart)
+                self.cleanup()
+
+    def cleanup(self):
+        attrs = ['curveLength',
+                 'uValue',
+                 'frontTwist',
+                 'upTwist',
+                 'sideTwist',
+                 'uValueOffset',
+                 'bank',
+                 'bankScale',
+                 'bankLimit',
+                 'timeWarpOffset',
+                 'parent']
+
+        network = self.getConnected(self.curve, 'parent')
+
+        if cmds.attributeQuery('nodes', node=network, ex=True):
+            nodeList = cmds.listConnections('{}.nodes'.format(network))
+            for node in nodeList:
+                try:
+                    cmds.delete(node)
+                except:
+                    print 'Node {} does not exist. Delete Skipped.'.format(node)
+
+        try:
+            cmds.delete(network)
+        except:
+            print 'Network {} does not exist. Delete skipped.'.format(network)
+
+        for attr in attrs:
+            if cmds.attributeQuery(attr, node=self.curve, ex=True):
+                attrName = '{}.{}'.format(self.curve, attr)
+                cmds.setAttr(attrName, lock=False)
+
+                conn = cmds.listConnections(attrName)
+                if conn:
+                    for c in conn:
+                        try:
+                            cmds.delete(c)
+                        except:
+                            print'Delete connection {}. Skipped.'.format(c)
+
+                try:
+                    cmds.deleteAttr(attrName)
+                except:
+                    print 'Curve does not have attribute {}. Delete Atrribute Skipped.'.format(attr)
 
     def getCurve(self):
         curve = cmds.ls(sl=True)
@@ -1159,6 +1242,70 @@ def getConnectedObj(obj, attr, *args):
             return None
 
 
+class bankRig():
+    def __init__(self, selected=None, name='bankRig'):
+        self.name = name
+        self.selected = selected
+        self.joints = []
+        self.curve = None
+        self.ik = None
+        self.group = None
+
+        if self.selected and len(self.selected) >= 1:
+            self.joints = self.createJointChain(self.selected)
+            self.curve = self.createCurve(self.joints)
+            self.ik = self.createSpline(start=self.joints[0], end=self.joints[-1], curve=self.curve)
+            self.group = cmds.group(self.joints[0], self.curve, self.ik, n='{}_group#'.format(self.name))[0]
+
+    def getDistance(self, start, end):
+        if type(start) is list:
+            startPos = start
+        else:
+            startPos = cmds.xform(start, q=True, ws=True, rp=True)
+
+        if type(end) is list:
+            endPos = end
+        else:
+            endPos = cmds.xform(end, q=True, ws=True, rp=True)
+        distance = sqrt(
+            pow((startPos[0] - endPos[0]), 2) + pow((startPos[1] - endPos[1]), 2) + pow((startPos[2] - endPos[2]), 2))
+        return distance
+
+    def createJointChain(self, selected, name='joint#'):
+        jointList = []
+        i = 0
+        distance = 0
+        cmds.select(d=True)
+        for obj in selected:
+            if i != 0:
+                distance += self.getDistance(selected[i - 1], selected[i])
+            jnt = cmds.joint(n='{}_{}'.format(self.name, name))
+            cmds.xform(jnt, ws=True, t=[0, 0, distance])
+            jointList.append(jnt)
+            i += 1
+        cmds.select(d=True)
+        return jointList
+
+    def createCurve(self, selected, name='curve#', d=1):
+        # 1 == Linear / 3 == Curve
+        pointList = []
+        for obj in selected:
+            if type(obj) == str or type(obj) == unicode:
+                var = cmds.xform(obj, q=True, ws=True, rp=True)
+            elif type(obj) == list:
+                var = obj
+            pointList.append(var)
+        curve = cmds.curve(n='{}_{}'.format(self.name, name), d=d, p=pointList)
+        shape = cmds.listRelatives(curve, shapes=True)
+        cmds.rename(shape, '{}Shape'.format(curve))
+        cmds.xform(curve, cpc=True)
+        cmds.rebuildCurve(curve, rt=0, s=len(selected) * (len(selected) * 2), ch=False)
+        return curve
+
+    def createSpline(self, start, end, curve):
+        return cmds.ikHandle(sj=start, ee=end, sol='ikSplineSolver', ccv=False, c=curve)[0]
+
+
 def pathToolUI(label='Animation Cycle Path Tool',
                padding=10,
                lc=[.055, .2, .376],
@@ -1176,6 +1323,13 @@ def pathToolUI(label='Animation Cycle Path Tool',
     cmds.separator()
     tui1 = textField(l='Curve', bw=80, bc=bc, fc=lc)
     tui2 = textField(l='Global Object', bw=80, bc=bc, fc=lc)
+    cmds.separator()
+    frameLayout(label='Advance Bank Controls', bgc=bgc)
+    cmds.separator(st='none')
+    bcui1 = textScrollList(bw=80, bc=bc)
+    cmds.button(l='Test', c=lambda *x:bankRig(bcui1.get()))
+    cmds.setParent('..')
+
     cmds.separator()
 
     cui1 = cmds.checkBox(l='Smart Bake')
@@ -1260,6 +1414,7 @@ def curveMotionTrail(selected, *args):
     cmds.delete(mt)
     return curve
 
+
 def reverseCurveDirection(*args):
     selected = getSelected()
     if selected:
@@ -1287,8 +1442,8 @@ def menuUI(*args):
     cmds.menuItem(l='Create Curve Motion Trail', c=lambda *x: curveMotionTrail(getSelected()[0]))
     cmds.menuItem(d=True)
     cmds.menuItem(l='Convert Motion Trail To Curve', c=lambda *x: motionTrailToCurve(getSelected()[0]))
-    cmds.menu(l='Debug')
-    cmds.menuItem(l='Debug Mode', cb=False, c=updateDebug)
+    # cmds.menu(l='Debug')
+    # cmds.menuItem(l='Debug Mode', cb=False, c=updateDebug)
     cmds.setParent('..')
     return ui
 
