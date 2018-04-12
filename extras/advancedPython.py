@@ -1,5 +1,6 @@
 # List Comprehension
-selected = [x for x in cmds.ls(sl=True)]
+get = cmds.ls(sl=True)
+selected = [x for x in get] if get else None
 
 # Decorators
 def testB(func):
