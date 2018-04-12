@@ -1318,17 +1318,18 @@ def pathToolUI(label='Animation Cycle Path Tool',
     cmds.text(align='left',
               l='- First get Curve. Then get Global Object.\n'
                 '- Select all animated objects and ATTACH for timewarp. (Optional)\n'
-                '- Creates new attributes on Curve. Select Curve to BAKE.')
+                '- Creates new attributes on Curve. Select Curve to BAKE.\n'
+                '- Does not work with Animation Curves.')
 
     cmds.separator()
     tui1 = textField(l='Curve', bw=80, bc=bc, fc=lc)
     tui2 = textField(l='Global Object', bw=80, bc=bc, fc=lc)
-    cmds.separator()
-    frameLayout(label='Advance Bank Controls', bgc=bgc)
-    cmds.separator(st='none')
-    bcui1 = textScrollList(bw=80, bc=bc)
-    cmds.button(l='Test', c=lambda *x:bankRig(bcui1.get()))
-    cmds.setParent('..')
+    #cmds.separator()
+    #frameLayout(label='Advance Quadruped Bank Controls', bgc=bgc)
+    #cmds.separator(st='none')
+    #bcui1 = textScrollList(bw=80, bc=bc)
+    #cmds.button(l='Test', c=lambda *x:bankRig(bcui1.get()))
+    #cmds.setParent('..')
 
     cmds.separator()
 
