@@ -11,3 +11,14 @@ def testB(func):
 @testB
 def testA(var):
     print var
+
+# Generators
+def generate(var):
+    for x in range(var):
+        yield x
+    
+
+for x in generate(100):
+    print 
+    
+    
