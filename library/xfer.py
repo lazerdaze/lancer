@@ -21,7 +21,6 @@ from xml.dom.minidom import Document
 from xml.dom.minidom import parse
 from xml.etree import ElementTree as etree
 
-
 ########################################################################################################################
 #
 #
@@ -31,20 +30,141 @@ from xml.etree import ElementTree as etree
 ########################################################################################################################
 
 
+debugMode = True
+
+
+class FileType:
+	json = 'json'
+	xml = 'xml'
+	ma = 'ma'
+	mb = 'mb'
+	fbx = 'fbx'
+	txt = 'txt'
+	py = 'py'
+	obj = 'obj'
+
+
 def pathJoin(*args):
 	return os.path.join(*args)
 
 
-def pathEnd(path):
-	return os.path.basename(path)
+def pathDirName(path):
+	return os.path.dirname(path)
 
 
-def pathExists(path):
+def pathBaseName(path):
+	base = os.path.basename(path)
+	return base if base else None
+
+
+def doesPathExist(path):
 	return os.path.exists(path)
 
 
-def fileExists(path):
+def doesFileExists(path):
 	return os.path.isfile(path)
+
+
+def splitPath(path, fileName=None, fileType=None):
+	dir = pathDirName(path)
+	base = pathBaseName(path)
+	fileName = fileName if fileName else base
+	fileType = fileType if fileType else None
+
+	if fileName:
+		fileType = fileName.split('.')[-1] if '.' in fileName else None
+
+	if fileType:
+		fileName = fileName.replace('.{}'.format(fileType), '')
+		fileType = fileType.replace('.', '')
+
+	return [dir, fileName, fileType]
+
+
+def makePath(path, fileName=None, fileType=None):
+	newPath = ''
+	for x in [path, fileName, fileType]:
+		if x:
+			if x not in newPath:
+				newPath = pathJoin(newPath, x)
+	return newPath
+
+
+def prettyXML(root):
+	return minidom.parseString(etree.tostring(root)).toprettyxml()
+
+
+def write(path, data=None, isDebug=False):
+	fileType = splitPath(path)[2]
+
+	with open(path, 'w') as writeFile:
+		if isDebug:
+			print''
+			print'Start writing to file: "{}"'.format(path)
+
+		if fileType == FileType.json:
+			if isDebug:
+				print data
+			else:
+				json.dump(data, writeFile)
+		elif fileType == FileType.xml:
+			if isDebug:
+				print data
+			else:
+				writeFile.write(prettyXML(data))
+		else:
+			if isDebug:
+				print data
+			else:
+				writeFile.write(data)
+
+	writeFile.close()
+	if isDebug:
+		print'End writing to file.'
+		print''
+	return
+
+
+def read(path, isDebug=False):
+	data = None
+	fileType = splitPath(path)[2]
+
+	with open(path, 'r') as readFile:
+		if isDebug:
+			print''
+			print'Start reading from file: "{}"'.format(path)
+
+		if fileType == FileType.json:
+			data = json.load(readFile)
+			if isDebug:
+				print json.dumps(data, indent=4)
+
+		elif fileType == FileType.xml:
+			data = xml.dom.minidom.parse(path)
+			root = etree.parse(path).getroot()
+			if isDebug:
+				print prettyXML(root)
+
+		else:
+			data = readFile.read()
+			if isDebug:
+				print data
+
+	readFile.close()
+
+	if isDebug:
+		print'End reading from file.'
+		print''
+
+	return data if data else None
+
+
+def importFile(path):
+	pathQuery = splitPath(path)
+	fileDir = pathQuery[0]
+	fileName = pathQuery[1]
+	fileType = pathQuery[2]
+	return read(path)
 
 
 ########################################################################################################################
@@ -56,92 +176,38 @@ def fileExists(path):
 ########################################################################################################################
 
 
-class FileType:
-	ma = 'ma'
-	mb = 'mb'
-	fbx = 'fbx'
-	txt = 'txt'
-	py = 'py'
-	obj = 'obj'
-	json = 'json'
-	xml = 'xml'
-
-	def __init__(self):
-		pass
-
-
-debugMode = True
-
-
 class Base:
-	def __init__(self, data=None, filePath=None, fileName=None, fileType=None, isDebug=debugMode):
+	def __init__(self, filePath, data=None, fileName=None, fileType=None, isDebug=debugMode):
 		self.data = data
 		self.filePath = filePath
 		self.fileDirectory = filePath
 		self.fileName = fileName
 		self.fileType = fileType
+		self.isDebug = isDebug
 		self.fileDirectoryExists = False
 		self.fileExists = False
-		self.isDebug = isDebug
 
-		self.makeFileName()
-		self.makeFilePath()
-		self.makeFileDirectory()
+		self.organizePaths()
 		self.queryExist()
 
 		if self.isDebug:
 			self.getDebugInfo()
 
-	def makeFileName(self):
-
-		end = pathEnd(self.filePath)
-
-		if not self.fileName:
-			if self.filePath:
-				if '.' in end:
-					self.fileName = end.split('.')[0]
-					self.fileType = end.split('.')[-1]
-				else:
-					self.fileName = end if end else None
-
+		if self.fileDirectoryExists:
+			self.run()
 		else:
-			if '.' in self.fileName:
-				self.fileType = self.fileName.split('.')[-1]
-				self.fileName = self.fileName.split('.')[0]
+			print None
 
-		if not self.fileType:
-			if self.fileName:
-				if '.' in self.fileName:
-					self.fileType = self.fileName.split('.')[-1]
+	def run(self):
+		pass
 
-			elif self.filePath:
-				if '.' in end:
-					self.fileType = end.split('.')[-1]
-
-	def makeFilePath(self):
-		pathE = pathEnd(self.filePath)
-		end = '{}.{}'.format(self.fileName, self.fileType)
-
-		if self.filePath:
-			if self.fileName == pathE:
-				if '.' not in pathE:
-					if self.fileType:
-						self.filePath = '{}.{}'.format(self.filePath, self.fileType)
-			else:
-				if self.fileName and self.fileType:
-					if end != pathE:
-						self.filePath = pathJoin(self.filePath, end)
-				else:
-					if self.fileName:
-						self.filePath = pathJoin(self.filePath, self.fileName)
-
-	def makeFileDirectory(self):
-		end = pathEnd(self.filePath)
-		if self.filePath:
-			if not end:
-				self.fileDirectory = self.filePath
-			else:
-				self.fileDirectory = os.path.dirname(self.filePath)
+	def organizePaths(self):
+		path = splitPath(self.filePath, self.fileName, self.fileType)
+		self.fileDirectory = path[0]
+		self.fileName = path[1]
+		self.fileType = path[2]
+		self.filePath = makePath(self.fileDirectory, self.fileName, self.fileType)
+		return
 
 	def queryExist(self):
 		if self.filePath:
@@ -149,29 +215,7 @@ class Base:
 
 		if self.fileDirectory:
 			self.fileDirectoryExists = os.path.exists(self.fileDirectory)
-
-	def read(self):
-		data = None
-
-		if self.fileExists:
-			if self.fileType == FileType.txt:
-				readFile = open(self.filePath, 'r')
-				data = readFile.readlines()
-				readFile.close()
-			elif self.fileType == FileType.json:
-				data = json.load(open(self.filePath))
-
-		self.data = data
-		return self.data
-
-	def write(self):
-		if self.isDebug:
-			return
-		else:
-			writeFile = open(self.filePath, 'w')
-			writeFile.write(self.data)
-			writeFile.close()
-			return self.filePath
+		return
 
 	def getDebugInfo(self):
 		for x in sorted(vars(self).iterkeys()):
@@ -182,15 +226,19 @@ class Base:
 		return 'filepath: {}'.format(str(self.filePath))
 
 
-bang = Base(filePath='/Users/hypebox/PycharmProjects/lancer/test_data/read_test.json')
-print bang.read()
-
-
 class Export(Base):
-	def __init__(self, data, filePath, fileName=None, fileType=None):
-		Base.__init__(self, data, filePath, fileName, fileType)
+	def __init__(self, filePath, data, fileName=None, fileType=None):
+		Base.__init__(self, filePath, data, fileName, fileType)
+
+	def run(self):
+		write(self.filePath, self.data, self.isDebug)
+		return
 
 
 class Import(Base):
-	def __init__(self, data, filePath, fileName=None, fileType=None):
-		Base.__init__(self, data, filePath, fileName, fileType)
+	def __init__(self, filePath, data, fileName=None, fileType=None):
+		Base.__init__(self, filePath, data, fileName, fileType)
+
+	def run(self):
+		read(self.filePath, isDebug=self.isDebug)
+		return
