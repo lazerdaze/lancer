@@ -1,7 +1,6 @@
+# LANCER.LIBRARY.XFER
 #
 #
-#
-# xfer.py
 #
 #
 #
@@ -11,7 +10,7 @@ import os
 import sys
 import collections
 from contextlib import contextmanager
-
+import time
 import json
 
 import xml
@@ -20,6 +19,8 @@ from xml.dom import minidom
 from xml.dom.minidom import Document
 from xml.dom.minidom import parse
 from xml.etree import ElementTree as etree
+
+import maya.cmds as cmds
 
 ########################################################################################################################
 #
@@ -83,10 +84,12 @@ def splitPath(path, fileName=None, fileType=None):
 
 def makePath(path, fileName=None, fileType=None):
 	newPath = ''
-	for x in [path, fileName, fileType]:
+	for x in [path, fileName]:
 		if x:
 			if x not in newPath:
 				newPath = pathJoin(newPath, x)
+	if fileType:
+		newPath = '{}.{}'.format(newPath, fileType)
 	return newPath
 
 
@@ -95,23 +98,16 @@ def prettyXML(root):
 
 
 def write(path, data=None, isDebug=False):
+	t1 = time.time()
 	fileType = splitPath(path)[2]
 
 	with open(path, 'w') as writeFile:
-		if isDebug:
-			print''
-			print'Start writing to file: "{}"'.format(path)
 
 		if fileType == FileType.json:
-			if isDebug:
-				print data
-			else:
-				json.dump(data, writeFile)
+			json.dump(data, writeFile, indent=1)
+
 		elif fileType == FileType.xml:
-			if isDebug:
-				print data
-			else:
-				writeFile.write(prettyXML(data))
+			writeFile.write(prettyXML(data))
 		else:
 			if isDebug:
 				print data
@@ -119,25 +115,19 @@ def write(path, data=None, isDebug=False):
 				writeFile.write(data)
 
 	writeFile.close()
-	if isDebug:
-		print'End writing to file.'
-		print''
+	print'File written to path: "{}" successfully in {} seconds.'.format(path, time.time() - t1)
 	return
 
 
 def read(path, isDebug=False):
+	t1 = time.time()
 	data = None
 	fileType = splitPath(path)[2]
 
 	with open(path, 'r') as readFile:
-		if isDebug:
-			print''
-			print'Start reading from file: "{}"'.format(path)
 
 		if fileType == FileType.json:
 			data = json.load(readFile)
-			if isDebug:
-				print json.dumps(data, indent=4)
 
 		elif fileType == FileType.xml:
 			data = xml.dom.minidom.parse(path)
@@ -151,11 +141,7 @@ def read(path, isDebug=False):
 				print data
 
 	readFile.close()
-
-	if isDebug:
-		print'End reading from file.'
-		print''
-
+	print'File read from path "{}" successfully in {} seconds.'.format(path, time.time() - t1)
 	return data if data else None
 
 
@@ -165,6 +151,29 @@ def importFile(path):
 	fileName = pathQuery[1]
 	fileType = pathQuery[2]
 	return read(path)
+
+
+basicFilter = "*.mb"
+singleFilter = "All Files (*.*)"
+multipleFilters = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;All Files (*.*)"
+
+
+def mayaFileBrowse(label='File Browse', fileMode=3, okCaption='OK', fileFilter='directory', *args):
+	filepath = cmds.fileDialog2(cap=label, fm=fileMode, okc=okCaption, ff=fileFilter, ds=2)
+	if filepath:
+		filepath = str(filepath[0])
+		return filepath
+	else:
+		return None
+
+
+def mayaImportFile(filePath, *args):
+	try:
+		cmds.file(filePath, i=True)
+		print 'File "{}" imported successfuly.'.format(filePath)
+	except:
+		cmds.error('Unable to import file: "{}".'.format(filePath))
+	return filePath
 
 
 ########################################################################################################################
@@ -190,13 +199,11 @@ class Base:
 		self.organizePaths()
 		self.queryExist()
 
-		if self.isDebug:
-			self.getDebugInfo()
-
 		if self.fileDirectoryExists:
 			self.run()
-		else:
-			print None
+
+		if self.isDebug:
+			self.getDebugInfo()
 
 	def run(self):
 		pass
@@ -218,6 +225,7 @@ class Base:
 		return
 
 	def getDebugInfo(self):
+		print ''
 		for x in sorted(vars(self).iterkeys()):
 			print '{}: {}'.format(x, vars(self)[x])
 		return vars(self)
@@ -227,8 +235,8 @@ class Base:
 
 
 class Export(Base):
-	def __init__(self, filePath, data, fileName=None, fileType=None):
-		Base.__init__(self, filePath, data, fileName, fileType)
+	def __init__(self, filePath, data, fileName=None, fileType=None, isDebug=debugMode):
+		Base.__init__(self, filePath, data, fileName, fileType, isDebug)
 
 	def run(self):
 		write(self.filePath, self.data, self.isDebug)
@@ -236,9 +244,9 @@ class Export(Base):
 
 
 class Import(Base):
-	def __init__(self, filePath, data, fileName=None, fileType=None):
-		Base.__init__(self, filePath, data, fileName, fileType)
+	def __init__(self, filePath, isDebug=debugMode):
+		Base.__init__(self, filePath=filePath, isDebug=isDebug)
 
 	def run(self):
-		read(self.filePath, isDebug=self.isDebug)
+		self.data = read(self.filePath, isDebug=self.isDebug)
 		return

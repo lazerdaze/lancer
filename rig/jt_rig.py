@@ -4,7 +4,9 @@
 #
 #
 #
-
+import external.tf_smoothSkinWeight as tf_smoothSkinWeight
+import skin
+reload(skin)
 # Maya Modules
 import maya.cmds as cmds
 import maya.mel as mel
@@ -884,9 +886,8 @@ def orientJointChain(*args):
 	return
 
 
-def getJointHiearchy(*args):
-	pass
-	return
+def getJointHierarchy(*args):
+	return cmds.select(hi=True)
 
 
 def createJointChain(selected=[], typ='bind', world=False, *args):
@@ -3435,6 +3436,7 @@ def skeletonUI():
 	j2 = cmds.button(l='Show', enable=False)
 	j3 = cmds.button(l='Hide', enable=False)
 	autoRow([j1, j2, j3])
+	divider('Joint Scale')
 	jdUI = cmds.floatSliderGrp(field=True, pre=2, min=0.01, max=10.00, v=cmds.jointDisplayScale(q=True),
 	                           cc=lambda *x: cmds.jointDisplayScale(cmds.floatSliderGrp(jdUI, q=True, v=True)))
 	cmds.setParent('..')
@@ -3442,7 +3444,7 @@ def skeletonUI():
 	cmds.frameLayout(l='Create', mh=mar, mw=mar, bgs=True, cl=True)
 	b1 = cmds.button(l='Create Joint', c=createJoint)
 	b2 = cmds.button(l='Orient Chain', c=orientJointChain)
-	b3 = cmds.button(l='Select Hierarchy', c=getJointHiearchy)
+	b3 = cmds.button(l='Select Hierarchy', c=getJointHierarchy)
 	autoRow([b1, b2, b3])
 	cmds.setParent('..')
 
@@ -3462,6 +3464,12 @@ def skeletonUI():
 	cmds.button(l='+', w=20, c=lambda *x: jointLabel().addTypeFromUI(cmds.optionMenuGrp(om1, q=True, sl=True)))
 	cmds.setParent('..')
 
+	cmds.setParent('..')
+
+	cmds.frameLayout(l='Skinning', mh=mar, mw=mar, bgs=True, cl=True)
+	cmds.button(l='Paint Skin Weights Tool', c=lambda *x: mel.eval('ArtPaintSkinWeightsToolOptions;'))
+	cmds.button(l='Smooth Skin Weight Tool', c=tf_smoothSkinWeight.paint)
+	cmds.button(l='Mirror Skin Weights', c=lambda *x: [skin.mirrorSkinWeights(mesh=x) for x in cmds.ls(sl=True)])
 	cmds.setParent('..')
 
 	# End UI
