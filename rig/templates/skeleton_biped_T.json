@@ -1,0 +1,1439 @@
+{
+ "CenterCOG": {
+  "attributes": {
+   "translateX": -1.395734804344561e-17, 
+   "translateY": 0.6401616427138647, 
+   "translateZ": 0.0, 
+   "jointOrientY": 0.0, 
+   "jointOrientX": 0.0, 
+   "jointOrientZ": 0.0, 
+   "rotateX": 0.0, 
+   "rotateY": 0.0, 
+   "rotateZ": 0.0, 
+   "radius": 0.05, 
+   "type": "Root", 
+   "side": "Center"
+  }, 
+  "children": {
+   "CenterSpine0": {
+    "attributes": {
+     "translateX": 0.0, 
+     "translateY": 0.0, 
+     "translateZ": 0.0, 
+     "jointOrientY": 0.0, 
+     "jointOrientX": 0.0, 
+     "jointOrientZ": 90.0, 
+     "rotateX": 0.0, 
+     "rotateY": 0.0, 
+     "rotateZ": 0.0, 
+     "radius": 0.05, 
+     "type": "Spine", 
+     "side": "Center"
+    }, 
+    "children": {
+     "CenterSpine1": {
+      "attributes": {
+       "translateX": 0.11522735983456445, 
+       "translateY": 1.5745229856965348e-17, 
+       "translateZ": -3.756070847210369e-18, 
+       "jointOrientY": 0.0, 
+       "jointOrientX": 0.0, 
+       "jointOrientZ": 0.0, 
+       "rotateX": 0.0, 
+       "rotateY": 0.0, 
+       "rotateZ": 0.0, 
+       "radius": 0.05, 
+       "type": "Spine", 
+       "side": "Center"
+      }, 
+      "children": {
+       "CenterSpine1Bind0": {
+        "attributes": {
+         "translateX": 3.550104987759539e-09, 
+         "translateY": 5.937219361663973e-25, 
+         "translateZ": 4.2749583626545976e-10, 
+         "jointOrientY": 0.0, 
+         "jointOrientX": 0.0, 
+         "jointOrientZ": 0.0, 
+         "rotateX": 0.0, 
+         "rotateY": 0.0, 
+         "rotateZ": 0.0, 
+         "radius": 0.060000000000000005, 
+         "type": "Bind", 
+         "side": "Center"
+        }, 
+        "children": {}
+       }, 
+       "CenterSpine2": {
+        "attributes": {
+         "translateX": 0.09606948719610153, 
+         "translateY": -7.1479041579932e-18, 
+         "translateZ": 1.5024283388841476e-17, 
+         "jointOrientY": 0.0, 
+         "jointOrientX": 0.0, 
+         "jointOrientZ": 0.0, 
+         "rotateX": 0.0, 
+         "rotateY": 0.0, 
+         "rotateZ": 0.0, 
+         "radius": 0.05, 
+         "type": "Spine", 
+         "side": "Center"
+        }, 
+        "children": {
+         "LeftArmCollar": {
+          "attributes": {
+           "translateX": 0.04070949680569114, 
+           "translateY": -0.01777261817080412, 
+           "translateZ": -0.004705794976532695, 
+           "jointOrientY": 0.0, 
+           "jointOrientX": 0.0, 
+           "jointOrientZ": -90.0, 
+           "rotateX": 0.0, 
+           "rotateY": 0.0, 
+           "rotateZ": 0.0, 
+           "radius": 0.05, 
+           "type": "Collar", 
+           "side": "Left"
+          }, 
+          "children": {
+           "LeftArmCollarBind0": {
+            "attributes": {
+             "translateX": 0.0, 
+             "translateY": -1.1102230246251565e-16, 
+             "translateZ": 1.205632815803881e-16, 
+             "jointOrientY": 0.0, 
+             "jointOrientX": 0.0, 
+             "jointOrientZ": 0.0, 
+             "rotateX": 0.0, 
+             "rotateY": 0.0, 
+             "rotateZ": 0.0, 
+             "radius": 0.060000000000000005, 
+             "type": "Bind", 
+             "side": "Left"
+            }, 
+            "children": {}
+           }, 
+           "LeftArmShoulder": {
+            "attributes": {
+             "translateX": 0.09479148642362421, 
+             "translateY": -2.220446049250313e-16, 
+             "translateZ": 1.205632815803881e-16, 
+             "jointOrientY": 0.0, 
+             "jointOrientX": 0.0, 
+             "jointOrientZ": 0.0, 
+             "rotateX": 0.0, 
+             "rotateY": 0.0, 
+             "rotateZ": 0.0, 
+             "radius": 0.05, 
+             "type": "Shoulder", 
+             "side": "Left"
+            }, 
+            "children": {
+             "LeftArmElbow": {
+              "attributes": {
+               "translateX": 0.14384821153945868, 
+               "translateY": 1.4432899320127035e-15, 
+               "translateZ": 7.806255641895632e-18, 
+               "jointOrientY": 0.0, 
+               "jointOrientX": 0.0, 
+               "jointOrientZ": 0.0, 
+               "rotateX": 0.0, 
+               "rotateY": 0.0, 
+               "rotateZ": 0.0, 
+               "radius": 0.05, 
+               "type": "Elbow", 
+               "side": "Left"
+              }, 
+              "children": {
+               "LeftArmElbowBind0": {
+                "attributes": {
+                 "translateX": 1.27675647831893e-15, 
+                 "translateY": -3.3306690738754696e-16, 
+                 "translateZ": -8.239936510889834e-17, 
+                 "jointOrientY": 0.0, 
+                 "jointOrientX": 0.0, 
+                 "jointOrientZ": 0.0, 
+                 "rotateX": 0.0, 
+                 "rotateY": 0.0, 
+                 "rotateZ": 0.0, 
+                 "radius": 0.060000000000000005, 
+                 "type": "Bind", 
+                 "side": "Left"
+                }, 
+                "children": {}
+               }, 
+               "LeftArmElbowBind1": {
+                "attributes": {
+                 "translateX": 0.07139053409122675, 
+                 "translateY": -0.00028628296748334225, 
+                 "translateZ": 1.0091089894248562e-07, 
+                 "jointOrientY": 0.0, 
+                 "jointOrientX": 0.0, 
+                 "jointOrientZ": 0.0, 
+                 "rotateX": 0.0, 
+                 "rotateY": 0.0, 
+                 "rotateZ": 0.0, 
+                 "radius": 0.060000000000000005, 
+                 "type": "Bind", 
+                 "side": "Left"
+                }, 
+                "children": {}
+               }, 
+               "LeftArmHand": {
+                "attributes": {
+                 "translateX": 0.14278106818245329, 
+                 "translateY": -0.0005725659349664625, 
+                 "translateZ": 2.0182179802808592e-07, 
+                 "jointOrientY": 0.0, 
+                 "jointOrientX": 0.0, 
+                 "jointOrientZ": 0.0, 
+                 "rotateX": 0.0, 
+                 "rotateY": 0.0, 
+                 "rotateZ": 0.0, 
+                 "radius": 0.05, 
+                 "type": "Hand", 
+                 "side": "Left"
+                }, 
+                "children": {
+                 "LeftArmMiddleFinger0": {
+                  "attributes": {
+                   "translateX": 0.06328009903248366, 
+                   "translateY": 0.0, 
+                   "translateZ": 0.004684543547917144, 
+                   "jointOrientY": 0.0, 
+                   "jointOrientX": 0.0, 
+                   "jointOrientZ": 0.0, 
+                   "rotateX": 0.0, 
+                   "rotateY": 0.0, 
+                   "rotateZ": 0.0, 
+                   "radius": 0.05, 
+                   "type": "Middle Finger", 
+                   "side": "Left"
+                  }, 
+                  "children": {
+                   "LeftArmMiddleFinger1": {
+                    "attributes": {
+                     "translateX": 0.029955362563816423, 
+                     "translateY": 0.0, 
+                     "translateZ": -3.7560829013044694e-16, 
+                     "jointOrientY": 0.0, 
+                     "jointOrientX": 0.0, 
+                     "jointOrientZ": 0.0, 
+                     "rotateX": 0.0, 
+                     "rotateY": 0.0, 
+                     "rotateZ": 0.0, 
+                     "radius": 0.05, 
+                     "type": "Middle Finger", 
+                     "side": "Left"
+                    }, 
+                    "children": {
+                     "LeftArmMiddleFinger2": {
+                      "attributes": {
+                       "translateX": 0.023669434836487924, 
+                       "translateY": 0.0, 
+                       "translateZ": -9.014463437859166e-17, 
+                       "jointOrientY": 0.0, 
+                       "jointOrientX": 0.0, 
+                       "jointOrientZ": 0.0, 
+                       "rotateX": 0.0, 
+                       "rotateY": 0.0, 
+                       "rotateZ": 0.0, 
+                       "radius": 0.05, 
+                       "type": "Middle Finger", 
+                       "side": "Left"
+                      }, 
+                      "children": {}
+                     }
+                    }
+                   }
+                  }
+                 }, 
+                 "LeftArmThumb0": {
+                  "attributes": {
+                   "translateX": 0.011811448304917038, 
+                   "translateY": 0.0, 
+                   "translateZ": 0.017064293370491337, 
+                   "jointOrientY": -45.0, 
+                   "jointOrientX": 90.0, 
+                   "jointOrientZ": 0.0, 
+                   "rotateX": 0.0, 
+                   "rotateY": 0.0, 
+                   "rotateZ": 0.0, 
+                   "radius": 0.05, 
+                   "type": "Thumb", 
+                   "side": "Left"
+                  }, 
+                  "children": {
+                   "LeftArmThumb1": {
+                    "attributes": {
+                     "translateX": 0.03524189174722503, 
+                     "translateY": -4.996003610813204e-16, 
+                     "translateZ": -4.440892098500626e-16, 
+                     "jointOrientY": 0.0, 
+                     "jointOrientX": 0.0, 
+                     "jointOrientZ": 0.0, 
+                     "rotateX": 0.0, 
+                     "rotateY": 0.0, 
+                     "rotateZ": 0.0, 
+                     "radius": 0.05, 
+                     "type": "Thumb", 
+                     "side": "Left"
+                    }, 
+                    "children": {
+                     "LeftArmThumb2": {
+                      "attributes": {
+                       "translateX": 0.02281563195276798, 
+                       "translateY": -5.551115123125783e-17, 
+                       "translateZ": 2.220446049250313e-16, 
+                       "jointOrientY": 0.0, 
+                       "jointOrientX": 0.0, 
+                       "jointOrientZ": 0.0, 
+                       "rotateX": 0.0, 
+                       "rotateY": 0.0, 
+                       "rotateZ": 0.0, 
+                       "radius": 0.05, 
+                       "type": "Thumb", 
+                       "side": "Left"
+                      }, 
+                      "children": {}
+                     }
+                    }
+                   }
+                  }
+                 }, 
+                 "LeftArmRingFinger0": {
+                  "attributes": {
+                   "translateX": 0.0608075506548158, 
+                   "translateY": 0.0, 
+                   "translateZ": -0.01412598522019708, 
+                   "jointOrientY": 0.0, 
+                   "jointOrientX": 0.0, 
+                   "jointOrientZ": 0.0, 
+                   "rotateX": 0.0, 
+                   "rotateY": 0.0, 
+                   "rotateZ": 0.0, 
+                   "radius": 0.05, 
+                   "type": "Ring Finger", 
+                   "side": "Left"
+                  }, 
+                  "children": {
+                   "LeftArmRingFinger1": {
+                    "attributes": {
+                     "translateX": 0.027536885863333638, 
+                     "translateY": 0.0, 
+                     "translateZ": 2.393918396847994e-16, 
+                     "jointOrientY": 0.0, 
+                     "jointOrientX": 0.0, 
+                     "jointOrientZ": 0.0, 
+                     "rotateX": 0.0, 
+                     "rotateY": 0.0, 
+                     "rotateZ": 0.0, 
+                     "radius": 0.05, 
+                     "type": "Ring Finger", 
+                     "side": "Left"
+                    }, 
+                    "children": {
+                     "LeftArmRingFinger2": {
+                      "attributes": {
+                       "translateX": 0.023612079626297133, 
+                       "translateY": 0.0, 
+                       "translateZ": -1.1102230246251565e-16, 
+                       "jointOrientY": 0.0, 
+                       "jointOrientX": 0.0, 
+                       "jointOrientZ": 0.0, 
+                       "rotateX": 0.0, 
+                       "rotateY": 0.0, 
+                       "rotateZ": 0.0, 
+                       "radius": 0.05, 
+                       "type": "Ring Finger", 
+                       "side": "Left"
+                      }, 
+                      "children": {}
+                     }
+                    }
+                   }
+                  }
+                 }, 
+                 "LeftArmIndexFinger0": {
+                  "attributes": {
+                   "translateX": 0.05955571561627748, 
+                   "translateY": 0.0, 
+                   "translateZ": 0.019830647721849434, 
+                   "jointOrientY": 0.0, 
+                   "jointOrientX": 0.0, 
+                   "jointOrientZ": 0.0, 
+                   "rotateX": 0.0, 
+                   "rotateY": 0.0, 
+                   "rotateZ": 0.0, 
+                   "radius": 0.05, 
+                   "type": "Index Finger", 
+                   "side": "Left"
+                  }, 
+                  "children": {
+                   "LeftArmIndexFinger1": {
+                    "attributes": {
+                     "translateX": 0.029095255917497398, 
+                     "translateY": 0.0, 
+                     "translateZ": 9.020562075079397e-17, 
+                     "jointOrientY": 0.0, 
+                     "jointOrientX": 0.0, 
+                     "jointOrientZ": 0.0, 
+                     "rotateX": 0.0, 
+                     "rotateY": 0.0, 
+                     "rotateZ": 0.0, 
+                     "radius": 0.05, 
+                     "type": "Index Finger", 
+                     "side": "Left"
+                    }, 
+                    "children": {
+                     "LeftArmIndexFinger2": {
+                      "attributes": {
+                       "translateX": 0.022681471317921753, 
+                       "translateY": 0.0, 
+                       "translateZ": -6.071532165918825e-17, 
+                       "jointOrientY": 0.0, 
+                       "jointOrientX": 0.0, 
+                       "jointOrientZ": 0.0, 
+                       "rotateX": 0.0, 
+                       "rotateY": 0.0, 
+                       "rotateZ": 0.0, 
+                       "radius": 0.05, 
+                       "type": "Index Finger", 
+                       "side": "Left"
+                      }, 
+                      "children": {}
+                     }
+                    }
+                   }
+                  }
+                 }, 
+                 "LeftArmPinkyFinger0": {
+                  "attributes": {
+                   "translateX": 0.05806380801864808, 
+                   "translateY": 0.0, 
+                   "translateZ": -0.0312689547401105, 
+                   "jointOrientY": 0.0, 
+                   "jointOrientX": 0.0, 
+                   "jointOrientZ": 0.0, 
+                   "rotateX": 0.0, 
+                   "rotateY": 0.0, 
+                   "rotateZ": 0.0, 
+                   "radius": 0.05, 
+                   "type": "Pinky Finger", 
+                   "side": "Left"
+                  }, 
+                  "children": {
+                   "LeftArmPinkyFinger1": {
+                    "attributes": {
+                     "translateX": 0.021135567955946122, 
+                     "translateY": 0.0, 
+                     "translateZ": 3.885780586188048e-16, 
+                     "jointOrientY": 0.0, 
+                     "jointOrientX": 0.0, 
+                     "jointOrientZ": 0.0, 
+                     "rotateX": 0.0, 
+                     "rotateY": 0.0, 
+                     "rotateZ": 0.0, 
+                     "radius": 0.05, 
+                     "type": "Pinky Finger", 
+                     "side": "Left"
+                    }, 
+                    "children": {
+                     "LeftArmPinkyFinger2": {
+                      "attributes": {
+                       "translateX": 0.01795584674020695, 
+                       "translateY": 0.0, 
+                       "translateZ": -1.0408340855860843e-16, 
+                       "jointOrientY": 0.0, 
+                       "jointOrientX": 0.0, 
+                       "jointOrientZ": 0.0, 
+                       "rotateX": 0.0, 
+                       "rotateY": 0.0, 
+                       "rotateZ": 0.0, 
+                       "radius": 0.05, 
+                       "type": "Pinky Finger", 
+                       "side": "Left"
+                      }, 
+                      "children": {}
+                     }
+                    }
+                   }
+                  }
+                 }, 
+                 "LeftArmHandBind0": {
+                  "attributes": {
+                   "translateX": -1.7208456881689926e-15, 
+                   "translateY": 8.881784197001252e-16, 
+                   "translateZ": 4.5102810375396984e-17, 
+                   "jointOrientY": 0.0, 
+                   "jointOrientX": 0.0, 
+                   "jointOrientZ": 0.0, 
+                   "rotateX": 0.0, 
+                   "rotateY": 0.0, 
+                   "rotateZ": 0.0, 
+                   "radius": 0.060000000000000005, 
+                   "type": "Bind", 
+                   "side": "Left"
+                  }, 
+                  "children": {}
+                 }
+                }
+               }
+              }
+             }, 
+             "LeftArmShoulderBind0": {
+              "attributes": {
+               "translateX": 1.3877787807814457e-17, 
+               "translateY": 1.2212453270876722e-15, 
+               "translateZ": 7.546047120499111e-17, 
+               "jointOrientY": 0.0, 
+               "jointOrientX": 0.0, 
+               "jointOrientZ": 0.0, 
+               "rotateX": 0.0, 
+               "rotateY": 0.0, 
+               "rotateZ": 0.0, 
+               "radius": 0.060000000000000005, 
+               "type": "Bind", 
+               "side": "Left"
+              }, 
+              "children": {}
+             }, 
+             "LeftArmShoulderBind1": {
+              "attributes": {
+               "translateX": 0.07192410576972916, 
+               "translateY": 9.992007221626409e-16, 
+               "translateZ": 5.984795992119984e-17, 
+               "jointOrientY": 0.0, 
+               "jointOrientX": 0.0, 
+               "jointOrientZ": 0.0, 
+               "rotateX": 0.0, 
+               "rotateY": 0.0, 
+               "rotateZ": 0.0, 
+               "radius": 0.060000000000000005, 
+               "type": "Bind", 
+               "side": "Left"
+              }, 
+              "children": {}
+             }
+            }
+           }
+          }
+         }, 
+         "RightArmCollar": {
+          "attributes": {
+           "translateX": 0.04070979571032696, 
+           "translateY": 0.01777263101651156, 
+           "translateZ": -0.004705654503101307, 
+           "jointOrientY": 0.0, 
+           "jointOrientX": -180.0, 
+           "jointOrientZ": -90.0, 
+           "rotateX": 0.0, 
+           "rotateY": 0.0, 
+           "rotateZ": 0.0, 
+           "radius": 0.05, 
+           "type": "Collar", 
+           "side": "Right"
+          }, 
+          "children": {
+           "RightArmShoulder": {
+            "attributes": {
+             "translateX": -0.09479142713195515, 
+             "translateY": 5.551115123125783e-16, 
+             "translateZ": 2.250446866532141e-08, 
+             "jointOrientY": 0.0, 
+             "jointOrientX": 0.0, 
+             "jointOrientZ": 0.0, 
+             "rotateX": 0.0, 
+             "rotateY": 0.0, 
+             "rotateZ": 0.0, 
+             "radius": 0.05, 
+             "type": "Shoulder", 
+             "side": "Right"
+            }, 
+            "children": {
+             "RightArmElbow": {
+              "attributes": {
+               "translateX": -0.14384856506839297, 
+               "translateY": -3.5380437990450986e-07, 
+               "translateZ": -2.0866556251983304e-08, 
+               "jointOrientY": 0.0, 
+               "jointOrientX": 0.0, 
+               "jointOrientZ": 0.0, 
+               "rotateX": 0.0, 
+               "rotateY": 0.0, 
+               "rotateZ": 0.0, 
+               "radius": 0.05, 
+               "type": "Elbow", 
+               "side": "Right"
+              }, 
+              "children": {
+               "RightArmHand": {
+                "attributes": {
+                 "translateX": -0.14278075696968096, 
+                 "translateY": 0.0005734882755206172, 
+                 "translateZ": -1.4371694821713188e-07, 
+                 "jointOrientY": 0.0, 
+                 "jointOrientX": 0.0, 
+                 "jointOrientZ": 0.0, 
+                 "rotateX": 0.0, 
+                 "rotateY": 0.0, 
+                 "rotateZ": 0.0, 
+                 "radius": 0.05, 
+                 "type": "Hand", 
+                 "side": "Right"
+                }, 
+                "children": {
+                 "RightArmPinkyFinger0": {
+                  "attributes": {
+                   "translateX": -0.058063310777046406, 
+                   "translateY": 0.0, 
+                   "translateZ": 0.03126884405726612, 
+                   "jointOrientY": 0.0, 
+                   "jointOrientX": 0.0, 
+                   "jointOrientZ": 0.0, 
+                   "rotateX": 0.0, 
+                   "rotateY": 0.0, 
+                   "rotateZ": 0.0, 
+                   "radius": 0.05, 
+                   "type": "Pinky Finger", 
+                   "side": "Right"
+                  }, 
+                  "children": {
+                   "RightArmPinkyFinger1": {
+                    "attributes": {
+                     "translateX": -0.021136257089846344, 
+                     "translateY": 0.0, 
+                     "translateZ": -1.0280906578147286e-07, 
+                     "jointOrientY": 0.0, 
+                     "jointOrientX": 0.0, 
+                     "jointOrientZ": 0.0, 
+                     "rotateX": 0.0, 
+                     "rotateY": 0.0, 
+                     "rotateZ": 0.0, 
+                     "radius": 0.05, 
+                     "type": "Pinky Finger", 
+                     "side": "Right"
+                    }, 
+                    "children": {
+                     "RightArmPinkyFinger2": {
+                      "attributes": {
+                       "translateX": -0.017955784970935917, 
+                       "translateY": 0.0, 
+                       "translateZ": -4.116789558555878e-08, 
+                       "jointOrientY": 0.0, 
+                       "jointOrientX": 0.0, 
+                       "jointOrientZ": 0.0, 
+                       "rotateX": 0.0, 
+                       "rotateY": 0.0, 
+                       "rotateZ": 0.0, 
+                       "radius": 0.05, 
+                       "type": "Pinky Finger", 
+                       "side": "Right"
+                      }, 
+                      "children": {}
+                     }
+                    }
+                   }
+                  }
+                 }, 
+                 "RightArmIndexFinger0": {
+                  "attributes": {
+                   "translateX": -0.05955610401247036, 
+                   "translateY": 0.0, 
+                   "translateZ": -0.01983061577908035, 
+                   "jointOrientY": 0.0, 
+                   "jointOrientX": 0.0, 
+                   "jointOrientZ": 0.0, 
+                   "rotateX": 0.0, 
+                   "rotateY": 0.0, 
+                   "rotateZ": 0.0, 
+                   "radius": 0.05, 
+                   "type": "Index Finger", 
+                   "side": "Right"
+                  }, 
+                  "children": {
+                   "RightArmIndexFinger1": {
+                    "attributes": {
+                     "translateX": -0.02909513013117465, 
+                     "translateY": 0.0, 
+                     "translateZ": -9.884617564216713e-08, 
+                     "jointOrientY": 0.0, 
+                     "jointOrientX": 0.0, 
+                     "jointOrientZ": 0.0, 
+                     "rotateX": 0.0, 
+                     "rotateY": 0.0, 
+                     "rotateZ": 0.0, 
+                     "radius": 0.05, 
+                     "type": "Index Finger", 
+                     "side": "Right"
+                    }, 
+                    "children": {
+                     "RightArmIndexFinger2": {
+                      "attributes": {
+                       "translateX": -0.022680628706698014, 
+                       "translateY": 0.0, 
+                       "translateZ": -1.0941634582574411e-07, 
+                       "jointOrientY": 0.0, 
+                       "jointOrientX": 0.0, 
+                       "jointOrientZ": 0.0, 
+                       "rotateX": 0.0, 
+                       "rotateY": 0.0, 
+                       "rotateZ": 0.0, 
+                       "radius": 0.05, 
+                       "type": "Index Finger", 
+                       "side": "Right"
+                      }, 
+                      "children": {}
+                     }
+                    }
+                   }
+                  }
+                 }, 
+                 "RightArmHandBind0": {
+                  "attributes": {
+                   "translateX": 0.0, 
+                   "translateY": -8.881784197001252e-16, 
+                   "translateZ": -6.765421556309548e-17, 
+                   "jointOrientY": 0.0, 
+                   "jointOrientX": 0.0, 
+                   "jointOrientZ": 0.0, 
+                   "rotateX": 0.0, 
+                   "rotateY": 0.0, 
+                   "rotateZ": 0.0, 
+                   "radius": 0.060000000000000005, 
+                   "type": "Bind", 
+                   "side": "Right"
+                  }, 
+                  "children": {}
+                 }, 
+                 "RightArmRingFinger0": {
+                  "attributes": {
+                   "translateX": -0.06080751017401237, 
+                   "translateY": 0.0, 
+                   "translateZ": 0.0141259418694206, 
+                   "jointOrientY": 0.0, 
+                   "jointOrientX": 0.0, 
+                   "jointOrientZ": 0.0, 
+                   "rotateX": 0.0, 
+                   "rotateY": 0.0, 
+                   "rotateZ": 0.0, 
+                   "radius": 0.05, 
+                   "type": "Ring Finger", 
+                   "side": "Right"
+                  }, 
+                  "children": {
+                   "RightArmRingFinger1": {
+                    "attributes": {
+                     "translateX": -0.02753651921804723, 
+                     "translateY": 0.0, 
+                     "translateZ": 6.817948120310668e-08, 
+                     "jointOrientY": 0.0, 
+                     "jointOrientX": 0.0, 
+                     "jointOrientZ": 0.0, 
+                     "rotateX": 0.0, 
+                     "rotateY": 0.0, 
+                     "rotateZ": 0.0, 
+                     "radius": 0.05, 
+                     "type": "Ring Finger", 
+                     "side": "Right"
+                    }, 
+                    "children": {
+                     "RightArmRingFinger2": {
+                      "attributes": {
+                       "translateX": -0.023612707560021706, 
+                       "translateY": 0.0, 
+                       "translateZ": -5.674613924935845e-08, 
+                       "jointOrientY": 0.0, 
+                       "jointOrientX": 0.0, 
+                       "jointOrientZ": 0.0, 
+                       "rotateX": 0.0, 
+                       "rotateY": 0.0, 
+                       "rotateZ": 0.0, 
+                       "radius": 0.05, 
+                       "type": "Ring Finger", 
+                       "side": "Right"
+                      }, 
+                      "children": {}
+                     }
+                    }
+                   }
+                  }
+                 }, 
+                 "RightArmThumb0": {
+                  "attributes": {
+                   "translateX": -0.0118115543947509, 
+                   "translateY": 0.0, 
+                   "translateZ": -0.017064363498293482, 
+                   "jointOrientY": -45.0, 
+                   "jointOrientX": 90.0, 
+                   "jointOrientZ": 0.0, 
+                   "rotateX": 0.0, 
+                   "rotateY": 0.0, 
+                   "rotateZ": 0.0, 
+                   "radius": 0.05, 
+                   "type": "Thumb", 
+                   "side": "Right"
+                  }, 
+                  "children": {
+                   "RightArmThumb1": {
+                    "attributes": {
+                     "translateX": -0.035242089063025395, 
+                     "translateY": 3.900218081831497e-07, 
+                     "translateZ": 5.823081240530215e-07, 
+                     "jointOrientY": 0.0, 
+                     "jointOrientX": 0.0, 
+                     "jointOrientZ": 0.0, 
+                     "rotateX": 0.0, 
+                     "rotateY": 0.0, 
+                     "rotateZ": 0.0, 
+                     "radius": 0.05, 
+                     "type": "Thumb", 
+                     "side": "Right"
+                    }, 
+                    "children": {
+                     "RightArmThumb2": {
+                      "attributes": {
+                       "translateX": -0.022815519018816288, 
+                       "translateY": -2.4294212530584502e-08, 
+                       "translateZ": -1.1728040760772274e-10, 
+                       "jointOrientY": 0.0, 
+                       "jointOrientX": 0.0, 
+                       "jointOrientZ": 0.0, 
+                       "rotateX": 0.0, 
+                       "rotateY": 0.0, 
+                       "rotateZ": 0.0, 
+                       "radius": 0.05, 
+                       "type": "Thumb", 
+                       "side": "Right"
+                      }, 
+                      "children": {}
+                     }
+                    }
+                   }
+                  }
+                 }, 
+                 "RightArmMiddleFinger0": {
+                  "attributes": {
+                   "translateX": -0.06327996545283088, 
+                   "translateY": 0.0, 
+                   "translateZ": -0.004684561777856739, 
+                   "jointOrientY": 0.0, 
+                   "jointOrientX": 0.0, 
+                   "jointOrientZ": 0.0, 
+                   "rotateX": 0.0, 
+                   "rotateY": 0.0, 
+                   "rotateZ": 0.0, 
+                   "radius": 0.05, 
+                   "type": "Middle Finger", 
+                   "side": "Right"
+                  }, 
+                  "children": {
+                   "RightArmMiddleFinger1": {
+                    "attributes": {
+                     "translateX": -0.02995523281685708, 
+                     "translateY": 0.0, 
+                     "translateZ": 1.038140026622302e-07, 
+                     "jointOrientY": 0.0, 
+                     "jointOrientX": 0.0, 
+                     "jointOrientZ": 0.0, 
+                     "rotateX": 0.0, 
+                     "rotateY": 0.0, 
+                     "rotateZ": 0.0, 
+                     "radius": 0.05, 
+                     "type": "Middle Finger", 
+                     "side": "Right"
+                    }, 
+                    "children": {
+                     "RightArmMiddleFinger2": {
+                      "attributes": {
+                       "translateX": -0.023669487265570388, 
+                       "translateY": 0.0, 
+                       "translateZ": 1.8501446764095152e-07, 
+                       "jointOrientY": 0.0, 
+                       "jointOrientX": 0.0, 
+                       "jointOrientZ": 0.0, 
+                       "rotateX": 0.0, 
+                       "rotateY": 0.0, 
+                       "rotateZ": 0.0, 
+                       "radius": 0.05, 
+                       "type": "Middle Finger", 
+                       "side": "Right"
+                      }, 
+                      "children": {}
+                     }
+                    }
+                   }
+                  }
+                 }
+                }
+               }, 
+               "RightArmElbowBind0": {
+                "attributes": {
+                 "translateX": 0.0, 
+                 "translateY": 0.0, 
+                 "translateZ": -2.1423834928313568e-16, 
+                 "jointOrientY": 0.0, 
+                 "jointOrientX": 0.0, 
+                 "jointOrientZ": 0.0, 
+                 "rotateX": 0.0, 
+                 "rotateY": 0.0, 
+                 "rotateZ": 0.0, 
+                 "radius": 0.060000000000000005, 
+                 "type": "Bind", 
+                 "side": "Right"
+                }, 
+                "children": {}
+               }, 
+               "RightArmElbowBind1": {
+                "attributes": {
+                 "translateX": -0.07139036612678584, 
+                 "translateY": 0.000287528261409431, 
+                 "translateZ": -3.835106633480467e-08, 
+                 "jointOrientY": 0.0, 
+                 "jointOrientX": 0.0, 
+                 "jointOrientZ": 0.0, 
+                 "rotateX": 0.0, 
+                 "rotateY": 0.0, 
+                 "rotateZ": 0.0, 
+                 "radius": 0.060000000000000005, 
+                 "type": "Bind", 
+                 "side": "Right"
+                }, 
+                "children": {}
+               }
+              }
+             }, 
+             "RightArmShoulderBind0": {
+              "attributes": {
+               "translateX": -4.85722573273506e-16, 
+               "translateY": -1.2212453270876722e-15, 
+               "translateZ": 6.765421556309548e-17, 
+               "jointOrientY": 0.0, 
+               "jointOrientX": 0.0, 
+               "jointOrientZ": 0.0, 
+               "rotateX": 0.0, 
+               "rotateY": 0.0, 
+               "rotateZ": 0.0, 
+               "radius": 0.060000000000000005, 
+               "type": "Bind", 
+               "side": "Right"
+              }, 
+              "children": {}
+             }, 
+             "RightArmShoulderBind1": {
+              "attributes": {
+               "translateX": -0.07192440108853346, 
+               "translateY": -2.9334632856148346e-07, 
+               "translateZ": -2.0981898238812968e-08, 
+               "jointOrientY": 0.0, 
+               "jointOrientX": 0.0, 
+               "jointOrientZ": 0.0, 
+               "rotateX": 0.0, 
+               "rotateY": 0.0, 
+               "rotateZ": 0.0, 
+               "radius": 0.060000000000000005, 
+               "type": "Bind", 
+               "side": "Right"
+              }, 
+              "children": {}
+             }
+            }
+           }, 
+           "RightArmCollarBind0": {
+            "attributes": {
+             "translateX": 1.734723475976807e-17, 
+             "translateY": 5.551115123125783e-16, 
+             "translateZ": -7.546047120499111e-17, 
+             "jointOrientY": 0.0, 
+             "jointOrientX": 0.0, 
+             "jointOrientZ": 0.0, 
+             "rotateX": 0.0, 
+             "rotateY": 0.0, 
+             "rotateZ": 0.0, 
+             "radius": 0.060000000000000005, 
+             "type": "Bind", 
+             "side": "Right"
+            }, 
+            "children": {}
+           }
+          }
+         }, 
+         "CenterSpine2Bind0": {
+          "attributes": {
+           "translateX": 3.3306690738754696e-16, 
+           "translateY": 4.930380657631324e-32, 
+           "translateZ": -1.201942671107318e-16, 
+           "jointOrientY": 0.0, 
+           "jointOrientX": 0.0, 
+           "jointOrientZ": 0.0, 
+           "rotateX": 0.0, 
+           "rotateY": 0.0, 
+           "rotateZ": 0.0, 
+           "radius": 0.060000000000000005, 
+           "type": "Bind", 
+           "side": "Center"
+          }, 
+          "children": {}
+         }, 
+         "CenterSpine3": {
+          "attributes": {
+           "translateX": 0.10252708495754392, 
+           "translateY": 2.8066375649485767e-17, 
+           "translateZ": -2.1033996744378068e-16, 
+           "jointOrientY": 0.0, 
+           "jointOrientX": 0.0, 
+           "jointOrientZ": 0.0, 
+           "rotateX": 0.0, 
+           "rotateY": 0.0, 
+           "rotateZ": 0.0, 
+           "radius": 0.05, 
+           "type": "Neck", 
+           "side": "Center"
+          }, 
+          "children": {
+           "CenterSpine3Bind0": {
+            "attributes": {
+             "translateX": -1.6286079929095365e-08, 
+             "translateY": -3.826795140061948e-24, 
+             "translateZ": 5.4175162014820146e-09, 
+             "jointOrientY": 0.0, 
+             "jointOrientX": 0.0, 
+             "jointOrientZ": 0.0, 
+             "rotateX": 0.0, 
+             "rotateY": 0.0, 
+             "rotateZ": 0.0, 
+             "radius": 0.060000000000000005, 
+             "type": "Bind", 
+             "side": "Center"
+            }, 
+            "children": {}
+           }, 
+           "CenterHead": {
+            "attributes": {
+             "translateX": 0.053199462767419936, 
+             "translateY": 3.2684220623969304e-18, 
+             "translateZ": 6.00971335553659e-17, 
+             "jointOrientY": 0.0, 
+             "jointOrientX": 0.0, 
+             "jointOrientZ": 0.0, 
+             "rotateX": 0.0, 
+             "rotateY": 0.0, 
+             "rotateZ": 0.0, 
+             "radius": 0.05, 
+             "type": "Head", 
+             "side": "Center"
+            }, 
+            "children": {
+             "CenterHeadBind0": {
+              "attributes": {
+               "translateX": 2.224953132845542e-08, 
+               "translateY": -5.098675153743558e-18, 
+               "translateZ": -6.240636831611618e-09, 
+               "jointOrientY": 0.0, 
+               "jointOrientX": 0.0, 
+               "jointOrientZ": 0.0, 
+               "rotateX": 0.0, 
+               "rotateY": 0.0, 
+               "rotateZ": 0.0, 
+               "radius": 0.060000000000000005, 
+               "type": "Bind", 
+               "side": "Center"
+              }, 
+              "children": {}
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }, 
+     "CenterSpine0Bind0": {
+      "attributes": {
+       "translateX": 1.1102230246251565e-16, 
+       "translateY": -2.465190328815662e-32, 
+       "translateZ": 3.756070847210369e-18, 
+       "jointOrientY": 0.0, 
+       "jointOrientX": 0.0, 
+       "jointOrientZ": 0.0, 
+       "rotateX": 0.0, 
+       "rotateY": 0.0, 
+       "rotateZ": 0.0, 
+       "radius": 0.060000000000000005, 
+       "type": "Bind", 
+       "side": "Center"
+      }, 
+      "children": {}
+     }
+    }
+   }, 
+   "CenterHip": {
+    "attributes": {
+     "translateX": 0.0, 
+     "translateY": 0.0, 
+     "translateZ": 0.0, 
+     "jointOrientY": 0.0, 
+     "jointOrientX": 0.0, 
+     "jointOrientZ": 0.0, 
+     "rotateX": 0.0, 
+     "rotateY": 0.0, 
+     "rotateZ": 0.0, 
+     "radius": 0.05, 
+     "type": "Hip", 
+     "side": "Center"
+    }, 
+    "children": {
+     "RightLegHip": {
+      "attributes": {
+       "translateX": -0.05303848896051399, 
+       "translateY": -0.027861754627403257, 
+       "translateZ": -0.007096164518350621, 
+       "jointOrientY": 0.0, 
+       "jointOrientX": 180.0, 
+       "jointOrientZ": 90.0, 
+       "rotateX": 0.0, 
+       "rotateY": 0.0, 
+       "rotateZ": 0.0, 
+       "radius": 0.05, 
+       "type": "Hip", 
+       "side": "Right"
+      }, 
+      "children": {
+       "RightLegKnee": {
+        "attributes": {
+         "translateX": -0.29037262145467985, 
+         "translateY": -9.23262733279473e-08, 
+         "translateZ": -9.859817304627705e-09, 
+         "jointOrientY": 0.0, 
+         "jointOrientX": 0.0, 
+         "jointOrientZ": 0.0, 
+         "rotateX": 0.0, 
+         "rotateY": 0.0, 
+         "rotateZ": 0.0, 
+         "radius": 0.05, 
+         "type": "Knee", 
+         "side": "Right"
+        }, 
+        "children": {
+         "RightLegFoot": {
+          "attributes": {
+           "translateX": -0.2526682027946883, 
+           "translateY": -3.923899580052237e-07, 
+           "translateZ": 2.0816681711721685e-17, 
+           "jointOrientY": -62.776262225551974, 
+           "jointOrientX": 0.0, 
+           "jointOrientZ": 0.0, 
+           "rotateX": 0.0, 
+           "rotateY": 0.0, 
+           "rotateZ": 0.0, 
+           "radius": 0.05, 
+           "type": "Foot", 
+           "side": "Right"
+          }, 
+          "children": {
+           "RightLegFootBind0": {
+            "attributes": {
+             "translateX": -2.740863092043355e-16, 
+             "translateY": 9.020562075079397e-17, 
+             "translateZ": 5.620504062164855e-16, 
+             "jointOrientY": 0.0, 
+             "jointOrientX": 0.0, 
+             "jointOrientZ": 0.0, 
+             "rotateX": 0.0, 
+             "rotateY": 0.0, 
+             "rotateZ": 0.0, 
+             "radius": 0.060000000000000005, 
+             "type": "Bind", 
+             "side": "Right"
+            }, 
+            "children": {}
+           }, 
+           "RightLegToe": {
+            "attributes": {
+             "translateX": -0.11113143888731444, 
+             "translateY": 6.11898622382423e-07, 
+             "translateZ": 1.2260212463310882e-08, 
+             "jointOrientY": 0.0, 
+             "jointOrientX": 0.0, 
+             "jointOrientZ": 0.0, 
+             "rotateX": 0.0, 
+             "rotateY": 0.0, 
+             "rotateZ": 0.0, 
+             "radius": 0.05, 
+             "type": "Toe", 
+             "side": "Right"
+            }, 
+            "children": {
+             "RightLegToeBind0": {
+              "attributes": {
+               "translateX": -1.3877787807814457e-16, 
+               "translateY": 7.632783294297951e-17, 
+               "translateZ": 9.020562075079397e-17, 
+               "jointOrientY": 0.0, 
+               "jointOrientX": 0.0, 
+               "jointOrientZ": 0.0, 
+               "rotateX": 0.0, 
+               "rotateY": 0.0, 
+               "rotateZ": 0.0, 
+               "radius": 0.060000000000000005, 
+               "type": "Bind", 
+               "side": "Right"
+              }, 
+              "children": {}
+             }
+            }
+           }
+          }
+         }, 
+         "RightLegKneeBind1": {
+          "attributes": {
+           "translateX": -0.12633410139734416, 
+           "translateY": 5.584235560768258e-08, 
+           "translateZ": 8.85174481282669e-09, 
+           "jointOrientY": 0.0, 
+           "jointOrientX": 0.0, 
+           "jointOrientZ": 0.0, 
+           "rotateX": 0.0, 
+           "rotateY": 0.0, 
+           "rotateZ": 0.0, 
+           "radius": 0.060000000000000005, 
+           "type": "Bind", 
+           "side": "Right"
+          }, 
+          "children": {}
+         }, 
+         "RightLegKneeBind0": {
+          "attributes": {
+           "translateX": 6.661338147750939e-16, 
+           "translateY": -1.1102230246251565e-16, 
+           "translateZ": 3.903127820947816e-17, 
+           "jointOrientY": 0.0, 
+           "jointOrientX": 0.0, 
+           "jointOrientZ": 0.0, 
+           "rotateX": 0.0, 
+           "rotateY": 0.0, 
+           "rotateZ": 0.0, 
+           "radius": 0.060000000000000005, 
+           "type": "Bind", 
+           "side": "Right"
+          }, 
+          "children": {}
+         }
+        }
+       }, 
+       "RightLegHipBind0": {
+        "attributes": {
+         "translateX": 0.0, 
+         "translateY": 1.1796119636642288e-16, 
+         "translateZ": -1.9081958235744878e-17, 
+         "jointOrientY": 0.0, 
+         "jointOrientX": 0.0, 
+         "jointOrientZ": 0.0, 
+         "rotateX": 0.0, 
+         "rotateY": 0.0, 
+         "rotateZ": 0.0, 
+         "radius": 0.060000000000000005, 
+         "type": "Bind", 
+         "side": "Right"
+        }, 
+        "children": {}
+       }, 
+       "RightLegHipBind1": {
+        "attributes": {
+         "translateX": -0.14518631072733956, 
+         "translateY": -1.3356811097431365e-07, 
+         "translateZ": -1.4264164677549318e-08, 
+         "jointOrientY": 0.0, 
+         "jointOrientX": 0.0, 
+         "jointOrientZ": 0.0, 
+         "rotateX": 0.0, 
+         "rotateY": 0.0, 
+         "rotateZ": 0.0, 
+         "radius": 0.060000000000000005, 
+         "type": "Bind", 
+         "side": "Right"
+        }, 
+        "children": {}
+       }
+      }
+     }, 
+     "LeftLegHip": {
+      "attributes": {
+       "translateX": 0.05303843665187666, 
+       "translateY": -0.027861201263751578, 
+       "translateZ": -0.007096163743174892, 
+       "jointOrientY": 0.0, 
+       "jointOrientX": 0.0, 
+       "jointOrientZ": -90.0, 
+       "rotateX": 0.0, 
+       "rotateY": 0.0, 
+       "rotateZ": 0.0, 
+       "radius": 0.05, 
+       "type": "Hip", 
+       "side": "Left"
+      }, 
+      "children": {
+       "LeftLegHipBind0": {
+        "attributes": {
+         "translateX": -1.3783787444765494e-09, 
+         "translateY": -6.930136742244741e-10, 
+         "translateZ": -2.493227412719845e-11, 
+         "jointOrientY": 0.0, 
+         "jointOrientX": 0.0, 
+         "jointOrientZ": 0.0, 
+         "rotateX": 0.0, 
+         "rotateY": 0.0, 
+         "rotateZ": 0.0, 
+         "radius": 0.060000000000000005, 
+         "type": "Bind", 
+         "side": "Left"
+        }, 
+        "children": {}
+       }, 
+       "LeftLegHipBind1": {
+        "attributes": {
+         "translateX": 0.14527322763250022, 
+         "translateY": 2.1510571102112408e-16, 
+         "translateZ": 9.540979117872439e-18, 
+         "jointOrientY": 0.0, 
+         "jointOrientX": 0.0, 
+         "jointOrientZ": 0.0, 
+         "rotateX": 0.0, 
+         "rotateY": 0.0, 
+         "rotateZ": 0.0, 
+         "radius": 0.060000000000000005, 
+         "type": "Bind", 
+         "side": "Left"
+        }, 
+        "children": {}
+       }, 
+       "LeftLegKnee": {
+        "attributes": {
+         "translateX": 0.2905464552650005, 
+         "translateY": 3.469446951953614e-17, 
+         "translateZ": -1.734723475976807e-18, 
+         "jointOrientY": 0.0, 
+         "jointOrientX": 0.0, 
+         "jointOrientZ": 0.0, 
+         "rotateX": 0.0, 
+         "rotateY": 0.0, 
+         "rotateZ": 0.0, 
+         "radius": 0.05, 
+         "type": "Knee", 
+         "side": "Left"
+        }, 
+        "children": {
+         "LeftLegFoot": {
+          "attributes": {
+           "translateX": 0.2527497040048634, 
+           "translateY": -2.4176783700036175e-09, 
+           "translateZ": 7.806255641895632e-18, 
+           "jointOrientY": -62.776262225551974, 
+           "jointOrientX": 0.0, 
+           "jointOrientZ": 0.0, 
+           "rotateX": 0.0, 
+           "rotateY": 0.0, 
+           "rotateZ": 0.0, 
+           "radius": 0.05, 
+           "type": "Foot", 
+           "side": "Left"
+          }, 
+          "children": {
+           "LeftLegToe": {
+            "attributes": {
+             "translateX": 0.11113154726155085, 
+             "translateY": 1.0408340855860843e-16, 
+             "translateZ": 4.440892098500626e-16, 
+             "jointOrientY": 0.0, 
+             "jointOrientX": 0.0, 
+             "jointOrientZ": 0.0, 
+             "rotateX": 0.0, 
+             "rotateY": 0.0, 
+             "rotateZ": 0.0, 
+             "radius": 0.05, 
+             "type": "Toe", 
+             "side": "Left"
+            }, 
+            "children": {
+             "LeftLegToeBind0": {
+              "attributes": {
+               "translateX": 2.7239750038932087e-09, 
+               "translateY": 6.760756253443301e-09, 
+               "translateZ": -1.5650342133355366e-11, 
+               "jointOrientY": 0.0, 
+               "jointOrientX": 0.0, 
+               "jointOrientZ": 0.0, 
+               "rotateX": 0.0, 
+               "rotateY": 0.0, 
+               "rotateZ": 0.0, 
+               "radius": 0.060000000000000005, 
+               "type": "Bind", 
+               "side": "Left"
+              }, 
+              "children": {}
+             }
+            }
+           }, 
+           "LeftLegFootBind0": {
+            "attributes": {
+             "translateX": -3.682093865919889e-11, 
+             "translateY": -1.4475677601044623e-11, 
+             "translateZ": 4.849325038747132e-10, 
+             "jointOrientY": 0.0, 
+             "jointOrientX": 0.0, 
+             "jointOrientZ": 0.0, 
+             "rotateX": 0.0, 
+             "rotateY": 0.0, 
+             "rotateZ": 0.0, 
+             "radius": 0.060000000000000005, 
+             "type": "Bind", 
+             "side": "Left"
+            }, 
+            "children": {}
+           }
+          }
+         }, 
+         "LeftLegKneeBind1": {
+          "attributes": {
+           "translateX": 0.12637485200243165, 
+           "translateY": -1.734723475976807e-16, 
+           "translateZ": 9.540979117872439e-18, 
+           "jointOrientY": 0.0, 
+           "jointOrientX": 0.0, 
+           "jointOrientZ": 0.0, 
+           "rotateX": 0.0, 
+           "rotateY": 0.0, 
+           "rotateZ": 0.0, 
+           "radius": 0.060000000000000005, 
+           "type": "Bind", 
+           "side": "Left"
+          }, 
+          "children": {}
+         }, 
+         "LeftLegKneeBind0": {
+          "attributes": {
+           "translateX": -1.6653345369377348e-16, 
+           "translateY": -3.469446951953614e-17, 
+           "translateZ": 9.540979117872439e-18, 
+           "jointOrientY": 0.0, 
+           "jointOrientX": 0.0, 
+           "jointOrientZ": 0.0, 
+           "rotateX": 0.0, 
+           "rotateY": 0.0, 
+           "rotateZ": 0.0, 
+           "radius": 0.060000000000000005, 
+           "type": "Bind", 
+           "side": "Left"
+          }, 
+          "children": {}
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}
