@@ -788,7 +788,7 @@ def zeroJointOrient(jnt, *args):
 	return
 
 
-def freezeTransform(obj, t=True, r=True, s=True, *args):
+def freezeTransform(obj, t=True, r=True, s=True):
 	if t:
 		cmds.makeIdentity(obj, apply=True, t=True)
 	if r:
