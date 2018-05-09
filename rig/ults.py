@@ -1278,7 +1278,7 @@ def getVertPosition(obj, *args):
 		cmds.xform(v, q=True, ws=True, t=True)
 
 
-def createFKIK(obj, fk, ik, ctl, n='FKIK', *args):
+def createFKIK(obj, fk, ik, ctl, n='FKIK'):
 	# Add Attribute
 
 	if not cmds.attributeQuery(n, node=ctl, ex=True):
@@ -1315,7 +1315,7 @@ def createFKIK(obj, fk, ik, ctl, n='FKIK', *args):
 
 	# Return
 
-	return [pcList, reList, n]
+	return [pcList, reList]
 
 
 def createSet(objs, n='set1', *args):
@@ -1445,6 +1445,12 @@ def setEnumByString(obj, attr, value):
 	attribute = '{}.{}'.format(obj, attr)
 	cmds.setAttr(attribute, index)
 	return attribute
+
+
+def addSideAttr(obj):
+	cmds.addAttr(obj, ln='side', at='enum', en='Center:Left:Right:None:', keyable=True)
+	cmds.setAttr('{}.side'.format(obj), 3, keyable=True)
+	return
 
 
 class jointLabel():
@@ -1606,7 +1612,7 @@ def colorIndexList(*args):
 	return indexColor
 
 
-def presetWireColor(selected, typ, *args):
+def presetWireColor(selected, typ):
 	if typ == component.fk:
 		color = [0, 0, 1]
 
@@ -1615,6 +1621,9 @@ def presetWireColor(selected, typ, *args):
 
 	elif typ == component.center:
 		color = [1, 1, 0]
+
+	elif typ == component.attr:
+		color = [.75, 0, .75]
 
 	overrideColor(selected, color=color, )
 

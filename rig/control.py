@@ -29,7 +29,7 @@ def wire(typ=None, axis=[1,0,0]):
 	curve = None
 
 	if typ == component.circle:
-		curve = cmds.circle(ch=False, nr=[0, 1, 0], radius=0.5)[0]
+		curve = cmds.circle(ch=False, nr=[0, 1, 0], radius=1)[0]
 
 	elif typ == component.square:
 		curve = mel.eval('curve -d 1 -p 1 0 -1 -p -1 0 -1 -p -1 0 1 -p 1 0 1 -p 1 0 -1 -k 0 -k 1 -k 2 -k 3 -k 4 ')

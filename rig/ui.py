@@ -6,7 +6,6 @@
 #
 
 # Lancer Modules
-import external.tf_smoothSkinWeight as tf_smoothSkinWeight
 import library.xfer as xfer
 import ults
 import network

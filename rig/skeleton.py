@@ -251,7 +251,7 @@ def setJointIndex(joint, indexValue=0):
 	attrName = 'index'
 	query = cmds.attributeQuery(attrName, node=joint, exists=True)
 	if not query:
-		cmds.addAttr(joint, ln=attrName, at=long, dv=0)
+		cmds.addAttr(joint, ln=attrName, at='long')
 	cmds.setAttr('{}.{}'.format(joint, attrName), lock=False)
 	cmds.setAttr('{}.{}'.format(joint, attrName), indexValue)
 	return indexValue

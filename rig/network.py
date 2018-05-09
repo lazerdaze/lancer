@@ -23,7 +23,7 @@ import maya.cmds as cmds
 rootNetwork = ults.component.character
 
 
-def network(n='network', typ='', *args):
+def create(n='network', typ='', *args):
 	node = cmds.createNode('network', n=n)
 	cmds.addAttr(node, ln='networkType', dt='string')
 	cmds.setAttr('{}.networkType'.format(node), typ, type='string', lock=True)
@@ -150,7 +150,7 @@ def connectToNetwork(obj, network, ln, *args):
 	return [objAttr, networkAttr]
 
 
-def multiConnectToNetwork(objects, network, ln, *args):
+def multiConnectToNetwork(objects, network, ln,):
 	if not cmds.attributeQuery(ln, node=network, ex=True):
 		cmds.addAttr(network, ln=ln, dt='string', m=True)
 		i = 0
