@@ -247,6 +247,27 @@ def sortJointHierarchy(joints):
 	return joints
 
 
+def setJointIndex(joint, indexValue=0):
+	attrName = 'index'
+	query = cmds.attributeQuery(attrName, node=joint, exists=True)
+	if not query:
+		cmds.addAttr(joint, ln=attrName, at=long, dv=0)
+	cmds.setAttr('{}.{}'.format(joint, attrName), lock=False)
+	cmds.setAttr('{}.{}'.format(joint, attrName), indexValue)
+	return indexValue
+
+
+def getJointIndex(joint):
+	attrName = 'index'
+	indexValue = 0
+	query = cmds.attributeQuery(attrName, node=joint, exists=True)
+	if not query:
+		indexValue = setJointIndex(joint, indexValue)
+	else:
+		indexValue = cmds.getAttr('{}.{}'.format(joint, attrName))
+	return indexValue
+
+
 ########################################################################################################################
 #
 #
@@ -280,7 +301,14 @@ jointLabelGlobalList = ['None',
                         'Pinky Toe',
                         'Other',
                         'Bind',
+                        'Limbs'
                         ]
+
+jointLabelLimbGlobalList = ['arms',
+                            'legs',
+                            'finger',
+                            'toe',
+                            ]
 
 
 def setJointLabel(joint, side=None, typ=None, otherType=None):
@@ -300,8 +328,14 @@ def setJointLabel(joint, side=None, typ=None, otherType=None):
 
 
 def getJointLabel(joint):
-	side = cmds.getAttr('{}.side'.format(joint), asString=True)
-	typ = cmds.getAttr('{}.type'.format(joint), asString=True)
+	side = None
+	typ = None
+
+	if cmds.attributeQuery('side', node=joint, exists=True):
+		side = cmds.getAttr('{}.side'.format(joint), asString=True)
+
+	if cmds.attributeQuery('type', node=joint, exists=True):
+		typ = cmds.getAttr('{}.type'.format(joint), asString=True)
 
 	if typ == 'Other':
 		typ = cmds.getAttr('{}.otherType'.format(joint), asString=True)
@@ -331,9 +365,15 @@ class Query:
 		self.children = getAllJointChildren(root) if root else None
 		self.joints = self.getAllJoints()
 		self.data = {}
+		self.armLabels = ['Collar', 'Shoulder', 'Elbow', 'Hand']
+		self.fingerLabels = ['Thumb', 'Index Finger', 'Middle Finger', 'Ring Finger', 'Pinky Finger']
+		self.legLabels = ['Hip', 'Knee', 'Foot', 'Toe']
+		self.toeLabels = ['Big Toe', 'Index Toe', 'Middle Toe', 'Ring Toe', 'Pinky Toe']
+		self.limbLabels = self.armLabels + self.fingerLabels + self.legLabels + self.toeLabels
 
 		if self.joints:
 			self.populate()
+			self.populateLimbs()
 
 	def __str__(self):
 		return str(json.dumps(self.data, indent=8))
@@ -346,79 +386,94 @@ class Query:
 			joints = joints + self.children
 		return joints
 
+	def getLimbLabels(self, limb):
+		if limb == 'Arms':
+			return self.armLabels
+		elif limb == 'Legs':
+			return self.legLabels
+		else:
+			return limb
+
+	def populateLimbs(self):
+		dataList = []
+		limbDict = {}
+		for limb in ['Arms', 'Legs'] + self.fingerLabels + self.toeLabels:
+
+			sideDict = {}
+			for side in ['Left', 'Right']:
+				limbLabels = self.getLimbLabels(limb)
+				indexList = {}
+
+				for joint in self.joints:
+					label = getJointLabel(joint)
+					labelSide = label[0]
+					labelType = label[1]
+					jointIndex = getJointIndex(joint)
+
+					if side == labelSide:
+						if limb in ['Arms', 'Legs']:
+							if labelType in limbLabels:
+								if jointIndex in indexList:
+									indexList[jointIndex].append(joint)
+								else:
+									indexList[jointIndex] = [joint]
+						else:
+							if labelType == limb:
+								if jointIndex in indexList:
+									indexList[jointIndex].append(joint)
+								else:
+									indexList[jointIndex] = [joint]
+
+				for x in indexList:
+					indexList[x] = sortJointHierarchy(indexList[x])
+
+				sideDict[side] = indexList
+			limbDict[limb] = sideDict
+
+		dataList.append(limbDict)
+
+		dataDict = {}
+		for x in dataList:
+			for label, labelData in x.items():
+				dataDict[label] = labelData
+
+		self.data['Limbs'] = dataDict
+
 	def populate(self):
 		dataList = []
 
 		for jointLabel in jointLabelGlobalList:
-			leftList = []
-			rightList = []
-			centerList = []
-			noneList = []
+			if jointLabel not in self.limbLabels:
+				labelList = []
+				for joint in self.joints:
+					label = getJointLabel(joint)
+					labelSide = label[0]
+					labelType = label[1]
+					jointIndex = getJointIndex(joint)
 
-			for joint in self.joints:
-				label = getJointLabel(joint)
-				labelSide = label[0]
-				labelType = label[1]
+					if labelType == jointLabel:
+						labelList.append(joint)
 
-				if labelType == jointLabel:
-					if labelSide == 'Left':
-						leftList.append(joint)
-					elif labelSide == 'Right':
-						rightList.append(joint)
-					elif labelSide == 'Center':
-						centerList.append(joint)
-					else:
-						noneList.append(joint)
-
-			if jointLabel not in ['None', 'Bind']:
-				dataList.append({
-					jointLabel: {
-						'Left'  : sortJointHierarchy(leftList) if leftList else leftList,
-						'Center': sortJointHierarchy(centerList) if centerList else centerList,
-						'Right' : sortJointHierarchy(rightList) if rightList else rightList,
-					}
-				})
+				if jointLabel not in ['None', 'Bind']:
+					dataList.append({jointLabel: sortJointHierarchy(labelList) if labelList else labelList})
 
 		for x in dataList:
 			for label, labelData in x.items():
 				self.data[label] = labelData
+		return
 
-	def get(self, typ, side='center'):
-		chain = []
-
-		if typ == ults.componentType.root:
-			chain.append(self.data['Root'][side.capitalize()][0])
-
-		elif typ == ults.componentType.cog:
-			chain.append(self.data['COG'][side.capitalize()][0])
-
-		elif typ == ults.componentType.hip:
-			chain.append(self.data['Hip'][side.capitalize()][0])
-
-		elif typ == ults.componentType.spine:
-			chain = self.data['Spine'][side.capitalize()]
-
-		elif typ == ults.componentType.head:
-			for x in ['Neck', 'Head']:
-				chain.append(self.data[x][side.capitalize()][0])
-
-		elif typ == ults.componentType.arm:
-			for x in ['Collar', 'Shoulder', 'Elbow', 'Hand']:
-				chain.append(self.data[x][side.capitalize()][0])
-
-		elif typ == ults.componentType.hand:
-			for x in ['Thumb', 'Index Finger', 'Middle Finger', 'Ring Finger', 'Pinky Finger']:
-				chain.append(self.data[x][side.capitalize()])
-
-		elif typ == ults.componentType.leg:
-			for x in ['Hip', 'Knee', 'Foot', 'Toe']:
-				chain.append(self.data[x][side.capitalize()][0])
-
-		elif typ == ults.componentType.foot:
-			for x in ['Big Toe', 'Index Toe', 'Middle Toe', 'Ring Toe', 'Pinky Toe']:
-				chain.append(self.data[x][side.capitalize()][0])
-
-		return chain
+	def get(self, typ, limbType=None, side=None, index=0):
+		typ = typ.title()
+		if typ in self.data:
+			if limbType:
+				limbType = limbType.title()
+				side = side.title()
+				return self.data[typ][limbType][side][index]
+			else:
+				return self.data[typ]
+		else:
+			print 'Cannot find "{}".'.format(typ)
+			return None
 
 
 ########################################################################################################################

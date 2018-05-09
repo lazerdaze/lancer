@@ -5,19 +5,36 @@
 #
 #
 
+# Lancer Modules
+import ults
+reload(ults)
+
+# Maya Modules
 from maya import cmds, mel
 
 
-def wire(typ=None):
+class component(object):
+	circle = 'circle'
+	square = 'square'
+	lollipop = 'lollipop'
+	cog = 'cog'
+	root = 'root'
+	mover = 'mover'
+	locator = 'locator'
+	cube = 'cube'
+	diamond = 'diamond'
+
+
+def wire(typ=None, axis=[1,0,0]):
 	curve = None
 
-	if typ == 'circle':
-		curve = cmds.circle(ch=False, nr=[0, 1, 0])[0]
+	if typ == component.circle:
+		curve = cmds.circle(ch=False, nr=[0, 1, 0], radius=0.5)[0]
 
-	elif typ == 'square':
+	elif typ == component.square:
 		curve = mel.eval('curve -d 1 -p 1 0 -1 -p -1 0 -1 -p -1 0 1 -p 1 0 1 -p 1 0 -1 -k 0 -k 1 -k 2 -k 3 -k 4 ')
 
-	elif typ == 'lollipop':
+	elif typ == component.lollipop:
 		curve = cmds.curve(d=1, p=[[0.0, 0.0, 0.0], [0.0, 1.7123030076867394e-17, -0.07711527187363379],
 		                           [0.0, 1.3698578170305682e-16, -0.6169291154329428],
 		                           [0.0, 1.5410881177992419e-16, -0.6940443873065765],
@@ -59,7 +76,7 @@ def wire(typ=None):
 		                           [0.0, 1.5410881177992419e-16, -0.6940443873065765]]
 		                   )
 
-	elif typ == 'cog':
+	elif typ == component.cog:
 		curve = cmds.curve(d=1, p=[[0.7075841429448686, 0.0, -0.7065833927290376],
 		                           [0.5882273123980648, 0.0, -0.8085696375059601],
 		                           [0.45429696125840446, 0.0, -0.8905083279155774],
@@ -102,7 +119,7 @@ def wire(typ=None):
 		                           [0.8096252749716769, 0.0, -0.5872906246141906],
 		                           [0.7075841429448686, 0.0, -0.7065833927290376]])
 
-	elif typ == 'root':
+	elif typ == component.root:
 		curve = cmds.curve(d=1, p=[[0.2218294764302727, 0.0, 0.6828598014335026],
 		                           [0.32587850355211845, 0.0, 0.6397250275320987],
 		                           [0.4219568140867114, 0.0, 0.58094421452366],
@@ -145,7 +162,7 @@ def wire(typ=None):
 		                           [0.19368312783324698, 0.0, 0.6895990722818344],
 		                           [0.2218294764302727, 0.0, 0.6828598014335026]])
 
-	elif typ == 'mover':
+	elif typ == component.mover:
 		curve = cmds.curve(d=1, p=[[3.0151795805144164, -1.8909139247979197e-21, -8.515919247109593e-06],
 		                           [2.913475730972275, 2.2581152296350285e-17, 0.10169646906743957],
 		                           [2.201539630739292, 1.806644872624896e-16, 0.8136405175144299],
@@ -293,33 +310,35 @@ def wire(typ=None):
 		                           [3.0151795805144164, -1.8909139247979197e-21, -8.515919247109593e-06]])
 
 
-	elif typ == 'locator':
+	elif typ == component.locator:
 		curve = cmds.curve(d=1, p=[[-1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0], [1.0, 0.0, 0.0],
 		                           [0.0, 0.0, 0.0], [0.0, 0.0, -1.0], [0.0, 0.0, 0.0], [0.0, 1.0, 0.0],
 		                           [0.0, -1.0, 0.0]])
 
-	elif typ == 'cube':
+	elif typ == component.cube:
 		curve = mel.eval(
 				'curve -d 1 -p 0.5 0.5 0.5 -p 0.5 0.5 -0.5 -p -0.5 0.5 -0.5 -p -0.5 -0.5 -0.5 -p 0.5 -0.5 -0.5 -p 0.5 0.5 -0.5 -p -0.5 0.5 -0.5 -p -0.5 0.5 0.5 -p 0.5 0.5 0.5 -p 0.5 -0.5 0.5 -p 0.5 -0.5 -0.5 -p -0.5 -0.5 -0.5 -p -0.5 -0.5 0.5 -p 0.5 -0.5 0.5 -p -0.5 -0.5 0.5 -p -0.5 0.5 0.5 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15')
 
 
-	elif typ == 'diamond':
+	elif typ == component.diamond:
 		curve = mel.eval(
 				'curve -d 1 -p 0 1 0 -p 1 0 0 -p 0 0 1 -p -1 0 0 -p 0 0 -1 -p 0 1 0 -p 0 0 1 -p 0 -1 0 -p 0 0 -1 -p 1 0 0 -p 0 1 0 -p -1 0 0 -p 0 -1 0 -p 1 0 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13')
 
+	ults.forwardAxis(curve, axis=axis)
 	return curve
 
 
-def create(name='control0', shape='circle', *args):
+def create(name='control0', shape='circle', axis=[1,0,0]):
 	# Joint Node
 	node = cmds.createNode('joint', name=name)
 	cmds.setAttr('{}.segmentScaleCompensate'.format(node), 0)
 	cmds.setAttr('{}.drawStyle'.format(node), 2)
 	cmds.setAttr('{}.radius'.format(node), keyable=False, channelBox=False)
 	cmds.setAttr('{}.v'.format(node), keyable=False, channelBox=False)
+	cmds.setAttr('{}.rotateOrder'.format(node), k=True)
 
 	# Curve Shape
-	curve = wire(shape)
+	curve = wire(typ=shape, axis=axis)
 	curveShape = cmds.rename(cmds.listRelatives(curve, shapes=True)[0],
 	                         '{}Shape'.format(name))
 	cmds.parent(curveShape, node, r=True, s=True)

@@ -23,7 +23,7 @@ import json
 #																														#
 #########################################################################################################################
 
-class componentType(object):
+class component(object):
 	left = 'left'
 	right = 'right'
 	center = 'center'
@@ -35,6 +35,7 @@ class componentType(object):
 	character = 'character'
 	set = 'set'
 	noodle = 'noodle'
+	attr = 'attr'
 
 	root = 'root'
 	cog = 'cog'
@@ -670,7 +671,7 @@ def snap(par, child, t=False, r=False):
 	parRotation = cmds.xform(par, q=True, ws=True, ro=True)
 
 	if t:
-		cmds.xform(child, rp=parPosition, ws=True)
+		cmds.xform(child, t=parPosition, ws=True)
 
 	if r:
 		cmds.xform(child, ro=parRotation, ws=True)
@@ -678,23 +679,35 @@ def snap(par, child, t=False, r=False):
 	return
 
 
-def createGroup(obj, n='', *args):
-	if not n:
-		n = '{}_grp'.format(obj)
-
-	if cmds.objExists(n):
-		n = '{}#'.format(n)
-
+def createGroup(obj, n='grp'):
 	grp = cmds.group(n=n, em=True)
 	snap(obj, grp, t=True, r=True)
 	par = cmds.listRelatives(obj, parent=True)
 
 	if par:
+		par = par[0]
 		cmds.parent(grp, par)
 
 	cmds.parent(obj, grp)
 
 	return grp
+
+
+def hideAttributes(obj):
+	attributes = cmds.listAttr(obj, k=True)
+	if attributes:
+		for attr in attributes:
+			cmds.setAttr('{}.{}'.format(obj, attr), keyable=False, channelBox=False)
+	return
+
+
+def lockAttributes(obj, hide=False):
+	hide = False if hide else True
+	attributes = cmds.listAttr(obj, k=True)
+	if attributes:
+		for attr in attributes:
+			cmds.setAttr('{}.{}'.format(obj, attr), lock=True, keyable=hide, channelBox=hide)
+	return
 
 
 def createLocalWorld(obj, local, world, n='localWorld', t=False, r=True):
@@ -736,15 +749,15 @@ def getPositionSide(obj, *args):
 		position = cmds.xform(obj, q=True, ws=True, rp=True)[0]
 
 	if 'e' in str(position):
-		return componentType.center
+		return component.center
 
 	else:
 
 		if position > 0:
-			return componentType.left
+			return component.left
 
 		elif position < 0:
-			return componentType.right
+			return component.right
 
 		elif position == 0:
 			if type(obj) is list:
@@ -755,9 +768,9 @@ def getPositionSide(obj, *args):
 						newObj.append(o)
 					getPositionSide(newObj)
 				else:
-					return componentType.center
+					return component.center
 			else:
-				return componentType.center
+				return component.center
 
 
 def getChild(root, typ='joint', *args):
@@ -920,7 +933,7 @@ def createJointChain(selected=[], typ='bind', world=False, *args):
 
 def createBindChain(selected, *args):
 	selected = listCheck(selected)
-	bindJnt = createJointChain(selected, typ=componentType.bind)
+	bindJnt = createJointChain(selected, typ=component.bind)
 	for jnt in bindJnt:
 		i = bindJnt.index(jnt)
 		cmds.parentConstraint(jnt, selected[i], mo=True)
@@ -1134,27 +1147,27 @@ def locOnCurve(curve, intLoc=1, n='locator', upObject='', start=False, end=False
 	return locList
 
 
-def makePoleVector(ik, start, end, *args):
-	poleVector = cmds.poleVectorConstraint(start, ik)
-	curve = makeNurbsCurve([start, end], n='{}_curve'.format(start))
 
-	curveCVs = cmds.ls('{0}.cv[:]'.format(curve), fl=True)
-	clusters = clusterCurve(curve, n='{}Cluster'.format(curve))
+class createPoleVector:
+	def __init__(self, ik, start, end):
+		poleVector = cmds.poleVectorConstraint(start, ik)
+		curveName = '{}_poleVector_curve'.format(start)
+		curve = cmds.curve(n=curveName, d=1, p=[[0, 0, 0], [0, 0, 0]])
+		shape = cmds.rename(cmds.listRelatives(curve, shapes=True)[0], '{}Shape'.format(curveName))
 
-	i = 0
-	for par in [start, end]:
-		cmds.parent(clusters[i], par)
-		i += 1
+		i = 0
+		for x in [start, end]:
+			cmds.cluster('{}.cv[{}]'.format(curve, i), n='{}_cluster'.format(x), wn=[x, x])
+			i += 1
 
-	# CleanUp
-	cmds.setAttr('{}.template'.format(cmds.listRelatives(curve, shapes=True)[0]), 1)
+		cmds.setAttr('{}.template'.format(cmds.listRelatives(curve, shapes=True)[0]), 1)
+		cmds.setAttr('{}.inheritsTransform'.format(curve), 0)
 
-	grp = cmds.group(curve, n='{}_grp'.format(curve))
-	cmds.parent(grp, start)
-	cmds.setAttr('{}.inheritsTransform'.format(grp), 0)
-	zeroAttrs(grp)
+		# Return
+		self.poleVector = poleVector
+		self.curve = curve
+		self.shape = shape
 
-	return [curve, grp]
 
 
 def makeAimVector(par, child, *args):
@@ -1479,35 +1492,35 @@ class jointLabel():
 	def get(self, typ, side='center'):
 		chain = []
 
-		if typ == componentType.root:
+		if typ == component.root:
 			chain.append(self.masterDict['Root'][side.capitalize()][0])
 
-		elif typ == componentType.cog:
+		elif typ == component.cog:
 			chain.append(self.masterDict['COG'][side.capitalize()][0])
 
-		elif typ == componentType.hip:
+		elif typ == component.hip:
 			chain.append(self.masterDict['Hip'][side.capitalize()][0])
 
-		elif typ == componentType.spine:
+		elif typ == component.spine:
 			chain = self.masterDict['Spine'][side.capitalize()]
 
-		elif typ == componentType.head:
+		elif typ == component.head:
 			for x in ['Neck', 'Head']:
 				chain.append(self.masterDict[x][side.capitalize()][0])
 
-		elif typ == componentType.arm:
+		elif typ == component.arm:
 			for x in ['Collar', 'Shoulder', 'Elbow', 'Hand']:
 				chain.append(self.masterDict[x][side.capitalize()][0])
 
-		elif typ == componentType.hand:
+		elif typ == component.hand:
 			for x in ['Thumb', 'Index Finger', 'Middle Finger', 'Ring Finger', 'Pinky Finger']:
 				chain.append(self.masterDict[x][side.capitalize()])
 
-		elif typ == componentType.leg:
+		elif typ == component.leg:
 			for x in ['Hip', 'Knee', 'Foot', 'Toe']:
 				chain.append(self.masterDict[x][side.capitalize()][0])
 
-		elif typ == componentType.foot:
+		elif typ == component.foot:
 			for x in ['Big Toe', 'Index Toe', 'Middle Toe', 'Ring Toe', 'Pinky Toe']:
 				chain.append(self.masterDict[x][side.capitalize()][0])
 
@@ -1594,13 +1607,13 @@ def colorIndexList(*args):
 
 
 def presetWireColor(selected, typ, *args):
-	if typ == componentType.fk:
+	if typ == component.fk:
 		color = [0, 0, 1]
 
-	elif typ == componentType.ik:
+	elif typ == component.ik:
 		color = [1, 0, 0]
 
-	elif typ == componentType.center:
+	elif typ == component.center:
 		color = [1, 1, 0]
 
 	overrideColor(selected, color=color, )
@@ -1659,7 +1672,7 @@ def overrideColor(selected=[], color=[], reset=False, index=False, *args):
 #########################################################################################################################
 
 
-rootNetwork = componentType.character
+rootNetwork = component.character
 
 
 def network(n='network', typ='', *args):
@@ -1669,22 +1682,22 @@ def network(n='network', typ='', *args):
 	cmds.addAttr(node, ln='children', dt='string')
 	cmds.addAttr(node, ln='set', at='message')
 
-	if typ != componentType.fkik:
+	if typ != component.fkik:
 		cmds.addAttr(node, ln='fkikNetwork', at='message')
 
-	if typ != componentType.root:
+	if typ != component.root:
 		cmds.addAttr(node, ln='index', dv=0, at='long')
 		cmds.addAttr(node, ln='side', dt='string')
 		cmds.addAttr(node, ln='characterNetwork', at='message')
 		cmds.addAttr(node, ln='parentNetwork', at='message')
 
-	if typ in [componentType.arm, componentType.leg]:
+	if typ in [component.arm, component.leg]:
 		# cmds.addAttr(node, ln='index', dv=0, at='long')
 		# cmds.addAttr(node, ln='side', dt='string')
 		# cmds.addAttr(node, ln='side', at='enum', en='none:center:left:right')
 		cmds.addAttr(node, ln='opposite', at='message')
 
-	if typ == componentType.character:
+	if typ == component.character:
 		cmds.addAttr(node, ln='characterName', dt='string')
 		cmds.addAttr(node, ln='globalScale', dv=1)
 		cmds.addAttr(node, ln='cog', at='message')
@@ -1696,33 +1709,33 @@ def network(n='network', typ='', *args):
 	# cmds.addAttr(node, ln='control', dt='string', m=True)
 	# cmds.addAttr(node, ln='bindJoint', dt='string', m=True)
 
-	elif typ == componentType.cog:
+	elif typ == component.cog:
 		# cmds.addAttr(node, ln='control', dt='string', m=True)
 		# cmds.addAttr(node, ln='bindJoint', dt='string', m=True)
 		pass
-	elif typ == componentType.spine:
+	elif typ == component.spine:
 		cmds.addAttr(node, ln='neckHead', at='message')
 		cmds.addAttr(node, ln='tail', at='message')
-	elif typ == componentType.collar:
+	elif typ == component.collar:
 		pass
 	# cmds.addAttr(node, ln='side', dt='string')
 
-	elif typ == componentType.arm:
+	elif typ == component.arm:
 		cmds.addAttr(node, ln='collar', at='message')
 		cmds.addAttr(node, ln='hand', at='message')
-	elif typ == componentType.hand:
+	elif typ == component.hand:
 		pass
 	# cmds.addAttr(node, ln='side', dt='string')
 	# cmds.addAttr(node, ln='finger', dt='string', m=True)
-	elif typ == componentType.foot:
+	elif typ == component.foot:
 		pass
 	# cmds.addAttr(node, ln='side', dt='string')
 	# cmds.addAttr(node, ln='FKIK', min=0, max=1, dv=0)
-	elif typ == componentType.leg:
+	elif typ == component.leg:
 		cmds.addAttr(node, ln='hip', at='message')
 		cmds.addAttr(node, ln='foot', at='message')
 
-	elif typ == componentType.fkik:
+	elif typ == component.fkik:
 		cmds.addAttr(node, ln='FKIK', dv=0, min=0, max=1)
 		cmds.addAttr(node, ln='ikHandle', at='message')
 		cmds.addAttr(node, ln='ikPoleVector', at='message')
@@ -1860,7 +1873,7 @@ class queryNetwork():
 			self.getNetworkFromSelected(selected)
 
 		else:
-			if typ == componentType.character:
+			if typ == component.character:
 				self.getRoot()
 			else:
 				self.network = self.findNetwork(typ)
@@ -1893,7 +1906,7 @@ class queryNetwork():
 
 		# Get Root
 
-		root = self.findNetwork(componentType.character)
+		root = self.findNetwork(component.character)
 		self.network = root
 
 		# Get CharacterName
@@ -1903,32 +1916,32 @@ class queryNetwork():
 		# Get COG
 
 		if root:
-			self.cog = self.getConnected(root, componentType.cog)
+			self.cog = self.getConnected(root, component.cog)
 
 		# Get HIP
 
 		if root:
-			self.hip = self.getConnected(root, componentType.hip)
+			self.hip = self.getConnected(root, component.hip)
 
 		# Get Spine
 		if root:
-			self.spine = self.getConnected(root, componentType.spine)
+			self.spine = self.getConnected(root, component.spine)
 
 		# Get Arm
 		if root:
-			self.arm = self.getConnected(root, componentType.arm)
+			self.arm = self.getConnected(root, component.arm)
 
 		# Get Leg
 		if root:
-			self.leg = self.getConnected(root, componentType.leg)
+			self.leg = self.getConnected(root, component.leg)
 
 		# Get FKIK
 		if root:
-			self.fkik = self.getConnected(root, componentType.fkik)
+			self.fkik = self.getConnected(root, component.fkik)
 
 		# Get Set
 		if root:
-			self.set = self.getConnected(root, componentType.set)
+			self.set = self.getConnected(root, component.set)
 
 	def networkPromptUI(self, *args):
 		networks = self.findAllNetworksByType(self.typ)
