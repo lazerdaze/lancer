@@ -259,9 +259,9 @@ def skeletonUI():
 
 	cmds.frameLayout(l='Skinning', mh=mar, mw=mar, bgs=True, cl=True)
 	swb1 = cmds.button(l='Paint Weights', c=lambda *x: mel.eval('ArtPaintSkinWeightsToolOptions;'))
-	swb2 = cmds.button(l='Smooth Weights', c=tf_smoothSkinWeight.paint)
+	#swb2 = cmds.button(l='Smooth Weights', c=tf_smoothSkinWeight.paint)
 	swb3 = cmds.button(l='Mirror Weights', c=lambda *x: [skin.mirrorSkinWeights(mesh=x) for x in cmds.ls(sl=True)])
-	autoRow([swb1, swb2, swb3])
+	autoRow([swb1, swb3])
 	cmds.setParent('..')
 
 	# End UI

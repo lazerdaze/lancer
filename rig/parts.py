@@ -32,6 +32,44 @@ GlobalRigRootAttr = 'rigNetworkRoot'
 GlobalRigAttr = 'rigNetwork'
 
 
+class component(object):
+	left = 'Left'
+	right = 'Right'
+	center = 'Center'
+
+	fk = 'fk'
+	ik = 'ik'
+	bind = 'rig'
+	fkik = 'fkik'
+	character = 'character'
+	set = 'set'
+	noodle = 'noodle'
+	detail = 'detail'
+	attr = 'attr'
+
+	root = 'root'
+	cog = 'cog'
+	hip = 'hip'
+	spine = 'spine'
+	neck = 'neck'
+	head = 'head'
+	arm = 'arm'
+	collar = 'collar'
+	leg = 'leg'
+	hand = 'hand'
+	foot = 'foot'
+	finger = 'finger'
+	toe = 'toe'
+	limb = 'limb'
+	digit = 'digit'
+
+	thumb = 'thumb'
+	index = 'index'
+	middle = 'middle'
+	ring = 'ring'
+	pinky = 'pinky'
+
+
 ########################################################################################################################
 #
 #
@@ -44,7 +82,7 @@ GlobalRigAttr = 'rigNetwork'
 class CONTROL(object):
 	def __init__(self,
 	             name='control',
-	             typ=None,
+	             typ='circle',
 	             scale=1,
 	             axis=None,
 	             translate=False,
@@ -108,7 +146,7 @@ class CONTROL(object):
 		return
 
 	def setAttributes(self, selected):
-		for attr in ['character', 'skeletonNetwork', 'rigNetwork']:
+		for attr in ['character', 'skeletonNetwork', 'rigNetwork', 'rigNetworkRoot']:
 			cmds.addAttr(selected, ln=attr, at='message')
 
 		cmds.addAttr(selected, ln='index', at='long', dv=self.index)
@@ -120,7 +158,8 @@ class CONTROL(object):
 		return
 
 	def createGroup(self):
-		self.group = cmds.group(self.transform, name='{}_grp'.format(self.transform))
+		self.group = cmds.group(name='{}_grp'.format(self.transform), em=True)
+		cmds.parent(self.transform, self.group)
 		if self.child:
 			ults.snap(self.child, self.group, t=True, r=True)
 		self.setAttributes(self.group)
@@ -435,6 +474,8 @@ class IKCHAIN(CHAIN):
 
 class RIBBONCHAIN(CHAIN):
 	def __init__(self):
+		CHAIN.__init__(self,
+		               )
 		pass
 
 
@@ -449,9 +490,7 @@ class RIBBONCHAIN(CHAIN):
 
 class BASE(object):
 	def __init__(self,
-	             start=None,
-	             mid=None,
-	             end=None,
+	             objects=None,
 	             name='base',
 	             fkName=ults.component.fk,
 	             ikName=ults.component.ik,
@@ -460,8 +499,9 @@ class BASE(object):
 	             side=None,
 	             index=0,
 	             networkRoot=None,
+	             networkParent=None,
 	             ):
-		'''
+		""""
 		:param start:
 		:param mid:
 		:param end:
@@ -473,11 +513,9 @@ class BASE(object):
 		:param side:
 		:param index:
 		:param networkRoot:
-		'''
-		self.start = start
-		self.mid = mid
-		self.end = end
-		self.objects = [start, mid, end]
+		"""
+
+		self.objects = ults.listCheck(objects)
 		self.name = name
 		self.fkName = fkName
 		self.ikName = ikName
@@ -498,12 +536,17 @@ class BASE(object):
 		self.ikPoleVector = None
 		self.ikParent = None
 
+		self.detailObjects = None
+		self.detailControl = None
+		self.detailGroup = None
+
 		self.attrControl = None
 		self.attrGroup = None
 
 		self.parent = None
 		self.network = None
 		self.networkRoot = networkRoot
+		self.networkParent = networkParent
 		self.set = None
 
 	def __str__(self):
@@ -512,8 +555,37 @@ class BASE(object):
 			print '{}: {}'.format(x, vars(self)[x])
 		return str()
 
-	def createFKChain(self):
-		fk = FKCHAIN(self.objects,
+	def createDetailChain(self, objects):
+		self.detailObjects = []
+		self.detailControl = []
+		self.detailGroup = []
+
+		objects = ults.listCheck(objects)
+		for obj in objects:
+			i = self.objects.index(obj)
+			children = skeleton.getBindJoint(obj)
+
+			if children:
+				for child in children:
+					ctl = DETAILCONTROL(name='{}_detail_ctl'.format(obj),
+					                    scale=self.scale,
+					                    parent=None,
+					                    child=child,
+					                    index=i,
+					                    axis=self.axis,
+					                    )
+
+					cmds.parent(ctl.group, obj)
+					cmds.parentConstraint(ctl.transform, child, mo=True)
+					cmds.scaleConstraint(ctl.transform, child, mo=True)
+
+					self.detailObjects.append(child)
+					self.detailControl.append(ctl.transform)
+					self.detailGroup.append(ctl.group)
+		return
+
+	def createFKChain(self, objects):
+		fk = FKCHAIN(objects,
 		             name=self.fkName,
 		             scale=self.scale,
 		             axis=self.axis,
@@ -525,8 +597,8 @@ class BASE(object):
 		self.fkParent = fk.parent
 		return
 
-	def createIKChain(self):
-		ik = IKCHAIN(self.objects,
+	def createIKChain(self, objects):
+		ik = IKCHAIN(objects,
 		             name=self.ikName,
 		             scale=self.scale,
 		             axis=self.axis,
@@ -542,15 +614,15 @@ class BASE(object):
 		return
 
 	def createFKPoleVector(self):
-		fkPoleVector = cmds.group(n=self.createName('_FKPoleVector_null'), em=True)
+		fkPoleVector = cmds.group(n='_fk_PoleVector_null'.format(self.name), em=True)
 		ults.snap(self.ikControl[1], fkPoleVector, t=True, r=True)
 		cmds.parent(fkPoleVector, self.fkControl[1])
 		self.fkPoleVector = fkPoleVector
 		return
 
-	def createAttrControl(self):
+	def createAttrControl(self, obj):
 		ctl = ATTRCONTROL(name='{}_attr_ctl'.format(self.name),
-		                  child=self.end,
+		                  child=obj,
 		                  scale=self.scale,
 		                  side=self.side,
 		                  axis=self.axis,
@@ -558,23 +630,24 @@ class BASE(object):
 
 		self.attrControl = ctl.transform
 		self.attrGroup = ctl.group
-		cmds.parent(self.attrGroup, self.end)
+		cmds.parent(self.attrGroup, obj)
 		ults.lockAttributes(self.attrControl, hide=True)
 		return
 
-	def createFKIKChain(self):
-		self.createFKChain()
-		self.createIKChain()
+	def createFKIKChain(self, objects):
+		self.createFKChain(objects)
+		self.createIKChain(objects)
 		self.createFKPoleVector()
-		self.createAttrControl()
+		self.createAttrControl(objects[-1])
 		self.createFKIKConnections()
-		self.createParent()
+		self.createParent(name='grp', child=objects[0])
 		self.createSet(self.fkControl + self.ikControl + [self.attrControl])
 		return
 
-	def createParent(self):
-		self.parent = cmds.group(n='{}_grp'.format(self.name), em=True)
-		ults.snap(self.start, self.parent, t=True, r=True)
+	def createParent(self, name, child=None):
+		self.parent = cmds.group(n='{}_{}'.format(self.name, name), em=True)
+		if child:
+			ults.snap(child, self.parent, t=True, r=True)
 		return
 
 	def createFKIKConnections(self):
@@ -597,7 +670,20 @@ class BASE(object):
 		return
 
 	def createNetwork(self, typ):
-		node = cmds.createNode('network', n='{}_network'.format(self.name))
+		self.network = cmds.createNode('network', n='{}_network'.format(self.name))
+		self.addDefaultNetworkAttributes(typ)
+
+		if self.networkParent:
+			self.connectToNetworkRoot()
+
+		if self.networkRoot:
+			self.connectToNetwork(self.network, self.networkRoot, typ)
+			for attr in ['jointDisplay', 'controlDisplay']:
+				cmds.connectAttr('{}.{}'.format(self.networkRoot, attr), '{}.{}'.format(self.network, attr))
+		return
+
+	def addDefaultNetworkAttributes(self, typ):
+		node = self.network
 		cmds.addAttr(node, ln='type', dt='string')
 		ults.addSideAttr(node)
 		cmds.addAttr(node, ln='index', at='long')
@@ -605,18 +691,31 @@ class BASE(object):
 		cmds.setAttr('{}.index'.format(node), self.index)
 		ults.setEnumByString(node, 'side', self.side)
 		cmds.addAttr(node, ln='children', dt='string')
-		self.connectToRoot(node)
-		self.network = node
+		ults.addBoolAttr(node, 'jointDisplay')
+		ults.addBoolAttr(node, 'controlDisplay')
 		return
 
-	def createSet(self, objs):
-		self.set = ults.createSet(objs,
-		                          n='{}_control_set'.format(self.name))
+	def createSet(self, objects):
+		cmds.select(d=True)
+		objects = ults.listCheck(objects)
+		self.set = cmds.sets(objects, name='{}_control_set'.format(self.name))
+
+		if self.networkRoot:
+			rootSet = self.getConnected(self.networkRoot, 'set')
+
+			if cmds.objExists(str(rootSet)):
+				cmds.sets(self.set, add=rootSet)
+
 		return
 
-	def connectToNetwork(self, obj, name):
-		network = self.network
-		attrName = GlobalRigAttr
+	def hideObjectsAttributes(self, objects):
+		objects = ults.listCheck(objects)
+		for obj in objects:
+			ults.hideAttributes(obj)
+		return
+
+	def connectToNetwork(self, obj, network, name):
+		attrName = 'rigNetworkRoot'
 		objAttr = '{}.{}'.format(obj, attrName)
 		networkAttr = '{}.{}'.format(network, name)
 
@@ -637,21 +736,19 @@ class BASE(object):
 			cmds.addAttr(network, ln=name, at='message')
 
 		cmds.connectAttr(networkAttr, objAttr, force=True)
-		self.connectToRoot(obj)
 		return
 
-	def connectToRoot(self, obj):
-		attrName = GlobalRigRootAttr
-		if self.networkRoot:
-			if not cmds.attributeQuery(attrName, node=obj, ex=True):
-				cmds.addAttr(obj, ln=attrName, at='message')
-			if not network.getConnectedObj(obj, attrName):
-				cmds.connectAttr('{}.children'.format(self.networkRoot), '{}.{}'.format(obj, attrName), f=True)
+	def connectToNetworkRoot(self, obj, network):
+		attrName = 'rigNetworkRoot'
+		if not cmds.attributeQuery(attrName, node=obj, ex=True):
+			cmds.addAttr(obj, ln=attrName, at='message')
+		if not self.getConnected(obj, attrName):
+			cmds.connectAttr('{}.children'.format(network), '{}.{}'.format(obj, attrName), f=True)
 		return
 
-	def multiConnectToNetwork(self, objects, name):
-		attrName = GlobalRigAttr
-		network = self.network
+	def multiConnectToNetwork(self, objects, network, name):
+		objects = ults.listCheck(objects)
+		attrName = 'rigNetwork'
 
 		if not cmds.attributeQuery(name, node=network, ex=True):
 			cmds.addAttr(network, ln=name, dt='string', m=True)
@@ -662,65 +759,95 @@ class BASE(object):
 			else:
 				i = 0
 
-		objects = ults.listCheck(objects)
+		for obj in objects:
+			if self.networkRoot:
+				self.connectToNetworkRoot(obj, self.networkRoot)
 
-		for x in objects:
-			self.connectToRoot(x)
+			if not cmds.attributeQuery(attrName, node=obj, ex=True):
+				cmds.addAttr(obj, ln=attrName, at='message')
 
-			if not cmds.attributeQuery(attrName, node=x, ex=True):
-				cmds.addAttr(x, ln=attrName, at='message')
-
-			cmds.connectAttr('{}.{}[{}]'.format(network, name, i), '{}.{}'.format(x, attrName), f=True)
-			ults.addIndexValue(x, i)
+			cmds.connectAttr('{}.{}[{}]'.format(network, name, i), '{}.{}'.format(obj, attrName), f=True)
+			ults.addIndexValue(obj, i)
 			i += 1
-
 		return
+
+	def getConnected(self, obj, attr, indexValue=0):
+		attrName = '{}.{}'.format(obj, attr)
+		attrNameIndex = '{}.{}[{}]'.format(obj, attr, indexValue)
+		if cmds.attributeQuery(attr, node=obj, ex=True):
+			if cmds.attributeQuery(attr, node=obj, m=True):
+				query = cmds.listConnections(attrNameIndex)
+				return query[0] if query else None
+			elif cmds.connectionInfo(attrName, id=True):
+				query = cmds.listConnections(cmds.connectionInfo(attrName, ged=True))
+				return query[0] if query else None
+			else:
+				query = cmds.listConnections(attrName)
+				return query[0] if query else None
+		else:
+			return None
 
 	def createNetworkConnections(self):
 		# Parent
 		if self.parent:
-			self.connectToNetwork(self.parent, 'parentGroup')
+			self.connectToNetwork(self.parent, self.network, 'parentGroup')
 
 		# Attr Control
 		if self.attrControl:
-			self.connectToNetwork(self.attrControl, 'attrControl')
+			self.connectToNetwork(self.attrControl, self.network, 'attrControl')
 
 		# Set
 		if self.set:
-			self.connectToNetwork(self.set, 'set')
+			self.connectToNetwork(self.set, self.network, 'set')
 
 		# FK
 		if self.fkParent:
-			self.connectToNetwork(self.fkParent, 'fkParent')
+			self.connectToNetwork(self.fkParent, self.network, 'fkParent')
 
 		if self.fkPoleVector:
-			self.connectToNetwork(self.fkPoleVector, 'fkPoleVector')
+			self.connectToNetwork(self.fkPoleVector, self.network, 'fkPoleVector')
 
 		# IK
 		if self.ikParent:
-			self.connectToNetwork(self.fkParent, 'ikParent')
+			self.connectToNetwork(self.fkParent, self.network, 'ikParent')
 
 		if self.ikPoleVector:
-			self.connectToNetwork(self.fkPoleVector, 'ikPoleVector')
+			self.connectToNetwork(self.fkPoleVector, self.network, 'ikPoleVector')
 
 		if self.ikHandle:
-			self.connectToNetwork(self.fkPoleVector, 'ikHandle')
+			self.connectToNetwork(self.fkPoleVector, self.network, 'ikHandle')
 
 		# Skeleton
 		if self.objects:
-			self.multiConnectToNetwork(self.objects, 'skeleton')
+			self.multiConnectToNetwork(self.objects, self.network, 'skeleton')
+			con = cmds.createNode('condition', name='{}_jointDisplay_condition'.format(self.network))
+			cmds.setAttr('{}.colorIfTrueR'.format(con), 2)
+			cmds.setAttr('{}.colorIfFalseR'.format(con), 0)
+			cmds.connectAttr('{}.jointDisplay'.format(self.network), '{}.firstTerm'.format(con))
+			for obj in self.objects:
+				cmds.connectAttr('{}.outColorR'.format(con), '{}.drawStyle'.format(obj))
+
+			if self.detailObjects:
+				self.multiConnectToNetwork(self.detailObjects, self.network, 'skeletonDetail')
+				for detail in self.detailObjects:
+					cmds.connectAttr('{}.outColorR'.format(con), '{}.drawStyle'.format(detail))
+
+		# Detail Controls
+		if self.detailControl:
+			attrName = 'detailControlDisplay'
+			self.multiConnectToNetwork(self.detailControl, self.network, 'detailControl')
+			ults.addBoolAttr(self.network, attrName)
+
+			for detail in self.detailGroup:
+				cmds.connectAttr('{}.{}'.format(self.network, attrName), '{}.v'.format(detail))
 
 		# FK Control
 		if self.fkControl:
-			self.multiConnectToNetwork(self.fkControl, 'fkControl')
+			self.multiConnectToNetwork(self.fkControl, self.network, 'fkControl')
 
 		# IK Control
 		if self.ikControl:
-			self.multiConnectToNetwork(self.ikControl, 'ikControl')
-
-		return
-
-	def cleanUp(self):
+			self.multiConnectToNetwork(self.ikControl, self.network, 'ikControl')
 		return
 
 
@@ -741,49 +868,45 @@ class FKIK(BASE):
 	             name='fkik',
 	             ):
 		BASE.__init__(self,
-		              start=start,
-		              mid=mid,
-		              end=end,
+		              objects=[start, mid, end],
 		              name=name,
 		              )
 
-		self.createFKIKChain()
-		self.createNetwork('fkik')
+		self.createFKIKChain(self.objects)
+		self.createNetwork(typ='fkik')
 		self.createNetworkConnections()
 
 
 class ROOT(BASE):
 	def __init__(self,
-	             start,
-	             name='charater',
+	             root=None,
+	             name='character',
+	             scale=1,
 	             ):
 		BASE.__init__(self,
-		              start=start,
 		              name=name,
 		              side='Center',
+		              scale=scale,
 		              )
-		self.objects = [start]
-		self.determineScale()
+		self.root = root
+
+		if self.root:
+			self.objects = [root]
+			self.getScale()
+
 		self.createControls()
-		self.setupGlobalScale()
-		self.createParent()
+		self.createRootOffset()
 		self.createSet(self.fkControl)
-		self.createNetwork(typ='character')
+		self.createNetwork(typ='root')
+		self.networkRoot = self.network
+		self.networkParent = self.network
 		self.createNetworkConnections()
+		self.setupDisplayAttr()
+		self.setupGlobalScale()
+		self.hideGroupNodes([self.network] + self.fkGroup)
 
-	def determineScale(self):
-		posList = []
-		children = cmds.listRelatives(self.start, ad=True)
-
-		if children:
-			for child in children:
-				if cmds.objectType(child, isType='joint'):
-					pos = cmds.xform(child, q=True, ws=True, rp=True)
-					posList.append(pos[1])
-		if posList:
-			self.scale = int(max(posList) / 2)
-
-
+	def getScale(self):
+		self.scale = int(skeleton.determineHeight(self.root) / 2)
 		return
 
 	def createControls(self):
@@ -791,26 +914,50 @@ class ROOT(BASE):
 		ctl = CONTROL(name='{}_ctl'.format(self.name),
 		              typ='root',
 		              scale=self.scale + 2,
-		              axis=[0,0,0],
+		              axis=[0, 0, 0],
 		              )
 
 		offset = CONTROL(name='{}_offset_ctl'.format(self.name),
-		              typ='center',
-		              scale=self.scale,
-		              axis=[0,0,0],
-		              )
-
-		rootOffset = CONTROL(name='{}_root_offset_ctl'.format(self.name),
-		                 typ='circle',
-		                 scale=self.scale - .8,
+		                 typ='center',
+		                 scale=self.scale,
 		                 axis=[0, 0, 0],
 		                 )
 
-		ults.presetWireColor([ctl.transform, offset.transform, rootOffset.transform], typ=ults.component.center)
-		cmds.parent(rootOffset.group, offset.transform)
+		ults.presetWireColor([ctl.transform, offset.transform, ], typ=ults.component.center)
 		cmds.parent(offset.group, ctl.transform)
-		self.fkControl = [ctl.transform, offset.transform, rootOffset.transform]
-		self.fkGroup = [ctl.group, offset.group, rootOffset.group]
+		self.fkControl = [ctl.transform, offset.transform]
+		self.fkGroup = [ctl.group, offset.group]
+
+		if self.root:
+			cmds.parent(self.root, offset.transform)
+		return
+
+	def createRootOffset(self):
+		attrName = 'rootOffset'
+		parent = self.fkControl[0]
+
+		rootOffset = CONTROL(name='{}_root_offset_ctl'.format(self.name),
+		                     typ='center',
+		                     scale=self.scale - 0.8,
+		                     axis=[0, 0, 0],
+		                     )
+
+		ults.presetWireColor([rootOffset.transform], typ=ults.component.center)
+		cmds.parent(rootOffset.group, self.fkControl[-1])
+		ults.addBoolAttr(obj=parent, name=attrName)
+		cmds.connectAttr('{}.{}'.format(parent, attrName), '{}.v'.format(rootOffset.group))
+
+		if self.root:
+			cmds.parentConstraint(rootOffset.transform, self.root, mo=True)
+
+		self.fkControl.append(rootOffset.transform)
+		self.fkGroup.append(rootOffset.group)
+		return
+
+	def setupDisplayAttr(self):
+		for attr in ['jointDisplay', 'controlDisplay']:
+			ults.addBoolAttr(self.fkControl[0], attr)
+			cmds.connectAttr('{}.{}'.format(self.fkControl[0], attr), '{}.{}'.format(self.network, attr))
 		return
 
 	def setupGlobalScale(self):
@@ -822,124 +969,137 @@ class ROOT(BASE):
 
 		for axis in ['x', 'y', 'z']:
 			cmds.connectAttr('{}.{}'.format(globalNode, attrName), '{}.s{}'.format(globalNode, axis))
-			cmds.connectAttr('{}.{}'.format(globalNode, attrName), '{}.s{}'.format(self.objects[0], axis))
 			cmds.setAttr('{}.s{}'.format(globalNode, axis), k=False, channelBox=False, lock=True)
 
-	def createParent(self):
-		self.parent = cmds.group(self.fkGroup[0], n='{}_global'.format(self.name))
+	def hideGroupNodes(self, objects):
+		self.hideObjectsAttributes(objects)
 		return
 
 
-
 class COG(BASE):
+	def __init__(self,
+	             cog,
+	             hip=None,
+	             networkRoot=None,
+	             name='cog',
+	             scale=1,
+	             ):
+		BASE.__init__(self,
+		              networkRoot=networkRoot,
+		              name=name,
+		              side='Center',
+		              scale=scale,
+		              )
 
-	def __init__(self, selected=None, name='cog', scale=1, *args):
-		super(COG, self).__init__(selected=selected, name=name, scale=scale, typ=ults.component.cog)
+		self.cog = cog
+		self.hip = hip
+		self.objects = [cog]
 
-		if self.selected:
-			self.createControls()
-			self.updateNetwork()
+		self.getScale()
+		self.createControls()
+		self.createHipControl()
+		self.hideObjectsAttributes(self.fkGroup)
 
-	def determineControlScale(self):
-		self.scale = cmds.xform(self.selected[0], q=True, ws=True, rp=True)[1] / 4 + 1
+		if self.networkRoot:
+			self.createSet(self.fkControl)
+			self.createNetwork(typ='cog')
+			self.createNetworkConnections()
+			self.setupHierarchy()
 
-	def createControls(self):
-		self.determineControlScale()
-		self.createBindJoints()
-
-		ctl = control(self.bindJoint, n='cog_ctl', typ='center', r=False, parent=False, scale=self.scale, nest=True)
-		presetWireColor(ctl, typ=ults.component.center)
-
-		self.fkControl = ctl
-		self.control.append(ctl[0])
-
-	def updateNetwork(self):
-		self.createSet()
-
-		if self.rootQuery.network:
-			connectToNetwork(self.network, self.rootQuery.network, ults.component.cog)
-			rootCtl = getConnectedObj(self.rootQuery.network, 'control[0]')
-			cmds.parent(self.fkControl[1], rootCtl)
-
-		multiConnectToNetwork(self.control, self.network, 'control')
-		multiConnectToNetwork(self.bindJoint, self.network, 'bindJoint')
-
-
-class HIP(BASE):
-
-	def __init__(self, selected=None, name='hip', scale=1, *args):
-		super(HIP, self).__init__(selected=selected, name=name, scale=scale, typ=ults.component.hip)
-
-		if self.selected:
-			self.createControls()
-			self.updateNetwork()
-
-	def determineControlScale(self):
-		self.scale = cmds.xform(self.selected[0], q=True, ws=True, rp=True)[1] / 4
+	def getScale(self):
+		self.scale = skeleton.determineHeight(self.cog) / 4 + .25
+		return
 
 	def createControls(self):
-		self.determineControlScale()
-		self.createBindJoints()
+		ctl = CONTROL(name='{}_ctl'.format(self.name),
+		              typ='center',
+		              scale=self.scale,
+		              axis=[0, 0, 0],
+		              child=self.cog,
+		              )
 
-		ctl = control(self.bindJoint, n='hip_ctl', typ='circle', r=False, parent=False, scale=self.scale, nest=True)
-		presetWireColor(ctl, typ=ults.component.center)
+		ults.presetWireColor(ctl.transform, typ=ults.component.center)
+		cmds.parentConstraint(ctl.transform, self.cog)
+		self.fkControl = [ctl.transform]
+		self.fkGroup = [ctl.group]
+		return
 
-		self.fkControl = ctl
-		self.control.append(ctl[0])
+	def createHipControl(self):
+		if self.hip:
+			ctl = CONTROL(name='hip_ctl',
+			              typ='circle',
+			              scale=self.scale - .25,
+			              axis=[0, 0, 0],
+			              child=self.hip,
+			              )
+			ults.presetWireColor(ctl.transform, typ=ults.component.center)
+			cmds.parentConstraint(ctl.transform, self.hip)
+			cmds.parent(ctl.group, self.fkControl[-1])
+			self.objects.append(self.hip)
+			self.fkControl.append(ctl.transform)
+			self.fkGroup.append(ctl.group)
+		return
 
-	def updateNetwork(self):
-		self.createSet()
+	def setupHierarchy(self):
+		parent = self.getConnected(self.networkRoot, 'fkControl', 1)
+		if parent:
+			cmds.parent(self.fkGroup[0], parent)
 
-		if self.rootQuery.network:
-			connectToNetwork(self.network, self.rootQuery.network, ults.component.hip)
-
-		if self.rootQuery.cog:
-			cog = getConnectedObj(self.rootQuery.cog, 'control[0]')
-
-			if cog:
-				cmds.parent(self.fkControl[1], cog)
-
-		multiConnectToNetwork(self.control, self.network, 'control')
-		multiConnectToNetwork(self.bindJoint, self.network, 'bindJoint')
+		rootOffset = self.getConnected(self.networkRoot, 'fkControl', 2)
+		if rootOffset:
+			grp = ults.createGroup(rootOffset, '{}_pos_grp'.format(rootOffset))
+			cmds.pointConstraint(self.fkControl[0], grp, skip='y', mo=True)
 
 
 class SPINE(BASE):
-	def __init__(self, selected=None, name='spine', scale=1, *args):
-		super(SPINE, self).__init__(selected=selected, name=name, scale=scale, typ=ults.component.spine)
+	def __init__(self,
+	             objects,
+	             networkRoot=None,
+	             name='spine',
+	             scale=1,
+	             ):
+		BASE.__init__(self,
+		              objects,
+		              networkRoot=networkRoot,
+		              name=name,
+		              side='Center',
+		              scale=scale,
+		              fkName='{}_fk'.format(name),
+		              )
 
-		if self.selected:
-			self.createControls()
-			self.updateNetwork()
+		self.getScale()
+		self.createFKChain(self.objects)
+		self.constrainSpine()
+		self.createParent(name='rig_grp'.format(self.name), child=self.objects[0])
+		self.setupHierarchy()
+		self.createDetailChain(self.objects)
 
-	def determineControlScale(self):
-		bound = estimateBoundsByJoint(self.selected[0])
-		if bound:
-			self.scale = bound.maxX[0]
+		if self.networkRoot:
+			self.createSet(self.fkControl)
+			self.createNetwork(typ=self.name)
+			self.createNetworkConnections()
 
-	def createControls(self):
-		self.determineControlScale()
-		self.createBindJoints()
-		self.createFK(self.bindJoint)
+	def getScale(self):
+		if len(self.objects) > 1:
+			start = self.objects[0]
+			end = self.objects[1]
+			distance = ults.getDistance(start, end)
+			self.scale = distance
+		return
 
-		i = 0
-		for jnt in self.fkJoint:
-			cmds.parentConstraint(jnt, self.bindJoint[i], mo=True)
-			i += 1
+	def constrainSpine(self):
+		for obj in self.objects:
+			i = self.objects.index(obj)
+			cmds.parentConstraint(self.fkControl[i], obj, mo=True)
 
-	def updateNetwork(self):
-		self.createSet()
-		self.createFKIKNetwork()
+	def setupHierarchy(self):
+		cmds.parent(self.fkParent, self.parent)
 
-		if self.rootQuery.network:
-			connectToNetwork(self.network, self.rootQuery.network, ults.component.spine)
-
-		if self.rootQuery.cog:
-			cog = getConnectedObj(self.rootQuery.cog, 'control[0]')
-			cogBind = getConnectedObj(self.rootQuery.cog, 'bindJoint[0]')
-
-			if cog:
-				cmds.parent(self.fkControl[0][1], cog)
-				cmds.parent(self.bindJoint[0], cogBind)
+		parent = cmds.listRelatives(self.objects[0], parent=True)
+		parent = parent[0] if parent else None
+		if parent:
+			cmds.parent(self.parent, parent)
+		return
 
 
 class HEAD(BASE):
@@ -1192,11 +1352,11 @@ class HAND(BASE):
 		super(HAND, self).__init__(selected=selected, name=name, scale=scale, index=0, typ=ults.component.hand)
 
 		self.handDict = {
-			ults.component.thumb: [],
-			ults.component.index: [],
+			ults.component.thumb : [],
+			ults.component.index : [],
 			ults.component.middle: [],
-			ults.component.ring: [],
-			ults.component.pinky: [],
+			ults.component.ring  : [],
+			ults.component.pinky : [],
 		}
 
 		if self.selected:
@@ -1458,8 +1618,8 @@ class createIKFootPivot():
 		loc = cmds.spaceLocator()
 		snap(end, loc, t=True, r=False)
 		cmds.delete(
-			cmds.aimConstraint(loc, masterGrp, aimVector=[0, 0, 1], upVector=[0, 1, 0], worldUpType='vector',
-			                   worldUpVector=[0, 1, 0], skip=['x', 'z']))
+				cmds.aimConstraint(loc, masterGrp, aimVector=[0, 0, 1], upVector=[0, 1, 0], worldUpType='vector',
+				                   worldUpVector=[0, 1, 0], skip=['x', 'z']))
 		cmds.delete(loc)
 
 		bounds = estimateBoundsByJoint(start)
@@ -1510,12 +1670,12 @@ class createIKFootPivot():
 		addEmptyAttr(ctl, n='footPivot')
 
 		attrDict = {
-			'roll': 0,
+			'roll'     : 0,
 			'heelAngle': 45,
 			'ballAngle': 45,
-			'toeAngle': 70,
-			'toeRaise': 0,
-			'bank': 0,
+			'toeAngle' : 70,
+			'toeRaise' : 0,
+			'bank'     : 0,
 		}
 
 		for attr in attrDict:

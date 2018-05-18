@@ -268,6 +268,22 @@ def getJointIndex(joint):
 	return indexValue
 
 
+def determineHeight(root):
+	scale = 1
+	posList = []
+	children = cmds.listRelatives(root, ad=True)
+
+	if children:
+		for child in children:
+			if cmds.objectType(child, isType='joint'):
+				pos = cmds.xform(child, q=True, ws=True, rp=True)
+				posList.append(pos[1])
+	if posList:
+		scale = int(max(posList))
+
+	return scale
+
+
 ########################################################################################################################
 #
 #
@@ -357,6 +373,18 @@ def getJointRootByLabel(joint, label, child=None):
 			return joint
 		else:
 			return child
+
+
+def getBindJoint(joint):
+	bindJoints = []
+	children = cmds.listRelatives(joint, children=True)
+	if children:
+		for child in children:
+			if cmds.objectType(child) == 'joint':
+				label = getJointLabel(child)[1]
+				if label == 'Bind':
+					bindJoints.append(child)
+	return bindJoints if bindJoints else None
 
 
 class Query:

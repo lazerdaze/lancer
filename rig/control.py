@@ -7,6 +7,7 @@
 
 # Lancer Modules
 import ults
+
 reload(ults)
 
 # Maya Modules
@@ -26,7 +27,7 @@ class component(object):
 	center = 'center'
 
 
-def wire(typ=None, axis=[1,0,0]):
+def wire(typ=None, axis=[1, 0, 0]):
 	curve = None
 
 	if typ == component.circle:
@@ -372,7 +373,7 @@ def wire(typ=None, axis=[1,0,0]):
 	return curve
 
 
-def create(name='control0', shape='circle', axis=[1,0,0], scale=1):
+def create(name='control0', shape='circle', axis=[1, 0, 0], scale=1):
 	# Joint Node
 	node = cmds.createNode('joint', name=name)
 	cmds.setAttr('{}.segmentScaleCompensate'.format(node), 0)
@@ -395,8 +396,6 @@ def create(name='control0', shape='circle', axis=[1,0,0], scale=1):
 	# Parent
 	cmds.parent(curveShape, node, r=True, s=True)
 	cmds.delete(curve)
-
-
 
 	return [node, curveShape]
 

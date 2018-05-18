@@ -1147,7 +1147,6 @@ def locOnCurve(curve, intLoc=1, n='locator', upObject='', start=False, end=False
 	return locList
 
 
-
 class createPoleVector:
 	def __init__(self, ik, start, end):
 		poleVector = cmds.poleVectorConstraint(start, ik)
@@ -1167,7 +1166,6 @@ class createPoleVector:
 		self.poleVector = poleVector
 		self.curve = curve
 		self.shape = shape
-
 
 
 def makeAimVector(par, child, *args):
@@ -1398,6 +1396,14 @@ def createDistanceNode(start, end, n='distanceBetween1', *args):
 def addEmptyAttr(obj, n='customAttr', *args):
 	cmds.addAttr(obj, ln=n, at='enum', en='-:', k=True)
 	cmds.setAttr('{}.{}'.format(obj, n), e=True, channelBox=True)
+	return
+
+
+def addBoolAttr(obj, name):
+	attrName = '{}.{}'.format(obj, name)
+	cmds.addAttr(obj, ln=name, at='enum', en='off:on')
+	cmds.setAttr(attrName, e=True, cb=True)
+	return attrName
 
 
 def toggleJointLabel(*args):
@@ -1449,7 +1455,7 @@ def setEnumByString(obj, attr, value):
 
 def addSideAttr(obj):
 	cmds.addAttr(obj, ln='side', at='enum', en='Center:Left:Right:None:', keyable=True)
-	cmds.setAttr('{}.side'.format(obj), 3, keyable=True)
+	cmds.setAttr('{}.side'.format(obj), 3, keyable=False, cb=False)
 	return
 
 
