@@ -1,0 +1,36 @@
+//Maya Preference 2016 (Release 1)
+//
+//
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import maya.cmds as cmds\n\nmoveQuery = cmds.manipMoveContext('Move', q=True, mode=True) + 2\n    \nif moveQuery > 2:\n    moveQuery = 0\n        \nif moveQuery == 0:\n    moveName = 'object'\n            \nelif moveQuery == 2:\n    moveName = 'world'\n        \ncmds.manipMoveContext('Move', edit=True, mode=moveQuery)\ncmds.headsUpMessage('Move: ' + moveName)")
+	hotMove;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import maya.cmds as cmds\n\nrotateQuery = cmds.manipRotateContext('Rotate', q=True, mode=True) + 1\n        \nif rotateQuery > 1:\n    rotateQuery = 0\n        \nif rotateQuery == 0:\n    rotateName = 'object'\n            \nelif rotateQuery == 1:\n    rotateName = 'world'\n    \n        \ncmds.manipRotateContext('Rotate', edit=True, mode=rotateQuery)\ncmds.headsUpMessage('Rotate: ' + rotateName)    ")
+	hotRotate;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("performSetKeyframeArgList 1 {\"0\", \"animationList\"};\nkeyframe -time `currentTime -q` -tds 1;")
+	keyFrameSpecial;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("def zeroOut():\n    selected = cmds.ls(sl=True)\n    \n    if selected:\n        for obj in selected:\n            for axis in ['x', 'y', 'z']:\n                for attr in ['t', 'r',]:\n                    try:\n                        cmds.setAttr('{}.{}{}'.format(obj, attr, axis), 0)\n                    except:\n                        pass     \nzeroOut()")
+	zeroAttr;
+
