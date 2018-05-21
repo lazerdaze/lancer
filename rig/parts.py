@@ -1059,7 +1059,7 @@ class SPINE(BASE):
 	             scale=1,
 	             ):
 		BASE.__init__(self,
-		              objects,
+		              objects=objects,
 		              networkRoot=networkRoot,
 		              name=name,
 		              side='Center',
@@ -1102,7 +1102,79 @@ class SPINE(BASE):
 		return
 
 
+class NECK(SPINE):
+	def __init__(self,
+	             objects,
+	             networkRoot=None,
+	             name='neck',
+	             scale=1,
+	             ):
+		SPINE.__init__(self,
+		               objects=objects,
+		               networkRoot=networkRoot,
+		               name=name,
+		               scale=scale,
+		               )
+
+	def getScale(self):
+		distanceList = []
+		children = cmds.listRelatives(self.objects[0], children=True)
+		if children:
+			for child in children:
+				start = self.objects[0]
+				end = child
+				distanceList.append(ults.getDistance(start, end))
+
+		self.scale = max(distanceList) + 0.25
+		return
+
+
 class HEAD(BASE):
+	def __init__(self,
+	             head,
+	             networkRoot=None,
+	             name='head',
+	             scale=1,
+	             ):
+		BASE.__init__(self,
+		              objects=ults.listCheck(head),
+		              networkRoot=networkRoot,
+		              name=name,
+		              side='Center',
+		              scale=scale,
+		              fkName='{}_fk'.format(name),
+		              ikName='{}_ik'.format(name),
+		              )
+
+		self.head = head
+		self.getScale()
+		self.createFKChain(self.objects)
+
+	def getScale(self):
+		return
+
+	def createIK(self, objects):
+
+		ctl = CONTROL(name='{}_ctl'.format(self.name),
+		              typ='circle',
+		              scale=self.scale,
+		              axis=[0, 0, 0],
+		              )
+
+		distance = cmds.xform(self.head, q=True, ws=True, rp=True)[1]
+		ults.snap(self.head, ctl.transform, t=True)
+		cmds.xform(ctl.transform, ws=True, t=[0, 0, distance], r=True)
+
+		#ults.makeAimVector(ikCtl[0], ikJnt)
+
+		ults.presetWireColor(ctl.transform, typ=ults.component.ik)
+
+
+		return
+
+
+
+class HEAD2(BASE):
 	def __init__(self, selected=None, name='head', scale=1, *args):
 		super(HEAD, self).__init__(selected=selected, name=name, scale=scale, typ=ults.component.head)
 
