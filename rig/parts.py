@@ -183,7 +183,7 @@ class FKCONTROL(CONTROL):
 	             ):
 		CONTROL.__init__(self,
 		                 name=name,
-		                 typ=control.component.circle,
+		                 typ=control.component.circleRotate,
 		                 scale=scale,
 		                 child=child,
 		                 parent=parent,
@@ -651,7 +651,7 @@ class BASE(object):
 		return
 
 	def createFKIKConnections(self):
-		attrName = 'fkik'
+		attrName = component.fkik
 		fkik = ults.createFKIK(obj=self.objects,
 		                       fk=self.fkControl,
 		                       ik=self.ikJoint,
@@ -786,6 +786,19 @@ class BASE(object):
 				return query[0] if query else None
 		else:
 			return None
+
+	def createLocalWorld(self, obj, local):
+		attrName = 'localWorld'
+		cogNetwork = self.getConnected(self.networkRoot, 'cog')
+		cog = self.getConnected(cogNetwork, 'fkControl', 0) if cogNetwork else None
+
+		if cog:
+			ults.createLocalWorld(obj=obj,
+			                      local=local,
+			                      world=cog,
+			                      n=attrName,
+			                      )
+		return
 
 	def createNetworkConnections(self):
 		# Parent
@@ -1027,7 +1040,7 @@ class COG(BASE):
 	def createHipControl(self):
 		if self.hip:
 			ctl = CONTROL(name='hip_ctl',
-			              typ='circle',
+			              typ=control.component.circleRotate,
 			              scale=self.scale - .25,
 			              axis=[0, 0, 0],
 			              child=self.hip,
@@ -1116,6 +1129,11 @@ class NECK(SPINE):
 		               scale=scale,
 		               )
 
+		if self.networkRoot:
+			self.createLocalWorld(obj=self.fkControl[0],
+			                      local=self.fkGroup[0],
+			                      )
+
 	def getScale(self):
 		distanceList = []
 		children = cmds.listRelatives(self.objects[0], children=True)
@@ -1127,6 +1145,8 @@ class NECK(SPINE):
 
 		self.scale = max(distanceList) + 0.25
 		return
+
+
 
 
 class HEAD(BASE):
@@ -1148,30 +1168,85 @@ class HEAD(BASE):
 
 		self.head = head
 		self.getScale()
-		self.createFKChain(self.objects)
+		self.createControls()
+		self.createIK()
+		self.setupHierarchy()
+		self.createFKIK()
+		self.createDetailChain(self.objects)
+
+		if self.networkRoot:
+			self.createLocalWorld(obj=self.fkControl[0],
+			                      local=self.fkGroup[0],
+			                      )
+			self.createSet([self.fkControl[0], self.ikControl[1]])
+			self.createNetwork(typ=self.name)
+			self.createNetworkConnections()
+			self.updateNetwork()
 
 	def getScale(self):
+		height = cmds.xform(self.head, q=True, ws=True, rp=True)[1]
+		self.scale = height / 6
 		return
 
-	def createIK(self, objects):
-
+	def createControls(self):
 		ctl = CONTROL(name='{}_ctl'.format(self.name),
-		              typ='circle',
+		              typ=control.component.lollipop,
 		              scale=self.scale,
+		              axis=[1, 0, -1],
+		              )
+		ults.snap(self.head, ctl.group, t=True, r=True)
+		ults.presetWireColor(ctl.transform, typ=ults.component.center)
+		ults.lockScale(ctl.transform)
+
+		self.fkControl = [ctl.transform]
+		self.fkGroup = [ctl.group]
+		return
+
+	def createIK(self):
+		ctl = CONTROL(name='{}_ik_ctl'.format(self.name),
+		              typ=control.component.sphere,
+		              scale=self.scale / 8,
 		              axis=[0, 0, 0],
 		              )
 
+		ults.snap(self.head, ctl.group, t=True)
 		distance = cmds.xform(self.head, q=True, ws=True, rp=True)[1]
-		ults.snap(self.head, ctl.transform, t=True)
-		cmds.xform(ctl.transform, ws=True, t=[0, 0, distance], r=True)
+		cmds.xform(ctl.group, ws=True, t=[0, 0, distance], r=True)
 
-		#ults.makeAimVector(ikCtl[0], ikJnt)
-
+		ikNull = cmds.group(name='{}_ik_aim'.format(self.name), em=True)
+		ikGrp = cmds.group(ikNull, name='{}_grp'.format(ikNull))
+		ults.snap(self.head, ikGrp, t=True, r=True)
+		ults.createAimVector(ctl.transform, ikNull, name='{}_aimVector'.format(self.name))
 		ults.presetWireColor(ctl.transform, typ=ults.component.ik)
 
-
+		self.ikControl = [ikNull, ctl.transform]
+		self.ikGroup = [ikGrp, ctl.group]
 		return
 
+	def setupHierarchy(self):
+		parent = cmds.listRelatives(self.head, parent=True)
+		if parent:
+			parent = parent[0]
+			cmds.parent(self.fkGroup[0], self.ikGroup[0], parent)
+		return
+
+	def createFKIK(self):
+		attrName = 'fkik'
+		ults.createFKIK(obj=self.head,
+		                fk=self.fkControl[0],
+		                ctl=self.fkControl[0],
+		                ik=self.ikControl[0],
+		                n=attrName,
+		                )
+
+		cmds.connectAttr('{}.{}'.format(self.fkControl[0], attrName), '{}.v'.format(self.ikGroup[1]))
+		return
+
+	def updateNetwork(self):
+		attrName = 'detailControlDisplay'
+		ults.addBoolAttr(self.fkControl[0], attrName)
+		cmds.connectAttr('{}.{}'.format(self.fkControl[0], attrName), '{}.{}'.format(self.network, attrName))
+		return
 
 
 class HEAD2(BASE):

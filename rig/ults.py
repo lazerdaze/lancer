@@ -666,6 +666,17 @@ def control(child='', n='control', typ='circle', axis=[0, 0, 0], t=True, r=True,
 	return [ctl, grp]
 
 
+def createName(*args):
+	var = ''
+	for arg in args:
+		i = args.index(arg)
+		if i == 0:
+			var = str(arg)
+		else:
+			var = '{}_{}'.format(var, arg)
+	return var
+
+
 def snap(par, child, t=False, r=False):
 	parPosition = cmds.xform(par, q=True, ws=True, rp=True)
 	parRotation = cmds.xform(par, q=True, ws=True, ro=True)
@@ -710,6 +721,12 @@ def lockAttributes(obj, hide=False):
 	return
 
 
+def lockScale(obj, hide=False):
+	for axis in ['x', 'y', 'z']:
+		cmds.setAttr('{}.s{}'.format(obj, axis), lock=True, keyable=hide, channelBox=hide)
+	return
+
+
 def createLocalWorld(obj, local, world, n='localWorld', t=False, r=True):
 	name = '{}_{}'.format(obj, n)
 
@@ -718,7 +735,7 @@ def createLocalWorld(obj, local, world, n='localWorld', t=False, r=True):
 
 	null = createGroup(obj, n=name)
 
-	cmds.addAttr(obj, ln=n, min=0, max=1, dv=0, k=True)
+	cmds.addAttr(obj, ln=n, min=0, max=1, dv=1, k=True)
 
 	if t and r:
 		pc = cmds.parentConstraint(local, world, null, mo=True)[0]
@@ -734,7 +751,7 @@ def createLocalWorld(obj, local, world, n='localWorld', t=False, r=True):
 
 	cmds.connectAttr('{}.{}'.format(obj, n), '{}.{}'.format(pc, pcAttr[-1]))
 
-	reverse = cmds.createNode('reverse')
+	reverse = cmds.createNode('reverse', name='{}_re0'.format(name))
 	cmds.connectAttr('{}.{}'.format(obj, n), '{}.inputX'.format(reverse))
 	cmds.connectAttr('{}.outputX'.format(reverse), '{}.{}'.format(pc, pcAttr[0]))
 
@@ -1147,6 +1164,39 @@ def locOnCurve(curve, intLoc=1, n='locator', upObject='', start=False, end=False
 	return locList
 
 
+def getCurveCVs(curve):
+	return cmds.ls('{}.cv[:]'.format(curve), fl=True)
+
+
+def getCurvePoints(curve):
+	pointList = []
+	curveCVs = getCurveCVs(curve)
+	for cv in curveCVs:
+		pointList.append(cmds.xform(cv, q=True, ws=True, t=True))
+	return pointList
+
+
+def createAimVectorHelper(start, end, name='poleVector_helper'):
+	# Create Curve
+	curve = cmds.curve(n=name, d=1, p=[[0, 0, 0], [0, 0, 0]])
+	curveShape = cmds.rename(cmds.listRelatives(curve, shapes=True)[0],
+	                         '{}Shape'.format(name))
+	cmds.parent(curveShape, end, r=True, s=True)
+	cmds.delete(curve)
+
+	# Create Nodes
+	mult = cmds.createNode('multMatrix', name='{}_multMatrix0'.format(name))
+	dec = cmds.createNode('decomposeMatrix', name='{}_decomposeMatrix0'.format(name))
+
+	# Create Connections
+	cmds.connectAttr('{}.worldMatrix[0]'.format(start), '{}.matrixIn[0]'.format(mult))
+	cmds.connectAttr('{}.worldInverseMatrix[0]'.format(end), '{}.matrixIn[1]'.format(mult))
+
+	cmds.connectAttr('{}.matrixSum'.format(mult), '{}.inputMatrix'.format(dec))
+	cmds.connectAttr('{}.outputTranslate'.format(dec), '{}.controlPoints[1]'.format(curveShape))
+	return curveShape
+
+
 class createPoleVector:
 	def __init__(self, ik, start, end):
 		poleVector = cmds.poleVectorConstraint(start, ik)
@@ -1168,27 +1218,21 @@ class createPoleVector:
 		self.shape = shape
 
 
-def makeAimVector(par, child, *args):
-	aim = cmds.aimConstraint(par, child, mo=True, aimVector=[1, 0, 0], upVector=[0, 1, 0], worldUpType='objectrotation',
-	                         worldUpVector=[0, 1, 0], worldUpObject=par)
-	curve = makeNurbsCurve([par, child], n='{}_curve'.format(par))
-	curveCVs = cmds.ls('{0}.cv[:]'.format(curve), fl=True)
-	clusters = clusterCurve(curve, n='{}Cluster'.format(curve))
+def createAimVector(par, child, name='aimVector', aimVector=[0,0,1]):
+	aim = cmds.aimConstraint(par,
+	                         child,
+	                         name='{}_constraint0'.format(name),
+	                         mo=True,
+	                         aimVector=aimVector,
+	                         upVector=[0, 1, 0],
+	                         worldUpType='objectrotation',
+	                         worldUpVector=[0, 1, 0],
+	                         worldUpObject=par,
+	                         )
 
-	i = 0
-	for x in [par, child]:
-		cmds.parent(clusters[i], x)
-		i += 1
+	shape = createAimVectorHelper(child, par, name='{}_helper'.format(name))
 
-	# CleanUp
-	cmds.setAttr('{}.template'.format(cmds.listRelatives(curve, shapes=True)[0]), 1)
-
-	grp = cmds.group(curve, n='{}_grp'.format(curve))
-	cmds.parent(grp, par)
-	cmds.setAttr('{}.inheritsTransform'.format(grp), 0)
-	zeroAttrs(grp)
-
-	return [curve, grp]
+	return [aim, shape]
 
 
 def zeroAttrs(obj, *args):
@@ -1297,9 +1341,9 @@ def createFKIK(obj, fk, ik, ctl, n='FKIK'):
 		i = obj.index(x)
 
 		if len(obj) == 1:
-			pc = cmds.parentConstraint(fk, ik, x, n='{}_{}_pc1'.format(x, n), mo=True)[0]
+			pc = cmds.parentConstraint(fk, ik, x, n='{}_{}_pc0'.format(x, n), mo=True)[0]
 		else:
-			pc = cmds.parentConstraint(fk[i], ik[i], x, n='{}_{}_pc1'.format(x, n), mo=True)[0]
+			pc = cmds.parentConstraint(fk[i], ik[i], x, n='{}_{}_pc0'.format(x, n), mo=True)[0]
 		pcAttr = cmds.parentConstraint(pc, q=True, wal=True)
 
 		cmds.connectAttr('{}.{}'.format(ctl, n), '{}.{}'.format(pc, pcAttr[-1]), f=True)
@@ -1644,38 +1688,38 @@ def overrideColor(selected=[], color=[], reset=False, index=False, *args):
 
 	if selected:
 		for obj in selected:
-			shape = cmds.listRelatives(obj, shapes=True, f=True)
+			shapes = cmds.listRelatives(obj, shapes=True, f=True)
 
-			if shape:
-				shape = shape[0]
+			if shapes:
+				for shape in shapes:
 
-				if reset:
-					for attr in attrList:
-						cmds.setAttr('{0}.{1}'.format(shape, attr), 0)
-
-				else:
-
-					cmds.setAttr('{0}.useObjectColor'.format(shape), 0)
-					cmds.setAttr('{0}.overrideEnabled'.format(shape), 1)
-
-					if index:
-						if color:
-
-							cmds.setAttr('{0}.overrideRGBColors'.format(shape), 0)
-							cmds.setAttr('{0}.overrideColor'.format(shape), color)
-
-						else:
-							for attr in attrList:
-								cmds.setAttr('{0}.{1}'.format(shape, attr), 0)
+					if reset:
+						for attr in attrList:
+							cmds.setAttr('{0}.{1}'.format(shape, attr), 0)
 
 					else:
-						if color:
-							cmds.setAttr('{0}.overrideRGBColors'.format(shape), 1)
 
-							i = 0
-							for x in ['R', 'G', 'B']:
-								cmds.setAttr('{0}.overrideColor{1}'.format(shape, x), color[i])
-								i += 1
+						cmds.setAttr('{0}.useObjectColor'.format(shape), 0)
+						cmds.setAttr('{0}.overrideEnabled'.format(shape), 1)
+
+						if index:
+							if color:
+
+								cmds.setAttr('{0}.overrideRGBColors'.format(shape), 0)
+								cmds.setAttr('{0}.overrideColor'.format(shape), color)
+
+							else:
+								for attr in attrList:
+									cmds.setAttr('{0}.{1}'.format(shape, attr), 0)
+
+						else:
+							if color:
+								cmds.setAttr('{0}.overrideRGBColors'.format(shape), 1)
+
+								i = 0
+								for x in ['R', 'G', 'B']:
+									cmds.setAttr('{0}.overrideColor{1}'.format(shape, x), color[i])
+									i += 1
 
 
 #########################################################################################################################
