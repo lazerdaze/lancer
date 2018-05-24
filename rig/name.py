@@ -1,6 +1,0 @@
-# LANCER.RIG.NETWORK
-#
-#
-#
-#
-#

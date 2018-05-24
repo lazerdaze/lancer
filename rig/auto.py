@@ -5,8 +5,58 @@
 #
 #
 
+# Lancer Modules
+import parts
+
+reload(parts)
+
 # Maya Modules
 from maya import cmds, mel
+
+
+def rigFromTemplate(*args):
+
+	root = parts.ROOT(root='CenterRoot')
+
+	cog = parts.COG(cog='CenterCOG',
+	                hip='CenterHip',
+	                networkRoot=root.network,
+	                )
+	spine = parts.SPINE(objects=['CenterSpine0', 'CenterSpine1', 'CenterSpine2', ],
+	                    networkRoot=root.network)
+
+	neck = parts.NECK(objects=['CenterNeck0'], networkRoot=root.network)
+	head = parts.HEAD(head='CenterHead', networkRoot=root.network)
+
+	armL = parts.ARM(side='Left',
+	                 collar='LeftArmCollar',
+	                 shoulder='LeftArmShoulder',
+	                 elbow='LeftArmElbow',
+	                 hand='LeftArmHand',
+	                 networkRoot=root.network,
+	                 )
+	armR = parts.ARM(side='Right',
+	                 collar='RightArmCollar',
+	                 shoulder='RightArmShoulder',
+	                 elbow='RightArmElbow',
+	                 hand='RightArmHand',
+	                 networkRoot=root.network,
+	                 )
+
+	legL = parts.LEG(side='Left',
+	                 hip='LeftLegHip',
+	                 knee='LeftLegKnee',
+	                 foot='LeftLegFoot',
+	                 networkRoot=root.network,
+	                 )
+
+	legR = parts.LEG(side='Right',
+	                 hip='RightLegHip',
+	                 knee='RightLegKnee',
+	                 foot='RightLegFoot',
+	                 networkRoot=root.network,
+	                 )
+	return
 
 
 #########################################################################################################################
@@ -19,4 +69,5 @@ from maya import cmds, mel
 
 
 def menu():
+	cmds.menuItem(l='Rig From Template', c=rigFromTemplate)
 	return

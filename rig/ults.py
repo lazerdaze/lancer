@@ -5,6 +5,11 @@
 #
 #
 
+# Lancer
+import naming
+
+reload(naming)
+
 # Maya Modules
 import maya.cmds as cmds
 import maya.mel as mel
@@ -666,17 +671,6 @@ def control(child='', n='control', typ='circle', axis=[0, 0, 0], t=True, r=True,
 	return [ctl, grp]
 
 
-def createName(*args):
-	var = ''
-	for arg in args:
-		i = args.index(arg)
-		if i == 0:
-			var = str(arg)
-		else:
-			var = '{}_{}'.format(var, arg)
-	return var
-
-
 def snap(par, child, t=False, r=False):
 	parPosition = cmds.xform(par, q=True, ws=True, rp=True)
 	parRotation = cmds.xform(par, q=True, ws=True, ro=True)
@@ -1164,6 +1158,16 @@ def locOnCurve(curve, intLoc=1, n='locator', upObject='', start=False, end=False
 	return locList
 
 
+def swapShape(par, child):
+	snap(par, child)
+	parShape = cmds.listRelatives(par, shapes=True)[0]
+	childShape = cmds.listRelatives(child, shapes=True)[0]
+	cmds.parent(childShape, par, r=True, s=True)
+	cmds.delete(child, parShape)
+	cmds.rename(childShape, parShape)
+	return
+
+
 def getCurveCVs(curve):
 	return cmds.ls('{}.cv[:]'.format(curve), fl=True)
 
@@ -1197,28 +1201,13 @@ def createAimVectorHelper(start, end, name='poleVector_helper'):
 	return curveShape
 
 
-class createPoleVector:
-	def __init__(self, ik, start, end):
-		poleVector = cmds.poleVectorConstraint(start, ik)
-		curveName = '{}_poleVector_curve'.format(start)
-		curve = cmds.curve(n=curveName, d=1, p=[[0, 0, 0], [0, 0, 0]])
-		shape = cmds.rename(cmds.listRelatives(curve, shapes=True)[0], '{}Shape'.format(curveName))
-
-		i = 0
-		for x in [start, end]:
-			cmds.cluster('{}.cv[{}]'.format(curve, i), n='{}_cluster'.format(x), wn=[x, x])
-			i += 1
-
-		cmds.setAttr('{}.template'.format(cmds.listRelatives(curve, shapes=True)[0]), 1)
-		cmds.setAttr('{}.inheritsTransform'.format(curve), 0)
-
-		# Return
-		self.poleVector = poleVector
-		self.curve = curve
-		self.shape = shape
+def createPoleVector(joint, ctl, ik, name='ik_poleVector'):
+	poleVector = cmds.poleVectorConstraint(ctl, ik)
+	shape = createAimVectorHelper(joint, ctl, name='{}_helper'.format(name))
+	return [poleVector, shape]
 
 
-def createAimVector(par, child, name='aimVector', aimVector=[0,0,1]):
+def createAimVector(par, child, name='aimVector', aimVector=[0, 0, 1]):
 	aim = cmds.aimConstraint(par,
 	                         child,
 	                         name='{}_constraint0'.format(name),
@@ -1675,6 +1664,9 @@ def presetWireColor(selected, typ):
 	elif typ == component.attr:
 		color = [.75, 0, .75]
 
+	elif typ == naming.rig.detail:
+		color = [0, .5, 0]
+
 	overrideColor(selected, color=color, )
 
 
@@ -1720,6 +1712,81 @@ def overrideColor(selected=[], color=[], reset=False, index=False, *args):
 								for x in ['R', 'G', 'B']:
 									cmds.setAttr('{0}.overrideColor{1}'.format(shape, x), color[i])
 									i += 1
+
+
+def createFollicle(name='follicle0'):
+	shape = cmds.createNode('follicle', name='{}Shape'.format(name))
+	transform = cmds.listRelatives(shape, parent=True)[0]
+
+	cmds.select(d=True)
+	joint = cmds.joint(name='{}_joint'.format(name))
+	cmds.parent(shape, joint, r=True, s=True)
+	cmds.delete(transform)
+	transform = cmds.listRelatives(shape, parent=True)[0]
+
+	cmds.connectAttr('{}.outRotate'.format(shape), '{}.rotate'.format(transform))
+	cmds.connectAttr('{}.outTranslate'.format(shape), '{}.translate'.format(transform))
+	return [transform, shape]
+
+
+def createFlexiPlane(name='felxi', amount=5, width=10):
+	axis = [0, 1, 0]
+	plane = cmds.nurbsPlane(name='{}_plane'.format(name), ax=axis, w=width, lr=0.1, d=3, u=amount, v=1, ch=0)
+	planeShape = cmds.listRelatives(plane, shapes=True)[0]
+
+	step = 1.0 / float(amount - 1)
+	uPos = 0
+	vPos = 0.5
+
+	follicleList = []
+
+	for x in range(amount):
+		follicle = createFollicle('{}_{}_follicle'.format(name, x))
+		follicleTransform = follicle[0]
+		follicleShape = follicle[1]
+		cmds.connectAttr('{}.local'.format(planeShape), '{}.inputSurface'.format(follicleShape))
+		cmds.connectAttr('{}.worldMatrix[0]'.format(planeShape), '{}.inputWorldMatrix'.format(follicleShape))
+		cmds.setAttr('{}.parameterU'.format(follicleShape), uPos)
+		cmds.setAttr('{}.parameterV'.format(follicleShape), vPos)
+
+		follicleList.append(follicleTransform)
+		uPos += step
+
+	# Locators
+	pos = [width/2*-1,0,width/2]
+	locList = []
+	locGrpList = []
+	i=0
+	for x in pos:
+		loc = cmds.spaceLocator(name='{}_{}_locator'.format(name,i))[0]
+		grp = cmds.group(loc, name='{}_grp'.format(loc))
+		cmds.xform(grp, ws=True, t=[x,0,0])
+		locList.append(loc)
+		locGrpList.append(grp)
+		i+=1
+
+	cmds.pointConstraint(locList[0], locList[2], locGrpList[1], mo=True)
+
+	# Curve
+
+	curve = makeNurbsCurve(locList, n='{}_curve'.format(name), d=2)
+	i=0
+	for x in getCurveCVs(curve):
+		if i == 1:
+			rel =False
+		else:
+			rel=True
+		cmds.cluster(x, rel=rel, wn=[locList[i], locList[i]])
+		i+=1
+
+
+	#Wire Deformer
+	wire = cmds.wire(plane, wire=curve, name='{}_wire0'.format(name))[0]
+	cmds.setAttr('{}.dropoffDistance[0]'.format(wire), 20)
+
+	#TwistDeformer
+	dup = cmds.duplicate(plane, name='{}_twist_blend'.format(plane))
+	return
 
 
 #########################################################################################################################

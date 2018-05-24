@@ -309,8 +309,8 @@ def rigUI():
 	# Legs
 
 	cmds.frameLayout(l='6. Legs / Feet', bgs=True, mh=10, mw=10, cll=False, cl=True, lv=False)
-	button(l='6. Hip', i=UIImage('icon_04_100.png'), c=parts.HIP)
-	button(l='7. Leg', i=UIImage('icon_04_100.png'), c=parts.LEG)
+	#button(l='6. Hip', i=UIImage('icon_04_100.png'), c=parts.HIP)
+	#button(l='7. Leg', i=UIImage('icon_04_100.png'), c=parts.LEG)
 	cmds.setParent('..')
 
 	cmds.setParent('..')
