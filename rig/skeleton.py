@@ -328,6 +328,11 @@ jointLabelLimbGlobalList = ['arms',
 
 
 def setJointLabel(joint, side=None, typ=None, otherType=None):
+	if typ == 'Bind':
+		otherType = typ
+		typ = 'Other'
+
+
 	if side:
 		sideAttr = ults.setEnumByString(joint, 'side', side)
 

@@ -96,7 +96,7 @@ class CONTROL(object):
 	             label=None,
 	             color=None,
 	             ):
-		'''
+		"""
 		Base Control class to be used in all parts classes.
 		Created as a joint with nurbs shape node and default attributes.
 
@@ -112,7 +112,7 @@ class CONTROL(object):
 		:param side:        Side of the controls origin.
 		:param label:       Label of the control to determine rig type.
 		:param color:       Color of control.
-		'''
+		"""
 
 		self.name = name
 		self.typ = typ
@@ -335,7 +335,7 @@ class CHAIN(object):
 		self.scale = scale
 		self.index = index
 		self.axis = axis
-		self.side = side
+		self.side = side if side else 'Center'
 		self.control = None
 		self.group = None
 		self.parent = None
@@ -348,7 +348,7 @@ class CHAIN(object):
 
 		controlList = []
 		groupList = []
-
+		i = 0
 		for obj in self.objects:
 			objectLabel = skeleton.getJointLabel(obj)
 			objectSide = objectLabel[0]
@@ -357,7 +357,7 @@ class CHAIN(object):
 
 			ctl = self.controlClass(name=naming.convention(self.name,
 			                                               objectType,
-			                                               objectIndex,
+			                                               objectIndex if objectIndex else i,
 			                                               naming.rig.ctl,
 			                                               ),
 			                        child=obj,
@@ -369,7 +369,7 @@ class CHAIN(object):
 			                        )
 			controlList.append(ctl.transform)
 			groupList.append(ctl.group)
-
+			i+=1
 		self.control = controlList
 		self.group = groupList
 		return
@@ -525,10 +525,42 @@ class IKCHAIN(CHAIN):
 
 
 class RIBBONCHAIN(CHAIN):
-	def __init__(self):
+	def __init__(self,
+	             objects,
+	             name=naming.rig.ribbon,
+	             scale=1,
+	             axis=None,
+	             side=None,
+	             ):
 		CHAIN.__init__(self,
+		               objects=objects,
+		               controlClass=DETAILCONTROL,
+		               name=name,
+		               scale=scale,
+		               axis=axis,
+		               side=side,
 		               )
-		pass
+		self.create()
+		self.createFlexiPlane()
+
+	def createFlexiPlane(self):
+		startObject = self.objects[0]
+		endObject = self.objects[-1]
+		amount = len(self.objects)
+		distance = ults.getDistance(startObject, endObject)
+		flex = ults.createFlexiPlane(name=self.name, amount=amount, width=distance)
+
+		cmds.delete(cmds.parentConstraint(startObject, endObject, flex.parent))
+
+		for grp in self.group:
+			i = self.group.index(grp)
+			cmds.parent(grp, flex.follicle[i])
+
+		self.ribbonLocators = flex.control
+		self.ribbonLocatorsGroup = flex.group
+		self.parent = flex.parent
+
+		return
 
 
 ########################################################################################################################

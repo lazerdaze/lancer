@@ -31,6 +31,7 @@ class rig(object):
 	null = 'null'
 	aim = 'aim'
 	aimVector = 'aimVector'
+	ribbon = 'ribbon'
 
 	detail = 'detail'
 	attr = 'attr'
