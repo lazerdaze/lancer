@@ -1737,6 +1737,10 @@ class createFlexiPlane():
 		plane = cmds.nurbsPlane(name='{}_plane'.format(name), ax=axis, w=width, lr=0.1, d=3, u=amount, v=1, ch=0)[0]
 		planeShape = cmds.listRelatives(plane, shapes=True)[0]
 
+		# BlendShape
+		dup = cmds.duplicate(plane, name='{}_twist_blend'.format(plane))
+		blendshape = cmds.blendShape(dup, plane, at=True, name='{}_blendShape0'.format(name), weight=[0, 1])
+
 		step = 1.0 / float(amount - 1)
 		uPos = 0
 		vPos = 0.5
@@ -1748,10 +1752,12 @@ class createFlexiPlane():
 			follicle = createFollicle('{}_{}_follicle'.format(name, x))
 			follicleTransform = follicle[0]
 			follicleShape = follicle[1]
+
 			cmds.connectAttr('{}.local'.format(planeShape), '{}.inputSurface'.format(follicleShape))
 			cmds.connectAttr('{}.worldMatrix[0]'.format(planeShape), '{}.inputWorldMatrix'.format(follicleShape))
 			cmds.setAttr('{}.parameterU'.format(follicleShape), uPos)
 			cmds.setAttr('{}.parameterV'.format(follicleShape), vPos)
+			cmds.setAttr('{}.v'.format(follicleShape), 0)
 
 			follicleList.append(follicleTransform)
 			uPos += step
@@ -1788,7 +1794,10 @@ class createFlexiPlane():
 		cmds.setAttr('{}.dropoffDistance[0]'.format(wire[0]), 20)
 
 		# TwistDeformer
-		dup = cmds.duplicate(plane, name='{}_twist_blend'.format(plane))
+
+
+
+
 		twist = cmds.nonLinear(dup, type='twist', name='{}_twist'.format(name))
 		twistShape = cmds.rename(twist[0], '{}_twist'.format(name))
 		twistTransform = cmds.rename(twist[1], '{}_twistHandle'.format(name))
@@ -1797,8 +1806,6 @@ class createFlexiPlane():
 		cmds.connectAttr('{}.rx'.format(locList[0]), '{}.endAngle'.format(twistShape))
 		cmds.connectAttr('{}.rx'.format(locList[2]), '{}.startAngle'.format(twistShape))
 
-		# BlendShape
-		blendshape = cmds.blendShape(dup, plane, frontOfChain=True, name='{}_blendShape0'.format(name), weight=[0, 1])
 
 		# Hierarchy
 		extrasGrp = cmds.group(name='{}_extras_grp'.format(name), em=True)

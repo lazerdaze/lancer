@@ -369,7 +369,7 @@ class CHAIN(object):
 			                        )
 			controlList.append(ctl.transform)
 			groupList.append(ctl.group)
-			i+=1
+			i += 1
 		self.control = controlList
 		self.group = groupList
 		return
@@ -559,8 +559,50 @@ class RIBBONCHAIN(CHAIN):
 		self.ribbonLocators = flex.control
 		self.ribbonLocatorsGroup = flex.group
 		self.parent = flex.parent
+		return
+
+
+class RIBBONLIMB(CHAIN):
+	def __init__(self,
+	             upperObjects,
+	             lowerObjects,
+	             midObject,
+	             name=naming.rig.ribbon,
+	             scale=1,
+	             axis=None,
+	             side=None,
+	             ):
+
+		CHAIN.__init__(self,
+		               objects=upperObjects + lowerObjects + ults.listCheck(midObject),
+		               controlClass=DETAILCONTROL,
+		               name=name,
+		               scale=scale,
+		               axis=axis,
+		               side=side,
+		               )
+
+		self.name = name
+		self.upperObjects = upperObjects
+		self.lowerObjects = lowerObjects
+		self.midObject = ults.listCheck(midObject)
+
+		self.create()
+
+		#self.createUpperFlexiPlane()
+
+	def createUpperFlexiPlane(self):
+		start = self.upperObjects[0]
+		end = self.midObject[0]
+		amount = len(self.upperObjects + [self.midObject])
+		distance = ults.getDistance(start, end)
+
+		flex = ults.createFlexiPlane(name=self.name, amount=amount, width=distance)
+		cmds.delete(cmds.parentConstraint(start, end, flex.parent))
 
 		return
+
+
 
 
 ########################################################################################################################
