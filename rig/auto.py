@@ -56,6 +56,19 @@ def rigFromTemplate(*args):
 	                 foot='RightLegFoot',
 	                 networkRoot=root.network,
 	                 )
+
+	armList = ['LeftArmShoulder', 'LeftArmElbow', 'LeftArmHand']
+	upperList = ['LeftArmShoulderBind0', 'LeftArmShoulderBind1']
+	lowerList = ['LeftArmElbowBind1', 'LeftArmElbowBind2']
+	midObject = 'LeftArmElbowBind0'
+
+	parts.RIBBONLIMB(start=armList[0],
+	                 mid=armList[1],
+	                 end=armList[2],
+	                 upperObjects=upperList,
+	                 lowerObjects=lowerList,
+	                 midObject=midObject,
+	                 )
 	return
 
 

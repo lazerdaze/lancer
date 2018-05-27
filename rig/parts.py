@@ -161,6 +161,8 @@ class CONTROL(object):
 	def setColor(self):
 		if type(self.color) is str:
 			ults.presetWireColor(self.transform, self.color)
+		if type(self.color) is list:
+			ults.overrideColor(ults.listCheck(self.transform), color=self.color)
 		return
 
 	def createGroup(self):
@@ -562,47 +564,241 @@ class RIBBONCHAIN(CHAIN):
 		return
 
 
-class RIBBONLIMB(CHAIN):
+class RIBBONLIMB:
 	def __init__(self,
+	             start,
+	             mid,
+	             end,
 	             upperObjects,
-	             lowerObjects,
 	             midObject,
+	             lowerObjects,
 	             name=naming.rig.ribbon,
 	             scale=1,
 	             axis=None,
 	             side=None,
 	             ):
+		self.start = start
+		self.startParent = self.getStartParent()
+		self.mid = mid
+		self.end = end
+		self.objects = [start, mid, end]
 
-		CHAIN.__init__(self,
-		               objects=upperObjects + lowerObjects + ults.listCheck(midObject),
-		               controlClass=DETAILCONTROL,
-		               name=name,
-		               scale=scale,
-		               axis=axis,
-		               side=side,
-		               )
-
-		self.name = name
 		self.upperObjects = upperObjects
 		self.lowerObjects = lowerObjects
-		self.midObject = ults.listCheck(midObject)
+		self.midObject = midObject
+		self.name = name
+		self.scale = scale
+		self.axis = axis
+		self.side = side
 
-		self.create()
+		self.mainControl = []
+		self.mainGroup = []
 
-		#self.createUpperFlexiPlane()
+		self.upperControl = []
+		self.upperGroup = []
+		self.midControl = []
+		self.midGroup = []
+		self.lowerControl = []
+		self.lowerGroup = []
 
-	def createUpperFlexiPlane(self):
-		start = self.upperObjects[0]
-		end = self.midObject[0]
-		amount = len(self.upperObjects + [self.midObject])
-		distance = ults.getDistance(start, end)
+		self.detailControl = []
+		self.detailGroup = []
 
-		flex = ults.createFlexiPlane(name=self.name, amount=amount, width=distance)
-		cmds.delete(cmds.parentConstraint(start, end, flex.parent))
+		self.upperFlexiPlane = None
+		self.lowerFlexiPlane = None
+
+		self.getScale()
+		self.createMainControls()
+		self.createIntermediateControls()
+		self.createDetailControls()
+		self.createRibbon()
+		self.createTwist()
+		self.cleanUp()
+
+	def getScale(self):
+		self.scale = ults.getDistance(self.start, self.mid) / 2
+		return
+
+	def getStartParent(self):
+		parent = cmds.listRelatives(self.start, parent=True)
+		return parent[0] if parent else None
+
+	def createMainControls(self):
+		for obj in self.objects:
+			i = self.objects.index(obj)
+			ctl = CONTROL(name=naming.convention(self.name,
+			                                     'main',
+			                                     i,
+			                                     naming.rig.ctl,
+			                                     ),
+			              typ=control.component.hexigon,
+			              scale=self.scale,
+			              axis=self.axis,
+			              child=obj,
+			              color=[.5, 1, .75],
+			              )
+
+			cmds.parent(ctl.group, obj)
+			self.mainControl.append(ctl.transform)
+			self.mainGroup.append(ctl.group)
+
+		cmds.delete(cmds.orientConstraint(self.mainGroup[0], self.mainGroup[2], self.mainGroup[1]))
+		return
+
+	def createIntermediateControls(self):
+		for i in range(2):
+			ctl = CONTROL(name=naming.convention(self.name,
+			                                     'intermediate',
+			                                     i,
+			                                     naming.rig.ctl,
+			                                     ),
+			              typ=control.component.hexigon,
+			              scale=self.scale,
+			              axis=self.axis,
+			              color=[.5,1,.75],
+			              )
+
+			cmds.parent(ctl.group, self.objects[i])
+
+			if i == 0:
+				j = 1
+				startIndex = 0
+				endIndex = 1
+			else:
+				j = 2
+				startIndex = 2
+				endIndex = 3
+
+			cmds.delete(cmds.parentConstraint(self.mainControl[startIndex], self.mainControl[endIndex], ctl.group))
+			cmds.pointConstraint(self.mainControl[startIndex], self.mainControl[endIndex], ctl.group, mo=True)
+			self.mainControl.insert(i + j, ctl.transform)
+			self.mainGroup.insert(i + j, ctl.group)
+		return
+
+	def createDetailControls(self):
+		upperIndex = len(self.upperObjects) - 1
+		midIndex = upperIndex + 1
+		objects = self.upperObjects + ults.listCheck(self.midObject) + self.lowerObjects
+		i = 0
+		for obj in objects:
+			i = objects.index(obj)
+			ctl = DETAILCONTROL(name=naming.convention(self.name,
+			                                           'detail',
+			                                           i,
+			                                           naming.rig.ctl,
+			                                           ),
+			                    scale=self.scale,
+			                    axis=self.axis,
+			                    child=obj,
+			                    )
+
+			cmds.parentConstraint(ctl.transform, obj, mo=True)
+			cmds.scaleConstraint(ctl.transform, obj, mo=True)
+
+			if i < midIndex:
+				self.upperControl.append(ctl.transform)
+				self.upperGroup.append(ctl.group)
+
+			elif i == midIndex:
+				self.midControl.append(ctl.transform)
+				self.midGroup.append(ctl.group)
+
+			else:
+				self.lowerControl.append(ctl.transform)
+				self.lowerGroup.append(ctl.group)
+
+			self.detailControl.append(ctl.transform)
+			self.detailGroup.append(ctl.group)
+			i += 1
 
 		return
 
+	def createRibbon(self):
+		upper = self.createFlexiPlane(start=self.start,
+		                              end=self.mid,
+		                              amount=len(self.upperObjects + ults.listCheck(self.midObject)),
+		                              name=naming.convention(self.name,
+		                                                     'upper',
+		                                                     ),
+		                              )
+		lower = self.createFlexiPlane(start=self.mid,
+		                              end=self.end,
+		                              amount=len(self.upperObjects + ults.listCheck(self.midObject)),
+		                              name=naming.convention(self.name,
+		                                                     'lower',
+		                                                     ),
+		                              )
 
+		cmds.delete(upper.constraint, lower.constraint)
+
+		self.upperFlexiPlane = upper
+		self.lowerFlexiPlane = lower
+		return
+
+	def createHierarchy(self):
+		i = 0
+		for grp in self.upperFlexiPlane.group:
+			cmds.parent(grp, self.mainControl[i])
+			i += 1
+
+		i = 2
+		for grp in self.lowerFlexiPlane.group:
+			cmds.parent(grp, self.mainControl[i])
+			i += 1
+
+		i = 0
+		for grp in self.upperGroup:
+			cmds.parent(grp, self.upperFlexiPlane.follicle[i])
+			i += 1
+
+		i = 1
+		for grp in self.lowerGroup:
+			cmds.parent(grp, self.lowerFlexiPlane.follicle[i])
+			i += 1
+
+		cmds.parent(self.midGroup[0], self.mainControl[2])
+
+		if self.startParent:
+			cmds.parent(self.upperFlexiPlane.parent, self.startParent)
+
+		cmds.parent(self.lowerFlexiPlane.parent, self.mid)
+		return
+
+	def createTwist(self):
+		add = cmds.createNode('plusMinusAverage', name='{}_add0'.format(self.name))
+		cmds.connectAttr('{}.rx'.format(self.mainControl[0]), '{}.input3D[0].input3Dx'.format(add))
+		cmds.connectAttr('{}.rx'.format(self.mainControl[2]), '{}.input3D[0].input3Dy'.format(add))
+		cmds.connectAttr('{}.rx'.format(self.mainControl[-1]), '{}.input3D[0].input3Dz'.format(add))
+
+		cmds.connectAttr('{}.output3Dx'.format(add), '{}.rx'.format(self.upperFlexiPlane.control[0]))
+		cmds.connectAttr('{}.output3Dy'.format(add), '{}.rx'.format(self.upperFlexiPlane.control[-1]))
+
+		cmds.connectAttr('{}.output3Dy'.format(add), '{}.rx'.format(self.lowerFlexiPlane.control[0]))
+		cmds.connectAttr('{}.output3Dz'.format(add), '{}.rx'.format(self.lowerFlexiPlane.control[-1]))
+
+		cmds.connectAttr('{}.rx'.format(self.start), '{}.input3D[1].input3Dy'.format(add))
+		cmds.connectAttr('{}.rx'.format(self.start), '{}.input3D[2].input3Dz'.format(add))
+		cmds.connectAttr('{}.rx'.format(self.end), '{}.input3D[1].input3Dz'.format(add))
+		return
+
+	def createFlexiPlane(self, start, end, amount, name):
+		distance = ults.getDistance(start, end)
+		flex = ults.createFlexiPlane(name=name,
+		                             amount=amount,
+		                             width=distance,
+		                             )
+
+		cmds.delete(cmds.parentConstraint(start, end, flex.parent))
+		return flex
+
+	def cleanUp(self):
+		for obj in self.upperFlexiPlane.group + self.lowerFlexiPlane.group:
+			ults.setVisibility(obj)
+
+		for obj in self.mainControl:
+			ults.lockScale(obj)
+
+		return
 
 
 ########################################################################################################################
@@ -1511,7 +1707,7 @@ class ARM(BASE):
 		if self.collar:
 			self.createCollar()
 
-		self.createDetailChain(self.objects)
+		#self.createDetailChain(self.objects)
 
 		if self.networkRoot:
 			self.createLocalWorld(obj=self.fkControl[0],
@@ -1523,8 +1719,8 @@ class ARM(BASE):
 			                                         self.index,
 			                                         )
 			                   )
-			self.createNetworkConnections()
-			self.updateNetwork()
+			#self.createNetworkConnections()
+			#self.updateNetwork()
 
 	def getScale(self):
 		self.scale = ults.getDistance(self.shoulder, self.elbow) / 2.5
