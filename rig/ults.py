@@ -143,7 +143,7 @@ def curveShape(n='curve', typ='circle', axis=[0, 0, 0], *args):
 
 	elif typ == 'triangle':
 		curve = mel.eval(
-				'curve -d 1 -p -1.03923 0 0.6 -p 1.03923 0 0.6 -p 0 0 -1.2 -p -1.03923 0 0.6 -k 0 -k 1 -k 2 -k 3')
+			'curve -d 1 -p -1.03923 0 0.6 -p 1.03923 0 0.6 -p 0 0 -1.2 -p -1.03923 0 0.6 -k 0 -k 1 -k 2 -k 3')
 
 	elif typ == 'house':
 		curve = cmds.curve(d=1, p=[[0.0, 3.279783964168176e-16, 1.953102539721272],
@@ -305,7 +305,7 @@ def curveShape(n='curve', typ='circle', axis=[0, 0, 0], *args):
 
 	elif typ == 'hexagon':
 		curve = mel.eval(
-				'curve  -d 1 -p -0.5 1 0.866025 -p 0.5 1 0.866025 -p 0.5 -1 0.866025 -p 1 -1 0 -p 1 1 0 -p 0.5 1 -0.866025 -p 0.5 -1 -0.866025 -p -0.5 -1 -0.866026 -p -0.5 1 -0.866026 -p -1 1 -1.5885e-007 -p -1 -1 -1.5885e-007 -p -0.5 -1 0.866025 -p -0.5 1 0.866025 -p -1 1 -1.5885e-007 -p -0.5 1 -0.866026 -p 0.5 1 -0.866025 -p 1 1 0 -p 0.5 1 0.866025 -p 0.5 -1 0.866025 -p -0.5 -1 0.866025 -p -1 -1 -1.5885e-007 -p -0.5 -1 -0.866026 -p 0.5 -1 -0.866025 -p 1 -1 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23')
+			'curve  -d 1 -p -0.5 1 0.866025 -p 0.5 1 0.866025 -p 0.5 -1 0.866025 -p 1 -1 0 -p 1 1 0 -p 0.5 1 -0.866025 -p 0.5 -1 -0.866025 -p -0.5 -1 -0.866026 -p -0.5 1 -0.866026 -p -1 1 -1.5885e-007 -p -1 -1 -1.5885e-007 -p -0.5 -1 0.866025 -p -0.5 1 0.866025 -p -1 1 -1.5885e-007 -p -0.5 1 -0.866026 -p 0.5 1 -0.866025 -p 1 1 0 -p 0.5 1 0.866025 -p 0.5 -1 0.866025 -p -0.5 -1 0.866025 -p -1 -1 -1.5885e-007 -p -0.5 -1 -0.866026 -p 0.5 -1 -0.866025 -p 1 -1 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23')
 
 	elif typ == 'mover':
 		curve = cmds.curve(d=1, p=[[3.0151795805144164, -1.8909139247979197e-21, -8.515919247109593e-06],
@@ -544,27 +544,27 @@ def curveShape(n='curve', typ='circle', axis=[0, 0, 0], *args):
 	# 3D
 	elif typ == 'pyramid':
 		curve = mel.eval(
-				'curve  -d 1 -p -1 0 0 -p 0 0 1 -p 0 1 0 -p -1 0 0 -p 1 0 0 -p 0 1 0 -p 1 0 0 -p 0 0 1 -p 0 1 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8')
+			'curve  -d 1 -p -1 0 0 -p 0 0 1 -p 0 1 0 -p -1 0 0 -p 1 0 0 -p 0 1 0 -p 1 0 0 -p 0 0 1 -p 0 1 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8')
 
 	elif typ == 'cube':
 		curve = mel.eval(
-				'curve -d 1 -p 0.5 0.5 0.5 -p 0.5 0.5 -0.5 -p -0.5 0.5 -0.5 -p -0.5 -0.5 -0.5 -p 0.5 -0.5 -0.5 -p 0.5 0.5 -0.5 -p -0.5 0.5 -0.5 -p -0.5 0.5 0.5 -p 0.5 0.5 0.5 -p 0.5 -0.5 0.5 -p 0.5 -0.5 -0.5 -p -0.5 -0.5 -0.5 -p -0.5 -0.5 0.5 -p 0.5 -0.5 0.5 -p -0.5 -0.5 0.5 -p -0.5 0.5 0.5 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15')
+			'curve -d 1 -p 0.5 0.5 0.5 -p 0.5 0.5 -0.5 -p -0.5 0.5 -0.5 -p -0.5 -0.5 -0.5 -p 0.5 -0.5 -0.5 -p 0.5 0.5 -0.5 -p -0.5 0.5 -0.5 -p -0.5 0.5 0.5 -p 0.5 0.5 0.5 -p 0.5 -0.5 0.5 -p 0.5 -0.5 -0.5 -p -0.5 -0.5 -0.5 -p -0.5 -0.5 0.5 -p 0.5 -0.5 0.5 -p -0.5 -0.5 0.5 -p -0.5 0.5 0.5 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15')
 
 	elif typ == 'rombus':
 		curve = mel.eval(
-				'curve -d 1 -p 0 1 0 -p 1 0 0 -p 0 0 1 -p -1 0 0 -p 0 0 -1 -p 0 1 0 -p 0 0 1 -p 0 -1 0 -p 0 0 -1 -p 1 0 0 -p 0 1 0 -p -1 0 0 -p 0 -1 0 -p 1 0 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13')
+			'curve -d 1 -p 0 1 0 -p 1 0 0 -p 0 0 1 -p -1 0 0 -p 0 0 -1 -p 0 1 0 -p 0 0 1 -p 0 -1 0 -p 0 0 -1 -p 1 0 0 -p 0 1 0 -p -1 0 0 -p 0 -1 0 -p 1 0 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13')
 
 	elif typ == 'cone':
 		curve = mel.eval(
-				'curve -d 1 -p 0.5 -1 0.866025 -p -0.5 -1 0.866025 -p 0 1 0 -p 0.5 -1 0.866025 -p 1 -1 0 -p 0 1 0 -p 0.5 -1 -0.866025 -p 1 -1 0 -p 0 1 0 -p -0.5 -1 -0.866026 -p 0.5 -1 -0.866025 -p 0 1 0 -p -1 -1 -1.5885e-007 -p -0.5 -1 -0.866026 -p 0 1 0 -p -0.5 -1 0.866025 -p -1 -1 -1.5885e-007 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16')
+			'curve -d 1 -p 0.5 -1 0.866025 -p -0.5 -1 0.866025 -p 0 1 0 -p 0.5 -1 0.866025 -p 1 -1 0 -p 0 1 0 -p 0.5 -1 -0.866025 -p 1 -1 0 -p 0 1 0 -p -0.5 -1 -0.866026 -p 0.5 -1 -0.866025 -p 0 1 0 -p -1 -1 -1.5885e-007 -p -0.5 -1 -0.866026 -p 0 1 0 -p -0.5 -1 0.866025 -p -1 -1 -1.5885e-007 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16')
 
 	elif typ == 'rotateSphere':
 		curve = mel.eval(
-				'curve -d 1 -p 0 0.35 -1.001567 -p -0.336638 0.677886 -0.751175 -p -0.0959835 0.677886 -0.751175 -p -0.0959835 0.850458 -0.500783 -p -0.0959835 0.954001 -0.0987656 -p -0.500783 0.850458 -0.0987656 -p -0.751175 0.677886 -0.0987656 -p -0.751175 0.677886 -0.336638 -p -1.001567 0.35 0 -p -0.751175 0.677886 0.336638 -p -0.751175 0.677886 0.0987656 -p -0.500783 0.850458 0.0987656 -p -0.0959835 0.954001 0.0987656 -p -0.0959835 0.850458 0.500783 -p -0.0959835 0.677886 0.751175 -p -0.336638 0.677886 0.751175 -p 0 0.35 1.001567 -p 0.336638 0.677886 0.751175 -p 0.0959835 0.677886 0.751175 -p 0.0959835 0.850458 0.500783 -p 0.0959835 0.954001 0.0987656 -p 0.500783 0.850458 0.0987656 -p 0.751175 0.677886 0.0987656 -p 0.751175 0.677886 0.336638 -p 1.001567 0.35 0 -p 0.751175 0.677886 -0.336638 -p 0.751175 0.677886 -0.0987656 -p 0.500783 0.850458 -0.0987656 -p 0.0959835 0.954001 -0.0987656 -p 0.0959835 0.850458 -0.500783 -p 0.0959835 0.677886 -0.751175 -p 0.336638 0.677886 -0.751175 -p 0 0.35 -1.001567 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32')
+			'curve -d 1 -p 0 0.35 -1.001567 -p -0.336638 0.677886 -0.751175 -p -0.0959835 0.677886 -0.751175 -p -0.0959835 0.850458 -0.500783 -p -0.0959835 0.954001 -0.0987656 -p -0.500783 0.850458 -0.0987656 -p -0.751175 0.677886 -0.0987656 -p -0.751175 0.677886 -0.336638 -p -1.001567 0.35 0 -p -0.751175 0.677886 0.336638 -p -0.751175 0.677886 0.0987656 -p -0.500783 0.850458 0.0987656 -p -0.0959835 0.954001 0.0987656 -p -0.0959835 0.850458 0.500783 -p -0.0959835 0.677886 0.751175 -p -0.336638 0.677886 0.751175 -p 0 0.35 1.001567 -p 0.336638 0.677886 0.751175 -p 0.0959835 0.677886 0.751175 -p 0.0959835 0.850458 0.500783 -p 0.0959835 0.954001 0.0987656 -p 0.500783 0.850458 0.0987656 -p 0.751175 0.677886 0.0987656 -p 0.751175 0.677886 0.336638 -p 1.001567 0.35 0 -p 0.751175 0.677886 -0.336638 -p 0.751175 0.677886 -0.0987656 -p 0.500783 0.850458 -0.0987656 -p 0.0959835 0.954001 -0.0987656 -p 0.0959835 0.850458 -0.500783 -p 0.0959835 0.677886 -0.751175 -p 0.336638 0.677886 -0.751175 -p 0 0.35 -1.001567 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32')
 
 	elif typ == 'jack':
 		curve = mel.eval(
-				'curve -d 1 -p 0 0 0 -p 0.75 0 0 -p 1 0.25 0 -p 1.25 0 0 -p 1 -0.25 0 -p 0.75 0 0 -p 1 0 0.25 -p 1.25 0 0 -p 1 0 -0.25 -p 1 0.25 0 -p 1 0 0.25 -p 1 -0.25 0 -p 1 0 -0.25 -p 0.75 0 0 -p 0 0 0 -p -0.75 0 0 -p -1 0.25 0 -p -1.25 0 0 -p -1 -0.25 0 -p -0.75 0 0 -p -1 0 0.25 -p -1.25 0 0 -p -1 0 -0.25 -p -1 0.25 0 -p -1 0 0.25 -p -1 -0.25 0 -p -1 0 -0.25 -p -0.75 0 0 -p 0 0 0 -p 0 0.75 0 -p 0 1 -0.25 -p 0 1.25 0 -p 0 1 0.25 -p 0 0.75 0 -p -0.25 1 0 -p 0 1.25 0 -p 0.25 1 0 -p 0 1 0.25 -p -0.25 1 0 -p 0 1 -0.25 -p 0.25 1 0 -p 0 0.75 0 -p 0 0 0 -p 0 -0.75 0 -p 0 -1 -0.25 -p 0 -1.25 0 -p 0 -1 0.25 -p 0 -0.75 0 -p -0.25 -1 0 -p 0 -1.25 0 -p 0.25 -1 0 -p 0 -1 -0.25 -p -0.25 -1 0 -p 0 -1 0.25 -p 0.25 -1 0 -p 0 -0.75 0 -p 0 0 0 -p 0 0 -0.75 -p 0 0.25 -1 -p 0 0 -1.25 -p 0 -0.25 -1 -p 0 0 -0.75 -p -0.25 0 -1 -p 0 0 -1.25 -p 0.25 0 -1 -p 0 0.25 -1 -p -0.25 0 -1 -p 0 -0.25 -1 -p 0.25 0 -1 -p 0 0 -0.75 -p 0 0 0 -p 0 0 0.75 -p 0 0.25 1 -p 0 0 1.25 -p 0 -0.25 1 -p 0 0 0.75 -p -0.25 0 1 -p 0 0 1.25 -p 0.25 0 1 -p 0 0.25 1 -p -0.25 0 1 -p 0 -0.25 1 -p 0.25 0 1 -p 0 0 0.75 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32 -k 33 -k 34 -k 35 -k 36 -k 37 -k 38 -k 39 -k 40 -k 41 -k 42 -k 43 -k 44 -k 45 -k 46 -k 47 -k 48 -k 49 -k 50 -k 51 -k 52 -k 53 -k 54 -k 55 -k 56 -k 57 -k 58 -k 59 -k 60 -k 61 -k 62 -k 63 -k 64 -k 65 -k 66 -k 67 -k 68 -k 69 -k 70 -k 71 -k 72 -k 73 -k 74 -k 75 -k 76 -k 77 -k 78 -k 79 -k 80 -k 81 -k 82 -k 83')
+			'curve -d 1 -p 0 0 0 -p 0.75 0 0 -p 1 0.25 0 -p 1.25 0 0 -p 1 -0.25 0 -p 0.75 0 0 -p 1 0 0.25 -p 1.25 0 0 -p 1 0 -0.25 -p 1 0.25 0 -p 1 0 0.25 -p 1 -0.25 0 -p 1 0 -0.25 -p 0.75 0 0 -p 0 0 0 -p -0.75 0 0 -p -1 0.25 0 -p -1.25 0 0 -p -1 -0.25 0 -p -0.75 0 0 -p -1 0 0.25 -p -1.25 0 0 -p -1 0 -0.25 -p -1 0.25 0 -p -1 0 0.25 -p -1 -0.25 0 -p -1 0 -0.25 -p -0.75 0 0 -p 0 0 0 -p 0 0.75 0 -p 0 1 -0.25 -p 0 1.25 0 -p 0 1 0.25 -p 0 0.75 0 -p -0.25 1 0 -p 0 1.25 0 -p 0.25 1 0 -p 0 1 0.25 -p -0.25 1 0 -p 0 1 -0.25 -p 0.25 1 0 -p 0 0.75 0 -p 0 0 0 -p 0 -0.75 0 -p 0 -1 -0.25 -p 0 -1.25 0 -p 0 -1 0.25 -p 0 -0.75 0 -p -0.25 -1 0 -p 0 -1.25 0 -p 0.25 -1 0 -p 0 -1 -0.25 -p -0.25 -1 0 -p 0 -1 0.25 -p 0.25 -1 0 -p 0 -0.75 0 -p 0 0 0 -p 0 0 -0.75 -p 0 0.25 -1 -p 0 0 -1.25 -p 0 -0.25 -1 -p 0 0 -0.75 -p -0.25 0 -1 -p 0 0 -1.25 -p 0.25 0 -1 -p 0 0.25 -1 -p -0.25 0 -1 -p 0 -0.25 -1 -p 0.25 0 -1 -p 0 0 -0.75 -p 0 0 0 -p 0 0 0.75 -p 0 0.25 1 -p 0 0 1.25 -p 0 -0.25 1 -p 0 0 0.75 -p -0.25 0 1 -p 0 0 1.25 -p 0.25 0 1 -p 0 0.25 1 -p -0.25 0 1 -p 0 -0.25 1 -p 0.25 0 1 -p 0 0 0.75 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32 -k 33 -k 34 -k 35 -k 36 -k 37 -k 38 -k 39 -k 40 -k 41 -k 42 -k 43 -k 44 -k 45 -k 46 -k 47 -k 48 -k 49 -k 50 -k 51 -k 52 -k 53 -k 54 -k 55 -k 56 -k 57 -k 58 -k 59 -k 60 -k 61 -k 62 -k 63 -k 64 -k 65 -k 66 -k 67 -k 68 -k 69 -k 70 -k 71 -k 72 -k 73 -k 74 -k 75 -k 76 -k 77 -k 78 -k 79 -k 80 -k 81 -k 82 -k 83')
 
 	elif typ == 'cylinder':
 		curve = cmds.curve(d=1, p=[[0.679679916801789, -1.000000000044628, -0.6796799168017885],
@@ -1061,7 +1061,7 @@ def getDistance(start, end, *args):
 	else:
 		endPos = cmds.xform(end, q=True, ws=True, rp=True)
 	distance = sqrt(
-			pow((startPos[0] - endPos[0]), 2) + pow((startPos[1] - endPos[1]), 2) + pow((startPos[2] - endPos[2]), 2))
+		pow((startPos[0] - endPos[0]), 2) + pow((startPos[1] - endPos[1]), 2) + pow((startPos[2] - endPos[2]), 2))
 	return distance
 
 
@@ -1126,11 +1126,11 @@ def setOnMotionPath(selected, curve, name='motionPath', uValue=0, *args):
 	mp = cmds.createNode('motionPath', n='{}_mp'.format(name))
 
 	mpAttr = {
-		'follow'      : 1,
+		'follow': 1,
 		'fractionMode': 0,
-		'worldUpType' : 3,
-		'frontAxis'   : 2,
-		'upAxis'      : 1,
+		'worldUpType': 3,
+		'frontAxis': 2,
+		'upAxis': 1,
 	}
 	for attr in mpAttr:
 		cmds.setAttr('{}.{}'.format(mp, attr), mpAttr[attr])
@@ -1614,15 +1614,15 @@ class jointLabel():
 
 			if x != 'None':
 				self.masterDict[x] = {
-					'None'  : noneList, 'Left': sortJointHierarchy(leftList),
+					'None': noneList, 'Left': sortJointHierarchy(leftList),
 					'Center': sortJointHierarchy(centerList),
-					'Right' : sortJointHierarchy(rightList, )
+					'Right': sortJointHierarchy(rightList, )
 				}
 			else:
 				self.masterDict[x] = {
-					'None'  : noneList, 'Left': leftList,
+					'None': noneList, 'Left': leftList,
 					'Center': centerList,
-					'Right' : rightList
+					'Right': rightList
 				}
 
 	def isDebug(self):
@@ -1733,13 +1733,16 @@ def overrideColor(selected=[], color=[], reset=False, index=False, *args):
 									i += 1
 
 
-def createFollicle(name='follicle0'):
+def createFollicle(name='follicle0', debug=False):
 	shape = cmds.createNode('follicle', name='{}Shape'.format(name))
 	transform = cmds.listRelatives(shape, parent=True)[0]
 
 	cmds.select(d=True)
 	joint = cmds.joint(name='{}_joint'.format(name))
-	cmds.setAttr('{}.drawStyle'.format(joint), 2)
+	if not debug:
+		cmds.setAttr('{}.drawStyle'.format(joint), 2)
+	else:
+		cmds.setAttr('{}.displayLocalAxis'.format(joint), 1)
 	cmds.parent(shape, joint, r=True, s=True)
 	cmds.delete(transform)
 	transform = cmds.listRelatives(shape, parent=True)[0]
@@ -1751,7 +1754,7 @@ def createFollicle(name='follicle0'):
 
 
 class createFlexiPlane():
-	def __init__(self, name='felxi', amount=5, width=10, side='Left'):
+	def __init__(self, name='felxi', amount=5, width=10, side=naming.side.left, debug=False):
 		"""
 		:param name:    Name of component.
 		:param amount:  Amount of follicles to be created.
@@ -1777,7 +1780,7 @@ class createFlexiPlane():
 		follicleList = []
 
 		for x in range(amount):
-			follicle = createFollicle('{}_{}_follicle'.format(name, x))
+			follicle = createFollicle('{}_{}_follicle'.format(name, x), debug=debug)
 			follicleTransform = follicle[0]
 			follicleShape = follicle[1]
 
@@ -1799,16 +1802,13 @@ class createFlexiPlane():
 			loc = cmds.spaceLocator(name='{}_{}_locator'.format(name, i))[0]
 			grp = cmds.group(loc, name='{}_grp'.format(loc))
 			cmds.xform(grp, ws=True, t=[x, 0, 0])
-			setVisibility(grp)
 			locList.append(loc)
 			locGrpList.append(grp)
+			if not debug:
+				setVisibility(grp)
 			i += 1
 
 		pc = cmds.pointConstraint(locList[0], locList[2], locGrpList[1], mo=True)
-
-		for loc in [locList[0], locList[2]]:
-			cmds.addAttr(loc, ln='twist', min=0, max=1, dv=1, k=True)
-			cmds.addAttr(loc, ln='twistAdd', k=True, at='doubleAngle')
 
 		# Curve
 
@@ -1830,41 +1830,50 @@ class createFlexiPlane():
 		twist = cmds.nonLinear(dup, type='twist', name='{}_twist'.format(name))
 		twistShape = cmds.rename(twist[0], '{}_twist'.format(name))
 		twistTransform = cmds.rename(twist[1], '{}_twistHandle'.format(name))
-		cmds.setAttr('{}.rz'.format(twistTransform), 90)
+		cmds.setAttr('{}.rz'.format(twistTransform), -90)
 
-		rangeNode = cmds.createNode('setRange', name='{}_setRange0'.format(name))
+		rangeNode = cmds.createNode('setRange', name='{}_twist_setRange0'.format(name))
 		addList = []
 		for axis in ['x', 'y', 'z']:
 			cmds.setAttr('{}.oldMax{}'.format(rangeNode, axis.upper()), 1)
 
-		print side, naming.side.right
-		for loc in [locList[0], locList[2]]:
-			i = locList.index(loc)
-			axis = 'X' if i == 0 else 'Y'
-			angle = 'end' if i == 0 else 'start'
-			add = cmds.createNode('addDoubleLinear', name='{}_add0'.format(loc))
+		cmds.addAttr(globalGrp, ln='startTwist', min=0, max=1, dv=1, k=True)
+		cmds.addAttr(globalGrp, ln='endTwist', min=0, max=1, dv=1, k=True)
+		cmds.addAttr(globalGrp, ln='startTwistAmount', k=True, at='doubleAngle')
+		cmds.addAttr(globalGrp, ln='endTwistAmount', k=True, at='doubleAngle')
+		cmds.addAttr(globalGrp, ln='startTwistAdd', k=True, at='doubleAngle')
+		cmds.addAttr(globalGrp, ln='endTwistAdd', k=True, at='doubleAngle')
+		cmds.addAttr(globalGrp, ln='twistSide', min=-1, max=1, dv=0, k=True)
 
-			if side == naming.side.right:
-				reverseNode = cmds.createNode('reverse', name='{}_reverse0'.format(name))
-				cmds.connectAttr('{}.rx'.format(loc), '{}.inputX'.format(reverseNode))
-				cmds.connectAttr('{}.twistAdd'.format(loc), '{}.inputY'.format(reverseNode))
+		if side == naming.side.left:
+			cmds.setAttr('{}.twistSide'.format(globalGrp), -1, lock=True)
+		elif side == naming.side.right:
+			cmds.setAttr('{}.twistSide'.format(globalGrp), 1, lock=True)
 
-				cmds.connectAttr('{}.outputX'.format(reverseNode), '{}.input1'.format(add))
-				cmds.connectAttr('{}.outputY'.format(reverseNode), '{}.input2'.format(add))
+		mirror = cmds.createNode('multiplyDivide', name='{}_mirror_mult0'.format(name))
 
-			else:
-				cmds.connectAttr('{}.rx'.format(loc), '{}.input1'.format(add))
-				cmds.connectAttr('{}.twistAdd'.format(loc), '{}.input2'.format(add))
+		axis = 'X'
+		for attr in ['start', 'end']:
+			add = cmds.createNode('addDoubleLinear', name='{}_{}_add0'.format(name, attr))
+			cmds.connectAttr('{}.{}TwistAmount'.format(globalGrp, attr), '{}.input1'.format(add))
+			cmds.connectAttr('{}.{}TwistAdd'.format(globalGrp, attr), '{}.input2'.format(add))
 
 			cmds.connectAttr('{}.output'.format(add), '{}.max{}'.format(rangeNode, axis))
-			cmds.connectAttr('{}.outValue{}'.format(rangeNode, axis), '{}.{}Angle'.format(twistShape, angle))
-			cmds.connectAttr('{}.twist'.format(loc), '{}.value{}'.format(rangeNode, axis))
+			cmds.connectAttr('{}.{}Twist'.format(globalGrp, attr), '{}.value{}'.format(rangeNode, axis))
+
+			cmds.connectAttr('{}.twistSide'.format(globalGrp), '{}.input1{}'.format(mirror, axis))
+			cmds.connectAttr('{}.outValue{}'.format(rangeNode, axis), '{}.input2{}'.format(mirror, axis))
+			cmds.connectAttr('{}.output{}'.format(mirror, axis), '{}.{}Angle'.format(twistShape, attr))
+			axis = 'Y'
+
+
+
 
 		# SnS
 		cmds.addAttr(globalGrp, ln='sns', min=0, max=1, dv=1, k=True)
+		cmds.addAttr(globalGrp, ln='snsAdd', k=True)
 		cmds.addAttr(globalGrp, ln='snsHighBound', k=True, min=0, max=1, dv=1)
 		cmds.addAttr(globalGrp, ln='snsLowBound', k=True, min=0, max=1, dv=1)
-		cmds.addAttr(globalGrp, ln='snsAdd', k=True)
 
 		curveInfo = createCurveInfo(curve)
 		divideA = cmds.createNode('multiplyDivide', name='{}_divide0'.format(name))
@@ -1877,7 +1886,7 @@ class createFlexiPlane():
 		cmds.connectAttr('{}.arcLength'.format(curveInfo), '{}.input1X'.format(divideA))
 		cmds.connectAttr('{}.outputX'.format(divideA), '{}.input2X'.format(divideB))
 
-		setRange = cmds.createNode('setRange', name='{}_setRange0'.format(name))
+		setRange = cmds.createNode('setRange', name='{}_sns_setRange0'.format(name))
 		cmds.setAttr('{}.minX'.format(setRange), 1)
 		cmds.setAttr('{}.oldMaxX'.format(setRange), 1)
 		cmds.connectAttr('{}.sns'.format(globalGrp), '{}.valueX'.format(setRange))
@@ -1931,7 +1940,7 @@ class createFlexiPlane():
 			#cmds.connectAttr('{}.outValueX'.format(setRangeA), '{}.maxX'.format(setRangeB))
 			'''
 			for axis in ['y', 'z']:
-				#cmds.connectAttr('{}.output'.format(multC), '{}.s{}'.format(follicle, axis))
+				# cmds.connectAttr('{}.output'.format(multC), '{}.s{}'.format(follicle, axis))
 				cmds.connectAttr('{}.output'.format(add), '{}.s{}'.format(follicle, axis))
 
 		# Hierarchy

@@ -26,8 +26,8 @@ def rigFromTemplate(*args):
 	spine = parts.SPINE(objects=['CenterSpine0', 'CenterSpine1', 'CenterSpine2', ],
 	                    networkRoot=root.network)
 
-	neck = parts.NECK(objects=['CenterNeck0'], networkRoot=root.network)
-	head = parts.HEAD(head='CenterHead', networkRoot=root.network)
+	#neck = parts.NECK(objects=['CenterNeck0'], networkRoot=root.network)
+	#head = parts.HEAD(head='CenterHead', networkRoot=root.network)
 
 	armL = parts.ARM(side=naming.side.left,
 	                 collar='LeftArmCollar',

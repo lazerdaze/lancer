@@ -575,7 +575,7 @@ class RIBBONLIMB:
 	             name=naming.rig.ribbon,
 	             scale=1,
 	             axis=None,
-	             side=None,
+	             side=naming.side.left,
 	             ):
 		self.start = start
 		self.startParent = self.getStartParent()
@@ -758,9 +758,6 @@ class RIBBONLIMB:
 			cmds.parent(grp, self.lowerFlexiPlane.follicle[i])
 			i += 1
 
-		#cmds.parent(self.midGroup[0], self.mainControl[2])
-		#cmds.scaleConstraint(self.upperFlexiPlane.follicle[0], self.mainGroup[0], mo=True)
-		#cmds.parent(self.detailGroup[-1], self.mainControl[-1])
 		cmds.parent(self.midGroup[0], self.upperFlexiPlane.follicle[-1])
 		cmds.orientConstraint(self.mainControl[2], self.midGroup[0], mo=True)
 		cmds.orientConstraint(self.mainControl[-1], self.detailGroup[-1], mo=True)
@@ -771,29 +768,15 @@ class RIBBONLIMB:
 		return
 
 	def createTwist(self):
-		add = cmds.createNode('plusMinusAverage', name='{}_add0'.format(self.name))
-		cmds.connectAttr('{}.rx'.format(self.mainControl[0]), '{}.input3D[0].input3Dx'.format(add))
-		cmds.connectAttr('{}.rx'.format(self.mainControl[2]), '{}.input3D[0].input3Dy'.format(add))
-		cmds.connectAttr('{}.rx'.format(self.mainControl[-1]), '{}.input3D[0].input3Dz'.format(add))
+		cmds.connectAttr('{}.rx'.format(self.mainControl[0]), '{}.startTwistAmount'.format(self.upperFlexiPlane.parent))
+		cmds.connectAttr('{}.rx'.format(self.mainControl[2]), '{}.endTwistAmount'.format(self.upperFlexiPlane.parent))
 
-		if self.side == naming.side.right:
-			reverseNode = cmds.createNode('reverse', name='{}_reverse0'.format(self.name))
-			cmds.connectAttr('{}.rx'.format(self.start), '{}.inputX'.format(reverseNode))
+		cmds.connectAttr('{}.rx'.format(self.mainControl[2]), '{}.startTwistAmount'.format(self.lowerFlexiPlane.parent))
+		cmds.connectAttr('{}.rx'.format(self.mainControl[-1]), '{}.endTwistAmount'.format(self.lowerFlexiPlane.parent))
 
-			#cmds.connectAttr('{}.outputX'.format(reverseNode), '{}.input3D[1].input3Dy'.format(add))
-			cmds.connectAttr('{}.rx'.format(self.start), '{}.input3D[1].input3Dy'.format(add))
-			cmds.connectAttr('{}.outputX'.format(reverseNode), '{}.input3D[2].input3Dz'.format(add))
-
-		else:
-			cmds.connectAttr('{}.rx'.format(self.start), '{}.input3D[1].input3Dy'.format(add))
-			cmds.connectAttr('{}.rx'.format(self.start), '{}.input3D[2].input3Dz'.format(add))
-			cmds.connectAttr('{}.rx'.format(self.end), '{}.input3D[1].input3Dz'.format(add))
-
-		cmds.connectAttr('{}.output3Dx'.format(add), '{}.rx'.format(self.upperFlexiPlane.control[0]))
-		cmds.connectAttr('{}.output3Dy'.format(add), '{}.rx'.format(self.upperFlexiPlane.control[-1]))
-
-		cmds.connectAttr('{}.output3Dy'.format(add), '{}.rx'.format(self.lowerFlexiPlane.control[0]))
-		cmds.connectAttr('{}.output3Dz'.format(add), '{}.rx'.format(self.lowerFlexiPlane.control[-1]))
+		cmds.connectAttr('{}.rx'.format(self.start), '{}.endTwistAdd'.format(self.upperFlexiPlane.parent))
+		cmds.connectAttr('{}.rx'.format(self.start), '{}.startTwistAdd'.format(self.lowerFlexiPlane.parent))
+		cmds.connectAttr('{}.rx'.format(self.start), '{}.endTwistAdd'.format(self.lowerFlexiPlane.parent))
 
 		return
 
@@ -1819,8 +1802,6 @@ class ARM(BASE):
 		if parent:
 			cmds.parent(ctl.group, parent[0])
 
-
-
 		self.collarFKControl = ctl.transform
 		self.collarFKGroup = ctl.group
 
@@ -1886,11 +1867,11 @@ class HAND2(BASE):
 		super(HAND, self).__init__(selected=selected, name=name, scale=scale, index=0, typ=ults.component.hand)
 
 		self.handDict = {
-			ults.component.thumb : [],
-			ults.component.index : [],
+			ults.component.thumb: [],
+			ults.component.index: [],
 			ults.component.middle: [],
-			ults.component.ring  : [],
-			ults.component.pinky : [],
+			ults.component.ring: [],
+			ults.component.pinky: [],
 		}
 
 		if self.selected:
@@ -2266,8 +2247,8 @@ class createIKFootPivot():
 		loc = cmds.spaceLocator()
 		snap(end, loc, t=True, r=False)
 		cmds.delete(
-				cmds.aimConstraint(loc, masterGrp, aimVector=[0, 0, 1], upVector=[0, 1, 0], worldUpType='vector',
-				                   worldUpVector=[0, 1, 0], skip=['x', 'z']))
+			cmds.aimConstraint(loc, masterGrp, aimVector=[0, 0, 1], upVector=[0, 1, 0], worldUpType='vector',
+			                   worldUpVector=[0, 1, 0], skip=['x', 'z']))
 		cmds.delete(loc)
 
 		bounds = estimateBoundsByJoint(start)
@@ -2318,12 +2299,12 @@ class createIKFootPivot():
 		addEmptyAttr(ctl, n='footPivot')
 
 		attrDict = {
-			'roll'     : 0,
+			'roll': 0,
 			'heelAngle': 45,
 			'ballAngle': 45,
-			'toeAngle' : 70,
-			'toeRaise' : 0,
-			'bank'     : 0,
+			'toeAngle': 70,
+			'toeRaise': 0,
+			'bank': 0,
 		}
 
 		for attr in attrDict:
