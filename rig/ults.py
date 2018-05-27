@@ -1758,7 +1758,7 @@ class createFlexiPlane():
 
 		# BlendShape
 		dup = cmds.duplicate(plane, name='{}_twist_blend'.format(plane))
-		blendshape = cmds.blendShape(dup, plane, at=True, name='{}_blendShape0'.format(name), weight=[0, 1])
+		blendshape = cmds.blendShape(dup, plane, name='{}_blendShape0'.format(name), weight=[0, 1])
 
 		step = 1.0 / float(amount - 1)
 		uPos = 0

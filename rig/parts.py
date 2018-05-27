@@ -278,7 +278,7 @@ class DETAILCONTROL(CONTROL):
 		                 index=index,
 		                 side=side,
 		                 label=label,
-		                 color=naming.rig.detail,
+		                 color=[.5,1,1],
 		                 axis=axis,
 		                 )
 
@@ -613,10 +613,11 @@ class RIBBONLIMB:
 		self.createDetailControls()
 		self.createRibbon()
 		self.createTwist()
+		self.createHierarchy()
 		self.cleanUp()
 
 	def getScale(self):
-		self.scale = ults.getDistance(self.start, self.mid) / 2
+		self.scale = ults.getDistance(self.start, self.mid) / 3
 		return
 
 	def getStartParent(self):
@@ -635,7 +636,7 @@ class RIBBONLIMB:
 			              scale=self.scale,
 			              axis=self.axis,
 			              child=obj,
-			              color=[.5, 1, .75],
+			              color=[0, .7, .7],
 			              )
 
 			cmds.parent(ctl.group, obj)
@@ -655,7 +656,7 @@ class RIBBONLIMB:
 			              typ=control.component.hexigon,
 			              scale=self.scale,
 			              axis=self.axis,
-			              color=[.5,1,.75],
+			              color=[0, .7, .7],
 			              )
 
 			cmds.parent(ctl.group, self.objects[i])
@@ -920,6 +921,25 @@ class BASE(object):
 					self.detailObjects.append(child)
 					self.detailControl.append(ctl.transform)
 					self.detailGroup.append(ctl.group)
+		return
+
+	def createRibbonChain(self, start, mid, end, upperObjects, midObjects, lowerObjects):
+		ribbon = RIBBONLIMB(name=naming.convention(self.name,
+		                                           self.side[0].upper(),
+		                                           self.index,
+		                                           naming.rig.ribbon,
+		                                           ),
+		                    start=start,
+		                    mid=mid,
+		                    end=end,
+		                    upperObjects=upperObjects,
+		                    lowerObjects=lowerObjects,
+		                    midObject=midObjects,
+		                    )
+
+		self.detailObjects = upperObjects + lowerObjects + ults.listCheck(midObjects)
+		self.detailControl = ribbon.detailControl
+		self.detailGroup = ribbon.detailGroup
 		return
 
 	def createFKChain(self, objects, name=None):
@@ -1707,7 +1727,8 @@ class ARM(BASE):
 		if self.collar:
 			self.createCollar()
 
-		#self.createDetailChain(self.objects)
+		# self.createDetailChain(self.objects)
+		self.createRibbon()
 
 		if self.networkRoot:
 			self.createLocalWorld(obj=self.fkControl[0],
@@ -1719,8 +1740,9 @@ class ARM(BASE):
 			                                         self.index,
 			                                         )
 			                   )
-			#self.createNetworkConnections()
-			#self.updateNetwork()
+
+			self.createNetworkConnections()
+			self.updateNetwork()
 
 	def getScale(self):
 		self.scale = ults.getDistance(self.shoulder, self.elbow) / 2.5
@@ -1753,6 +1775,22 @@ class ARM(BASE):
 		self.collarFKGroup = ctl.group
 
 		self.objects.insert(0, self.collar)
+		return
+
+	def createRibbon(self):
+		upper = skeleton.getBindJoint(self.shoulder)
+		lower = skeleton.getBindJoint(self.elbow)
+
+		if upper and lower:
+			middle = lower[0]
+			lower.remove(lower[0])
+			self.createRibbonChain(start=self.shoulder,
+			                       mid=self.elbow,
+			                       end=self.hand,
+			                       upperObjects=upper,
+			                       midObjects=middle,
+			                       lowerObjects=lower,
+			                       )
 		return
 
 	def updateNetwork(self):
@@ -1885,11 +1923,11 @@ class HAND(BASE):
 		super(HAND, self).__init__(selected=selected, name=name, scale=scale, index=0, typ=ults.component.hand)
 
 		self.handDict = {
-			ults.component.thumb : [],
-			ults.component.index : [],
+			ults.component.thumb: [],
+			ults.component.index: [],
 			ults.component.middle: [],
-			ults.component.ring  : [],
-			ults.component.pinky : [],
+			ults.component.ring: [],
+			ults.component.pinky: [],
 		}
 
 		if self.selected:
@@ -2151,8 +2189,8 @@ class createIKFootPivot():
 		loc = cmds.spaceLocator()
 		snap(end, loc, t=True, r=False)
 		cmds.delete(
-				cmds.aimConstraint(loc, masterGrp, aimVector=[0, 0, 1], upVector=[0, 1, 0], worldUpType='vector',
-				                   worldUpVector=[0, 1, 0], skip=['x', 'z']))
+			cmds.aimConstraint(loc, masterGrp, aimVector=[0, 0, 1], upVector=[0, 1, 0], worldUpType='vector',
+			                   worldUpVector=[0, 1, 0], skip=['x', 'z']))
 		cmds.delete(loc)
 
 		bounds = estimateBoundsByJoint(start)
@@ -2203,12 +2241,12 @@ class createIKFootPivot():
 		addEmptyAttr(ctl, n='footPivot')
 
 		attrDict = {
-			'roll'     : 0,
+			'roll': 0,
 			'heelAngle': 45,
 			'ballAngle': 45,
-			'toeAngle' : 70,
-			'toeRaise' : 0,
-			'bank'     : 0,
+			'toeAngle': 70,
+			'toeRaise': 0,
+			'bank': 0,
 		}
 
 		for attr in attrDict:
