@@ -1751,7 +1751,16 @@ def createFollicle(name='follicle0'):
 
 
 class createFlexiPlane():
-	def __init__(self, name='felxi', amount=5, width=10):
+	def __init__(self, name='felxi', amount=5, width=10, side='Left'):
+		"""
+		:param name:    Name of component.
+		:param amount:  Amount of follicles to be created.
+		:param width:   Total length of the plane.
+		"""
+		# Global Node
+		globalGrp = cmds.group(name='{}_global_grp'.format(name), em=True)
+
+		# Nurbs Plane
 		axis = [0, 1, 0]
 		plane = cmds.nurbsPlane(name='{}_plane'.format(name), ax=axis, w=width, lr=0.1, d=3, u=amount, v=1, ch=0)[0]
 		planeShape = cmds.listRelatives(plane, shapes=True)[0]
@@ -1790,11 +1799,16 @@ class createFlexiPlane():
 			loc = cmds.spaceLocator(name='{}_{}_locator'.format(name, i))[0]
 			grp = cmds.group(loc, name='{}_grp'.format(loc))
 			cmds.xform(grp, ws=True, t=[x, 0, 0])
+			setVisibility(grp)
 			locList.append(loc)
 			locGrpList.append(grp)
 			i += 1
 
 		pc = cmds.pointConstraint(locList[0], locList[2], locGrpList[1], mo=True)
+
+		for loc in [locList[0], locList[2]]:
+			cmds.addAttr(loc, ln='twist', min=0, max=1, dv=1, k=True)
+			cmds.addAttr(loc, ln='twistAdd', k=True, at='doubleAngle')
 
 		# Curve
 
@@ -1813,19 +1827,117 @@ class createFlexiPlane():
 		cmds.setAttr('{}.dropoffDistance[0]'.format(wire[0]), 20)
 
 		# TwistDeformer
-
 		twist = cmds.nonLinear(dup, type='twist', name='{}_twist'.format(name))
 		twistShape = cmds.rename(twist[0], '{}_twist'.format(name))
 		twistTransform = cmds.rename(twist[1], '{}_twistHandle'.format(name))
-
 		cmds.setAttr('{}.rz'.format(twistTransform), 90)
-		cmds.connectAttr('{}.rx'.format(locList[0]), '{}.endAngle'.format(twistShape))
-		cmds.connectAttr('{}.rx'.format(locList[2]), '{}.startAngle'.format(twistShape))
+
+		rangeNode = cmds.createNode('setRange', name='{}_setRange0'.format(name))
+		addList = []
+		for axis in ['x', 'y', 'z']:
+			cmds.setAttr('{}.oldMax{}'.format(rangeNode, axis.upper()), 1)
+
+		print side, naming.side.right
+		for loc in [locList[0], locList[2]]:
+			i = locList.index(loc)
+			axis = 'X' if i == 0 else 'Y'
+			angle = 'end' if i == 0 else 'start'
+			add = cmds.createNode('addDoubleLinear', name='{}_add0'.format(loc))
+
+			if side == naming.side.right:
+				reverseNode = cmds.createNode('reverse', name='{}_reverse0'.format(name))
+				cmds.connectAttr('{}.rx'.format(loc), '{}.inputX'.format(reverseNode))
+				cmds.connectAttr('{}.twistAdd'.format(loc), '{}.inputY'.format(reverseNode))
+
+				cmds.connectAttr('{}.outputX'.format(reverseNode), '{}.input1'.format(add))
+				cmds.connectAttr('{}.outputY'.format(reverseNode), '{}.input2'.format(add))
+
+			else:
+				cmds.connectAttr('{}.rx'.format(loc), '{}.input1'.format(add))
+				cmds.connectAttr('{}.twistAdd'.format(loc), '{}.input2'.format(add))
+
+			cmds.connectAttr('{}.output'.format(add), '{}.max{}'.format(rangeNode, axis))
+			cmds.connectAttr('{}.outValue{}'.format(rangeNode, axis), '{}.{}Angle'.format(twistShape, angle))
+			cmds.connectAttr('{}.twist'.format(loc), '{}.value{}'.format(rangeNode, axis))
+
+		# SnS
+		cmds.addAttr(globalGrp, ln='sns', min=0, max=1, dv=1, k=True)
+		cmds.addAttr(globalGrp, ln='snsHighBound', k=True, min=0, max=1, dv=1)
+		cmds.addAttr(globalGrp, ln='snsLowBound', k=True, min=0, max=1, dv=1)
+		cmds.addAttr(globalGrp, ln='snsAdd', k=True)
+
+		curveInfo = createCurveInfo(curve)
+		divideA = cmds.createNode('multiplyDivide', name='{}_divide0'.format(name))
+		cmds.setAttr('{}.operation'.format(divideA), 2)
+		cmds.setAttr('{}.input2X'.format(divideA), width)
+		divideB = cmds.createNode('multiplyDivide', name='{}_divide0'.format(name))
+		cmds.setAttr('{}.operation'.format(divideB), 2)
+		cmds.setAttr('{}.input1X'.format(divideB), 1)
+
+		cmds.connectAttr('{}.arcLength'.format(curveInfo), '{}.input1X'.format(divideA))
+		cmds.connectAttr('{}.outputX'.format(divideA), '{}.input2X'.format(divideB))
+
+		setRange = cmds.createNode('setRange', name='{}_setRange0'.format(name))
+		cmds.setAttr('{}.minX'.format(setRange), 1)
+		cmds.setAttr('{}.oldMaxX'.format(setRange), 1)
+		cmds.connectAttr('{}.sns'.format(globalGrp), '{}.valueX'.format(setRange))
+		cmds.connectAttr('{}.outputX'.format(divideB), '{}.maxX'.format(setRange))
+
+		add = cmds.createNode('addDoubleLinear', name='{}_add0'.format(name))
+		cmds.connectAttr('{}.outValueX'.format(setRange), '{}.input1'.format(add))
+		cmds.connectAttr('{}.snsAdd'.format(globalGrp), '{}.input2'.format(add))
+
+		var = 0
+		step = 1.0 / float(amount - 1)
+		stepRangePos = []
+
+		for x in range(amount):
+			if x == 0:
+				stepRangePos.append(.1)
+			else:
+				stepRangePos.append(var)
+			var += step
+
+		stepRangeNeg = list(reversed(stepRangePos))
+
+		for follicle in follicleList:
+			i = follicleList.index(follicle)
+			'''
+			#Lowbound
+			multA = cmds.createNode('multDoubleLinear', name='{}_lowbound_mult0'.format(follicle))
+			cmds.setAttr('{}.input1'.format(multA), stepRangePos[i])
+			cmds.connectAttr('{}.snsLowBound'.format(globalGrp), '{}.input2'.format(multA))
+
+			setRangeA = cmds.createNode('setRange', name='{}_lowbound_setRange0'.format(follicle))
+			cmds.setAttr('{}.minX'.format(setRangeA), 1)
+			cmds.setAttr('{}.oldMaxX'.format(setRangeA), 1)
+			cmds.connectAttr('{}.output'.format(multA), '{}.valueX'.format(setRangeA))
+			cmds.connectAttr('{}.output'.format(add), '{}.maxX'.format(setRangeA))
+
+			#Highbound
+			multB = cmds.createNode('multDoubleLinear', name='{}_highbound_mult0'.format(follicle))
+			cmds.setAttr('{}.input1'.format(multB), stepRangeNeg[i])
+			cmds.connectAttr('{}.snsHighBound'.format(globalGrp), '{}.input2'.format(multB))
+
+			setRangeB = cmds.createNode('setRange', name='{}_highbound_setRange0'.format(follicle))
+			cmds.setAttr('{}.minX'.format(setRangeB), 1)
+			cmds.setAttr('{}.oldMaxX'.format(setRangeB), 1)
+			cmds.connectAttr('{}.output'.format(multB), '{}.valueX'.format(setRangeB))
+			cmds.connectAttr('{}.output'.format(add), '{}.maxX'.format(setRangeB))
+
+			multC = cmds.createNode('multDoubleLinear', name='{}_mult0'.format(follicle))
+			cmds.connectAttr('{}.outValueX'.format(setRangeA), '{}.input1'.format(multC))
+			cmds.connectAttr('{}.outValueX'.format(setRangeB), '{}.input2'.format(multC))
+			#cmds.connectAttr('{}.outValueX'.format(setRangeA), '{}.maxX'.format(setRangeB))
+			'''
+			for axis in ['y', 'z']:
+				#cmds.connectAttr('{}.output'.format(multC), '{}.s{}'.format(follicle, axis))
+				cmds.connectAttr('{}.output'.format(add), '{}.s{}'.format(follicle, axis))
 
 		# Hierarchy
 		extrasGrp = cmds.group(name='{}_extras_grp'.format(name), em=True)
 		follicleGrp = cmds.group(name='{}_follicle_grp'.format(name), em=True)
-		globalGrp = cmds.group(extrasGrp, follicleGrp, name='{}_global_grp'.format(name))
+		cmds.parent(extrasGrp, follicleGrp, globalGrp)
 
 		cmds.setAttr('{}.v'.format(extrasGrp), 0)
 		cmds.parent(locGrpList, globalGrp)
@@ -1850,6 +1962,13 @@ class createFlexiPlane():
 		self.parent = globalGrp
 		self.extra = extrasGrp
 		self.constraint = pc
+
+
+def createCurveInfo(curve):
+	node = cmds.createNode('curveInfo', name='{}_curveInfo0'.format(curve))
+	shape = cmds.listRelatives(curve, shapes=True)[0]
+	cmds.connectAttr('{}.worldSpace[0]'.format(shape), '{}.inputCurve'.format(node))
+	return node
 
 
 #########################################################################################################################

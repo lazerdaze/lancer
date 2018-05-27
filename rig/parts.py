@@ -278,7 +278,7 @@ class DETAILCONTROL(CONTROL):
 		                 index=index,
 		                 side=side,
 		                 label=label,
-		                 color=[.5,1,1],
+		                 color=[.5, 1, 1],
 		                 axis=axis,
 		                 )
 
@@ -550,7 +550,7 @@ class RIBBONCHAIN(CHAIN):
 		endObject = self.objects[-1]
 		amount = len(self.objects)
 		distance = ults.getDistance(startObject, endObject)
-		flex = ults.createFlexiPlane(name=self.name, amount=amount, width=distance)
+		flex = ults.createFlexiPlane(name=self.name, amount=amount, width=distance, side=self.side)
 
 		cmds.delete(cmds.parentConstraint(startObject, endObject, flex.parent))
 
@@ -590,6 +590,7 @@ class RIBBONLIMB:
 		self.scale = scale
 		self.axis = axis
 		self.side = side
+		self.color = [0, .7, .7]
 
 		self.mainControl = []
 		self.mainGroup = []
@@ -612,8 +613,8 @@ class RIBBONLIMB:
 		self.createIntermediateControls()
 		self.createDetailControls()
 		self.createRibbon()
-		self.createTwist()
 		self.createHierarchy()
+		self.createTwist()
 		self.cleanUp()
 
 	def getScale(self):
@@ -632,11 +633,11 @@ class RIBBONLIMB:
 			                                     i,
 			                                     naming.rig.ctl,
 			                                     ),
-			              typ=control.component.hexigon,
+			              typ=control.component.octagon,
 			              scale=self.scale,
 			              axis=self.axis,
 			              child=obj,
-			              color=[0, .7, .7],
+			              color=self.color,
 			              )
 
 			cmds.parent(ctl.group, obj)
@@ -656,7 +657,7 @@ class RIBBONLIMB:
 			              typ=control.component.hexigon,
 			              scale=self.scale,
 			              axis=self.axis,
-			              color=[0, .7, .7],
+			              color=self.color,
 			              )
 
 			cmds.parent(ctl.group, self.objects[i])
@@ -738,13 +739,13 @@ class RIBBONLIMB:
 
 	def createHierarchy(self):
 		i = 0
-		for grp in self.upperFlexiPlane.group:
-			cmds.parent(grp, self.mainControl[i])
+		for ctl in self.upperFlexiPlane.control:
+			cmds.pointConstraint(self.mainControl[i], ctl)
 			i += 1
 
 		i = 2
-		for grp in self.lowerFlexiPlane.group:
-			cmds.parent(grp, self.mainControl[i])
+		for ctl in self.lowerFlexiPlane.control:
+			cmds.pointConstraint(self.mainControl[i], ctl)
 			i += 1
 
 		i = 0
@@ -757,12 +758,16 @@ class RIBBONLIMB:
 			cmds.parent(grp, self.lowerFlexiPlane.follicle[i])
 			i += 1
 
-		cmds.parent(self.midGroup[0], self.mainControl[2])
+		#cmds.parent(self.midGroup[0], self.mainControl[2])
+		#cmds.scaleConstraint(self.upperFlexiPlane.follicle[0], self.mainGroup[0], mo=True)
+		#cmds.parent(self.detailGroup[-1], self.mainControl[-1])
+		cmds.parent(self.midGroup[0], self.upperFlexiPlane.follicle[-1])
+		cmds.orientConstraint(self.mainControl[2], self.midGroup[0], mo=True)
+		cmds.orientConstraint(self.mainControl[-1], self.detailGroup[-1], mo=True)
 
 		if self.startParent:
 			cmds.parent(self.upperFlexiPlane.parent, self.startParent)
-
-		cmds.parent(self.lowerFlexiPlane.parent, self.mid)
+			cmds.parent(self.lowerFlexiPlane.parent, self.startParent)
 		return
 
 	def createTwist(self):
@@ -771,15 +776,25 @@ class RIBBONLIMB:
 		cmds.connectAttr('{}.rx'.format(self.mainControl[2]), '{}.input3D[0].input3Dy'.format(add))
 		cmds.connectAttr('{}.rx'.format(self.mainControl[-1]), '{}.input3D[0].input3Dz'.format(add))
 
+		if self.side == naming.side.right:
+			reverseNode = cmds.createNode('reverse', name='{}_reverse0'.format(self.name))
+			cmds.connectAttr('{}.rx'.format(self.start), '{}.inputX'.format(reverseNode))
+
+			#cmds.connectAttr('{}.outputX'.format(reverseNode), '{}.input3D[1].input3Dy'.format(add))
+			cmds.connectAttr('{}.rx'.format(self.start), '{}.input3D[1].input3Dy'.format(add))
+			cmds.connectAttr('{}.outputX'.format(reverseNode), '{}.input3D[2].input3Dz'.format(add))
+
+		else:
+			cmds.connectAttr('{}.rx'.format(self.start), '{}.input3D[1].input3Dy'.format(add))
+			cmds.connectAttr('{}.rx'.format(self.start), '{}.input3D[2].input3Dz'.format(add))
+			cmds.connectAttr('{}.rx'.format(self.end), '{}.input3D[1].input3Dz'.format(add))
+
 		cmds.connectAttr('{}.output3Dx'.format(add), '{}.rx'.format(self.upperFlexiPlane.control[0]))
 		cmds.connectAttr('{}.output3Dy'.format(add), '{}.rx'.format(self.upperFlexiPlane.control[-1]))
 
 		cmds.connectAttr('{}.output3Dy'.format(add), '{}.rx'.format(self.lowerFlexiPlane.control[0]))
 		cmds.connectAttr('{}.output3Dz'.format(add), '{}.rx'.format(self.lowerFlexiPlane.control[-1]))
 
-		cmds.connectAttr('{}.rx'.format(self.start), '{}.input3D[1].input3Dy'.format(add))
-		cmds.connectAttr('{}.rx'.format(self.start), '{}.input3D[2].input3Dz'.format(add))
-		cmds.connectAttr('{}.rx'.format(self.end), '{}.input3D[1].input3Dz'.format(add))
 		return
 
 	def createFlexiPlane(self, start, end, amount, name):
@@ -787,6 +802,7 @@ class RIBBONLIMB:
 		flex = ults.createFlexiPlane(name=name,
 		                             amount=amount,
 		                             width=distance,
+		                             side=self.side,
 		                             )
 
 		cmds.delete(cmds.parentConstraint(start, end, flex.parent))
@@ -860,6 +876,9 @@ class BASE(object):
 		self.ikPoleVector = None
 		self.ikParent = None
 
+		self.ribbonControl = []
+		self.ribbonGroup = []
+
 		self.detailObjects = []
 		self.detailControl = []
 		self.detailGroup = []
@@ -895,7 +914,7 @@ class BASE(object):
 		objects = ults.listCheck(objects)
 		indexNum = 0
 		for obj in objects:
-			i = self.objects.index(obj)
+			i = objects.index(obj)
 			children = skeleton.getBindJoint(obj)
 
 			if children:
@@ -923,26 +942,49 @@ class BASE(object):
 					self.detailGroup.append(ctl.group)
 		return
 
-	def createRibbonChain(self, start, mid, end, upperObjects, midObjects, lowerObjects):
-		ribbon = RIBBONLIMB(name=naming.convention(self.name,
-		                                           self.side[0].upper(),
-		                                           self.index,
-		                                           naming.rig.ribbon,
-		                                           ),
-		                    start=start,
-		                    mid=mid,
-		                    end=end,
-		                    upperObjects=upperObjects,
-		                    lowerObjects=lowerObjects,
-		                    midObject=midObjects,
-		                    )
+	def createRibbonChain(self, start, mid, end):
+		upperObjects = skeleton.getBindJoint(start)
+		lowerObjects = skeleton.getBindJoint(mid)
 
-		self.detailObjects = upperObjects + lowerObjects + ults.listCheck(midObjects)
-		self.detailControl = ribbon.detailControl
-		self.detailGroup = ribbon.detailGroup
+		if upperObjects and lowerObjects:
+			midObjects = lowerObjects[0]
+			lowerObjects.remove(lowerObjects[0])
+
+			ribbon = RIBBONLIMB(name=naming.convention(self.name,
+			                                           self.side[0].upper(),
+			                                           self.index,
+			                                           naming.rig.ribbon,
+			                                           ),
+			                    start=start,
+			                    mid=mid,
+			                    end=end,
+			                    upperObjects=upperObjects,
+			                    lowerObjects=lowerObjects,
+			                    midObject=midObjects,
+			                    side=self.side,
+			                    )
+
+			self.detailObjects = self.detailObjects + upperObjects + lowerObjects + ults.listCheck(midObjects)
+			self.detailControl = self.detailControl + ribbon.detailControl
+			self.detailGroup = self.detailGroup + ribbon.detailGroup
+
+			self.ribbonControl = ribbon.mainControl
+			self.ribbonGroup = ribbon.mainGroup
+
+			if self.attrControl:
+				attrName = ['sns', 'snsAdd']
+				cmds.addAttr(self.attrControl, ln=attrName[0], min=0, max=1, dv=0, k=True)
+				cmds.addAttr(self.attrControl, ln=attrName[1], k=True)
+
+				for attr in attrName:
+					cmds.connectAttr('{}.{}'.format(self.attrControl, attr),
+					                 '{}.{}'.format(ribbon.upperFlexiPlane.parent, attr))
+					cmds.connectAttr('{}.{}'.format(self.attrControl, attr),
+					                 '{}.{}'.format(ribbon.lowerFlexiPlane.parent, attr))
+
 		return
 
-	def createFKChain(self, objects, name=None):
+	def createFKChain(self, objects):
 		name = naming.convention(self.name,
 		                         self.side.upper()[0],
 		                         self.index,
@@ -1286,6 +1328,12 @@ class BASE(object):
 
 			for detail in self.detailGroup:
 				cmds.connectAttr('{}.{}'.format(self.network, attrName), '{}.v'.format(detail))
+
+			if self.ribbonControl:
+				self.multiConnectToNetwork(self.ribbonControl, self.network, 'ribbonControl')
+
+				for ribbon in self.ribbonGroup:
+					cmds.connectAttr('{}.{}'.format(self.network, attrName), '{}.v'.format(ribbon))
 
 		# FK Control
 		if self.fkControl:
@@ -1725,10 +1773,10 @@ class ARM(BASE):
 		self.createFKIKChain(self.objects)
 
 		if self.collar:
+			self.createDetailChain(self.collar)
 			self.createCollar()
 
-		# self.createDetailChain(self.objects)
-		self.createRibbon()
+		self.createRibbonChain(self.shoulder, self.elbow, self.hand)
 
 		if self.networkRoot:
 			self.createLocalWorld(obj=self.fkControl[0],
@@ -1771,37 +1819,139 @@ class ARM(BASE):
 		if parent:
 			cmds.parent(ctl.group, parent[0])
 
+
+
 		self.collarFKControl = ctl.transform
 		self.collarFKGroup = ctl.group
 
 		self.objects.insert(0, self.collar)
 		return
 
-	def createRibbon(self):
-		upper = skeleton.getBindJoint(self.shoulder)
-		lower = skeleton.getBindJoint(self.elbow)
-
-		if upper and lower:
-			middle = lower[0]
-			lower.remove(lower[0])
-			self.createRibbonChain(start=self.shoulder,
-			                       mid=self.elbow,
-			                       end=self.hand,
-			                       upperObjects=upper,
-			                       midObjects=middle,
-			                       lowerObjects=lower,
-			                       )
+	def createHand(self):
 		return
 
 	def updateNetwork(self):
-
 		# Collar
 		if self.collar:
 			self.connectToNetwork(self.collar, self.network, 'skeletonCollar')
 
 		if self.collarFKControl:
 			self.connectToNetwork(self.collarFKControl, self.network, 'collarFkControl')
+
 		return
+
+
+class HAND(BASE):
+	def __init__(self,
+	             hand,
+	             side=None,
+	             networkRoot=None,
+	             name=naming.component.arm,
+	             index=0,
+	             ):
+		BASE.__init__(self,
+		              objects=ults.listCheck(hand),
+		              networkRoot=networkRoot,
+		              name=name,
+		              side=side,
+		              index=index,
+		              )
+
+
+class DIGIT(BASE):
+	def __init__(self,
+	             objects,
+	             side=None,
+	             networkRoot=None,
+	             name=naming.component.digit,
+	             index=0,
+	             ):
+		BASE.__init__(self,
+		              objects=objects,
+		              networkRoot=networkRoot,
+		              name=name,
+		              side=side,
+		              index=index,
+		              )
+
+
+class HAND2(BASE):
+	def __init__(self,
+	             selected=None,
+	             name='hand',
+	             scale=1,
+	             index=0,
+	             *args
+	             ):
+		super(HAND, self).__init__(selected=selected, name=name, scale=scale, index=0, typ=ults.component.hand)
+
+		self.handDict = {
+			ults.component.thumb : [],
+			ults.component.index : [],
+			ults.component.middle: [],
+			ults.component.ring  : [],
+			ults.component.pinky : [],
+		}
+
+		if self.selected:
+			self.createControls()
+
+	def createControls(self):
+		self.bindJoint = []
+
+		cmds.addAttr(self.network, ln='finger', dt='string', m=True)
+
+		jointChain = self.getJointOrder()
+		if jointChain:
+			masterGrp = cmds.group(n=self.createName('rig_fk_ctl_grp'), em=True)
+			snap(self.selected[0], masterGrp, t=True, r=True)
+
+			i = 0
+			for chain in jointChain:
+				fingerRig = FINGER(jointChain[chain], index=i)
+				connectToNetwork(fingerRig.network, self.network, 'finger')
+
+				self.control = self.control + fingerRig.control
+				self.bindJoint.append(fingerRig.bindJoint)
+				cmds.parent(fingerRig.fkControl[0][1], masterGrp)
+				i += 1
+
+			self.group = masterGrp
+
+	def getJointOrder(self):
+		return self.getJointOrderByName() if not self.getJointOrderByLabel() else self.getJointOrderByLabel()
+
+	def getJointOrderByName(self):
+		chain = handJointHierarchy(self.selected)
+
+		handDict = self.handDict
+
+		for x in self.handDict:
+			for jnt in chain:
+				for j in jnt:
+					if x in j:
+						handDict[x] = jnt
+						break
+
+		return handDict
+
+	def getJointOrderByLabel(self):
+		chain = handJointHierarchy(self.selected)
+		handDict = self.handDict
+
+		newChain = []
+		for c in chain:
+			for x in c:
+				newChain.append(x)
+
+		newChain = jointLabel(newChain).get(self.typ, self.side)
+
+		i = 0
+		for x in self.handDict:
+			handDict[x] = newChain[i]
+			i += 1
+
+		return handDict
 
 
 class LEG(BASE):
@@ -1916,79 +2066,6 @@ class LEG2(BASE):
 
 					if cogCtl:
 						createLocalWorld(self.fkControl[0][0], local=hipCtl[0], world=cogCtl[0])
-
-
-class HAND(BASE):
-	def __init__(self, selected=None, name='hand', scale=1, index=0, *args):
-		super(HAND, self).__init__(selected=selected, name=name, scale=scale, index=0, typ=ults.component.hand)
-
-		self.handDict = {
-			ults.component.thumb: [],
-			ults.component.index: [],
-			ults.component.middle: [],
-			ults.component.ring: [],
-			ults.component.pinky: [],
-		}
-
-		if self.selected:
-			self.createControls()
-
-	def createControls(self):
-		self.bindJoint = []
-
-		cmds.addAttr(self.network, ln='finger', dt='string', m=True)
-
-		jointChain = self.getJointOrder()
-		if jointChain:
-			masterGrp = cmds.group(n=self.createName('rig_fk_ctl_grp'), em=True)
-			snap(self.selected[0], masterGrp, t=True, r=True)
-
-			i = 0
-			for chain in jointChain:
-				fingerRig = FINGER(jointChain[chain], index=i)
-				connectToNetwork(fingerRig.network, self.network, 'finger')
-
-				self.control = self.control + fingerRig.control
-				self.bindJoint.append(fingerRig.bindJoint)
-				cmds.parent(fingerRig.fkControl[0][1], masterGrp)
-				i += 1
-
-			self.group = masterGrp
-
-	def getJointOrder(self):
-		return self.getJointOrderByName() if not self.getJointOrderByLabel() else self.getJointOrderByLabel()
-
-	def getJointOrderByName(self):
-		chain = handJointHierarchy(self.selected)
-
-		handDict = self.handDict
-
-		for x in self.handDict:
-			for jnt in chain:
-				for j in jnt:
-					if x in j:
-						handDict[x] = jnt
-						break
-
-		return handDict
-
-	def getJointOrderByLabel(self):
-		chain = handJointHierarchy(self.selected)
-		handDict = self.handDict
-
-		newChain = []
-		for c in chain:
-			for x in c:
-				newChain.append(x)
-
-		newChain = jointLabel(newChain).get(self.typ, self.side)
-
-		i = 0
-		for x in self.handDict:
-			handDict[x] = newChain[i]
-			i += 1
-
-		return handDict
 
 
 class FINGER(BASE):
@@ -2189,8 +2266,8 @@ class createIKFootPivot():
 		loc = cmds.spaceLocator()
 		snap(end, loc, t=True, r=False)
 		cmds.delete(
-			cmds.aimConstraint(loc, masterGrp, aimVector=[0, 0, 1], upVector=[0, 1, 0], worldUpType='vector',
-			                   worldUpVector=[0, 1, 0], skip=['x', 'z']))
+				cmds.aimConstraint(loc, masterGrp, aimVector=[0, 0, 1], upVector=[0, 1, 0], worldUpType='vector',
+				                   worldUpVector=[0, 1, 0], skip=['x', 'z']))
 		cmds.delete(loc)
 
 		bounds = estimateBoundsByJoint(start)
@@ -2241,12 +2318,12 @@ class createIKFootPivot():
 		addEmptyAttr(ctl, n='footPivot')
 
 		attrDict = {
-			'roll': 0,
+			'roll'     : 0,
 			'heelAngle': 45,
 			'ballAngle': 45,
-			'toeAngle': 70,
-			'toeRaise': 0,
-			'bank': 0,
+			'toeAngle' : 70,
+			'toeRaise' : 0,
+			'bank'     : 0,
 		}
 
 		for attr in attrDict:

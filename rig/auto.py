@@ -7,8 +7,9 @@
 
 # Lancer Modules
 import parts
-
+import naming
 reload(parts)
+reload(naming)
 
 # Maya Modules
 from maya import cmds, mel
@@ -28,14 +29,14 @@ def rigFromTemplate(*args):
 	neck = parts.NECK(objects=['CenterNeck0'], networkRoot=root.network)
 	head = parts.HEAD(head='CenterHead', networkRoot=root.network)
 
-	armL = parts.ARM(side='Left',
+	armL = parts.ARM(side=naming.side.left,
 	                 collar='LeftArmCollar',
 	                 shoulder='LeftArmShoulder',
 	                 elbow='LeftArmElbow',
 	                 hand='LeftArmHand',
 	                 networkRoot=root.network,
 	                 )
-	armR = parts.ARM(side='Right',
+	armR = parts.ARM(side=naming.side.right,
 	                 collar='RightArmCollar',
 	                 shoulder='RightArmShoulder',
 	                 elbow='RightArmElbow',
@@ -56,7 +57,7 @@ def rigFromTemplate(*args):
 	                 foot='RightLegFoot',
 	                 networkRoot=root.network,
 	                 )
-
+	'''
 	armList = ['LeftArmShoulder', 'LeftArmElbow', 'LeftArmHand']
 	upperList = ['LeftArmShoulderBind0', 'LeftArmShoulderBind1']
 	lowerList = ['LeftArmElbowBind1', 'LeftArmElbowBind2']
@@ -69,6 +70,7 @@ def rigFromTemplate(*args):
 	                 lowerObjects=lowerList,
 	                 midObject=midObject,
 	                 )
+	'''
 	return
 
 
