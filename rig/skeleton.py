@@ -172,7 +172,7 @@ def getSkeletonTree(root, tree={}):
 	if children:
 		for child in children:
 			tree[child] = {
-				'children'  : getSkeletonTree(child, {}),
+				'children': getSkeletonTree(child, {}),
 				'attributes': getJointAttributes(child),
 			}
 
@@ -189,6 +189,12 @@ def reparentSkeletonTree(tree, parent=None):
 				if any(childDict):
 					reparentSkeletonTree(childDict, child)
 	return
+
+
+def getJointOrder(root):
+	joints = [root]
+	children = sortJointHierarchy(getAllJointChildren(root))
+	return joints + children
 
 
 def revertJointToBindPose(*args):
@@ -331,7 +337,6 @@ def setJointLabel(joint, side=None, typ=None, otherType=None):
 	if typ == 'Bind':
 		otherType = typ
 		typ = 'Other'
-
 
 	if side:
 		sideAttr = ults.setEnumByString(joint, 'side', side)

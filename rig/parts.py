@@ -175,11 +175,11 @@ class CONTROL(object):
 
 	def setLabel(self):
 		if self.side and self.label:
-			skeleton.setJointLabel(self.transform, side=self.side.capitalize(), typ=self.label.capitalize())
+			skeleton.setJointLabel(self.transform, side=self.side.capitalize(), typ=self.label)
 		elif self.side and not self.label:
 			skeleton.setJointLabel(self.transform, side=self.side.capitalize(), typ='None')
 		elif self.label and not self.side:
-			skeleton.setJointLabel(self.transform, side='Center', typ=self.label.capitalize())
+			skeleton.setJointLabel(self.transform, side='Center', typ=self.label)
 		return
 
 
@@ -272,7 +272,7 @@ class DETAILCONTROL(CONTROL):
 		CONTROL.__init__(self,
 		                 name=name,
 		                 typ=control.component.doubleLollipop,
-		                 scale=scale,
+		                 scale=scale * 1.5,
 		                 child=child,
 		                 parent=parent,
 		                 index=index,
@@ -358,7 +358,7 @@ class CHAIN(object):
 			objectIndex = skeleton.getJointIndex(obj)
 
 			ctl = self.controlClass(name=naming.convention(self.name,
-			                                               objectType,
+			                                               objectType.replace(' ',''),
 			                                               objectIndex if objectIndex else i,
 			                                               naming.rig.ctl,
 			                                               ),
@@ -776,7 +776,11 @@ class RIBBONLIMB:
 
 		cmds.connectAttr('{}.rx'.format(self.start), '{}.endTwistAdd'.format(self.upperFlexiPlane.parent))
 		cmds.connectAttr('{}.rx'.format(self.start), '{}.startTwistAdd'.format(self.lowerFlexiPlane.parent))
-		cmds.connectAttr('{}.rx'.format(self.start), '{}.endTwistAdd'.format(self.lowerFlexiPlane.parent))
+
+		add = cmds.createNode('addDoubleLinear', name='{}_lower_ribbon_add0'.format(self.name))
+		cmds.connectAttr('{}.rx'.format(self.start), '{}.input1'.format(add))
+		cmds.connectAttr('{}.rx'.format(self.end), '{}.input2'.format(add))
+		cmds.connectAttr('{}.output'.format(add), '{}.endTwistAdd'.format(self.lowerFlexiPlane.parent))
 
 		return
 
@@ -1760,6 +1764,7 @@ class ARM(BASE):
 			self.createCollar()
 
 		self.createRibbonChain(self.shoulder, self.elbow, self.hand)
+		self.createHand()
 
 		if self.networkRoot:
 			self.createLocalWorld(obj=self.fkControl[0],
@@ -1809,6 +1814,11 @@ class ARM(BASE):
 		return
 
 	def createHand(self):
+		HAND(hand=self.hand,
+		     side=self.side,
+		     networkRoot=self.networkRoot,
+		     index=self.index
+		     )
 		return
 
 	def updateNetwork(self):
@@ -1825,9 +1835,9 @@ class ARM(BASE):
 class HAND(BASE):
 	def __init__(self,
 	             hand,
-	             side=None,
+	             side,
 	             networkRoot=None,
-	             name=naming.component.arm,
+	             name=naming.component.hand,
 	             index=0,
 	             ):
 		BASE.__init__(self,
@@ -1837,6 +1847,25 @@ class HAND(BASE):
 		              side=side,
 		              index=index,
 		              )
+
+		self.hand = hand
+		self.createFingers()
+
+
+	def createFingers(self):
+		children = skeleton.getJointChildren(self.hand)
+
+		i = 0
+		for child in children:
+			joints = skeleton.getJointOrder(child)
+			finger = DIGIT(objects=joints,
+			               name=naming.component.finger,
+			               side=self.side,
+			               networkRoot=self.networkRoot,
+			               index=i,
+			               )
+			i+= 1
+		return
 
 
 class DIGIT(BASE):
@@ -1855,84 +1884,30 @@ class DIGIT(BASE):
 		              index=index,
 		              )
 
+		self.getScale()
+		self.createFKChain(self.objects)
+		self.createDetailChain(self.objects)
+		self.setupHierarchy()
 
-class HAND2(BASE):
-	def __init__(self,
-	             selected=None,
-	             name='hand',
-	             scale=1,
-	             index=0,
-	             *args
-	             ):
-		super(HAND, self).__init__(selected=selected, name=name, scale=scale, index=0, typ=ults.component.hand)
+		if self.networkRoot:
+			self.createSet(self.fkControl)
+			self.createNetwork(typ=naming.convention(self.name,
+			                                         self.index,
+			                                         )
+			                   )
 
-		self.handDict = {
-			ults.component.thumb: [],
-			ults.component.index: [],
-			ults.component.middle: [],
-			ults.component.ring: [],
-			ults.component.pinky: [],
-		}
+			self.createNetworkConnections()
 
-		if self.selected:
-			self.createControls()
+	def getScale(self):
+		self.scale = ults.getDistance(self.objects[0], self.objects[1]) / 2
+		return
 
-	def createControls(self):
-		self.bindJoint = []
+	def setupHierarchy(self):
+		for obj in self.objects:
+			i = self.objects.index(obj)
+			cmds.parentConstraint(self.fkControl[i], obj, mo=True)
+		return
 
-		cmds.addAttr(self.network, ln='finger', dt='string', m=True)
-
-		jointChain = self.getJointOrder()
-		if jointChain:
-			masterGrp = cmds.group(n=self.createName('rig_fk_ctl_grp'), em=True)
-			snap(self.selected[0], masterGrp, t=True, r=True)
-
-			i = 0
-			for chain in jointChain:
-				fingerRig = FINGER(jointChain[chain], index=i)
-				connectToNetwork(fingerRig.network, self.network, 'finger')
-
-				self.control = self.control + fingerRig.control
-				self.bindJoint.append(fingerRig.bindJoint)
-				cmds.parent(fingerRig.fkControl[0][1], masterGrp)
-				i += 1
-
-			self.group = masterGrp
-
-	def getJointOrder(self):
-		return self.getJointOrderByName() if not self.getJointOrderByLabel() else self.getJointOrderByLabel()
-
-	def getJointOrderByName(self):
-		chain = handJointHierarchy(self.selected)
-
-		handDict = self.handDict
-
-		for x in self.handDict:
-			for jnt in chain:
-				for j in jnt:
-					if x in j:
-						handDict[x] = jnt
-						break
-
-		return handDict
-
-	def getJointOrderByLabel(self):
-		chain = handJointHierarchy(self.selected)
-		handDict = self.handDict
-
-		newChain = []
-		for c in chain:
-			for x in c:
-				newChain.append(x)
-
-		newChain = jointLabel(newChain).get(self.typ, self.side)
-
-		i = 0
-		for x in self.handDict:
-			handDict[x] = newChain[i]
-			i += 1
-
-		return handDict
 
 
 class LEG(BASE):
@@ -2048,165 +2023,6 @@ class LEG2(BASE):
 					if cogCtl:
 						createLocalWorld(self.fkControl[0][0], local=hipCtl[0], world=cogCtl[0])
 
-
-class FINGER(BASE):
-	def __init__(self, selected=None, name='finger', scale=1, index=0, *args):
-		super(FINGER, self).__init__(selected=selected, name=name, scale=scale, index=index,
-		                             typ=ults.component.finger)
-
-		if self.selected:
-			self.createControls()
-			self.updateNetwork()
-
-	def createControls(self):
-		self.determineControlScale(self.selected[-1])
-		self.createBindJoints()
-		self.createFK(self.bindJoint)
-
-		i = 0
-		for jnt in self.fkJoint:
-			cmds.parentConstraint(jnt, self.bindJoint[i], mo=True)
-			i += 1
-
-	def determineControlScale(self, selected):
-		bound = estimateBoundsByJoint(selected)
-		if bound:
-			self.scale = getDistance(bound.maxZ, bound.minZ) / 2
-
-	def updateNetwork(self):
-		self.createFKIKNetwork()
-
-
-class NOODLE(BASE):
-	def __init__(self, selected=None, name='limb', typ=ults.component.noodle, scale=1, *args):
-		super(NOODLE, self).__init__(selected=selected, name=name, scale=scale, typ=typ)
-
-		if self.selected:
-
-			if len(self.selected) % 2 == 0:
-				cmds.warning('Need Odd Number of Joints.')
-
-			else:
-				self.midNum = (len(self.selected) / 2) + 1
-				self.mainControl = None
-
-				self.createControls()
-				self.createConnections()
-				self.updateNetwork()
-
-	def createControls(self):
-		self.bindJoint = self.createBindJoints(self.selected)
-		self.createBindControls()
-		self.createMainControls()
-
-		upperList = [self.mainControl[0][0], self.mainControl[1][0], self.mainControl[2][0]]
-		lowerList = [self.mainControl[2][0], self.mainControl[3][0], self.mainControl[4][0]]
-
-		self.upperBound = self.createCurveBound(upperList, name='upperBound_curve1', amount=self.midNum)
-		self.lowerBound = self.createCurveBound(lowerList, name='lowerBound_curve1', amount=self.midNum)
-
-	# self.smoothBound = self.createCurveBound([x[0] for x in self.mainControl], name='smoothBound_curve1',
-	#                                         amount=len(self.bindJoint))
-
-	def createBindControls(self):
-		for jnt in self.bindJoint:
-			ctl = control(jnt, n='{}_ctl'.format(removeJointStr(jnt)), typ='circle', axis=[1, 0, 0], nest=True,
-			              parent=False)
-			self.control.append(ctl)
-
-	def createMainControls(self):
-		start = self.bindJoint[0]
-		mid = self.bindJoint[len(self.bindJoint) / 2]
-		end = self.bindJoint[-1]
-
-		# Main Controls
-
-		mainCtlList = []
-		i = 0
-		for jnt in [start, mid, end]:
-			ctl = control(jnt, n=self.createName('main_{}_ctl'.format(i)),
-			              typ='square',
-			              axis=[1, 0, 0], parent=False)
-			mainCtlList.append(ctl)
-			i += 1
-
-		# Main Curve
-		self.mainBound = self.makeCurve(selected=[x[0] for x in mainCtlList],
-		                                name=self.createName('main_curve1'), amount=len(self.bindJoint))
-
-		# Int Controls
-
-		intCtlList = []
-		i = 0
-		for obj in ['upper', 'lower']:
-			ctl = control(n=self.createName('{}Bound_{}_ctl'.format(obj, i)),
-			              typ='square',
-			              axis=[1, 0, 0])
-			cmds.delete(cmds.pointConstraint(mainCtlList[i][1], mainCtlList[i + 1][1], ctl[1]))
-			snap(mainCtlList[i][1], ctl[1], r=True, t=False)
-			intCtlList.append(ctl)
-			i += 1
-
-		mainCtlList.insert(1, intCtlList[0])
-		mainCtlList.insert(3, intCtlList[1])
-
-		self.mainControl = mainCtlList
-
-	def createCurveBound(self, selected, name, amount, parent=True, start=True, end=True, d=2):
-		return self.makeCurve(selected,
-		                      name=self.createName(name),
-		                      amount=amount,
-		                      parent=parent,
-		                      start=start,
-		                      end=end,
-		                      d=d)
-
-	def createBindJoints(self, selected):
-		bindJoints = createJointChain(selected, typ=self.typ, world=True)
-
-		i = 0
-		for jnt in bindJoints:
-			cmds.parentConstraint(jnt, selected[i], mo=True)
-			cmds.scaleConstraint(jnt, selected[i], mo=True)
-			i += 1
-
-		return bindJoints
-
-	class makeCurve(object):
-		def __init__(self, selected, name, amount, upObject=None, parent=True, start=True, end=True, d=1):
-			curve = makeNurbsCurve(selected, n=name, d=d)
-			clusters = clusterCurve(curve, n='{}_cluster'.format(curve))
-			null = locOnCurve(curve=curve, intLoc=amount, n='{}_null'.format(curve), upObject=upObject, start=start,
-			                  end=end)
-			grp = cmds.group(null, n='{}_null_grp'.format(name))
-
-			if parent:
-				i = 0
-				for c in clusters:
-					cmds.parent(c, selected[i])
-					i += 1
-
-			self.curve = curve
-			self.cluster = clusters
-			self.null = null
-			self.group = grp
-
-	def createConnections(self):
-
-		cmds.addAttr(self.network, ln='smooth', at='double', dv=0, min=0, max=1)
-
-		for i in [self.midNum / 2, self.midNum]:
-			cmds.parent(self.mainControl[i][1], self.mainBound.null[i])
-
-		del (self.upperBound.null)[-1]
-
-		i = 0
-		for null in self.upperBound.null + self.lowerBound.null:
-			cmds.parent(self.control[i][1], null)
-			i += 1
-
-	def updateNetwork(self):
-		pass
 
 
 class createIKFootPivot():
