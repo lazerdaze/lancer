@@ -1800,7 +1800,6 @@ class createFlexiPlane():
 
 			follicleList.append(follicleTransform)
 
-
 		# Locators
 		pos = [width / 2 * -1, 0, width / 2]
 		if side == naming.side.right:
@@ -1854,10 +1853,12 @@ class createFlexiPlane():
 		cmds.addAttr(globalGrp, ln='endTwistAmount', k=True, at='doubleAngle')
 		cmds.addAttr(globalGrp, ln='startTwistAdd', k=True, at='doubleAngle')
 		cmds.addAttr(globalGrp, ln='endTwistAdd', k=True, at='doubleAngle')
-		cmds.addAttr(globalGrp, ln='twistSide', min=-1, max=1, dv=0, k=True)
-
-		if side == naming.side.left:
-			cmds.setAttr('{}.twistSide'.format(globalGrp), -1 if side == naming.side.left else 1, lock=True)
+		cmds.addAttr(globalGrp, ln='twistSide',
+		             min=-1,
+		             max=1,
+		             dv=-1 if side == naming.side.left else 1,
+		             k=True,
+		             )
 
 		mirror = cmds.createNode('multiplyDivide', name='{}_mirror_mult0'.format(name))
 
@@ -1874,9 +1875,6 @@ class createFlexiPlane():
 			cmds.connectAttr('{}.outValue{}'.format(rangeNode, axis), '{}.input2{}'.format(mirror, axis))
 			cmds.connectAttr('{}.output{}'.format(mirror, axis), '{}.{}Angle'.format(twistShape, attr))
 			axis = 'Y'
-
-
-
 
 		# SnS
 		cmds.addAttr(globalGrp, ln='sns', min=0, max=1, dv=1, k=True)
