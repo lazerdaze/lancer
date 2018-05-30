@@ -26,8 +26,8 @@ def rigFromTemplate(*args):
 	spine = parts.SPINE(objects=['CenterSpine0', 'CenterSpine1', 'CenterSpine2', ],
 	                    networkRoot=root.network)
 
-	#neck = parts.NECK(objects=['CenterNeck0'], networkRoot=root.network)
-	#head = parts.HEAD(head='CenterHead', networkRoot=root.network)
+	neck = parts.NECK(objects=['CenterNeck0'], networkRoot=root.network)
+	head = parts.HEAD(head='CenterHead', networkRoot=root.network)
 
 	armL = parts.ARM(side=naming.side.left,
 	                 collar='LeftArmCollar',
@@ -57,20 +57,7 @@ def rigFromTemplate(*args):
 	                 foot='RightLegFoot',
 	                 networkRoot=root.network,
 	                 )
-	'''
-	armList = ['LeftArmShoulder', 'LeftArmElbow', 'LeftArmHand']
-	upperList = ['LeftArmShoulderBind0', 'LeftArmShoulderBind1']
-	lowerList = ['LeftArmElbowBind1', 'LeftArmElbowBind2']
-	midObject = 'LeftArmElbowBind0'
 
-	parts.RIBBONLIMB(start=armList[0],
-	                 mid=armList[1],
-	                 end=armList[2],
-	                 upperObjects=upperList,
-	                 lowerObjects=lowerList,
-	                 midObject=midObject,
-	                 )
-	'''
 	return
 
 

@@ -1754,7 +1754,7 @@ def createFollicle(name='follicle0', debug=False):
 
 
 class createFlexiPlane():
-	def __init__(self, name='felxi', amount=5, width=10, side=naming.side.left, debug=False):
+	def __init__(self, name='felxi', amount=5, width=10, side=naming.side.left, debug=True):
 		"""
 		:param name:    Name of component.
 		:param amount:  Amount of follicles to be created.
@@ -1775,6 +1775,14 @@ class createFlexiPlane():
 		step = 1.0 / float(amount - 1)
 		uPos = 0
 		vPos = 0.5
+		posList = []
+
+		for x in range(amount):
+			posList.append(uPos)
+			uPos += step
+
+		if side == naming.side.right:
+			posList = list(reversed(posList))
 
 		# Follicles
 		follicleList = []
@@ -1786,15 +1794,18 @@ class createFlexiPlane():
 
 			cmds.connectAttr('{}.local'.format(planeShape), '{}.inputSurface'.format(follicleShape))
 			cmds.connectAttr('{}.worldMatrix[0]'.format(planeShape), '{}.inputWorldMatrix'.format(follicleShape))
-			cmds.setAttr('{}.parameterU'.format(follicleShape), uPos)
+			cmds.setAttr('{}.parameterU'.format(follicleShape), posList[x])
 			cmds.setAttr('{}.parameterV'.format(follicleShape), vPos)
 			cmds.setAttr('{}.v'.format(follicleShape), 0)
 
 			follicleList.append(follicleTransform)
-			uPos += step
+
 
 		# Locators
 		pos = [width / 2 * -1, 0, width / 2]
+		if side == naming.side.right:
+			pos = list(reversed(pos))
+
 		locList = []
 		locGrpList = []
 		i = 0
@@ -1830,7 +1841,7 @@ class createFlexiPlane():
 		twist = cmds.nonLinear(dup, type='twist', name='{}_twist'.format(name))
 		twistShape = cmds.rename(twist[0], '{}_twist'.format(name))
 		twistTransform = cmds.rename(twist[1], '{}_twistHandle'.format(name))
-		cmds.setAttr('{}.rz'.format(twistTransform), -90)
+		cmds.setAttr('{}.rz'.format(twistTransform), -90 if side == naming.side.left else 90)
 
 		rangeNode = cmds.createNode('setRange', name='{}_twist_setRange0'.format(name))
 		addList = []
@@ -1846,9 +1857,7 @@ class createFlexiPlane():
 		cmds.addAttr(globalGrp, ln='twistSide', min=-1, max=1, dv=0, k=True)
 
 		if side == naming.side.left:
-			cmds.setAttr('{}.twistSide'.format(globalGrp), -1, lock=True)
-		elif side == naming.side.right:
-			cmds.setAttr('{}.twistSide'.format(globalGrp), 1, lock=True)
+			cmds.setAttr('{}.twistSide'.format(globalGrp), -1 if side == naming.side.left else 1, lock=True)
 
 		mirror = cmds.createNode('multiplyDivide', name='{}_mirror_mult0'.format(name))
 

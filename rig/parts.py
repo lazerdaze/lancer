@@ -174,6 +174,23 @@ class CONTROL(object):
 		return
 
 	def setLabel(self):
+		if self.label:
+			if ' ' in self.label:
+				newStr = ''
+				var = self.label.split(' ')
+
+				for x in var:
+					i = var.index(x)
+					if i == 0:
+						space = ''
+					else:
+						space = ' '
+					newStr += '{}{}'.format(space, str(x).capitalize())
+
+				self.label = newStr
+			else:
+				self.label = self.label.capitalize()
+
 		if self.side and self.label:
 			skeleton.setJointLabel(self.transform, side=self.side.capitalize(), typ=self.label)
 		elif self.side and not self.label:
@@ -358,7 +375,7 @@ class CHAIN(object):
 			objectIndex = skeleton.getJointIndex(obj)
 
 			ctl = self.controlClass(name=naming.convention(self.name,
-			                                               objectType.replace(' ',''),
+			                                               objectType.split(' ')[0].lower(),
 			                                               objectIndex if objectIndex else i,
 			                                               naming.rig.ctl,
 			                                               ),
@@ -739,13 +756,15 @@ class RIBBONLIMB:
 
 	def createHierarchy(self):
 		i = 0
-		for ctl in self.upperFlexiPlane.control:
-			cmds.pointConstraint(self.mainControl[i], ctl)
+		for grp in self.upperFlexiPlane.group:
+			ults.snap(self.mainControl[i], grp, t=True)
+			cmds.parent(grp, self.mainControl[i])
 			i += 1
 
 		i = 2
-		for ctl in self.lowerFlexiPlane.control:
-			cmds.pointConstraint(self.mainControl[i], ctl)
+		for grp in self.lowerFlexiPlane.group:
+			ults.snap(self.mainControl[i], grp, t=True)
+			cmds.parent(grp, self.mainControl[i])
 			i += 1
 
 		i = 0
@@ -785,6 +804,7 @@ class RIBBONLIMB:
 		return
 
 	def createFlexiPlane(self, start, end, amount, name):
+
 		distance = ults.getDistance(start, end)
 		flex = ults.createFlexiPlane(name=name,
 		                             amount=amount,
@@ -792,7 +812,12 @@ class RIBBONLIMB:
 		                             side=self.side,
 		                             )
 
-		cmds.delete(cmds.parentConstraint(start, end, flex.parent))
+		#cmds.delete(cmds.parentConstraint(start, end, flex.parent))
+		cmds.delete(cmds.pointConstraint(start, end, flex.parent))
+
+		if self.side == naming.side.right:
+			cmds.setAttr('{}.rz'.format(flex.parent), -180)
+		#cmds.orientConstraint(start, flex.parent)
 		return flex
 
 	def cleanUp(self):
