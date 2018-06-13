@@ -35,6 +35,7 @@ class rig(object):
 
 	detail = 'detail'
 	attr = 'attr'
+	aux = 'aux'
 	parent = 'parent'
 	rigNetwork = 'rigNetwork'
 	rigNetworkRoot = 'rigNetworkRoot'

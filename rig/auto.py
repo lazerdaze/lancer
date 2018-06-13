@@ -48,6 +48,7 @@ def rigFromTemplate(*args):
 	                 hip='LeftLegHip',
 	                 knee='LeftLegKnee',
 	                 foot='LeftLegFoot',
+	                 toe='LeftLegToe',
 	                 networkRoot=root.network,
 	                 )
 
@@ -55,9 +56,10 @@ def rigFromTemplate(*args):
 	                 hip='RightLegHip',
 	                 knee='RightLegKnee',
 	                 foot='RightLegFoot',
+	                 toe='RightLegToe',
 	                 networkRoot=root.network,
 	                 )
-
+	cmds.select(d=True)
 	return
 
 

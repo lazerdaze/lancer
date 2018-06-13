@@ -7,8 +7,7 @@
 
 # Lancer
 import naming
-
-reload(naming)
+import control
 
 # Maya Modules
 import maya.cmds as cmds
@@ -143,7 +142,7 @@ def curveShape(n='curve', typ='circle', axis=[0, 0, 0], *args):
 
 	elif typ == 'triangle':
 		curve = mel.eval(
-			'curve -d 1 -p -1.03923 0 0.6 -p 1.03923 0 0.6 -p 0 0 -1.2 -p -1.03923 0 0.6 -k 0 -k 1 -k 2 -k 3')
+				'curve -d 1 -p -1.03923 0 0.6 -p 1.03923 0 0.6 -p 0 0 -1.2 -p -1.03923 0 0.6 -k 0 -k 1 -k 2 -k 3')
 
 	elif typ == 'house':
 		curve = cmds.curve(d=1, p=[[0.0, 3.279783964168176e-16, 1.953102539721272],
@@ -305,7 +304,7 @@ def curveShape(n='curve', typ='circle', axis=[0, 0, 0], *args):
 
 	elif typ == 'hexagon':
 		curve = mel.eval(
-			'curve  -d 1 -p -0.5 1 0.866025 -p 0.5 1 0.866025 -p 0.5 -1 0.866025 -p 1 -1 0 -p 1 1 0 -p 0.5 1 -0.866025 -p 0.5 -1 -0.866025 -p -0.5 -1 -0.866026 -p -0.5 1 -0.866026 -p -1 1 -1.5885e-007 -p -1 -1 -1.5885e-007 -p -0.5 -1 0.866025 -p -0.5 1 0.866025 -p -1 1 -1.5885e-007 -p -0.5 1 -0.866026 -p 0.5 1 -0.866025 -p 1 1 0 -p 0.5 1 0.866025 -p 0.5 -1 0.866025 -p -0.5 -1 0.866025 -p -1 -1 -1.5885e-007 -p -0.5 -1 -0.866026 -p 0.5 -1 -0.866025 -p 1 -1 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23')
+				'curve  -d 1 -p -0.5 1 0.866025 -p 0.5 1 0.866025 -p 0.5 -1 0.866025 -p 1 -1 0 -p 1 1 0 -p 0.5 1 -0.866025 -p 0.5 -1 -0.866025 -p -0.5 -1 -0.866026 -p -0.5 1 -0.866026 -p -1 1 -1.5885e-007 -p -1 -1 -1.5885e-007 -p -0.5 -1 0.866025 -p -0.5 1 0.866025 -p -1 1 -1.5885e-007 -p -0.5 1 -0.866026 -p 0.5 1 -0.866025 -p 1 1 0 -p 0.5 1 0.866025 -p 0.5 -1 0.866025 -p -0.5 -1 0.866025 -p -1 -1 -1.5885e-007 -p -0.5 -1 -0.866026 -p 0.5 -1 -0.866025 -p 1 -1 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23')
 
 	elif typ == 'mover':
 		curve = cmds.curve(d=1, p=[[3.0151795805144164, -1.8909139247979197e-21, -8.515919247109593e-06],
@@ -544,27 +543,27 @@ def curveShape(n='curve', typ='circle', axis=[0, 0, 0], *args):
 	# 3D
 	elif typ == 'pyramid':
 		curve = mel.eval(
-			'curve  -d 1 -p -1 0 0 -p 0 0 1 -p 0 1 0 -p -1 0 0 -p 1 0 0 -p 0 1 0 -p 1 0 0 -p 0 0 1 -p 0 1 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8')
+				'curve  -d 1 -p -1 0 0 -p 0 0 1 -p 0 1 0 -p -1 0 0 -p 1 0 0 -p 0 1 0 -p 1 0 0 -p 0 0 1 -p 0 1 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8')
 
 	elif typ == 'cube':
 		curve = mel.eval(
-			'curve -d 1 -p 0.5 0.5 0.5 -p 0.5 0.5 -0.5 -p -0.5 0.5 -0.5 -p -0.5 -0.5 -0.5 -p 0.5 -0.5 -0.5 -p 0.5 0.5 -0.5 -p -0.5 0.5 -0.5 -p -0.5 0.5 0.5 -p 0.5 0.5 0.5 -p 0.5 -0.5 0.5 -p 0.5 -0.5 -0.5 -p -0.5 -0.5 -0.5 -p -0.5 -0.5 0.5 -p 0.5 -0.5 0.5 -p -0.5 -0.5 0.5 -p -0.5 0.5 0.5 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15')
+				'curve -d 1 -p 0.5 0.5 0.5 -p 0.5 0.5 -0.5 -p -0.5 0.5 -0.5 -p -0.5 -0.5 -0.5 -p 0.5 -0.5 -0.5 -p 0.5 0.5 -0.5 -p -0.5 0.5 -0.5 -p -0.5 0.5 0.5 -p 0.5 0.5 0.5 -p 0.5 -0.5 0.5 -p 0.5 -0.5 -0.5 -p -0.5 -0.5 -0.5 -p -0.5 -0.5 0.5 -p 0.5 -0.5 0.5 -p -0.5 -0.5 0.5 -p -0.5 0.5 0.5 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15')
 
 	elif typ == 'rombus':
 		curve = mel.eval(
-			'curve -d 1 -p 0 1 0 -p 1 0 0 -p 0 0 1 -p -1 0 0 -p 0 0 -1 -p 0 1 0 -p 0 0 1 -p 0 -1 0 -p 0 0 -1 -p 1 0 0 -p 0 1 0 -p -1 0 0 -p 0 -1 0 -p 1 0 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13')
+				'curve -d 1 -p 0 1 0 -p 1 0 0 -p 0 0 1 -p -1 0 0 -p 0 0 -1 -p 0 1 0 -p 0 0 1 -p 0 -1 0 -p 0 0 -1 -p 1 0 0 -p 0 1 0 -p -1 0 0 -p 0 -1 0 -p 1 0 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13')
 
 	elif typ == 'cone':
 		curve = mel.eval(
-			'curve -d 1 -p 0.5 -1 0.866025 -p -0.5 -1 0.866025 -p 0 1 0 -p 0.5 -1 0.866025 -p 1 -1 0 -p 0 1 0 -p 0.5 -1 -0.866025 -p 1 -1 0 -p 0 1 0 -p -0.5 -1 -0.866026 -p 0.5 -1 -0.866025 -p 0 1 0 -p -1 -1 -1.5885e-007 -p -0.5 -1 -0.866026 -p 0 1 0 -p -0.5 -1 0.866025 -p -1 -1 -1.5885e-007 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16')
+				'curve -d 1 -p 0.5 -1 0.866025 -p -0.5 -1 0.866025 -p 0 1 0 -p 0.5 -1 0.866025 -p 1 -1 0 -p 0 1 0 -p 0.5 -1 -0.866025 -p 1 -1 0 -p 0 1 0 -p -0.5 -1 -0.866026 -p 0.5 -1 -0.866025 -p 0 1 0 -p -1 -1 -1.5885e-007 -p -0.5 -1 -0.866026 -p 0 1 0 -p -0.5 -1 0.866025 -p -1 -1 -1.5885e-007 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16')
 
 	elif typ == 'rotateSphere':
 		curve = mel.eval(
-			'curve -d 1 -p 0 0.35 -1.001567 -p -0.336638 0.677886 -0.751175 -p -0.0959835 0.677886 -0.751175 -p -0.0959835 0.850458 -0.500783 -p -0.0959835 0.954001 -0.0987656 -p -0.500783 0.850458 -0.0987656 -p -0.751175 0.677886 -0.0987656 -p -0.751175 0.677886 -0.336638 -p -1.001567 0.35 0 -p -0.751175 0.677886 0.336638 -p -0.751175 0.677886 0.0987656 -p -0.500783 0.850458 0.0987656 -p -0.0959835 0.954001 0.0987656 -p -0.0959835 0.850458 0.500783 -p -0.0959835 0.677886 0.751175 -p -0.336638 0.677886 0.751175 -p 0 0.35 1.001567 -p 0.336638 0.677886 0.751175 -p 0.0959835 0.677886 0.751175 -p 0.0959835 0.850458 0.500783 -p 0.0959835 0.954001 0.0987656 -p 0.500783 0.850458 0.0987656 -p 0.751175 0.677886 0.0987656 -p 0.751175 0.677886 0.336638 -p 1.001567 0.35 0 -p 0.751175 0.677886 -0.336638 -p 0.751175 0.677886 -0.0987656 -p 0.500783 0.850458 -0.0987656 -p 0.0959835 0.954001 -0.0987656 -p 0.0959835 0.850458 -0.500783 -p 0.0959835 0.677886 -0.751175 -p 0.336638 0.677886 -0.751175 -p 0 0.35 -1.001567 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32')
+				'curve -d 1 -p 0 0.35 -1.001567 -p -0.336638 0.677886 -0.751175 -p -0.0959835 0.677886 -0.751175 -p -0.0959835 0.850458 -0.500783 -p -0.0959835 0.954001 -0.0987656 -p -0.500783 0.850458 -0.0987656 -p -0.751175 0.677886 -0.0987656 -p -0.751175 0.677886 -0.336638 -p -1.001567 0.35 0 -p -0.751175 0.677886 0.336638 -p -0.751175 0.677886 0.0987656 -p -0.500783 0.850458 0.0987656 -p -0.0959835 0.954001 0.0987656 -p -0.0959835 0.850458 0.500783 -p -0.0959835 0.677886 0.751175 -p -0.336638 0.677886 0.751175 -p 0 0.35 1.001567 -p 0.336638 0.677886 0.751175 -p 0.0959835 0.677886 0.751175 -p 0.0959835 0.850458 0.500783 -p 0.0959835 0.954001 0.0987656 -p 0.500783 0.850458 0.0987656 -p 0.751175 0.677886 0.0987656 -p 0.751175 0.677886 0.336638 -p 1.001567 0.35 0 -p 0.751175 0.677886 -0.336638 -p 0.751175 0.677886 -0.0987656 -p 0.500783 0.850458 -0.0987656 -p 0.0959835 0.954001 -0.0987656 -p 0.0959835 0.850458 -0.500783 -p 0.0959835 0.677886 -0.751175 -p 0.336638 0.677886 -0.751175 -p 0 0.35 -1.001567 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32')
 
 	elif typ == 'jack':
 		curve = mel.eval(
-			'curve -d 1 -p 0 0 0 -p 0.75 0 0 -p 1 0.25 0 -p 1.25 0 0 -p 1 -0.25 0 -p 0.75 0 0 -p 1 0 0.25 -p 1.25 0 0 -p 1 0 -0.25 -p 1 0.25 0 -p 1 0 0.25 -p 1 -0.25 0 -p 1 0 -0.25 -p 0.75 0 0 -p 0 0 0 -p -0.75 0 0 -p -1 0.25 0 -p -1.25 0 0 -p -1 -0.25 0 -p -0.75 0 0 -p -1 0 0.25 -p -1.25 0 0 -p -1 0 -0.25 -p -1 0.25 0 -p -1 0 0.25 -p -1 -0.25 0 -p -1 0 -0.25 -p -0.75 0 0 -p 0 0 0 -p 0 0.75 0 -p 0 1 -0.25 -p 0 1.25 0 -p 0 1 0.25 -p 0 0.75 0 -p -0.25 1 0 -p 0 1.25 0 -p 0.25 1 0 -p 0 1 0.25 -p -0.25 1 0 -p 0 1 -0.25 -p 0.25 1 0 -p 0 0.75 0 -p 0 0 0 -p 0 -0.75 0 -p 0 -1 -0.25 -p 0 -1.25 0 -p 0 -1 0.25 -p 0 -0.75 0 -p -0.25 -1 0 -p 0 -1.25 0 -p 0.25 -1 0 -p 0 -1 -0.25 -p -0.25 -1 0 -p 0 -1 0.25 -p 0.25 -1 0 -p 0 -0.75 0 -p 0 0 0 -p 0 0 -0.75 -p 0 0.25 -1 -p 0 0 -1.25 -p 0 -0.25 -1 -p 0 0 -0.75 -p -0.25 0 -1 -p 0 0 -1.25 -p 0.25 0 -1 -p 0 0.25 -1 -p -0.25 0 -1 -p 0 -0.25 -1 -p 0.25 0 -1 -p 0 0 -0.75 -p 0 0 0 -p 0 0 0.75 -p 0 0.25 1 -p 0 0 1.25 -p 0 -0.25 1 -p 0 0 0.75 -p -0.25 0 1 -p 0 0 1.25 -p 0.25 0 1 -p 0 0.25 1 -p -0.25 0 1 -p 0 -0.25 1 -p 0.25 0 1 -p 0 0 0.75 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32 -k 33 -k 34 -k 35 -k 36 -k 37 -k 38 -k 39 -k 40 -k 41 -k 42 -k 43 -k 44 -k 45 -k 46 -k 47 -k 48 -k 49 -k 50 -k 51 -k 52 -k 53 -k 54 -k 55 -k 56 -k 57 -k 58 -k 59 -k 60 -k 61 -k 62 -k 63 -k 64 -k 65 -k 66 -k 67 -k 68 -k 69 -k 70 -k 71 -k 72 -k 73 -k 74 -k 75 -k 76 -k 77 -k 78 -k 79 -k 80 -k 81 -k 82 -k 83')
+				'curve -d 1 -p 0 0 0 -p 0.75 0 0 -p 1 0.25 0 -p 1.25 0 0 -p 1 -0.25 0 -p 0.75 0 0 -p 1 0 0.25 -p 1.25 0 0 -p 1 0 -0.25 -p 1 0.25 0 -p 1 0 0.25 -p 1 -0.25 0 -p 1 0 -0.25 -p 0.75 0 0 -p 0 0 0 -p -0.75 0 0 -p -1 0.25 0 -p -1.25 0 0 -p -1 -0.25 0 -p -0.75 0 0 -p -1 0 0.25 -p -1.25 0 0 -p -1 0 -0.25 -p -1 0.25 0 -p -1 0 0.25 -p -1 -0.25 0 -p -1 0 -0.25 -p -0.75 0 0 -p 0 0 0 -p 0 0.75 0 -p 0 1 -0.25 -p 0 1.25 0 -p 0 1 0.25 -p 0 0.75 0 -p -0.25 1 0 -p 0 1.25 0 -p 0.25 1 0 -p 0 1 0.25 -p -0.25 1 0 -p 0 1 -0.25 -p 0.25 1 0 -p 0 0.75 0 -p 0 0 0 -p 0 -0.75 0 -p 0 -1 -0.25 -p 0 -1.25 0 -p 0 -1 0.25 -p 0 -0.75 0 -p -0.25 -1 0 -p 0 -1.25 0 -p 0.25 -1 0 -p 0 -1 -0.25 -p -0.25 -1 0 -p 0 -1 0.25 -p 0.25 -1 0 -p 0 -0.75 0 -p 0 0 0 -p 0 0 -0.75 -p 0 0.25 -1 -p 0 0 -1.25 -p 0 -0.25 -1 -p 0 0 -0.75 -p -0.25 0 -1 -p 0 0 -1.25 -p 0.25 0 -1 -p 0 0.25 -1 -p -0.25 0 -1 -p 0 -0.25 -1 -p 0.25 0 -1 -p 0 0 -0.75 -p 0 0 0 -p 0 0 0.75 -p 0 0.25 1 -p 0 0 1.25 -p 0 -0.25 1 -p 0 0 0.75 -p -0.25 0 1 -p 0 0 1.25 -p 0.25 0 1 -p 0 0.25 1 -p -0.25 0 1 -p 0 -0.25 1 -p 0.25 0 1 -p 0 0 0.75 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32 -k 33 -k 34 -k 35 -k 36 -k 37 -k 38 -k 39 -k 40 -k 41 -k 42 -k 43 -k 44 -k 45 -k 46 -k 47 -k 48 -k 49 -k 50 -k 51 -k 52 -k 53 -k 54 -k 55 -k 56 -k 57 -k 58 -k 59 -k 60 -k 61 -k 62 -k 63 -k 64 -k 65 -k 66 -k 67 -k 68 -k 69 -k 70 -k 71 -k 72 -k 73 -k 74 -k 75 -k 76 -k 77 -k 78 -k 79 -k 80 -k 81 -k 82 -k 83')
 
 	elif typ == 'cylinder':
 		curve = cmds.curve(d=1, p=[[0.679679916801789, -1.000000000044628, -0.6796799168017885],
@@ -641,7 +640,7 @@ def scaleCurve(selected=[], *args):
 	return
 
 
-def control(child='', n='control', typ='circle', axis=[0, 0, 0], t=True, r=True, parent=True, scale=1, nest=False,
+def control2(child='', n='control', typ='circle', axis=[0, 0, 0], t=True, r=True, parent=True, scale=1, nest=False,
             *args):
 	ctl = curveShape(n=n, typ=typ, axis=axis)
 	grp = cmds.group(ctl, n='{}_grp'.format(ctl))
@@ -803,6 +802,37 @@ def getPositionSide(obj, *args):
 				return component.center
 
 
+def getSide(obj):
+	if type(obj) is list:
+		position = cmds.xform(obj[0], q=True, ws=True, rp=True)[0]
+
+	else:
+		position = cmds.xform(obj, q=True, ws=True, rp=True)[0]
+
+	if 'e' in str(position):
+		return naming.side.center
+
+	else:
+		if position > 0:
+			return naming.side.left
+
+		elif position < 0:
+			return naming.side.right
+
+		elif position == 0:
+			if type(obj) is list:
+				if len(obj) > 1:
+					obj.remove(obj[0])
+					newObj = []
+					for o in obj:
+						newObj.append(o)
+					getPositionSide(newObj)
+				else:
+					return naming.side.center
+			else:
+				return naming.side.center
+
+
 def getChild(root, typ='joint', *args):
 	child = cmds.listRelatives(root, c=True, type=typ)
 	if len(child) == 1:
@@ -829,7 +859,7 @@ def freezeTransform(obj, t=True, r=True, s=True):
 
 
 class queryJoint():
-	def __init__(self, jnt, *args):
+	def __init__(self, jnt):
 		skinCluster = getConnectedObj(jnt, 'objectColorRGB')
 		verts = []
 
@@ -861,9 +891,12 @@ class queryJoint():
 		self.skinCluster = skinCluster
 		self.verts = verts
 
+	def __str__(self):
+		return str(self.__dict__)
 
-class estimateBoundsByJoint():
-	def __init__(self, jnt, *args):
+
+class estimateBoundsByJoint:
+	def __init__(self, jnt):
 		self.verts = []
 		self.minX = []
 		self.maxX = []
@@ -878,6 +911,15 @@ class estimateBoundsByJoint():
 		if cmds.objectType(jnt, isType='joint'):
 			query = queryJoint(jnt)
 			verts = query.verts
+
+			if not verts:
+				children = cmds.listRelatives(jnt, children=True, type='joint')
+				if children:
+					for child in children:
+						childVerts = queryJoint(child).verts
+						if childVerts:
+							verts = childVerts
+							break
 
 			if verts:
 				for vert in verts:
@@ -900,6 +942,9 @@ class estimateBoundsByJoint():
 
 		else:
 			cmds.warning('Object is not a joint.')
+
+	def __str__(self):
+		return str(self.__dict__)
 
 
 def createJoint(obj=None, n='joint_0', *args):
@@ -1050,7 +1095,7 @@ def handJointHierarchy(root, *args):
 	return jointList
 
 
-def getDistance(start, end, *args):
+def getDistance(start, end):
 	if type(start) is list:
 		startPos = start
 	else:
@@ -1061,7 +1106,7 @@ def getDistance(start, end, *args):
 	else:
 		endPos = cmds.xform(end, q=True, ws=True, rp=True)
 	distance = sqrt(
-		pow((startPos[0] - endPos[0]), 2) + pow((startPos[1] - endPos[1]), 2) + pow((startPos[2] - endPos[2]), 2))
+			pow((startPos[0] - endPos[0]), 2) + pow((startPos[1] - endPos[1]), 2) + pow((startPos[2] - endPos[2]), 2))
 	return distance
 
 
@@ -1126,11 +1171,11 @@ def setOnMotionPath(selected, curve, name='motionPath', uValue=0, *args):
 	mp = cmds.createNode('motionPath', n='{}_mp'.format(name))
 
 	mpAttr = {
-		'follow': 1,
+		'follow'      : 1,
 		'fractionMode': 0,
-		'worldUpType': 3,
-		'frontAxis': 2,
-		'upAxis': 1,
+		'worldUpType' : 3,
+		'frontAxis'   : 2,
+		'upAxis'      : 1,
 	}
 	for attr in mpAttr:
 		cmds.setAttr('{}.{}'.format(mp, attr), mpAttr[attr])
@@ -1614,15 +1659,15 @@ class jointLabel():
 
 			if x != 'None':
 				self.masterDict[x] = {
-					'None': noneList, 'Left': sortJointHierarchy(leftList),
+					'None'  : noneList, 'Left': sortJointHierarchy(leftList),
 					'Center': sortJointHierarchy(centerList),
-					'Right': sortJointHierarchy(rightList, )
+					'Right' : sortJointHierarchy(rightList, )
 				}
 			else:
 				self.masterDict[x] = {
-					'None': noneList, 'Left': leftList,
+					'None'  : noneList, 'Left': leftList,
 					'Center': centerList,
-					'Right': rightList
+					'Right' : rightList
 				}
 
 	def isDebug(self):
@@ -1753,8 +1798,8 @@ def createFollicle(name='follicle0', debug=False):
 	return [transform, shape]
 
 
-class createFlexiPlane():
-	def __init__(self, name='felxi', amount=5, width=10, side=naming.side.left, debug=True):
+class createFlexiPlane:
+	def __init__(self, name='felxi', amount=5, width=10, side=naming.side.left, debug=False):
 		"""
 		:param name:    Name of component.
 		:param amount:  Amount of follicles to be created.
@@ -1762,11 +1807,13 @@ class createFlexiPlane():
 		"""
 		# Global Node
 		globalGrp = cmds.group(name='{}_global_grp'.format(name), em=True)
+		masterGrp = cmds.group(globalGrp, name='{}_grp'.format(name))
 
 		# Nurbs Plane
 		axis = [0, 1, 0]
 		plane = cmds.nurbsPlane(name='{}_plane'.format(name), ax=axis, w=width, lr=0.1, d=3, u=amount, v=1, ch=0)[0]
 		planeShape = cmds.listRelatives(plane, shapes=True)[0]
+		cmds.parent(plane, globalGrp)
 
 		# BlendShape
 		dup = cmds.duplicate(plane, name='{}_twist_blend'.format(plane))
@@ -1786,7 +1833,7 @@ class createFlexiPlane():
 
 		# Follicles
 		follicleList = []
-
+		follicleScale = []
 		for x in range(amount):
 			follicle = createFollicle('{}_{}_follicle'.format(name, x), debug=debug)
 			follicleTransform = follicle[0]
@@ -1797,7 +1844,7 @@ class createFlexiPlane():
 			cmds.setAttr('{}.parameterU'.format(follicleShape), posList[x])
 			cmds.setAttr('{}.parameterV'.format(follicleShape), vPos)
 			cmds.setAttr('{}.v'.format(follicleShape), 0)
-
+			follicleScale.append(cmds.scaleConstraint(globalGrp, follicleTransform, mo=True)[0])
 			follicleList.append(follicleTransform)
 
 		# Locators
@@ -1810,31 +1857,30 @@ class createFlexiPlane():
 		i = 0
 		for x in pos:
 			loc = cmds.spaceLocator(name='{}_{}_locator'.format(name, i))[0]
-			grp = cmds.group(loc, name='{}_grp'.format(loc))
-			cmds.xform(grp, ws=True, t=[x, 0, 0])
+			cmds.xform(loc, ws=True, t=[x, 0, 0])
+			freezeTransform(loc)
+			cmds.parent(loc, globalGrp)
 			locList.append(loc)
-			locGrpList.append(grp)
-			if not debug:
-				setVisibility(grp)
 			i += 1
-
-		pc = cmds.pointConstraint(locList[0], locList[2], locGrpList[1], mo=True)
 
 		# Curve
-
+		clusterList = []
+		clusterGrp = cmds.group(name='{}_cluster_grp'.format(name), em=True)
 		curve = makeNurbsCurve(locList, n='{}_curve'.format(name), d=2)
 		i = 0
-		for x in getCurveCVs(curve):
-			cluster = cmds.cluster(x, rel=False, name='{}_{}_cluster'.format(name, i))[1]
+		for x in ['0:1', '1', '1:2']:
+			cluster = cmds.cluster('{}.cv[{}]'.format(curve, x), rel=True, name='{}_{}_cluster'.format(name, i))
+			clusterShape = cluster[0]
+			cluster = cluster[1]
+			cmds.xform(cluster, ws=True, rp=[pos[i], 0, 0])
 			cmds.setAttr('{}.v'.format(cluster), 0)
-			cmds.parent(cluster, locList[i])
+			cmds.connectAttr('{}.t'.format(locList[i]), '{}.t'.format(cluster))
+			cmds.parent(cluster, clusterGrp)
+			clusterList.append(clusterShape)
 			i += 1
 
-		# Wire Deformer
-		wire = cmds.wire(plane, wire=curve, name='{}_wire0'.format(name))
-		wireShape = wire[0]
-		wireBaseTransform = cmds.listConnections('{}.baseWire[0]'.format(wireShape))[0]
-		cmds.setAttr('{}.dropoffDistance[0]'.format(wire[0]), 20)
+		cmds.percent(clusterList[0], '{}.cv[1]'.format(curve), v=.5)
+		cmds.percent(clusterList[-1], '{}.cv[1]'.format(curve), v=.5)
 
 		# TwistDeformer
 		twist = cmds.nonLinear(dup, type='twist', name='{}_twist'.format(name))
@@ -1876,11 +1922,17 @@ class createFlexiPlane():
 			cmds.connectAttr('{}.output{}'.format(mirror, axis), '{}.{}Angle'.format(twistShape, attr))
 			axis = 'Y'
 
+		# Wire Deformer
+		wire = cmds.wire(dup, wire=curve, name='{}_wire0'.format(name))
+		wireShape = wire[0]
+		wireBaseTransform = cmds.listConnections('{}.baseWire[0]'.format(wireShape))[0]
+		cmds.setAttr('{}.dropoffDistance[0]'.format(wire[0]), 20)
+
 		# SnS
 		cmds.addAttr(globalGrp, ln='sns', min=0, max=1, dv=1, k=True)
 		cmds.addAttr(globalGrp, ln='snsAdd', k=True)
-		cmds.addAttr(globalGrp, ln='snsHighBound', k=True, min=0, max=1, dv=1)
-		cmds.addAttr(globalGrp, ln='snsLowBound', k=True, min=0, max=1, dv=1)
+		# cmds.addAttr(globalGrp, ln='snsHighBound', k=True, min=0, max=1, dv=1)
+		# cmds.addAttr(globalGrp, ln='snsLowBound', k=True, min=0, max=1, dv=1)
 
 		curveInfo = createCurveInfo(curve)
 		divideA = cmds.createNode('multiplyDivide', name='{}_divide0'.format(name))
@@ -1916,51 +1968,26 @@ class createFlexiPlane():
 
 		stepRangeNeg = list(reversed(stepRangePos))
 
-		for follicle in follicleList:
-			i = follicleList.index(follicle)
-			'''
-			#Lowbound
-			multA = cmds.createNode('multDoubleLinear', name='{}_lowbound_mult0'.format(follicle))
-			cmds.setAttr('{}.input1'.format(multA), stepRangePos[i])
-			cmds.connectAttr('{}.snsLowBound'.format(globalGrp), '{}.input2'.format(multA))
-
-			setRangeA = cmds.createNode('setRange', name='{}_lowbound_setRange0'.format(follicle))
-			cmds.setAttr('{}.minX'.format(setRangeA), 1)
-			cmds.setAttr('{}.oldMaxX'.format(setRangeA), 1)
-			cmds.connectAttr('{}.output'.format(multA), '{}.valueX'.format(setRangeA))
-			cmds.connectAttr('{}.output'.format(add), '{}.maxX'.format(setRangeA))
-
-			#Highbound
-			multB = cmds.createNode('multDoubleLinear', name='{}_highbound_mult0'.format(follicle))
-			cmds.setAttr('{}.input1'.format(multB), stepRangeNeg[i])
-			cmds.connectAttr('{}.snsHighBound'.format(globalGrp), '{}.input2'.format(multB))
-
-			setRangeB = cmds.createNode('setRange', name='{}_highbound_setRange0'.format(follicle))
-			cmds.setAttr('{}.minX'.format(setRangeB), 1)
-			cmds.setAttr('{}.oldMaxX'.format(setRangeB), 1)
-			cmds.connectAttr('{}.output'.format(multB), '{}.valueX'.format(setRangeB))
-			cmds.connectAttr('{}.output'.format(add), '{}.maxX'.format(setRangeB))
-
-			multC = cmds.createNode('multDoubleLinear', name='{}_mult0'.format(follicle))
-			cmds.connectAttr('{}.outValueX'.format(setRangeA), '{}.input1'.format(multC))
-			cmds.connectAttr('{}.outValueX'.format(setRangeB), '{}.input2'.format(multC))
-			#cmds.connectAttr('{}.outValueX'.format(setRangeA), '{}.maxX'.format(setRangeB))
-			'''
+		for scale in follicleScale:
+			i = follicleScale.index(scale)
 			for axis in ['y', 'z']:
-				# cmds.connectAttr('{}.output'.format(multC), '{}.s{}'.format(follicle, axis))
-				cmds.connectAttr('{}.output'.format(add), '{}.s{}'.format(follicle, axis))
+				cmds.connectAttr('{}.output'.format(add), '{}.offset{}'.format(scale, axis.upper()))
 
 		# Hierarchy
-		extrasGrp = cmds.group(name='{}_extras_grp'.format(name), em=True)
-		follicleGrp = cmds.group(name='{}_follicle_grp'.format(name), em=True)
-		cmds.parent(extrasGrp, follicleGrp, globalGrp)
-
+		extrasGrp = cmds.group(clusterGrp, curve, twistTransform, dup, wireBaseTransform,
+		                       name='{}_extras_grp'.format(name))
 		cmds.setAttr('{}.v'.format(extrasGrp), 0)
-		cmds.parent(locGrpList, globalGrp)
-		cmds.parent(plane, curve, twistTransform, dup, wireBaseTransform, extrasGrp)
-		cmds.parent(follicleList, follicleGrp)
 		cmds.setAttr('{}.inheritsTransform'.format(extrasGrp), 0)
+
+		follicleGrp = cmds.group(follicleList, name='{}_follicle_grp'.format(name))
 		cmds.setAttr('{}.inheritsTransform'.format(follicleGrp), 0)
+		cmds.parent(extrasGrp, follicleGrp, masterGrp)
+
+		for x in [follicleGrp, clusterGrp, extrasGrp, plane]:
+			lockAttributes(x)
+
+		setVisibility(globalGrp)
+		lockScale(globalGrp)
 
 		# Return
 		self.plane = plane
@@ -1976,8 +2003,8 @@ class createFlexiPlane():
 		self.control = locList
 		self.group = locGrpList
 		self.parent = globalGrp
+		self.masterGroup = masterGrp
 		self.extra = extrasGrp
-		self.constraint = pc
 
 
 def createCurveInfo(curve):
@@ -1985,6 +2012,318 @@ def createCurveInfo(curve):
 	shape = cmds.listRelatives(curve, shapes=True)[0]
 	cmds.connectAttr('{}.worldSpace[0]'.format(shape), '{}.inputCurve'.format(node))
 	return node
+
+
+class createIKTwist:
+	def __init__(self, start, end, name='ikTwist'):
+		cmds.select(d=True)
+
+		ikJoint = []
+		i = 0
+		for x in [end, start]:
+			joint = cmds.joint(name='{}_{}_joint'.format(name, i))
+			cmds.setAttr('{}.drawStyle'.format(joint), 2)
+			snap(x, joint, t=True, r=True)
+			ikJoint.append(joint)
+			i += 1
+
+		globalGrp = createGroup(ikJoint[0], n='{}_grp'.format(name))
+		cmds.parent(globalGrp, start)
+		freezeTransform(ikJoint[0])
+
+		ik = cmds.ikHandle(sj=ikJoint[0], ee=ikJoint[1], sol='ikSCsolver', name='{}_ik'.format(name))[0]
+		setVisibility(ik)
+		parent = cmds.listRelatives(start, parent=True)
+		if parent:
+			cmds.parent(ik, parent[0])
+
+		self.joint = ikJoint
+		self.ikHandle = ik
+		self.parent = globalGrp
+
+
+def createNullChain(nullNames):
+	nullNames = listCheck(nullNames)
+	nullList = []
+	for null in nullNames:
+		i = nullNames.index(null)
+		grp = cmds.group(name='{}_null0'.format(null), em=True)
+		if len(nullNames) > 1 and i != 0:
+			cmds.parent(grp, nullList[i - 1])
+		nullList.append(grp)
+	return nullList
+
+
+def moveRotatePivot(parent, child):
+	if type(parent) is list:
+		cmds.xform(child, ws=True, rp=parent)
+	else:
+		pos = cmds.xform(parent, q=True, ws=True, rp=True)
+		cmds.xform(child, ws=True, rp=pos)
+	return
+
+
+class createIKFootRollNulls:
+	def __init__(self, foot, toe, control=None, name='ik_footPivot'):
+		'''
+		Global
+		Swivel
+			Heel
+			Toe
+			Ball
+		Bank
+			Inner
+			Outter
+		Rock
+			Heel
+			Toe
+		Ball XYZ
+			(Ik Handle)
+		Toe Raise
+			(Toe Joint Orient)
+
+		:param foot:
+		:param toe:
+		:param ik:
+		:param control:
+		:param name:
+		'''
+		self.start = foot
+		self.end = toe
+		self.control = control
+		self.name = name
+
+		self.side = getPositionSide(foot)
+		self.parent = None
+		self.swivel = None
+		self.bank = None
+		self.rock = None
+		self.ball = None
+		self.toe = None
+
+		self.wire = None
+
+		self.create()
+		self.defaultPositions()
+
+	def create(self):
+		partName = ['heel', 'ball', 'toe']
+		globalGrp = cmds.group(name='{}_global_grp0'.format(self.name), em=True)
+		self.control = self.control if self.control else globalGrp
+
+		# Swivel
+		swivelName = ['{}_swivel_{}'.format(self.name, x) for x in partName]
+		swivelList = createNullChain(swivelName)
+		cmds.parent(swivelList[0], globalGrp)
+		addEmptyAttr(self.control, n='swivelControl')
+		for null in swivelList:
+			i = swivelList.index(null)
+			attrName = 'swivel{}'.format(partName[i].capitalize())
+			cmds.addAttr(self.control, ln=attrName, k=True, at='doubleAngle')
+			cmds.connectAttr('{}.{}'.format(self.control, attrName), '{}.ry'.format(null))
+
+		# Bank
+		bankName = ['{}_bank_{}'.format(self.name, x) for x in ['inner', 'outter']]
+		bankList = createNullChain(bankName)
+		cmds.parent(bankList[0], swivelList[-1])
+		addEmptyAttr(self.control, n='bankControl')
+		cmds.addAttr(self.control, ln='bank', k=True, min=-180, max=180, dv=0)
+		bankCon = cmds.createNode('condition', name='{}_bank_condition0'.format(self.name))
+		cmds.setAttr('{}.operation'.format(bankCon), 2)
+		cmds.setAttr('{}.colorIfFalseR'.format(bankCon), 0)
+		cmds.setAttr('{}.colorIfFalseG'.format(bankCon), 0)
+		cmds.setAttr('{}.colorIfFalseB'.format(bankCon), 0)
+		cmds.connectAttr('{}.bank'.format(self.control), '{}.firstTerm'.format(bankCon))
+		cmds.connectAttr('{}.bank'.format(self.control), '{}.colorIfTrueR'.format(bankCon))
+		cmds.connectAttr('{}.bank'.format(self.control), '{}.colorIfFalseG'.format(bankCon))
+		cmds.connectAttr('{}.outColorR'.format(bankCon), '{}.rz'.format(bankList[0]))
+		cmds.connectAttr('{}.outColorG'.format(bankCon), '{}.rz'.format(bankList[1]))
+
+		# Rock
+		rockName = ['{}_rock_{}'.format(self.name, x) for x in ['heel', 'toe']]
+		rockList = createNullChain(rockName)
+		cmds.parent(rockList[0], bankList[-1])
+
+		# Ball
+		ballOffset = cmds.group(name='{}_ball_offset_null0'.format(self.name), em=True)
+		ballGrp = cmds.group(ballOffset, name='{}_ball_null0'.format(self.name))
+		cmds.parent(ballGrp, rockList[-1])
+		addEmptyAttr(self.control, n='ballControl')
+		for attr in ['x', 'y', 'z']:
+			cmds.addAttr(self.control, ln='ball{}'.format(attr.upper()), k=True, at='doubleAngle')
+			cmds.connectAttr('{}.ball{}'.format(self.control, attr.upper()), '{}.r{}'.format(ballOffset, attr))
+
+		# Toe
+		toeGrp = cmds.group(name='{}_toe_grp0'.format(self.name), em=True)
+		cmds.parent(toeGrp, rockList[-1])
+		addEmptyAttr(self.control, n='toeControl')
+		for attr in ['x', 'y', 'z']:
+			cmds.addAttr(self.control, ln='toe{}'.format(attr.upper()), k=True, at='doubleAngle')
+			cmds.connectAttr('{}.toe{}'.format(self.control, attr.upper()), '{}.r{}'.format(toeGrp, attr))
+
+		# Foot Roll
+		rollAngle = [90, 45, 90]
+		addEmptyAttr(self.control, n='rollControl')
+		cmds.addAttr(self.control, ln='roll', k=True, dv=0)
+		for attr in partName:
+			i = partName.index(attr)
+			cmds.addAttr(self.control,
+			             ln='angle{}'.format(attr.capitalize()),
+			             k=True,
+
+			             min=-180,
+			             max=180,
+			             dv=rollAngle[i],
+			             )
+
+		# Foot Roll - Heel
+		mul = cmds.createNode('multDoubleLinear', name='{}_heel_multiply0'.format(self.name))
+		cmds.setAttr('{}.input2'.format(mul), -1)
+		cmds.connectAttr('{}.angleHeel'.format(self.control), '{}.input1'.format(mul))
+		range = cmds.createNode('setRange', name='{}_heel_range0'.format(self.name))
+		cmds.setAttr('{}.oldMinX'.format(range), -10)
+		cmds.connectAttr('{}.output'.format(mul), '{}.minX'.format(range))
+		cmds.connectAttr('{}.roll'.format(self.control), '{}.valueX'.format(range))
+		cmds.connectAttr('{}.outValueX'.format(range), '{}.rx'.format(rockList[0]))
+
+		# Foot Roll - Toe
+		range = cmds.createNode('setRange', name='{}_toe_range0'.format(self.name))
+		cmds.setAttr('{}.oldMinX'.format(range), 10)
+		cmds.setAttr('{}.oldMaxX'.format(range), 20)
+		cmds.connectAttr('{}.angleToe'.format(self.control), '{}.maxX'.format(range))
+		cmds.connectAttr('{}.roll'.format(self.control), '{}.valueX'.format(range))
+		cmds.connectAttr('{}.outValueX'.format(range), '{}.rx'.format(rockList[1]))
+
+		# Foot Roll - Ball
+		range = cmds.createNode('setRange', name='{}_ball_range0'.format(self.name))
+		cmds.setAttr('{}.oldMaxX'.format(range), 10)
+		cmds.setAttr('{}.oldMinY'.format(range), 10)
+		cmds.setAttr('{}.oldMaxY'.format(range), 20)
+		cmds.connectAttr('{}.angleBall'.format(self.control), '{}.maxX'.format(range))
+		cmds.connectAttr('{}.angleBall'.format(self.control), '{}.minY'.format(range))
+		cmds.connectAttr('{}.roll'.format(self.control), '{}.valueX'.format(range))
+		cmds.connectAttr('{}.roll'.format(self.control), '{}.valueY'.format(range))
+		con = cmds.createNode('condition', name='{}_ball_condition0'.format(self.name))
+		cmds.setAttr('{}.secondTerm'.format(con), 10)
+		cmds.setAttr('{}.operation'.format(con), 2)
+		cmds.connectAttr('{}.roll'.format(self.control), '{}.firstTerm'.format(con))
+		cmds.connectAttr('{}.outValueX'.format(range), '{}.colorIfFalseR'.format(con))
+		cmds.connectAttr('{}.outValueY'.format(range), '{}.colorIfTrueR'.format(con))
+		cmds.connectAttr('{}.outColorR'.format(con), '{}.rx'.format(ballGrp))
+
+		# Return
+		self.parent = globalGrp
+		self.swivel = swivelList
+		self.bank = bankList
+		self.rock = rockList
+		self.ball = [ballOffset, ballGrp]
+		self.toe = listCheck(toeGrp)
+		return
+
+	def defaultPositions(self):
+		locators = getDefaultIKFootRollPositions(foot=self.start, toe=self.end)
+		snap(locators.parent, self.parent, t=True, r=True)
+		snap(self.end, self.toe[0], t=True, r=True)
+
+		for x in [self.swivel[0], self.rock[0]]:
+			moveRotatePivot(locators.heel, x)
+
+		for x in [self.swivel[1]]:
+			moveRotatePivot(locators.ball, x)
+
+		for x in [self.swivel[2], self.rock[1]]:
+			moveRotatePivot(locators.toe, x)
+
+		moveRotatePivot(locators.inner, self.bank[0])
+		moveRotatePivot(locators.outter, self.bank[1])
+
+		for x in self.ball:
+			moveRotatePivot(self.end, x)
+
+		cmds.delete(locators.parent)
+		return
+
+	def accuratePositions(self):
+		startBounds = estimateBoundsByJoint(self.start)
+		endBounds = estimateBoundsByJoint(self.end)
+
+		if self.side == 'left':
+			minX = [startBounds.minX[0], 0, startBounds.minX[2]]
+			maxX = [startBounds.maxX[0], 0, startBounds.maxX[2]]
+		else:
+			minX = [startBounds.maxX[0], 0, startBounds.maxX[2]]
+			maxX = [startBounds.minX[0], 0, startBounds.minX[2]]
+
+		# moveRotatePivot(minX, self.bank[0])
+		moveRotatePivot(maxX, self.bank[1])
+
+		for x in [self.swivel[0], self.rock[0]]:
+			moveRotatePivot([startBounds.minZ[0], 0, startBounds.minZ[2]], x)
+
+		for x in [self.swivel[2], self.rock[1]]:
+			moveRotatePivot([endBounds.maxZ[0], 0, endBounds.maxZ[2]], x)
+		return
+
+	def createWire(self):
+		self.wire = control.wire(typ=control.component.cubeSpecial, axis=[0, 0, 0])
+		snap(self.rock[0], self.wire, r=True, t=True)
+
+		var = [getDistance(self.bank[0], self.bank[1]),
+		       getDistance(self.parent, self.start),
+		       getDistance(self.rock[0], self.rock[1])]
+
+		i=0
+		for axis in ['x', 'y', 'z']:
+			cmds.setAttr('{}.s{}'.format(self.wire, axis), var[i])
+			i+=1
+		presetWireColor(self.wire, typ=component.ik)
+		freezeTransform(self.wire)
+		return
+
+
+class getDefaultIKFootRollPositions:
+	def __init__(self, foot, toe):
+		side = getPositionSide(foot)
+		distance = getDistance(foot, toe)
+
+		self.parent = cmds.spaceLocator(name='foot0')[0]
+		snap(foot, self.parent, t=True)
+		cmds.setAttr('{}.ty'.format(self.parent), 0)
+
+		self.ball = cmds.spaceLocator(name='ball0')[0]
+		snap(toe, self.ball, t=True)
+		cmds.setAttr('{}.ty'.format(self.ball), 0)
+
+		cmds.delete(cmds.aimConstraint(self.ball, self.parent, aimVector=[0, 0, 1]))
+		snap(self.parent, self.ball, r=True)
+		cmds.parent(self.ball, self.parent)
+
+		self.toe = cmds.spaceLocator(name='toe0')[0]
+		cmds.parent(self.toe, self.parent)
+		zeroAttrs(self.toe)
+		cmds.setAttr('{}.tz'.format(self.toe), distance + (distance / 4))
+
+		self.heel = cmds.spaceLocator(name='heel0')[0]
+		cmds.parent(self.heel, self.parent)
+		zeroAttrs(self.heel)
+		cmds.setAttr('{}.tz'.format(self.heel), (distance / 4) * -1)
+
+		if side == 'left':
+			innerM = -1
+			outterM = 1
+		else:
+			innerM = 1
+			outterM = -1
+
+		self.inner = cmds.spaceLocator(name='inner0')[0]
+		cmds.parent(self.inner, self.parent)
+		zeroAttrs(self.inner)
+		cmds.setAttr('{}.tx'.format(self.inner), (distance / 3) * innerM)
+
+		self.outter = cmds.spaceLocator(name='outter0')[0]
+		cmds.parent(self.outter, self.parent)
+		zeroAttrs(self.outter)
+		cmds.setAttr('{}.tx'.format(self.outter), (distance / 3) * outterM)
 
 
 #########################################################################################################################

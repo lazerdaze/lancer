@@ -238,7 +238,7 @@ class IKCONTROL(CONTROL):
 	             ):
 		CONTROL.__init__(self,
 		                 name=name,
-		                 typ=control.component.cube,
+		                 typ=control.component.sphere,
 		                 scale=scale,
 		                 child=child,
 		                 parent=parent,
@@ -409,6 +409,16 @@ class CHAIN(object):
 		for grp in self.group:
 			ults.lockAttributes(grp, hide=True)
 
+	def lockCtlScale(self):
+		for ctl in self.control:
+			ults.lockScale(ctl)
+		return
+
+	def limitRotations(self):
+		for ctl in self.control:
+			cmds.transformLimits(ctl, erx=[1, 1], rx=[-180, 180])
+		return
+
 
 class FKCHAIN(CHAIN):
 	def __init__(self,
@@ -428,9 +438,18 @@ class FKCHAIN(CHAIN):
 		               )
 		self.create()
 		self.setUpGroupHierarchy()
+		self.resetRotations()
 		self.createParent()
 		self.createStretch()
+		self.limitRotations()
 		self.lockGroups()
+		#self.lockCtlScale()
+
+	def resetRotations(self):
+		if len(self.group) != 1:
+			for axis in ['x', 'y', 'z']:
+				cmds.setAttr('{}.r{}'.format(self.group[-1], axis), 0)
+			return
 
 	def createStretch(self):
 		attrName = naming.rig.stretch
@@ -470,6 +489,7 @@ class IKCHAIN(CHAIN):
 		self.createIK()
 		self.createStretch()
 		self.lockGroups()
+		self.lockCtlScale()
 
 	def createJointChain(self):
 		name = naming.convention(naming.rig.ik, naming.rig.chain, naming.rig.jnt)
@@ -479,8 +499,10 @@ class IKCHAIN(CHAIN):
 
 	def resetRotations(self):
 		for grp in self.group:
-			for axis in ['x', 'y', 'z']:
-				cmds.setAttr('{}.r{}'.format(grp, axis), 0)
+			i=self.group.index(grp)
+			if i!= 0:
+				for axis in ['x', 'y', 'z']:
+					cmds.setAttr('{}.r{}'.format(grp, axis), 0)
 		return
 
 	def createIK(self):
@@ -499,7 +521,7 @@ class IKCHAIN(CHAIN):
 
 		# Pole Vector
 		pvPos = ults.getPoleVectorPosition(start, mid, end)
-		cmds.xform(self.control[1], ws=True, t=pvPos)
+		cmds.xform(self.group[1], ws=True, t=pvPos)
 		poleVector = ults.createPoleVector(joint=mid,
 		                                   ctl=self.control[1],
 		                                   ik=self.ikHandle,
@@ -512,6 +534,19 @@ class IKCHAIN(CHAIN):
 		                                  ),
 		               )
 
+		ults.lockRotate(self.control[1])
+
+		'''
+		rotateNull = cmds.group(name='{}_rotate_null'.format(self.ikHandle), em=True)
+		ults.snap(self.control[1], rotateNull, t=True)
+		cmds.parent(rotateNull, self.control[-1])
+		ults.lockAttributes(rotateNull)
+
+		poleVectorOffset = cmds.group(name='{}_offset'.format(self.control[1]), em=True)
+		ults.snap(start, poleVectorOffset, t=True)
+		cmds.aimConstraint(self.control[-1], poleVectorOffset, wut='object', wuo=rotateNull)
+		cmds.parent(self.group[1], poleVectorOffset)
+		'''
 		ults.presetWireColor(self.control[1], ults.component.ik)
 		return
 
@@ -541,6 +576,41 @@ class IKCHAIN(CHAIN):
 			stretchGroup.append(grp)
 
 		self.stretchGroup = stretchGroup
+
+
+class DETAILCHAIN(CHAIN):
+	def __init__(self,
+	             joint,
+	             name=naming.rig.detail,
+	             scale=1,
+	             axis=None,
+	             ):
+
+		CHAIN.__init__(self,
+		               objects=skeleton.getBindJoint(joint),
+		               controlClass=DETAILCONTROL,
+		               name=name,
+		               scale=scale,
+		               axis=axis,
+		               side=ults.getSide(joint),
+		               )
+
+		self.joint = joint
+		self.create()
+		self.parentToJoint()
+		self.createConstraints()
+
+	def parentToJoint(self):
+		for group in self.group:
+			cmds.parent(group, self.joint)
+		return
+
+	def createConstraints(self):
+		for obj in self.objects:
+			i = self.objects.index(obj)
+			cmds.parentConstraint(self.control[i], obj, mo=True)
+			cmds.scaleConstraint(self.control[i], obj, mo=True)
+		return
 
 
 class RIBBONCHAIN(CHAIN):
@@ -625,7 +695,6 @@ class RIBBONLIMB:
 		self.upperFlexiPlane = None
 		self.lowerFlexiPlane = None
 
-		self.getScale()
 		self.createMainControls()
 		self.createIntermediateControls()
 		self.createDetailControls()
@@ -633,10 +702,6 @@ class RIBBONLIMB:
 		self.createHierarchy()
 		self.createTwist()
 		self.cleanUp()
-
-	def getScale(self):
-		self.scale = ults.getDistance(self.start, self.mid) / 3
-		return
 
 	def getStartParent(self):
 		parent = cmds.listRelatives(self.start, parent=True)
@@ -660,6 +725,8 @@ class RIBBONLIMB:
 			cmds.parent(ctl.group, obj)
 			self.mainControl.append(ctl.transform)
 			self.mainGroup.append(ctl.group)
+
+		ults.snap(self.mid, self.mainGroup[-1], r=True)
 
 		cmds.delete(cmds.orientConstraint(self.mainGroup[0], self.mainGroup[2], self.mainGroup[1]))
 		return
@@ -732,40 +799,44 @@ class RIBBONLIMB:
 
 		return
 
+	def createFlexiPlane(self, start, end, amount, name):
+		distance = ults.getDistance(start, end)
+		flex = ults.createFlexiPlane(name=name,
+		                             amount=amount,
+		                             width=distance,
+		                             side=self.side,
+		                             )
+
+		cmds.delete(cmds.parentConstraint(start, end, flex.parent))
+		return flex
+
 	def createRibbon(self):
-		upper = self.createFlexiPlane(start=self.start,
-		                              end=self.mid,
-		                              amount=len(self.upperObjects + ults.listCheck(self.midObject)),
-		                              name=naming.convention(self.name,
-		                                                     'upper',
-		                                                     ),
-		                              )
-		lower = self.createFlexiPlane(start=self.mid,
-		                              end=self.end,
-		                              amount=len(self.upperObjects + ults.listCheck(self.midObject)),
-		                              name=naming.convention(self.name,
-		                                                     'lower',
-		                                                     ),
-		                              )
-
-		cmds.delete(upper.constraint, lower.constraint)
-
-		self.upperFlexiPlane = upper
-		self.lowerFlexiPlane = lower
+		self.upperFlexiPlane = self.createFlexiPlane(start=self.start,
+		                                             end=self.mid,
+		                                             amount=len(self.upperObjects + ults.listCheck(self.midObject)),
+		                                             name=naming.convention(self.name,
+		                                                                    'upper',
+		                                                                    ),
+		                                             )
+		self.lowerFlexiPlane = self.createFlexiPlane(start=self.mid,
+		                                             end=self.end,
+		                                             amount=len(self.upperObjects + ults.listCheck(self.midObject)),
+		                                             name=naming.convention(self.name,
+		                                                                    'lower',
+		                                                                    ),
+		                                             )
 		return
 
 	def createHierarchy(self):
-		i = 0
-		for grp in self.upperFlexiPlane.group:
-			ults.snap(self.mainControl[i], grp, t=True)
-			cmds.parent(grp, self.mainControl[i])
-			i += 1
 
-		i = 2
-		for grp in self.lowerFlexiPlane.group:
-			ults.snap(self.mainControl[i], grp, t=True)
-			cmds.parent(grp, self.mainControl[i])
-			i += 1
+		cmds.pointConstraint(self.mainControl[0], self.upperFlexiPlane.control[0])
+		cmds.pointConstraint(self.mainControl[2], self.upperFlexiPlane.control[2])
+
+		cmds.pointConstraint(self.mainControl[2], self.lowerFlexiPlane.control[0])
+		cmds.pointConstraint(self.mainControl[4], self.lowerFlexiPlane.control[2])
+
+		cmds.connectAttr('{}.t'.format(self.mainControl[1]), '{}.t'.format(self.upperFlexiPlane.control[1]))
+		cmds.connectAttr('{}.t'.format(self.mainControl[3]), '{}.t'.format(self.lowerFlexiPlane.control[1]))
 
 		i = 0
 		for grp in self.upperGroup:
@@ -781,9 +852,10 @@ class RIBBONLIMB:
 		cmds.orientConstraint(self.mainControl[2], self.midGroup[0], mo=True)
 		cmds.orientConstraint(self.mainControl[-1], self.detailGroup[-1], mo=True)
 
-		if self.startParent:
-			cmds.parent(self.upperFlexiPlane.parent, self.startParent)
-			cmds.parent(self.lowerFlexiPlane.parent, self.startParent)
+		# if self.startParent:
+		#	cmds.parent(self.upperFlexiPlane.masterGroup, self.startParent)
+		#	cmds.parent(self.lowerFlexiPlane.masterGroup, self.startParent)
+
 		return
 
 	def createTwist(self):
@@ -800,33 +872,185 @@ class RIBBONLIMB:
 		cmds.connectAttr('{}.rx'.format(self.start), '{}.input1'.format(add))
 		cmds.connectAttr('{}.rx'.format(self.end), '{}.input2'.format(add))
 		cmds.connectAttr('{}.output'.format(add), '{}.endTwistAdd'.format(self.lowerFlexiPlane.parent))
-
 		return
 
-	def createFlexiPlane(self, start, end, amount, name):
-
-		distance = ults.getDistance(start, end)
-		flex = ults.createFlexiPlane(name=name,
-		                             amount=amount,
-		                             width=distance,
-		                             side=self.side,
-		                             )
-
-		#cmds.delete(cmds.parentConstraint(start, end, flex.parent))
-		cmds.delete(cmds.pointConstraint(start, end, flex.parent))
-
-		if self.side == naming.side.right:
-			cmds.setAttr('{}.rz'.format(flex.parent), -180)
-		#cmds.orientConstraint(start, flex.parent)
-		return flex
-
 	def cleanUp(self):
-		for obj in self.upperFlexiPlane.group + self.lowerFlexiPlane.group:
-			ults.setVisibility(obj)
 
 		for obj in self.mainControl:
 			ults.lockScale(obj)
 
+		return
+
+
+class TWISTCHAIN:
+	def __init__(self,
+	             start,
+	             mid,
+	             end,
+	             name=naming.rig.aux,
+	             scale=1,
+	             axis=None,
+	             ):
+		self.start = start
+		self.mid = mid
+		self.end = end
+
+		self.name = name
+		self.scale = scale
+		self.side = ults.getSide(start)
+		self.axis = axis
+
+		self.upperObject = skeleton.getBindJoint(start)
+		self.lowerObject = skeleton.getBindJoint(mid)
+		self.midObject = self.lowerObject[0]
+
+		self.upperChain = DETAILCHAIN(joint=self.start,
+		                              scale=self.scale,
+		                              axis=self.axis,
+		                              name=naming.convention(self.name,
+		                                                     'upper',
+		                                                     naming.rig.detail,
+		                                                     )
+		                              )
+		self.lowerChain = DETAILCHAIN(joint=self.mid,
+		                              scale=self.scale,
+		                              axis=self.axis,
+		                              name=naming.convention(self.name,
+		                                                     'lower',
+		                                                     naming.rig.detail
+		                                                     )
+		                              )
+
+		self.objects = self.upperObject + self.lowerObject
+		self.control = self.upperChain.control + self.lowerChain.control
+		self.group = self.upperChain.group + self.lowerChain.group
+		self.stretch = []
+		self.distance = []
+
+		self.upperTwist = None
+		self.lowerTwist = None
+
+		self.createIKTwist()
+		self.createStretch(objects=self.upperChain.control, start=self.start, end=self.mid, typ='upper',
+		                   ctl=self.upperTwist.parent)
+		self.createStretch(objects=self.lowerChain.control, start=self.mid, end=self.end, typ='lower',
+		                   ctl=self.lowerTwist.parent)
+
+		self.createSnS()
+
+	def createIKTwist(self):
+		self.upperTwist = ults.createIKTwist(start=self.start,
+		                                     end=self.mid,
+		                                     name=naming.convention(self.name, 'upper_twist'),
+		                                     )
+
+		self.lowerTwist = ults.createIKTwist(start=self.end,
+		                                     end=self.mid,
+		                                     name=naming.convention(self.name, 'lower_twist'),
+		                                     )
+
+		self.createTwistConnections(self.upperChain.group, self.upperTwist.joint[0], self.upperTwist.parent,
+		                            typ='upper')
+		self.createTwistConnections(self.lowerChain.group, self.lowerTwist.joint[0], self.lowerTwist.parent,
+		                            typ='lower')
+		cmds.parent(self.lowerTwist.ikHandle, self.end)
+		cmds.parent(self.lowerTwist.parent, self.mid)
+		return
+
+	def createTwistConnections(self, objects, twist, ctl, typ):
+		attrName = 'twist'
+		cmds.addAttr(ctl, ln=attrName, m=True, at='double', k=True)
+
+		max = 1.0
+		step = max / float(len(objects))
+		var = max if typ == 'upper' else 0.0
+		for obj in objects:
+			i = objects.index(obj)
+			mult = cmds.createNode('multDoubleLinear', name='{}_twist_mult0'.format(obj))
+			cmds.connectAttr('{}.{}[{}]'.format(ctl, attrName, i), '{}.input1'.format(mult))
+			cmds.connectAttr('{}.rx'.format(twist), '{}.input2'.format(mult))
+			cmds.connectAttr('{}.output'.format(mult), '{}.rx'.format(obj))
+			cmds.setAttr('{}.{}[{}]'.format(ctl, attrName, i), var)
+			var += -step if typ == 'upper' else step
+		return
+
+	def createStretch(self, objects, start, end, ctl, typ):
+		attrName = naming.rig.stretch
+		cmds.addAttr(ctl, ln=attrName, m=True, at='double', k=True)
+		distance = ults.createDistanceNode(start=start, end=end,
+		                                   n=naming.convention(self.name, '{}_distance0'.format(typ)))
+
+		max = 1.0
+		if typ == 'upper':
+			step = max / float(len(objects))
+		else:
+			step = max / float(len(objects) - 1)
+		var = 0
+
+		for obj in objects:
+			i = objects.index(obj)
+			cmds.setAttr('{}.{}[{}]'.format(ctl, attrName, i), var)
+			grp = ults.createGroup(obj, n=naming.convention(obj, attrName, naming.rig.grp))
+			self.stretch.append(grp)
+			if i != 0:
+				sub = cmds.createNode('plusMinusAverage', name='{}_subtract0'.format(grp))
+				mult = cmds.createNode('multDoubleLinear', name='{}_mult0'.format(grp))
+				cmds.connectAttr('{}.distance'.format(distance[0]), '{}.input3D[0].input3Dx'.format(sub))
+				cmds.setAttr('{}.input3D[1].input3Dx'.format(sub), distance[1])
+				cmds.setAttr('{}.operation'.format(sub), 2)
+				cmds.connectAttr('{}.output3Dx'.format(sub), '{}.input1'.format(mult))
+				cmds.connectAttr('{}.output'.format(mult), '{}.tx'.format(grp))
+				cmds.connectAttr('{}.{}[{}]'.format(ctl, attrName, i), '{}.input2'.format(mult))
+			var += step
+		self.distance.append(distance[0])
+		return
+
+	def createSnS(self):
+		globalGrp = self.upperTwist.parent
+		cmds.addAttr(globalGrp, ln='sns', min=0, max=1, dv=0, k=True)
+		cmds.addAttr(globalGrp, ln='snsAdd', k=True)
+
+		maxDistance = ults.getDistance(self.start, self.mid) + ults.getDistance(self.mid, self.end)
+		# distance = ults.createDistanceNode(self.start, self.end)
+		distanceAdd = cmds.createNode('addDoubleLinear', name='{}_add0'.format(self.name))
+		cmds.connectAttr('{}.distance'.format(self.distance[0]), '{}.input1'.format(distanceAdd))
+		cmds.connectAttr('{}.distance'.format(self.distance[1]), '{}.input2'.format(distanceAdd))
+
+		divideA = cmds.createNode('multiplyDivide', name='{}_divide0'.format(self.name))
+		cmds.setAttr('{}.operation'.format(divideA), 2)
+		cmds.setAttr('{}.input2X'.format(divideA), maxDistance)
+		divideB = cmds.createNode('multiplyDivide', name='{}_divide0'.format(self.name))
+		cmds.setAttr('{}.operation'.format(divideB), 2)
+		cmds.setAttr('{}.input1X'.format(divideB), 1)
+
+		cmds.connectAttr('{}.output'.format(distanceAdd), '{}.input1X'.format(divideA))
+		cmds.connectAttr('{}.outputX'.format(divideA), '{}.input2X'.format(divideB))
+
+		setRange = cmds.createNode('setRange', name='{}_sns_setRange0'.format(self.name))
+		cmds.setAttr('{}.minX'.format(setRange), 1)
+		cmds.setAttr('{}.oldMaxX'.format(setRange), 1)
+		cmds.connectAttr('{}.sns'.format(globalGrp), '{}.valueX'.format(setRange))
+		cmds.connectAttr('{}.outputX'.format(divideB), '{}.maxX'.format(setRange))
+
+		add = cmds.createNode('addDoubleLinear', name='{}_add0'.format(self.name))
+		cmds.connectAttr('{}.outValueX'.format(setRange), '{}.input1'.format(add))
+		cmds.connectAttr('{}.snsAdd'.format(globalGrp), '{}.input2'.format(add))
+
+		amount = len(self.objects)
+		var = 0
+		step = 1.0 / float(len(self.objects) - 1)
+		stepRangePos = []
+
+		for x in range(amount):
+			if x == 0:
+				stepRangePos.append(.1)
+			else:
+				stepRangePos.append(var)
+			var += step
+
+		for grp in self.stretch:
+			for axis in ['y', 'z']:
+				cmds.connectAttr('{}.output'.format(add), '{}.s{}'.format(grp, axis))
 		return
 
 
@@ -974,6 +1198,7 @@ class BASE(object):
 			                    lowerObjects=lowerObjects,
 			                    midObject=midObjects,
 			                    side=self.side,
+			                    scale=self.scale / 1.2,
 			                    )
 
 			self.detailObjects = self.detailObjects + upperObjects + lowerObjects + ults.listCheck(midObjects)
@@ -993,6 +1218,32 @@ class BASE(object):
 					                 '{}.{}'.format(ribbon.upperFlexiPlane.parent, attr))
 					cmds.connectAttr('{}.{}'.format(self.attrControl, attr),
 					                 '{}.{}'.format(ribbon.lowerFlexiPlane.parent, attr))
+
+		return
+
+	def createTwistChain(self, start, mid, end):
+		chain = TWISTCHAIN(start=start,
+		                   mid=mid,
+		                   end=end,
+		                   scale=self.scale,
+		                   axis=self.axis,
+		                   name=naming.convention(self.name,
+		                                          self.side.upper()[0],
+		                                          self.index,
+		                                          naming.rig.aux,
+		                                          ))
+		self.detailObjects = chain.objects
+		self.detailControl = chain.control
+		self.detailGroup = chain.group
+
+		if self.attrControl:
+			attrName = ['sns', 'snsAdd']
+			cmds.addAttr(self.attrControl, ln=attrName[0], min=0, max=1, dv=0, k=True)
+			cmds.addAttr(self.attrControl, ln=attrName[1], k=True)
+
+			for attr in attrName:
+				cmds.connectAttr('{}.{}'.format(self.attrControl, attr),
+				                 '{}.{}'.format(chain.upperTwist.parent, attr))
 
 		return
 
@@ -1056,13 +1307,13 @@ class BASE(object):
 			axis = [1, -1, 0]
 		elif self.side == 'Right':
 			axis = [1, 1, 0]
-
+		'''
 		if self.name == 'leg':
 			if self.side == 'Left':
 				axis = [1, 0, 1]
 			elif self.side == 'Right':
 				axis = [1, 0, -1]
-
+		'''
 		ctl = ATTRCONTROL(name=naming.convention(self.name,
 		                                         self.side.upper()[0],
 		                                         self.index,
@@ -1783,12 +2034,12 @@ class ARM(BASE):
 
 		self.getScale()
 		self.createFKIKChain(self.objects)
+		self.createTwistChain(self.shoulder, self.elbow, self.hand)
 
 		if self.collar:
 			self.createDetailChain(self.collar)
 			self.createCollar()
 
-		self.createRibbonChain(self.shoulder, self.elbow, self.hand)
 		self.createHand()
 
 		if self.networkRoot:
@@ -1874,8 +2125,16 @@ class HAND(BASE):
 		              )
 
 		self.hand = hand
+		self.finger = []
 		self.createFingers()
 
+		if self.networkRoot:
+			self.createNetwork(typ=naming.convention(self.name,
+			                                         self.side.upper()[0],
+			                                         self.index,
+			                                         )
+			                   )
+			self.updateNetwork()
 
 	def createFingers(self):
 		children = skeleton.getJointChildren(self.hand)
@@ -1889,7 +2148,12 @@ class HAND(BASE):
 			               networkRoot=self.networkRoot,
 			               index=i,
 			               )
-			i+= 1
+			self.finger.append(finger)
+			i += 1
+		return
+
+	def updateNetwork(self):
+
 		return
 
 
@@ -1914,14 +2178,13 @@ class DIGIT(BASE):
 		self.createDetailChain(self.objects)
 		self.setupHierarchy()
 
-		if self.networkRoot:
-			self.createSet(self.fkControl)
-			self.createNetwork(typ=naming.convention(self.name,
-			                                         self.index,
-			                                         )
-			                   )
-
-			self.createNetworkConnections()
+		self.createNetwork(typ=naming.convention(self.name,
+		                                         self.side.upper()[0],
+		                                         self.index,
+		                                         )
+		                   )
+		self.createSet(self.fkControl)
+		self.createNetworkConnections()
 
 	def getScale(self):
 		self.scale = ults.getDistance(self.objects[0], self.objects[1]) / 2
@@ -1932,7 +2195,6 @@ class DIGIT(BASE):
 			i = self.objects.index(obj)
 			cmds.parentConstraint(self.fkControl[i], obj, mo=True)
 		return
-
 
 
 class LEG(BASE):
@@ -1953,16 +2215,30 @@ class LEG(BASE):
 		              index=index,
 		              )
 
+		self.toe = toe
+		self.toeFKControl = None
+		self.toeFKGroup = None
+		self.toeIKControl = None
+		self.toeIKGroup = None
+		self.roll = None
+
 		self.hip = hip
 		self.knee = knee
 		self.foot = foot
-		self.toe = toe
+
 		self.objects = [hip, knee, foot]
 
 		self.getScale()
 		self.createFKIKChain(self.objects)
-		self.createDetailChain(self.objects)
-		# self.swapFootControlWire()
+		self.resetRotations()
+		self.createTwistChain(self.hip, self.knee, self.foot)
+		self.setDefaultAttrValues()
+
+		if self.toe:
+			self.createDetailChain(self.toe)
+			self.createFootRoll()
+			self.createToe()
+			self.createToeFKIK()
 
 		if self.networkRoot:
 			self.createLocalWorld(obj=self.fkControl[0],
@@ -1977,327 +2253,100 @@ class LEG(BASE):
 			self.createNetworkConnections()
 
 	def getScale(self):
-		self.scale = ults.getDistance(self.hip, self.knee) / 4
+		self.scale = ults.getDistance(self.hip, self.knee) / 5
 		return
 
-	def swapFootControlWire(self):
-		newCurve = control.wire(typ=control.component.cubeFoot, scale=self.scale, axis=[0, 0, 0])
-		ults.snap(self.ikControl[-1], newCurve, t=True)
-		cmds.setAttr('{}.ty'.format(newCurve), 0)
-		ults.freezeTransform(newCurve, t=True)
+	def setDefaultAttrValues(self):
+		cmds.setAttr('{}.{}'.format(self.attrControl, naming.rig.fkik), 1)
 		return
 
-
-class LEG2(BASE):
-	def __init__(self, selected=None, name='leg', scale=1, *args):
-		super(LEG, self).__init__(selected=selected, name=name, scale=scale, typ=ults.component.leg)
-
-		if self.selected:
-			self.createControls()
-			self.updateNetwork()
-
-	def createControls(self):
-		self.createBindJoints()
-
-		if len(self.bindJoint) == 4:
-			self.createFK(self.bindJoint)
-			self.createIKLeg([self.bindJoint[0], self.bindJoint[1], self.bindJoint[2]])
-			self.createFKIKNetwork(self.bindJoint, self.fkJoint, self.ikJoint)
-			self.createAttrControl(self.bindJoint[2])
-
-		elif len(self.bindJoint) == 3:
-			self.createFKIK(self.bindJoint)
-
-	def createIKLeg(self, objects):
-		self.createIK(objects)
-
-		ballJnt = createJointChain(self.bindJoint[-1], typ=ults.component.ik, world=True)[0]
-		cmds.parent(ballJnt, self.ikJoint[-1])
-		self.ikJoint.append(ballJnt)
-
-		self.createFoot()
-
-	def createFoot(self):
-		foot = createIKFootPivot(n=self.createName('ik_footPivot'), ik=self.ikHandle,
-		                         start=self.selected[2], end=self.ikJoint[-1], ctl=self.ikControl[-1][0])
-
-	def updateNetwork(self):
-		cmds.setAttr('{}.FKIK'.format(self.attrControl[0]), 1)
-
-		if self.rootQuery.network:
-			connectToNetwork(self.network, self.rootQuery.network, ults.component.leg)
-			rootCtl = cmds.listConnections('{}.control'.format(self.rootQuery.network))
-
-			if rootCtl:
-				cmds.parent(self.ikControl[1][1], self.ikControl[2][1], rootCtl[0])
-
-			cogCtl = None
-			if self.rootQuery.cog:
-				cogCtl = cmds.listConnections('{}.control'.format(self.rootQuery.cog))
-
-			if self.rootQuery.hip:
-				hipCtl = cmds.listConnections('{}.control'.format(self.rootQuery.hip))
-				hipBind = getConnectedObj(self.rootQuery.hip, 'bindJoint[0]')
-
-				if hipBind:
-					cmds.parent(self.bindJoint[0], hipBind)
-
-				if hipCtl:
-					cmds.parent(self.ikControl[0][1], self.fkControl[0][1], hipCtl[0])
-
-					if cogCtl:
-						createLocalWorld(self.fkControl[0][0], local=hipCtl[0], world=cogCtl[0])
-
-
-
-class createIKFootPivot():
-	def __init__(self, n='ik_footPivot', ik=None, start=None, end=None, ctl=None, *args):
-
-		side = getPositionSide(start)
-
-		# Query IK
-
-		if not ik:
-			ik = queryIK(start).ikHandle
-
-		# Create Nulls
-
-		grpList = []
-
-		for grp in ['inner', 'outter', 'heel', 'toe', 'ball']:
-			g = cmds.group(n='{}_{}_null'.format(n, grp), em=True)
-			grpList.append(g)
-
-		i = 0
-		for g in grpList:
-			if i != 0:
-				cmds.parent(g, grpList[i - 1])
-			i += 1
-
-		masterGrp = cmds.group(grpList[0], n='{}_grp'.format(n))
-
-		# Toe Raise
-
-		toeRaise = cmds.group(n='{}_toeRaise_null'.format(n), em=True)
-		cmds.parent(toeRaise, grpList[3])
-		grpList.append(toeRaise)
-
-		# Pivot Locations
-
-		snap(start, masterGrp, t=True, r=False)
-		loc = cmds.spaceLocator()
-		snap(end, loc, t=True, r=False)
-		cmds.delete(
-			cmds.aimConstraint(loc, masterGrp, aimVector=[0, 0, 1], upVector=[0, 1, 0], worldUpType='vector',
-			                   worldUpVector=[0, 1, 0], skip=['x', 'z']))
-		cmds.delete(loc)
-
-		bounds = estimateBoundsByJoint(start)
-
-		if bounds.verts:
-			if side == ults.component.right:
-				grpList[0], grpList[1] = grpList[1], grpList[0]
-
-			i = 0
-			for b in [bounds.minX, bounds.maxX, bounds.minZ, bounds.maxZ]:
-				cmds.xform(grpList[i], ws=True, rp=[b[0], 0, b[2]])
-				i += 1
-
-		for grp in [grpList[4], grpList[5]]:
-			snap(end, grp, t=True, r=False)
-			freezeTransform(grp)
-
-		# Ball Control
-
-		ballCtl = control(end, n='{}_ball_ctl'.format(n), axis=[1, 0, 0], parent=False)
-		cmds.parent(ballCtl[1], grpList[4])
-
-		# Toe Control
-
-		toeCtl = control(grpList[3], n='{}_toe_ctl'.format(n), axis=[1, 0, 0], parent=False)
-		cmds.parent(toeCtl[1], grpList[5])
-		snap(end, toeCtl[1], t=False, r=True)
-
-		toePos = cmds.xform(grpList[5], q=True, ws=True, rp=True)
-		cmds.xform(toeCtl[0], ws=True, rp=toePos)
-		cmds.xform(toeCtl[1], ws=True, rp=toePos)
-		cmds.orientConstraint(toeCtl[0], end, mo=True)
-
-		# Main Control
-
-		if not ctl:
-			ctl = network(n='{}_Network_0'.format(n), typ='foot')
-			cmds.setAttr('{}.side'.format(ctl), side, type='string', l=True)
-
-			i = 0
-			for null in ['inner', 'outter', 'heel', 'toe', 'ball', 'toeRaise']:
-				connectToNetwork(grpList[i], ctl, '{}_pivot'.format(null))
-				i += 1
-
-		else:
-			cmds.parent(masterGrp, ctl)
-
-		addEmptyAttr(ctl, n='footPivot')
-
-		attrDict = {
-			'roll': 0,
-			'heelAngle': 45,
-			'ballAngle': 45,
-			'toeAngle': 70,
-			'toeRaise': 0,
-			'bank': 0,
-		}
-
-		for attr in attrDict:
-			cmds.addAttr(ctl, ln=attr, at='double', dv=attrDict[attr], k=True)
-
-		# Control Visibility
-
-		cmds.addAttr(ctl, ln='footControls', at='bool', k=True)
-		cmds.setAttr('{}.footControls'.format(ctl), e=True, channelBox=True)
-
-		for x in [ballCtl[1], toeCtl[1]]:
-			cmds.connectAttr('{}.footControls'.format(ctl), '{}.v'.format(x))
-
-		# Heel
-
-		mul = cmds.createNode('multDoubleLinear')
-		cmds.setAttr('{}.input2'.format(mul), -1)
-
-		cmds.connectAttr('{}.heelAngle'.format(ctl), '{}.input1'.format(mul))
-
-		range = cmds.createNode('setRange')
-		cmds.setAttr('{}.oldMinX'.format(range), -10)
-
-		cmds.connectAttr('{}.output'.format(mul), '{}.minX'.format(range))
-		cmds.connectAttr('{}.roll'.format(ctl), '{}.valueX'.format(range))
-
-		cmds.connectAttr('{}.outValueX'.format(range), '{}.rx'.format(grpList[2]))
-
-		# Toe Pivot Connections
-
-		range = cmds.createNode('setRange')
-		cmds.setAttr('{}.oldMinX'.format(range), 10)
-		cmds.setAttr('{}.oldMaxX'.format(range), 20)
-
-		cmds.connectAttr('{}.toeAngle'.format(ctl), '{}.maxX'.format(range))
-		cmds.connectAttr('{}.roll'.format(ctl), '{}.valueX'.format(range))
-
-		cmds.connectAttr('{}.outValueX'.format(range), '{}.rx'.format(grpList[3]))
-		cmds.connectAttr('{}.toeRaise'.format(ctl), '{}.rx'.format(toeRaise))
-
-		# Ball Pivot Connections
-
-		range = cmds.createNode('setRange')
-		cmds.setAttr('{}.oldMaxX'.format(range), 10)
-		cmds.setAttr('{}.oldMinY'.format(range), 10)
-		cmds.setAttr('{}.oldMaxY'.format(range), 20)
-
-		cmds.connectAttr('{}.ballAngle'.format(ctl), '{}.maxX'.format(range))
-		cmds.connectAttr('{}.ballAngle'.format(ctl), '{}.minY'.format(range))
-		cmds.connectAttr('{}.roll'.format(ctl), '{}.valueX'.format(range))
-		cmds.connectAttr('{}.roll'.format(ctl), '{}.valueY'.format(range))
-
-		con = cmds.createNode('condition')
-		cmds.setAttr('{}.secondTerm'.format(con), 10)
-		cmds.setAttr('{}.operation'.format(con), 2)
-
-		cmds.connectAttr('{}.roll'.format(ctl), '{}.firstTerm'.format(con))
-		cmds.connectAttr('{}.outValueX'.format(range), '{}.colorIfFalseR'.format(con))
-		cmds.connectAttr('{}.outValueY'.format(range), '{}.colorIfTrueR'.format(con))
-		cmds.connectAttr('{}.outColorR'.format(con), '{}.rx'.format(grpList[4]))
-
-		# Inner / Outter
-
-		con = cmds.createNode('condition')
-		cmds.setAttr('{}.operation'.format(con), 2)
-
-		cmds.connectAttr('{}.bank'.format(ctl), '{}.firstTerm'.format(con))
-		cmds.connectAttr('{}.bank'.format(ctl), '{}.colorIfTrueR'.format(con))
-		cmds.connectAttr('{}.bank'.format(ctl), '{}.colorIfFalseG'.format(con))
-
-		cmds.connectAttr('{}.outColorR'.format(con), '{}.rz'.format(grpList[0]))
-		cmds.connectAttr('{}.outColorG'.format(con), '{}.rz'.format(grpList[1]))
-
-		# IK
-
-		if ik:
-			cmds.parent(ik, ballCtl[0])
-
-		# Return
-
-		# self.network = net
-		self.pivot = grpList
-		self.group = masterGrp
-		self.control = [ballCtl, toeCtl]
-		self.attr = attrDict
-
-
-#########################################################################################################################
-#																														#
-#																														#
-#	Auto Rig    																								        #
-#																														#
-#																														#
-#########################################################################################################################
-
-class autoRig():
-	def __init__(self, characterName='character', *args):
-
-		selected = cmds.ls(sl=True)
-
-		if not selected:
-			selected = self.queryScene()
-
-		if selected:
-			joints = cmds.listRelatives(selected[0], ad=True, type='joint')
-			joints.append(selected[0])
-
-			jointQuery = jointLabel(joints, isDebug=False)
-
-			# BiPed
-			root = jointQuery.get(ults.component.root)
-			cog = jointQuery.get(ults.component.cog)
-			hip = jointQuery.get(ults.component.hip)
-			spine = jointQuery.get(ults.component.spine)
-			head = jointQuery.get(ults.component.head)
-			armLeft = jointQuery.get(ults.component.arm, ults.component.left)
-			armRight = jointQuery.get(ults.component.arm, ults.component.right)
-			legLeft = jointQuery.get(ults.component.leg, ults.component.left)
-			legRight = jointQuery.get(ults.component.leg, ults.component.right)
-
-			pUI = progressWindow(st='Creating Control Modules...', max=9)
-
-			ROOT(root)
-			pUI.update()
-
-			COG(cog)
-			pUI.update()
-
-			HIP(hip)
-			pUI.update()
-
-			SPINE(spine)
-			pUI.update()
-
-			HEAD(head)
-			pUI.update()
-
-			ARM(armLeft)
-			pUI.update()
-
-			ARM(armRight)
-			pUI.update()
-
-			LEG(legLeft)
-			pUI.update()
-
-			LEG(legRight)
-			pUI.update()
-
-	def queryScene(self):
-		joints = cmds.ls(type='joint')
-		return jointLabel(joints).get(ults.component.root)
+	def resetRotations(self):
+		cmds.parent(self.ikHandle, world=True)
+
+		for axis in ['x', 'y', 'z']:
+			cmds.setAttr('{}.r{}'.format(self.ikGroup[-1], axis), lock=False)
+			cmds.setAttr('{}.r{}'.format(self.ikGroup[-1], axis), 0)
+
+		cmds.parent(self.ikHandle, self.ikControl[-1])
+		ults.lockRotate(self.ikGroup[-1])
+
+		return
+
+	def createToe(self):
+		ctl = CONTROL(name=naming.convention(self.name,
+		                                     self.side[0],
+		                                     self.index,
+		                                     naming.rig.fk,
+		                                     naming.component.toe.capitalize(),
+		                                     naming.rig.ctl,
+		                                     ),
+		              typ=control.component.circleRotate,
+		              scale=self.scale,
+		              axis=[1, 0, 0],
+		              child=self.toe,
+		              side=self.side,
+		              label=naming.component.collar,
+		              color=ults.component.fk,
+		              )
+		ults.lockScale(ctl.transform)
+
+		parent = cmds.listRelatives(self.toe, parent=True)
+		if parent:
+			cmds.parent(ctl.group, parent[0])
+
+		self.toeFKControl = ctl.transform
+		self.toeFKGroup = ctl.group
+		self.objects.insert(0, self.toe)
+		return
+
+	def createFootRoll(self):
+		self.roll = ults.createIKFootRollNulls(foot=self.foot,
+		                                       toe=self.toe,
+		                                       control=self.ikControl[-1],
+		                                       name=naming.convention(self.name,
+		                                                              self.side[0],
+		                                                              self.index,
+		                                                              naming.rig.ik,
+		                                                              'footRoll'),
+		                                       )
+
+		# self.roll.accuratePositions()
+		self.roll.createWire()
+
+		cmds.parent(self.ikHandle, self.roll.ball[0])
+
+		for axis in ['x', 'y', 'z']:
+			cmds.setAttr('{}.t{}'.format(self.ikGroup[-1], axis), lock=False)
+
+		ults.snap(self.roll.wire, self.ikGroup[-1], t=True)
+		ults.lockAttributes(self.ikGroup[-1])
+
+		cmds.parent(self.roll.wire, self.ikGroup[-1])
+		ults.freezeTransform(self.roll.wire)
+		ults.swapShape(self.ikControl[-1], self.roll.wire)
+		cmds.parent(self.roll.parent, self.ikControl[-1])
+
+		self.toeIKControl = self.roll.toe[0]
+		return
+
+	def createToeFKIK(self):
+		pc = cmds.parentConstraint(self.toeFKControl,
+		                           self.toeIKControl,
+		                           self.toe,
+		                           n='{}_fkik_pc0'.format(self.toe),
+		                           mo=True)[0]
+
+		for axis in ['X', 'Y', 'Z']:
+			cmds.disconnectAttr('{}.constraintTranslate{}'.format(pc, axis), '{}.translate{}'.format(self.toe, axis))
+
+		pcAttr = cmds.parentConstraint(pc, q=True, wal=True)
+		cmds.connectAttr('{}.{}'.format(self.attrControl, naming.rig.fkik), '{}.{}'.format(pc, pcAttr[-1]), f=True)
+
+		reverse = cmds.createNode('reverse', n='{}_fkik_re0'.format(self.toe))
+		cmds.connectAttr('{}.{}'.format(self.attrControl, naming.rig.fkik), '{}.inputX'.format(reverse), f=True)
+		cmds.connectAttr('{}.outputX'.format(reverse), '{}.{}'.format(pc, pcAttr[0]), f=True)
+		cmds.connectAttr('{}.outputX'.format(reverse), '{}.v'.format(self.toeFKGroup), f=True)
+		return
 
 
 ########################################################################################################################

@@ -172,7 +172,7 @@ def getSkeletonTree(root, tree={}):
 	if children:
 		for child in children:
 			tree[child] = {
-				'children': getSkeletonTree(child, {}),
+				'children'  : getSkeletonTree(child, {}),
 				'attributes': getJointAttributes(child),
 			}
 
@@ -387,13 +387,33 @@ def getJointRootByLabel(joint, label, child=None):
 
 def getBindJoint(joint):
 	bindJoints = []
+
 	children = cmds.listRelatives(joint, children=True)
 	if children:
+		i = 0
 		for child in children:
 			if cmds.objectType(child) == 'joint':
 				label = getJointLabel(child)[1]
 				if label == 'Bind':
-					bindJoints.append(child)
+
+					# Position in chain - Distance
+
+					if i != 0:
+						posBefore = ults.getDistance(joint, bindJoints[i-1])
+						posAfter = ults.getDistance(joint, child)
+
+						# Negetive Values
+
+						if posAfter < posBefore:
+							bindJoints.insert(i - 1, child)
+						else:
+							bindJoints.append(child)
+
+					else:
+						bindJoints.append(child)
+
+					i += 1
+
 	return bindJoints if bindJoints else None
 
 
