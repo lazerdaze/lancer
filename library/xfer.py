@@ -250,3 +250,34 @@ class Import(Base):
 	def run(self):
 		self.data = read(self.filePath, isDebug=self.isDebug)
 		return
+
+
+########################################################################################################################
+#
+#
+#	Namespace
+#
+#
+########################################################################################################################
+
+def getNamespace(obj):
+	namespace = None
+	if ':' in obj:
+		var = obj.split(':')
+		namespace = var[0]
+		obj = var[-1]
+	return [obj, namespace]
+
+
+def isSameNamespace(par, child):
+	if getNamespace(par)[1] == getNamespace(child)[1]:
+		return True
+	else:
+		return False
+
+
+def isSameNamespaceObject(par, child):
+	if getNamespace(par)[0] == getNamespace(child)[0]:
+		return True
+	else:
+		return False

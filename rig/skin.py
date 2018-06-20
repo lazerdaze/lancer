@@ -235,7 +235,7 @@ class Export():
 		return data
 
 
-class Import():
+class Import:
 	def __init__(self, filepath, mesh, skin, *args):
 		self.filepath = filepath
 		self.mesh = mesh
@@ -267,7 +267,7 @@ class Import():
 					# restore normalize setting
 					if skinNorm != 0:
 						cmds.setAttr('{}.normalizeWeights'.format(self.skin), skinNorm)
-
+	
 					# remove unused influences
 					if inf not in skinValues['influences']:
 						cmds.skinCluster(skin, e=True, ri=inf)
@@ -276,7 +276,6 @@ class Import():
 
 					for attribute, attrValue in skinValues.items():
 						if attribute not in ['weights', 'influences']:
-							print attribute
 							cmds.setAttr('{}.{}'.format(skin, attribute), attrValue)
 
 					# Set New Weights
@@ -289,7 +288,7 @@ class Import():
 								                                                    vertID,
 								                                                    oldInfIDs[inf]),
 								             infIDValue)
-							# cmds.skinPercent(skin, '{}.vtx[{}]'.format(mesh, vertID), tv=[inf, infIDValue])
+						# cmds.skinPercent(skin, '{}.vtx[{}]'.format(mesh, vertID), tv=[inf, infIDValue])
 		return
 
 

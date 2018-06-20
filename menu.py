@@ -6,8 +6,9 @@
 #
 
 # Lancer Modules
-import rig.ui
+import lancer
 import channelBox.ui
+import rig.ui
 import rig.skeleton
 import rig.skin
 import rig.control
@@ -20,8 +21,14 @@ reload(rig.control)
 reload(rig.parts)
 reload(rig.auto)
 
+# External
+from external import tf_smoothSkinWeight
+
+# Python Modules
+import os
+
 # Maya Modules
-import maya.cmds as cmds
+from maya import cmds, mel
 
 
 def rigUI(*args):
@@ -46,6 +53,18 @@ def refresh(*args):
 def deletUI(name):
 	if cmds.menu(name, q=True, ex=True):
 		cmds.evalDeferred(lambda *_: cmds.deleteUI(name))
+	return
+
+
+def externalMeshSymmetry(*args):
+	PATH = os.path.join(lancer.DIRPATH, 'external', 'abSymMesh.mel').replace('\\', '/')
+	mel.eval('source "{}";'.format(PATH))
+	mel.eval('abSymMesh;')
+	return
+
+
+def externalSmoothSkinWeight(*args):
+	tf_smoothSkinWeight.paint()
 	return
 
 
@@ -74,5 +93,8 @@ def show(*args):
 	cmds.menuItem(l='Auto', subMenu=True, to=True)
 	rig.auto.menu()
 	cmds.setParent('..', menu=True)
+	cmds.menuItem(d=True, l='External')
+	cmds.menuItem(l='Mesh Symmetry', c=externalMeshSymmetry)
+	cmds.menuItem(l='Smooth Weights Tool', c=externalSmoothSkinWeight)
 
 	return ui

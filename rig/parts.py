@@ -443,7 +443,8 @@ class FKCHAIN(CHAIN):
 		self.createStretch()
 		self.limitRotations()
 		self.lockGroups()
-		#self.lockCtlScale()
+
+	# self.lockCtlScale()
 
 	def resetRotations(self):
 		if len(self.group) != 1:
@@ -498,9 +499,9 @@ class IKCHAIN(CHAIN):
 		return
 
 	def resetRotations(self):
-		for grp in self.group:
-			i=self.group.index(grp)
-			if i!= 0:
+		for grp in [self.group[0], self.group[1]]:
+			i = self.group.index(grp)
+			if i != 0:
 				for axis in ['x', 'y', 'z']:
 					cmds.setAttr('{}.r{}'.format(grp, axis), 0)
 		return
@@ -1402,7 +1403,8 @@ class BASE(object):
 			self.connectToNetworkRoot()
 
 		if self.networkRoot:
-			self.connectToNetwork(self.network, self.networkRoot, typ)
+			self.multiConnectToNetwork(self.network, self.networkRoot, naming.convention(self.name, self.side[0]))
+			# self.connectToNetwork(self.network, self.networkRoot, typ)
 			for attr in ['jointDisplay', 'controlDisplay']:
 				cmds.connectAttr('{}.{}'.format(self.networkRoot, attr), '{}.{}'.format(self.network, attr))
 		return
@@ -1798,8 +1800,8 @@ class COG(BASE):
 	def createHipControl(self):
 		if self.hip:
 			ctl = CONTROL(name='hip_ctl',
-			              typ=control.component.circleRotate,
-			              scale=self.scale - .25,
+			              typ=control.component.hip,
+			              scale=self.scale - .15,
 			              axis=[0, 0, 0],
 			              child=self.hip,
 			              )
@@ -1843,6 +1845,7 @@ class SPINE(BASE):
 		self.createParent(name='rig_grp'.format(self.name), child=self.objects[0])
 		self.setupHierarchy()
 		self.createDetailChain(self.objects)
+		self.overrideColor()
 
 		if self.networkRoot:
 			self.createSet(self.fkControl)
@@ -1869,6 +1872,10 @@ class SPINE(BASE):
 		parent = parent[0] if parent else None
 		if parent:
 			cmds.parent(self.parent, parent)
+		return
+
+	def overrideColor(self):
+		ults.presetWireColor(self.fkControl, 'center')
 		return
 
 
@@ -2047,11 +2054,7 @@ class ARM(BASE):
 			                      local=self.fkGroup[0],
 			                      )
 			self.createSet([self.collarFKControl] + self.fkControl + self.ikControl)
-			self.createNetwork(typ=naming.convention(self.name,
-			                                         self.side.upper()[0],
-			                                         self.index,
-			                                         )
-			                   )
+			self.createNetwork(typ=self.name)
 
 			self.createNetworkConnections()
 			self.updateNetwork()
@@ -2352,6 +2355,26 @@ class LEG(BASE):
 ########################################################################################################################
 #
 #
+#	Tools
+#
+#
+########################################################################################################################
+
+def mirror():
+	return
+
+
+def swap():
+	return
+
+
+def FKIKswitch():
+	return
+
+
+########################################################################################################################
+#
+#
 #	Menu
 #
 #
@@ -2359,20 +2382,17 @@ class LEG(BASE):
 
 
 def menu():
+	cmds.menuItem(d=True, l='Spine')
 	cmds.menuItem(l='Root', c=ROOT)
 	cmds.menuItem(l='COG', c=COG)
-	cmds.menuItem(d=True)
 	cmds.menuItem(l='Spine', c=SPINE)
-	cmds.menuItem(l='Neck', )
 	cmds.menuItem(l='Head', c=HEAD)
-	cmds.menuItem(d=True)
-	cmds.menuItem(l='Collar')
+	cmds.menuItem(d=True, l='Limbs')
 	cmds.menuItem(l='Arm', c=ARM)
-	cmds.menuItem(l='Hand')
-	cmds.menuItem(d=True)
-	cmds.menuItem(l='Hip')
 	cmds.menuItem(l='Leg', c=LEG)
-	cmds.menuItem(l='Foot')
-	cmds.menuItem(d=True)
 	cmds.menuItem(l='Tail')
+	cmds.menuItem(d=True, l='Tools')
+	cmds.menuItem(l='Mirror')
+	#cmds.menuItem(l='Swap')
+	cmds.menuItem(l='FKIK Switch')
 	return

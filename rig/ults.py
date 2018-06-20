@@ -2136,8 +2136,14 @@ class createIKFootRollNulls:
 		cmds.connectAttr('{}.bank'.format(self.control), '{}.firstTerm'.format(bankCon))
 		cmds.connectAttr('{}.bank'.format(self.control), '{}.colorIfTrueR'.format(bankCon))
 		cmds.connectAttr('{}.bank'.format(self.control), '{}.colorIfFalseG'.format(bankCon))
-		cmds.connectAttr('{}.outColorR'.format(bankCon), '{}.rz'.format(bankList[0]))
-		cmds.connectAttr('{}.outColorG'.format(bankCon), '{}.rz'.format(bankList[1]))
+
+		if self.side == 'left':
+			cmds.connectAttr('{}.outColorR'.format(bankCon), '{}.rz'.format(bankList[0]))
+			cmds.connectAttr('{}.outColorG'.format(bankCon), '{}.rz'.format(bankList[1]))
+		if self.side == 'right':
+			cmds.connectAttr('{}.outColorR'.format(bankCon), '{}.rz'.format(bankList[1]))
+			cmds.connectAttr('{}.outColorG'.format(bankCon), '{}.rz'.format(bankList[0]))
+
 
 		# Rock
 		rockName = ['{}_rock_{}'.format(self.name, x) for x in ['heel', 'toe']]

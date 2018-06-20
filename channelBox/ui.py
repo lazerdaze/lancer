@@ -5,10 +5,17 @@
 #
 #
 
+# Lancer
+import note
 
+reload(note)
+
+# Python Modules
+from functools import partial
+
+# Maya Modules
 import maya.cmds as cmds
 import maya.mel as mel
-from functools import partial
 
 
 class mayaUI(object):
@@ -753,6 +760,24 @@ class show():
 		self.end()
 		self.end(False)  # tabEnd
 
+	def noteUI(self, *args):
+		padding = 5
+
+		form = cmds.formLayout('Notes')
+		col = note.widget().control
+		cmds.setParent('..')
+
+		cmds.formLayout(form,
+		                e=True,
+		                attachForm=[
+			                [col, 'top', padding],
+			                [col, 'left', padding],
+			                [col, 'bottom', padding],
+			                [col, 'right', padding],
+		                ],
+		                )
+		return
+
 	def ui(self):
 
 		# Main Layout ===================================================================================================
@@ -813,6 +838,7 @@ class show():
 
 		self.keysUI()
 		self.motionTrailUI()
+		self.noteUI()
 
 		# End UI ===================================================================================================
 
