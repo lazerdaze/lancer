@@ -9,6 +9,19 @@
 # Maya Modules
 from maya import cmds, mel
 
+########################################################################################################################
+#
+#
+#	GLOBAL VARIABLES
+#
+#
+########################################################################################################################
+
+
+PADDING = 5
+WINDOWHEIGHT = 10
+WINDOWWIDTH = 390
+
 
 ########################################################################################################################
 #
@@ -100,9 +113,10 @@ class widget:
 		return nodes[0] if nodes else None
 
 	def edit(self, *args):
-		self.node = self.add()
 		text = cmds.scrollField(self.control, q=True, text=True)
-		cmds.setAttr('{}.notes'.format(self.node), text, type='string')
+		if text:
+			self.node = self.add()
+			cmds.setAttr('{}.notes'.format(self.node), text, type='string')
 		return
 
 	def update(self, *args):
@@ -136,25 +150,7 @@ class widget:
 		return
 
 
-def ui(*args):
-	padding = 5
-	winH = 10
-	winW = 390
-
-	if cmds.window(WINDOWNAME, q=True, ex=True):
-		cmds.deleteUI(WINDOWNAME)
-
-	winPref = cmds.windowPref(WINDOWNAME, exists=True)
-	if winPref:
-		cmds.windowPref(WINDOWNAME, e=True, h=winH, w=winW)
-
-	cmds.window(WINDOWNAME,
-	            t='Note',
-	            rtf=True,
-	            h=winH,
-	            w=winW,
-	            )
-
+def ui():
 	form = cmds.formLayout()
 	col = widget().control
 	cmds.setParent('..')
@@ -162,11 +158,40 @@ def ui(*args):
 	cmds.formLayout(form,
 	                e=True,
 	                attachForm=[
-		                [col, 'top', padding],
-		                [col, 'left', padding],
-		                [col, 'bottom', padding],
-		                [col, 'right', padding],
+		                [col, 'top', PADDING],
+		                [col, 'left', PADDING],
+		                [col, 'bottom', PADDING],
+		                [col, 'right', PADDING],
 	                ],
 	                )
+	return form
+
+
+########################################################################################################################
+#
+#
+#	WINDOW
+#
+#
+########################################################################################################################
+
+
+def window():
+	if cmds.window(WINDOWNAME, q=True, ex=True):
+		cmds.deleteUI(WINDOWNAME)
+
+	winPref = cmds.windowPref(WINDOWNAME, exists=True)
+	if winPref:
+		cmds.windowPref(WINDOWNAME, e=True, h=WINDOWHEIGHT, w=WINDOWWIDTH)
+
+	cmds.window(WINDOWNAME,
+	            t='Note',
+	            rtf=True,
+	            h=WINDOWHEIGHT,
+	            w=WINDOWWIDTH,
+	            )
+
+	ui()
 
 	cmds.showWindow(WINDOWNAME)
+	return
