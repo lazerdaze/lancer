@@ -790,7 +790,7 @@ def _translate(context, sourceText, *args):
         encoding = None
     else:
         raise TypeError(
-            "Expected 4 or 5 arguments, got {0}.".format(len(args)+2))
+            "Expected 4 or 5 arguments, got {0}.".format(len(args) + 2))
 
     if hasattr(Qt.QtCore, "QCoreApplication"):
         app = getattr(Qt.QtCore, "QCoreApplication")
@@ -1345,6 +1345,7 @@ def _pyside2():
     if hasattr(Qt, "_shiboken2"):
         Qt.QtCompat.wrapInstance = _wrapinstance
         Qt.QtCompat.getCppPointer = _getcpppointer
+        Qt.QtCompat.delete = shiboken2.delete
 
     if hasattr(Qt, "_QtUiTools"):
         Qt.QtCompat.loadUi = _loadUi
@@ -1382,6 +1383,7 @@ def _pyside():
     if hasattr(Qt, "_shiboken"):
         Qt.QtCompat.wrapInstance = _wrapinstance
         Qt.QtCompat.getCppPointer = _getcpppointer
+        Qt.QtCompat.delete = shiboken.delete
 
     if hasattr(Qt, "_QtUiTools"):
         Qt.QtCompat.loadUi = _loadUi
@@ -1417,6 +1419,7 @@ def _pyqt5():
     if hasattr(Qt, "_sip"):
         Qt.QtCompat.wrapInstance = _wrapinstance
         Qt.QtCompat.getCppPointer = _getcpppointer
+        Qt.QtCompat.delete = sip.delete
 
     if hasattr(Qt, "_uic"):
         Qt.QtCompat.loadUi = _loadUi
@@ -1482,6 +1485,7 @@ def _pyqt4():
     if hasattr(Qt, "_sip"):
         Qt.QtCompat.wrapInstance = _wrapinstance
         Qt.QtCompat.getCppPointer = _getcpppointer
+        Qt.QtCompat.delete = sip.delete
 
     if hasattr(Qt, "_uic"):
         Qt.QtCompat.loadUi = _loadUi

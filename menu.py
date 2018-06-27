@@ -20,6 +20,7 @@ reload(rig.skin)
 reload(rig.control)
 reload(rig.parts)
 reload(rig.auto)
+reload(channelBox.ui)
 
 # External
 from external import tf_smoothSkinWeight

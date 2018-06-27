@@ -29,7 +29,7 @@ MARGIN = 10
 COLUMN = 60
 
 
-class component(object):
+class component:
 	objects = 'objects'
 	camera = 'camera'
 	motion = 'motion'
@@ -164,9 +164,6 @@ def createMotionTrail(obj, typ):
 	return [pivot, motionTrail]
 
 
-
-
-
 ########################################################################################################################
 #
 #
@@ -174,6 +171,40 @@ def createMotionTrail(obj, typ):
 #
 #
 ########################################################################################################################
+
+
+def autoRow(*args):
+	form = cmds.formLayout(nd=100)
+	cmds.setParent('..')
+
+	length = float(len(args))
+	step = 100 / length
+
+	i = 0
+	for x in args:
+
+		if cmds.control(x, q=True, exists=True):
+			x = cmds.control(x, e=True, p=form)
+
+		elif cmds.layout(x, q=True, exists=True):
+			x = cmds.layout(x, e=True, p=form)
+
+		if i == 0:
+			cmds.formLayout(form, edit=True, attachForm=[(x, 'left', 0), (x, 'top', 0), (x, 'bottom', 0), ],
+			                attachPosition=[(x, 'right', 1, step), ], )
+
+		else:
+			cmds.formLayout(form, edit=True,
+			                attachForm=[(x, 'top', 0), (x, 'bottom', 0), ],
+			                attachControl=[(x, 'left', 2, args[i - 1]), ],
+			                attachPosition=[(x, 'right', 1, step), ]
+			                )
+
+		step += 100 / length
+		i += 1
+
+	return form
+
 
 def formRadio(items=[], label=[], labelW=60, command=[], *args):
 	if label:
@@ -247,39 +278,53 @@ def selectTextScroll(obj, *args):
 	return
 
 
-class ui:
+class widget:
 	def __init__(self):
-		cmds.columnLayout(adj=True)
-		cmds.frameLayout(lv=False)
+		form = cmds.formLayout()
 
+		typeLayout = cmds.columnLayout(adj=True)
 		self.typeUI = cmds.radioCollection()
 		formRadio(items=[component.motionObject, component.motionCamera])
+		cmds.setParent('..')
 
-		buttonForm = cmds.formLayout(nd=100)
 		b1 = cmds.button(l='Create', c=self.create, bgc=[.5, 1, .5])
 		b2 = cmds.button(l='Delete', bgc=[1, .25, .5], c=self.deleteAll)
-		cmds.setParent('..')
-		editFormRow(form=buttonForm, items=[b1, b2])
+		buttonUI = autoRow(b1, b2)
 
-		mtForm = cmds.formLayout(nd=100)
-		mt1 = cmds.columnLayout(adj=True)
-		cmds.text(l='Objects')
-		self.objectUI = cmds.textScrollList(h=50, w=100, sc=lambda *_: selectTextScroll(
+		self.objectUI = cmds.textScrollList(h=1, sc=lambda *_: selectTextScroll(
 				cmds.textScrollList(self.objectUI, q=True, si=True)[0]))
-		cmds.setParent('..')
 
-		mt2 = cmds.columnLayout(adj=True)
-		cmds.text(l='Motion Trails')
-		self.motionTrailUI = cmds.textScrollList(h=50, w=100, sc=lambda *_: selectTextScroll(
+		self.motionTrailUI = cmds.textScrollList(h=1, sc=lambda *_: selectTextScroll(
 				cmds.textScrollList(self.motionTrailUI, q=True, si=True)[0]))
-		cmds.setParent('..')
-		cmds.setParent('..')
-		editFormRow(form=mtForm, items=[mt1, mt2])
 
-		cmds.button(l='Update', c=self.update)
+		mtUI = autoRow(self.objectUI, self.motionTrailUI)
+
+		b3 = cmds.button(l='Update', c=self.update)
 
 		cmds.setParent('..')
-		cmds.setParent('..')
+
+		cmds.formLayout(form,
+		                e=True,
+		                attachForm=[
+			                [typeLayout, 'top', PADDING],
+			                [typeLayout, 'left', PADDING],
+			                [typeLayout, 'right', PADDING],
+			                [buttonUI, 'left', PADDING],
+			                [buttonUI, 'right', PADDING],
+			                [mtUI, 'left', PADDING],
+			                [mtUI, 'right', PADDING],
+			                [b3, 'left', PADDING],
+			                [b3, 'right', PADDING],
+			                [b3, 'bottom', PADDING],
+
+		                ],
+		                attachControl=[[buttonUI, 'top', PADDING, typeLayout],
+		                               [mtUI, 'top', PADDING, buttonUI],
+		                               [mtUI, 'bottom', PADDING, b3],
+		                               ],
+		                )
+
+		self.layout = form
 
 		self.startup()
 
@@ -355,6 +400,10 @@ class ui:
 		cmds.textScrollList(self.objectUI, e=True, ra=True)
 		cmds.textScrollList(self.motionTrailUI, e=True, ra=True)
 		return
+
+
+def ui():
+	return widget().layout
 
 
 ########################################################################################################################

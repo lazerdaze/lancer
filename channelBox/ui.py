@@ -256,14 +256,10 @@ def show(name=NAME):
 	tweenKey.ui()
 	cmds.setParent('..')
 
-	motionTrailUI = cmds.scrollLayout(cr=True)
-	motionTrail.ui()
-	cmds.setParent('..')
+	motionTrailUI = motionTrail.ui()
 
-	ghostUI = cmds.scrollLayout(cr=True)
-	ghost.ui()
-	cmds.setParent('..')
 
+	ghostUI = ghost.ui()
 	noteUI = note.ui()
 
 	# motionTrail.ui()

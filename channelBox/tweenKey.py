@@ -88,7 +88,7 @@ def getKeyable(obj):
 
 
 @undoable
-def tween(percent):
+def tween(percent, *args):
 	selected = cmds.ls(sl=True)
 
 	if selected:

@@ -5,14 +5,14 @@
 #
 #
 
+# External Modules
 
+# Python Modules
 import os
 import sys
 import collections
-from contextlib import contextmanager
 import time
 import json
-
 import xml
 import xml.dom
 from xml.dom import minidom
@@ -20,6 +20,7 @@ from xml.dom.minidom import Document
 from xml.dom.minidom import parse
 from xml.etree import ElementTree as etree
 
+# Maya Modules
 import maya.cmds as cmds
 
 ########################################################################################################################
@@ -43,6 +44,8 @@ class FileType:
 	txt = 'txt'
 	py = 'py'
 	obj = 'obj'
+	css = 'css'
+	qss = 'qss'
 
 
 def pathJoin(*args):
@@ -135,6 +138,9 @@ def read(path, isDebug=False):
 			if isDebug:
 				print prettyXML(root)
 
+		elif fileType == FileType.css or fileType == FileType.qss:
+			data = readFile.read()
+
 		else:
 			data = readFile.read()
 			if isDebug:
@@ -158,6 +164,15 @@ singleFilter = "All Files (*.*)"
 multipleFilters = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;All Files (*.*)"
 
 
+########################################################################################################################
+#
+#
+#	Maya
+#
+#
+########################################################################################################################
+
+
 def mayaFileBrowse(label='File Browse', fileMode=3, okCaption='OK', fileFilter='directory', *args):
 	filepath = cmds.fileDialog2(cap=label, fm=fileMode, okc=okCaption, ff=fileFilter, ds=2)
 	if filepath:
@@ -174,6 +189,17 @@ def mayaImportFile(filePath, *args):
 	except:
 		cmds.error('Unable to import file: "{}".'.format(filePath))
 	return filePath
+
+
+########################################################################################################################
+#
+#
+#	QT
+#
+#
+########################################################################################################################
+
+
 
 
 ########################################################################################################################

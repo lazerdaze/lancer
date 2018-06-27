@@ -29,7 +29,7 @@ MARGIN = 10
 COLUMN = 60
 
 
-class component(object):
+class component:
 	ghost = 'ghost'
 
 
@@ -69,6 +69,14 @@ def createGhost(*args):
 		return None
 
 
+########################################################################################################################
+#
+#
+#	UI
+#
+#
+########################################################################################################################
+
 def autoRow(*args):
 	form = cmds.formLayout(nd=100)
 	cmds.setParent('..')
@@ -101,31 +109,32 @@ def autoRow(*args):
 
 	return form
 
-
-########################################################################################################################
-#
-#
-#	UI
-#
-#
-########################################################################################################################
-
-class ui:
+class widget:
 	def __init__(self):
-
-		col = cmds.columnLayout(adj=True)
-		cmds.frameLayout(lv=False)
+		form = cmds.formLayout()
 		b1 = cmds.button(l='Create', c=self.create)
 		b2 = cmds.button(l='Delete All', c=self.delete)
-		autoRow(b1, b2)
+		buttonUI = autoRow(b1, b2)
 
-		self.objectUI = cmds.textScrollList(sc=lambda *x: self.select(self.objectUI))
-		self.ghostUI = cmds.textScrollList(sc=lambda *x: self.select(self.ghostUI))
+		self.objectUI = cmds.textScrollList(h=1, sc=lambda *x: self.select(self.objectUI))
+		self.ghostUI = cmds.textScrollList(h=1, sc=lambda *x: self.select(self.ghostUI))
 		listUI = autoRow(self.objectUI, self.ghostUI)
-
-		cmds.setParent('..')
 		cmds.setParent('..')
 
+		cmds.formLayout(form,
+		                e=True,
+		                attachForm=[
+			                [buttonUI, 'top', PADDING],
+			                [buttonUI, 'left', PADDING],
+			                [buttonUI, 'right', PADDING],
+			                [listUI, 'left', PADDING],
+			                [listUI, 'bottom', PADDING],
+			                [listUI, 'right', PADDING],
+		                ],
+		                attachControl=[listUI, 'top', PADDING, buttonUI]
+		                )
+
+		self.layout = form
 		self.startup()
 
 	def create(self, *args):
@@ -164,6 +173,10 @@ class ui:
 		cmds.textScrollList(self.objectUI, e=True, ra=True)
 		cmds.textScrollList(self.ghostUI, e=True, ra=True)
 		return
+
+
+def ui():
+	return widget().layout
 
 
 ########################################################################################################################
