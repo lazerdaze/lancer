@@ -1,5 +1,5 @@
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
+from Qt import QtCore, QtWidgets, QtGui
 
 
 class Ui_MainWindow(object):
