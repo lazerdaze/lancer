@@ -23,6 +23,7 @@ import maya.api.OpenMaya as om
 import os
 from math import *
 import json
+import time
 
 """
 Skinning Notes:
@@ -220,16 +221,88 @@ def revertJointToBindPose(*args):
 	return
 
 
-def storeBindPose(*args):
+def createBindPose(root, name='skeletonPose0'):
+	pose = cmds.dagPose(root, name=name, save=True)
+	return pose
+
+
+def restoreBindPose(poseName):
+	cmds.dagPose(poseName, restore=True, g=True)
+	return
+
+
+def createBindPosePrompt(*args):
 	selected = ults.getSelected()
 	if selected:
-		pass
+		root = selected[0]
+
+		if cmds.objectType(root) != 'joint':
+			cmds.warning('Create Joint Pose Failed: Must select a joint hierarchy.')
+			return
+		else:
+			result = cmds.promptDialog(
+					title='Create Joint Pose'.format(root),
+					message='Enter Name:',
+					button=['OK', 'Cancel'],
+					defaultButton='OK',
+					cancelButton='Cancel',
+					dismissString='Cancel')
+
+			if result == 'OK':
+				name = cmds.promptDialog(query=True, text=True)
+				if not name:
+					cmds.warning('Create Joint Pose Failed: Must specify a name.')
+					return
+				else:
+					createBindPose(root, name)
+			return
+
+
+def restoreBindPoseUI(poseList):
+	cmds.columnLayout(adj=True)
+	textVar = cmds.textScrollList(append=poseList)
+	cmds.button(l='Select',
+	            c=lambda x: cmds.layoutDialog(dismiss=str(cmds.textScrollList(textVar, q=True, si=True)[0])))
+	cmds.setParent('..')
+	return
+
+
+def restoreBindPosePrompt():
+	selected = ults.getSelected()
+	if selected:
+		root = selected[0]
+
+		if cmds.objectType(root) != 'joint':
+			cmds.warning('Restore Joint Pose Failed: Must select a joint hierarchy.')
+			return
+		else:
+			pose = []
+			hasPose = []
+			conn = cmds.listConnections('{}.message'.format(root))
+
+			for con in conn:
+				if cmds.objectType(con) == 'dagPose':
+					hasPose.append(True)
+					pose.append(con)
+				else:
+					hasPose.append(False)
+
+			if not pose or True not in hasPose:
+				cmds.warning('Restore Joint Pose Failed: No bind poses found.')
+				return
+			else:
+				if len(pose) > 1:
+					pose = cmds.layoutDialog(t='Restore Joint Pose', ui=lambda: restoreBindPoseUI(pose))
+				else:
+					pose = pose[0]
+
+				restoreBindPose(pose)
+			return
 	return
 
 
 def sortJointHierarchy(joints):
 	# Find the root
-
 	for joint in joints:
 		i = joints.index(joint)
 		parent = cmds.listRelatives(joint, parent=True, type='joint')
@@ -297,6 +370,38 @@ def determineHeight(root):
 #
 #
 ########################################################################################################################
+
+MAYAJOINTLABELS = ['None',
+                   'Root',
+                   'Hip',
+                   'Knee',
+                   'Foot',
+                   'Toe',
+                   'Spine',
+                   'Neck',
+                   'Head',
+                   'Collar',
+                   'Shoulder',
+                   'Elbow',
+                   'Hand',
+                   'Finger',
+                   'Thumb',
+                   'PropA',
+                   'PropB',
+                   'PropC',
+                   'Other',
+                   'Index Finger',
+                   'Middle Finger',
+                   'Ring Finger',
+                   'Pinky Finger',
+                   'Extra Finger'
+                   'Big Toe',
+                   'Index Toe',
+                   'Middle Toe',
+                   'Ring Toe',
+                   'Pinky Toe',
+                   'Foot Thumb',
+                   ]
 
 jointLabelGlobalList = ['None',
                         'Root',
@@ -399,7 +504,7 @@ def getBindJoint(joint):
 					# Position in chain - Distance
 
 					if i != 0:
-						posBefore = ults.getDistance(joint, bindJoints[i-1])
+						posBefore = ults.getDistance(joint, bindJoints[i - 1])
 						posAfter = ults.getDistance(joint, child)
 
 						# Negetive Values
@@ -746,13 +851,56 @@ def defineCharacter():
 ########################################################################################################################
 #
 #
-#	External
+#	IMPORT
 #
 #
 ########################################################################################################################
 
 
-def importTemplate(*args):
+class createSkeletonFromImport:
+	def __init__(self, data):
+		self.reparentSkeletonTree(data)
+		cmds.select(d=True)
+
+	def reparentSkeletonTree(self, tree, parent=None):
+		for root, rootDict in tree.items():
+			children = rootDict['children']
+
+			cmds.select(d=True)
+			rootJoint = cmds.joint(name=root)
+
+			if parent:
+				cmds.parent(root, parent)
+			self.setAttributes(rootJoint, rootDict['attributes'])
+
+			if any(children):
+				for child, childDict in children.items():
+					cmds.select(d=True)
+					childJoint = cmds.joint(name=child)
+					cmds.parent(childJoint, rootJoint)
+					self.setAttributes(childJoint, childDict['attributes'])
+
+					grandChildren = childDict['children']
+					if any(grandChildren):
+						self.reparentSkeletonTree(grandChildren, childJoint)
+		return
+
+	def setAttributes(self, joint, attributeDict):
+		for attribute in attributeDict:
+			value = attributeDict[attribute]
+			if attribute == 'type':
+				if value in MAYAJOINTLABELS:
+					setJointLabel(joint, typ=value)
+				else:
+					setJointLabel(joint, typ='Other', otherType=value)
+			elif attribute == 'side':
+				setJointLabel(joint, side=value)
+			else:
+				cmds.setAttr('{}.{}'.format(joint, attribute), value)
+		return
+
+
+def importTemplateLegacy(*args):
 	path = 'templates'
 	fileName = 'skeleton_biped_T.ma'
 	filePath = os.path.join(DIRPATH, path, fileName)
@@ -760,50 +908,117 @@ def importTemplate(*args):
 	return filePath
 
 
-def exportTemplate(*args):
-	selected = ults.getSelected()
-	if selected:
-		selected = selected[0]
-		root = getJointRoot(selected)
-		data = getSkeletonTree(root)
+def importTemplate(debug=False, *args):
+	filepath = xfer.mayaFileBrowse(label='Import Skeleton Template',
+	                               fileMode=1,
+	                               okCaption='Import',
+	                               fileFilter="*.json",
+	                               )
 
-		if data:
-			filepath = xfer.mayaFileBrowse(label='Export Skeleton Weights',
-			                               fileMode=0,
-			                               okCaption='Export',
-			                               fileFilter="*.json",
-			                               )
+	if filepath:
+		importer = xfer.Import(filepath, isDebug=False)
+		data = importer.getData()
 
-			if filepath:
-				xfer.Export(filepath, data=data, isDebug=False)
+		if debug:
+			t1 = time.time()
+			print 'Skeleton Template Import: Debug Mode {}\n\n'.format('-' * 100)
+			print importer.getDebugInfo(), '\n\n'
+			print json.dumps(data, indent=1)
+			print 'Skeleton Template Import: Completed in {} seconds. {}'.format(time.time() - t1, '-' * 100)
+			return
+		else:
+			createSkeletonFromImport(data)
+			return
 
-	return
+	else:
+		print 'Skeleton Template Export: Canceled.'
+		return
 
 
 ########################################################################################################################
 #
 #
-#	Menu
+#	EXPORT
+#
+#
+########################################################################################################################
+
+
+def buildSkeletonTree(root, tree={}):
+	tree[root] = {'attributes': getJointAttributes(root),
+	              'children': {},
+	              }
+
+	children = getJointChildren(root)
+	if children:
+		for child in children:
+			tree[root]['children'][child] = {
+				'children'  : getSkeletonTree(child, {}),
+				'attributes': getJointAttributes(child),
+			}
+	return tree
+
+
+def exportTemplate(debug=False, *args):
+	selected = ults.getSelected()
+	if selected:
+		selected = selected[0]
+		root = getJointRoot(selected)
+
+		if cmds.objectType(root) != 'joint':
+			cmds.warning('Skeleton Template Export Failed: Must select a joint hierarchy.')
+			return
+		else:
+			data = buildSkeletonTree(root)
+			if data:
+				if debug:
+					t1 = time.time()
+					print 'Skeleton Template Export: Debug Mode {}\n'.format('-' * 100)
+					print json.dumps(data, indent=1) if data else 'Data: None'
+					print '\nSkeleton Template Export: Completed in {} seconds. {}'.format(time.time() - t1, '-' * 100)
+					return
+				else:
+					filepath = xfer.mayaFileBrowse(label='Export Skeleton Template',
+					                               fileMode=0,
+					                               okCaption='Export',
+					                               fileFilter="*.json",
+					                               )
+
+					if filepath:
+						xfer.Export(filepath, data=data, isDebug=False)
+					else:
+						print 'Skeleton Template Export: Canceled.',
+			return
+
+
+########################################################################################################################
+#
+#
+#	MENU
 #
 #
 ########################################################################################################################
 
 
 def menu():
-	cmds.menuItem(l='Import Skeleton Template', d=True)
-	cmds.menuItem(l='Bi-Ped', c=importTemplate)
-	# cmds.menuItem(l='Export Skeleton Template', c=skeleton.exportTemplate)
-	cmds.menuItem(d=True)
 	cmds.menuItem(l='Select Joint Hierarchy', c=selectJointHierarchy)
 	cmds.menuItem(l='Select Bind Joints', c=selectAllBindJoints)
 	cmds.menuItem(l='Select Non-Bind Joints', c=selectAllNonBindJoints)
 	cmds.menuItem(d=True)
 	cmds.menuItem(l='Remove Segment Scale', c=setSegmentScaleCompensate)
-	cmds.menuItem(d=True)
-	cmds.menuItem(l='Revert Joint To Bind Pose', c=revertJointToBindPose)
-	cmds.menuItem(l='Store New Bind Pose', c=storeBindPose, enable=False)
 	cmds.menuItem(d=True, l='Joint Labels')
 	cmds.menuItem(l='Create Skeleton Network From Labels', c=createSkeletonNetwork)
+	cmds.menuItem(d=True, l='Joint Pose')
+	cmds.menuItem(l='Restore Joint Pose', c=restoreBindPosePrompt)
+	cmds.menuItem(l='Create Joint Pose', c=createBindPosePrompt)
+	cmds.menuItem(l='Template', d=True)
+	cmds.menuItem(l='Import Template', c=importTemplate)
+	cmds.menuItem(l='Export Template', c=exportTemplate)
+	# cmds.menuItem(d=True)
+	# cmds.menuItem(l='Import Biped (Simple)', c=importTemplate)
+	# cmds.menuItem(l='Import Biped (Advanced)', c=importTemplate, enable=False)
+	# cmds.menuItem(l='Import Quadruped (Simple)', c=importTemplate)
+	# cmds.menuItem(l='Import Quadruped (Advanced)', c=importTemplate, enable=False)
 	cmds.menuItem(d=True, l='Template Only')
 	cmds.menuItem(l='Mirror Skeleton Positions', c=mirrorSelectedSkeleton)
 	cmds.menuItem(l='Force T-Pose', c=forceTPoseOnSelected)

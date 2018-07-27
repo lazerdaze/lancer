@@ -8,16 +8,31 @@
 #             import tf_smoothSkinWeight
 #             tf_smoothSkinWeight.paint()
 # -----------------------------------------------------------------------------------
-
-import maya.cmds as mc
+import sys
+import maya.cmds as cmds
 import maya.mel as mm
-import maya.cmds as mc
 import maya.OpenMaya as om
 import maya.OpenMayaAnim as oma
+
+
+def undoable(function):
+	def decoratorCode(*args, **kwargs):
+		cmds.undoInfo(openChunk=True)
+		functionReturn = None
+		try:
+			functionReturn = function(*args, **kwargs)
+		except:
+			print sys.exc_info()[1]
+
+		finally:
+			cmds.undoInfo(closeChunk=True)
+			return functionReturn
+	return decoratorCode
 
 # -----------------------------------------------------------------------------------
 # define mel procedures for the scripted brush
 # -----------------------------------------------------------------------------------
+
 def initPaint():
   cmd = '''
     global string $tf_skinSmoothPatin_selection[];
@@ -48,7 +63,7 @@ def initPaint():
                 $objName = $buffer[0];
         }
         
-        python("paint = tf_smoothSkinWeight.smoothPaintClass()"); 
+        python("paint = lancer.external.tf_smoothSkinWeight.smoothPaintClass()"); 
     }
 
     global proc tf_set_smoothBrushValue( int $slot, int $index, float $val )        
@@ -84,13 +99,14 @@ initPaint()
 # -----------------------------------------------------------------------------------
 # class for holding initializing skincluster relevant stuff
 # -----------------------------------------------------------------------------------
+
 class smoothPaintClass():
-  
+
   def __init__(self):
     self.skinCluster = ''
     self.obj = ''
     self.mitVex = ''
-    
+
     # select the skinned geo
     selection = om.MSelectionList()
     om.MGlobal.getActiveSelectionList( selection )
@@ -102,11 +118,11 @@ class smoothPaintClass():
     selection.getDagPath( 0, dagPath, components )
     self.obj = dagPath
     dagPath.extendToShape()
-    
+
     # currentNode is MObject to your mesh
     currentNode = dagPath.node()
     self.mitVtx = om.MItMeshVertex (dagPath)
-    
+
     # get skincluster from shape
     try:
       itDG = om.MItDependencyGraph(currentNode, om.MFn.kSkinClusterFilter, om.MItDependencyGraph.kUpstream)
@@ -117,23 +133,24 @@ class smoothPaintClass():
         break
     except:
       om.MGlobal.displayError("No SkinCluster to paint on")
-    
+
   # -----------------------------------------------------------------------------------
   # function to read, average, and set all influence weights on the vertex
   # vtx     (int)     current vertex index
   # value   (float)   weight value from the artisan brush
   # -----------------------------------------------------------------------------------
-  def setWeight(self, vtx, value):    
+  @undoable
+  def setWeight(self, vtx, value):
     dagPath = self.obj
     fnSkin = self.skinCluster
     mitVtx = self.mitVtx
-    
+
     if not fnSkin:      # error out when there is no skinCluster defined
       om.MGlobal.displayError("No SkinCluster to paint on")
     else:
       component = om.MFnSingleIndexedComponent().create(om.MFn.kMeshVertComponent)
       om.MFnSingleIndexedComponent(component).addElement( vtx )
-      
+
       oldWeights = om.MDoubleArray()
       surrWeights = om.MDoubleArray()
       infCount = om.MScriptUtil()
@@ -143,26 +160,26 @@ class smoothPaintClass():
       infIndices = om.MIntArray()
       prevVtxUtil = om.MScriptUtil( )
       prevVtx = prevVtxUtil.asIntPtr()
-      
+
       # create mesh iterator and get conneted vertices for averaging
       mitVtx = om.MItMeshVertex (dagPath, component)
       mitVtx.getConnectedVertices(surrVtxArray)
       surrVtxCount = len(surrVtxArray)
-            
+
       surrComponents = om.MFnSingleIndexedComponent().create(om.MFn.kMeshVertComponent)
       om.MFnSingleIndexedComponent(surrComponents).addElements( surrVtxArray )
-      
+
       # read weight from single vertex (oldWeights) and from the surrounding vertices (surrWeights)
       fnSkin.getWeights(dagPath, component, oldWeights, int)
       fnSkin.getWeights(dagPath, surrComponents, surrWeights, int)
       influenceCount = om.MScriptUtil.getUint(int)
-      
+
       # average all the surrounding vertex weights and multiply and blend it over the origWeight with the weight from the artisan brush
       for i in range(influenceCount):
         infIndices.append( i )
         newWeights.append( 0.0 )
         for j in range(i,len(surrWeights),influenceCount):
           newWeights[i] += (((surrWeights[j] / surrVtxCount) * value) + ((oldWeights[i] / surrVtxCount) * (1-value)))
-      
+
       # set the final weights throught the skinCluster again
       fnSkin.setWeights( dagPath, component, infIndices, newWeights, 1, oldWeights)

@@ -1,3 +1,5 @@
+# Running on Python 2.7, Pyside 2, Qt.py
+
 import sys
 from Qt import QtCore, QtWidgets, QtGui
 

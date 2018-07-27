@@ -1,0 +1,35 @@
+//Maya Preference 2018 (Release 1)
+//
+//
+
+//
+// The hotkey set
+//
+hotkeySet -source "Maya_Default" -current Maya_Default_Duplicate2;
+//
+// The hotkey contexts and hotkeys
+//
+hotkey -keyShortcut "r" -alt -name ("");
+hotkey -keyShortcut "s" -ctl -alt -name ("incrementalSaveNameCommand");
+hotkey -keyShortcut "e" -alt -name ("hotRotateNameCommand");
+hotkey -keyShortcut "0" -alt -name ("zeroOutNameCommand");
+hotkey -keyShortcut "s" -alt -name ("SetKeyframeWithColorNameCommand");
+hotkey -keyShortcut "g" -alt -name ("CreateGroupNullNameCommand");
+hotkey -keyShortcut "w" -alt -name ("hotMoveNameCommand");
+hotkeyCtx -type "Editor" -addClient "polyTexturePlacementPanel";
+hotkeyCtx -type "Editor" -addClient "nodeEditorPanel";
+hotkeyCtx -type "Editor" -addClient "shapePanel";
+hotkeyCtx -type "Editor" -addClient "posePanel";
+hotkeyCtx -type "Editor" -addClient "hyperGraphPanel";
+hotkeyCtx -type "Editor" -addClient "graphEditor";
+hotkeyCtx -type "Editor" -addClient "timeEditorPanel";
+hotkeyCtx -type "Editor" -addClient "profilerPanel";
+hotkeyCtx -type "Editor" -addClient "outlinerPanel";
+hotkeyCtx -type "Editor" -addClient "hyperShadePanel";
+hotkeyCtx -type "Tool" -addClient "texSculptCacheContext";
+hotkeyCtx -type "Tool" -addClient "sculptMeshCache";
+hotkeyCtx -type "Tool" -addClient "SymmetrizeUVBrush";
+hotkeyCtx -type "Tool" -addClient "polyCutUV";
+hotkeyCtx -type "Tool" -addClient "texCutContext";
+hotkeyCtx -type "Tool" -addClient "xgmIGBrush";
+hotkeyCtx -type "Tool" -addClient "Unfold3DBrush";

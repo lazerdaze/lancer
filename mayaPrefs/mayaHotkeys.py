@@ -2,6 +2,7 @@ import maya.cmds as cmds
 import maya.mel as mel
 
 
+# Alt + W
 def hotMove():
 	moveQuery = cmds.manipMoveContext('Move', q=True, mode=True) + 2
 	if moveQuery > 2:
@@ -14,6 +15,7 @@ def hotMove():
 	cmds.headsUpMessage('Move: ' + moveName)
 
 
+# Alt + E
 def hotRotate():
 	rotateQuery = cmds.manipRotateContext('Rotate', q=True, mode=True) + 1
 	if rotateQuery > 1:
@@ -26,6 +28,7 @@ def hotRotate():
 	cmds.headsUpMessage('Rotate: ' + rotateName)
 
 
+# Alt + 0
 def zeroOut():
 	selected = cmds.ls(sl=True)
 	if selected:
@@ -38,6 +41,7 @@ def zeroOut():
 						print 'Zero out {}.{}{}. Skipped.'.format(obj, attr, axis)
 
 
+# Alt + 0
 def zeroAttrToDefaults():
 	selected = cmds.ls(sl=True)
 	if selected:
@@ -53,5 +57,88 @@ def zeroAttrToDefaults():
 	return
 
 
+# Alt + S
 def keyframeSpecial():
 	mel.eval('performSetKeyframeArgList 1 {"0", "animationList"}; keyframe -time `currentTime -q` -tds 1;')
+
+
+# Alt + G
+def createNull():
+	for x in cmds.ls(sl=True):
+		name = '{0}_grp'.format(x)
+
+		if cmds.objExists(name):
+			name = '{0}_grp#'.format(x)
+
+		par = cmds.listRelatives(x, parent=True)
+		grp = cmds.group(n=name, em=True)
+		cmds.delete(cmds.parentConstraint(x, grp))
+
+		if par:
+			cmds.parent(grp, par)
+
+		cmds.parent(x, grp)
+
+
+# Ctl + Alt + S
+def incrementalSave():
+	mel.eval('''
+global proc incrementalSave () {
+    int $DEBUG = 0; // make this 1 for debugging only
+
+    // get the current filename	
+    string $fname = `file -q -sn`; 
+    if ($DEBUG) print ($fname + "\n");
+
+    // make sure filename ends with .ma or .mb 
+    int $len = `size $fname`;
+    if ($DEBUG) print ($len + "\n");
+    string $suffix = `substring $fname ($len-2) $len`;
+    if ($DEBUG) print ($suffix + "\n");
+    if (! ($suffix == ".ma" || $suffix == ".mb")) {
+	error ("filename doesn't end with .ma or .mb\n");
+    }
+
+    // extract the main part of the filename, before the suffix
+    string $suffixless = `substring $fname 1 ($len - 3)`;
+    if ($DEBUG) print ($suffixless + "\n");
+
+    // extract any digits at the end of the filename
+    string $digits = `match "[0-9]*$" $suffixless`; 
+    if ($DEBUG) print ("digits: " + $digits + "\n");
+
+    // if there are no digits, tack on "000" and go around again.
+    if ($digits == "") {
+	string $newname = $suffixless + "000" + $suffix;
+	if ($DEBUG) print ("no digits at end of name, renaming to " + $newname + "\n");
+	file -rn $newname;
+	incrementalSave;
+    } else {
+
+    // if there are serial number digits, calculate the new serial number
+	int $n = (int) $digits;
+	int $nextn = $n + 1;
+	string $newdigits = (string) $nextn;
+
+	// pad the serial number with "0" on the left as needed 
+	int $ndigits = `size $digits`;
+	int $nnewdigits = `size $newdigits`;
+	if ($DEBUG) print ($newdigits + "\n");
+	while ($ndigits > $nnewdigits) {
+	    $newdigits = "0" + $newdigits;
+	    $nnewdigits++;
+	}
+	if ($DEBUG) print ($newdigits + "\n");
+
+	// put the new filename together, rename, and save
+	int $lengthwithoutdigits = `size $suffixless` - `size $digits`;
+	string $stringwithoutdigits = `substring $suffixless 1 $lengthwithoutdigits`;
+	string $newname = $stringwithoutdigits + $newdigits + $suffix;
+	if ($DEBUG) print ($newname + "\n");
+	file -rn $newname;
+	file -save;
+    }
+}
+
+incrementalSave;
+	''')

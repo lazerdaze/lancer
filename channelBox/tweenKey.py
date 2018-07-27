@@ -8,12 +8,8 @@
 # PySide Modules
 import sys
 from functools import partial
-try:
-	from PySide2.QtCore import *
-	from PySide2 import QtGui, QtWidgets
-	import shiboken2
-except:
-	print 'TweenKeys: Unable to load PySide2.'
+from library.Qt import *
+from library.Qt import QtGui, QtWidgets
 
 # Maya Modules
 from maya import cmds, mel, OpenMayaUI
@@ -241,6 +237,7 @@ def formRow(items=[], exclude=[], special=[], specialColor=[1, 0, 0], roundOff=1
 	cmds.setParent('..')
 	return
 
+
 def ui():
 	column = cmds.columnLayout(adj=True)
 	cmds.frameLayout(lv=False, bgs=True)
@@ -248,9 +245,9 @@ def ui():
 	tweenSlide = cmds.floatSlider(minValue=0.0, maxValue=1.0, value=.5, dc=tween)
 
 	formRow(items=VALUERANGE,
-	           special=SPECIALVALUES,
-	           roundOff=ROUNDOFF,
-	           command=tween)
+	        special=SPECIALVALUES,
+	        roundOff=ROUNDOFF,
+	        command=tween)
 
 	# column = cmds.columnLayout('Keys', adj=True)
 	# widget = wrapInstance(long(OpenMayaUI.MQtUtil.findControl(column)), QtWidgets.QWidget)
@@ -273,11 +270,15 @@ def ui():
 
 
 def getMayaWindow():
-	pointer = OpenMayaUI.MQtUtil.mainWindow()
-	return shiboken2.wrapInstance(long(pointer), QtWidgets.QWidget)
+	app = QtWidgets.QApplication.instance()
+	return {o.objectName(): o for o in app.topLevelWidgets()}["MayaWindow"]
+
+def window():
+	return
 
 
-def window(winName='tweenKeyWindowUI'):
+def windowQt(*args):
+	winName = 'tweenKeyWindowUI'
 	if cmds.window(winName, exists=True):
 		cmds.deleteUI(winName, wnd=True)
 
@@ -296,4 +297,15 @@ def window(winName='tweenKeyWindowUI'):
 
 	# Show UI
 	window.show()
+	return
+
+
+def windowMaya(*args):
+	winName = 'tweenKeyWindowUI'
+	if cmds.window(winName, exists=True):
+		cmds.deleteUI(winName, wnd=True)
+
+	cmds.window(winName, t='Tween Key')
+	ui()
+	cmds.showWindow(winName)
 	return

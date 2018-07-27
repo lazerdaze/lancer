@@ -2144,7 +2144,6 @@ class createIKFootRollNulls:
 			cmds.connectAttr('{}.outColorR'.format(bankCon), '{}.rz'.format(bankList[1]))
 			cmds.connectAttr('{}.outColorG'.format(bankCon), '{}.rz'.format(bankList[0]))
 
-
 		# Rock
 		rockName = ['{}_rock_{}'.format(self.name, x) for x in ['heel', 'toe']]
 		rockList = createNullChain(rockName)
@@ -2176,7 +2175,6 @@ class createIKFootRollNulls:
 			cmds.addAttr(self.control,
 			             ln='angle{}'.format(attr.capitalize()),
 			             k=True,
-
 			             min=-180,
 			             max=180,
 			             dv=rollAngle[i],

@@ -13,16 +13,21 @@
 """
 
 # Lancer Modules
-import library.xfer as xfer
+from library import xfer
+import skeleton
 import ults
+
 reload(xfer)
 reload(ults)
 
+# Python Modules
+import json
+import time
 
 # Maya Modules
 import maya.OpenMaya as OpenMaya
 import maya.OpenMayaAnim as OpenMayaAnim
-import maya.cmds as cmds
+from maya import cmds, mel
 
 
 ########################################################################################################################
@@ -32,6 +37,17 @@ import maya.cmds as cmds
 #
 #
 ########################################################################################################################
+
+def getJointRootFromSkin(skin):
+	root = None
+	influences = getSkinClusterInfluences(skin)
+	for inf in influences:
+		if cmds.objectType(inf) == 'joint':
+			query = skeleton.getJointRoot(inf)
+			if query:
+				root = query
+				break
+	return root
 
 
 class SkinQuery():
@@ -46,6 +62,48 @@ class SkinQuery():
 
 	def __str__(self):
 		return str(self.__dict__)
+
+
+def removeSkinCluster(mesh):
+	shape = None
+
+	if cmds.objectType(mesh) == 'transform':
+		shape = getMeshShapeNode(mesh)
+	elif cmds.objectType(mesh) == 'mesh':
+		shape = mesh
+
+	if shape:
+		cmds.skinCluster(shape, e=True, ub=True)
+		cmds.delete(mesh, ch=True)
+
+	else:
+		cmds.warning('Unable to remove skin cluster. Skipped.')
+	return
+
+
+def bindSkinToSkeleton(mesh, root):
+	joints = skeleton.getAllJointChildren(root)
+	joints.append(root)
+	cmds.select(joints)
+	cmds.select(mesh, add=True)
+	skin = cmds.skinCluster(tsb=True, sm=0, omi=False, mi=8)[0]
+	cmds.select(d=True)
+	return skin
+
+
+def setAllSkinWeightsToZero(skin):
+	mesh = cmds.listConnections('{}.outputGeometry'.format(skin))[0]
+	maxAttr = '{}.maintainMaxInfluences'.format(skin)
+	normalAttr = '{}.normalizeWeights'.format(skin)
+
+	if cmds.getAttr(maxAttr) == 1:
+		cmds.setAttr(maxAttr, 0)
+
+	cmds.setAttr(normalAttr, 0)
+
+	cmds.skinPercent(skin, mesh, prw=100.0, nrm=False)
+	cmds.setAttr(normalAttr, 1)
+	return
 
 
 def getMeshShapeNode(mesh):
@@ -210,20 +268,189 @@ skinClusterAttributes = ['skinningMethod',
                          ]
 
 
-class Export():
-	def __init__(self, filepath, mesh, *args):
+class Import:
+	def __init__(self, filepath, debug=False, *args):
+		self.filepath = filepath
+		self.debug = debug
+		self.transform = None
+		self.mesh = None
+		self.skin = None
+		self.skinData = None
+		self.skeletonRoot = None
+		self.skeletonJoints = None
+		self.data = xfer.Import(self.filepath, isDebug=False).getData()
+
+		self.organizeData()
+
+	def debugInfo(self):
+		return json.dumps(self.data, indent=1)
+
+	def __str__(self):
+		value = ''
+		for x in vars(self).iterkeys():
+			if str(x) != 'data':
+				value += '{}: {}\n'.format(x, vars(self)[x])
+		return value
+
+	def canProcess(self):
+		canProcessList = []
+
+		for obj in [self.transform, self.mesh, self.skeletonRoot]:
+			exists = cmds.objExists(obj)
+			canProcessList.append(exists)
+
+			if not exists:
+				print '''Skin Import: "{}" doesn't exist in scene.'''.format(obj)
+
+		return False if False in canProcessList else True
+
+	def organizeData(self):
+		for transform in self.data:
+			self.transform = transform
+			self.mesh = self.data[transform]['mesh']
+			self.skin = self.data[transform]['skinCluster'].keys()[0]
+			self.skinData = self.data[transform]['skinCluster']
+
+			self.skeletonRoot = self.data[transform]['skeletonRoot']
+			self.skeletonJoints = skeleton.getAllJointChildren(self.skeletonRoot)
+
+			if self.skeletonJoints:
+				if self.skeletonRoot not in self.skeletonJoints:
+					self.skeletonJoints.append(self.skeletonRoot)
+		return
+
+	def cleanMesh(self):
+		if self.mesh:
+			try:
+				removeSkinCluster(self.mesh)
+			except:
+				print 'Skin Import: Remove Skin Cluster on "{}". Skipped.'.format(self.mesh)
+		return
+
+	def bindMeshToSkeleton(self):
+		self.cleanMesh()
+		self.skin = bindSkinToSkeleton(self.mesh, self.skeletonRoot)
+		setAllSkinWeightsToZero(self.skin)
+		return
+
+	def processWeights(self):
+		if not self.canProcess():
+			print self.debugInfo()
+			cmds.error('Skin Import Failed: View Script Editor For details.')
+			return
+		else:
+			self.bindMeshToSkeleton()
+			maxAttr = '{}.maintainMaxInfluences'.format(self.skin)
+
+			if cmds.getAttr(maxAttr) == 1:
+				cmds.setAttr(maxAttr, 0)
+
+			for skin, skinValues in self.skinData.items():
+
+				# Set New Weights
+				oldInfIDs = getInfluenceIDs(self.skin)
+
+				for vertID, vertIDValue in skinValues['weights'].items():
+					for inf, infValue in vertIDValue.items():
+						for infID, infIDValue in infValue.items():
+							cmds.setAttr('{}.weightList[{}].weights[{}]'.format(self.skin,
+							                                                    vertID,
+							                                                    oldInfIDs[inf]),
+							             infIDValue
+							             )
+
+				# Set Skin Attributes
+				for attribute, attrValue in skinValues.items():
+					if attribute not in ['weights', 'influences']:
+						cmds.setAttr('{}.{}'.format(self.skin, attribute), attrValue)
+			return
+
+
+def importSkinWeights(debug=False, *args):
+	filepath = xfer.mayaFileBrowse(label='Import Skin Weights', fileMode=1, okCaption='Import',
+	                               fileFilter="*.json")
+
+	if filepath:
+		importer = Import(filepath=filepath, debug=debug)
+
+		if debug:
+			t1 = time.time()
+			print 'Skin Import: Debug Mode {}\n\n'.format('-' * 100)
+			print importer, '\n\n'
+			print importer.debugInfo(), '\n\n'
+			print 'Skin Import Debug Mode: Completed in {} seconds. {}'.format(time.time() - t1, '-' * 100)
+			return
+		else:
+			try:
+				t1 = time.time()
+				importer.processWeights()
+				print 'Skin imported successfully in {} seconds.'.format(time.time() - t1)
+				return
+			except:
+				cmds.error('Skin Import Failed: View Script Editor for details.')
+				return
+	else:
+		print 'Skin Import: Canceled.',
+		return
+
+
+########################################################################################################################
+#
+#
+#	EXPORT
+#
+#
+########################################################################################################################
+
+class Export:
+	def __init__(self, filepath=None, mesh=None, debug=False, *args):
 		self.filepath = filepath
 		self.mesh = mesh
+		self.debug = debug
+		self.transform = None
+		self.skeletonRoot = None
 		self.skin = getMeshSkinCluster(mesh)
+		self.data = None
 
-		if self.mesh and self.skin:
-			self.data = {self.mesh: {self.skin: self.getData()}}
-			xfer.Export(self.filepath, data=self.data, isDebug=False)
+		self.organizeMeshData()
+		self.calculateData()
 
-		else:
-			cmds.error('Export Failed. Mesh: {}. Skin: {}.'.format(self.mesh, self.skin))
+	def setFilepath(self, path):
+		self.filepath = path
+		return
 
-	def getData(self):
+	def setMesh(self, mesh):
+		self.mesh = mesh
+		self.organizeMeshData()
+		self.calculateData()
+		return
+
+	def organizeMeshData(self):
+		if self.mesh:
+			self.skin = getMeshSkinCluster(self.mesh)
+
+			if self.skin:
+				self.skeletonRoot = getJointRootFromSkin(self.skin)
+
+			objType = cmds.objectType(self.mesh)
+			if objType == 'mesh':
+				self.transform = cmds.listRelatives(self.mesh, parent=True)[0]
+			elif objType == 'transform':
+				self.transform = self.mesh
+				self.mesh = getMeshShapeNode(self.mesh)
+		return
+
+	def calculateData(self):
+		self.data = {
+			self.transform: {
+				'skeletonRoot': self.skeletonRoot,
+				'mesh'        : self.mesh,
+				'skinCluster' : {self.skin: self.getSkinData()}
+			}
+		} if self.mesh and self.skin else None
+		return
+
+	def getSkinData(self):
 		data = {}
 
 		for attr in skinClusterAttributes:
@@ -231,110 +458,85 @@ class Export():
 
 		data['influences'] = [x for x in getSkinClusterInfluences(self.skin)]
 		data['weights'] = getSkinWeights(self.skin)
-
 		return data
 
+	def saveToFile(self):
+		if not self.data:
+			self.calculateData()
 
-class Import:
-	def __init__(self, filepath, mesh, skin, *args):
-		self.filepath = filepath
-		self.mesh = mesh
-		self.skin = skin
-
-		self.importFile = xfer.Import(self.filepath, isDebug=False)
-		self.data = self.importFile.data
-
-		if self.data:
-			self.setData()
-
-	def setData(self):
-		for mesh, meshValues in self.data.items():
-			meshShape = getMeshShapeNode(mesh)
-
-			for skin, skinValues in meshValues.items():
-				if cmds.objExists(skin):
-
-					# unlock influences used by skincluster
-					for inf in getSkinClusterInfluences(skin):
-						cmds.setAttr('{}.liw'.format(inf), 0)
-
-					# normalize needs turned off for the prune to work
-					skinNorm = cmds.getAttr('{}.normalizeWeights'.format(self.skin))
-					if skinNorm != 0:
-						cmds.setAttr('{}.normalizeWeights'.format(self.skin), 0)
-					cmds.skinPercent(self.skin, meshShape, nrm=False, prw=100)
-
-					# restore normalize setting
-					if skinNorm != 0:
-						cmds.setAttr('{}.normalizeWeights'.format(self.skin), skinNorm)
-	
-					# remove unused influences
-					if inf not in skinValues['influences']:
-						cmds.skinCluster(skin, e=True, ri=inf)
-
-					# Set Skin Attributes
-
-					for attribute, attrValue in skinValues.items():
-						if attribute not in ['weights', 'influences']:
-							cmds.setAttr('{}.{}'.format(skin, attribute), attrValue)
-
-					# Set New Weights
-					oldInfIDs = getInfluenceIDs(self.skin)
-
-					for vertID, vertIDValue in skinValues['weights'].items():
-						for inf, infValue in vertIDValue.items():
-							for infID, infIDValue in infValue.items():
-								cmds.setAttr('{}.weightList[{}].weights[{}]'.format(skin,
-								                                                    vertID,
-								                                                    oldInfIDs[inf]),
-								             infIDValue)
-						# cmds.skinPercent(skin, '{}.vtx[{}]'.format(mesh, vertID), tv=[inf, infIDValue])
-		return
-
-
-def importSkinWeights(*args):
-	selected = ults.getSelected()
-
-	if selected:
-		selected = selected[0]
-		skinCluster = getMeshSkinCluster(selected)
-
-		if selected and skinCluster:
-			filepath = xfer.mayaFileBrowse(label='Import Skin Weights', fileMode=1, okCaption='Import',
-			                               fileFilter="*.json")
-
-			if filepath:
-				Import(filepath=filepath, mesh=selected, skin=skinCluster)
-			else:
-				return
-		else:
-			cmds.error('Import Failed. Mesh: {}. Skin: {}.'.format(selected, skinCluster))
-
-	else:
-		cmds.warning('Nothing Selected.')
-		return
-
-
-def exportSkinWeights(*args):
-	selected = ults.getSelected()
-
-	if selected:
-		selected = selected[0]
-		filepath = xfer.mayaFileBrowse(label='Export Skin Weights', fileMode=0, okCaption='Export', fileFilter="*.json")
-
-		if filepath:
-			Export(filepath=filepath, mesh=selected)
-		else:
+		if not self.filepath:
+			cmds.error('Skin Export Failed: No filepath specified.')
 			return
 
+		if self.filepath and self.data:
+			xfer.Export(self.filepath, data=self.data, isDebug=False)
+			return
+		else:
+			print self.debugInfo()
+			cmds.error('Skin Export Failed: View Script Editor for details.')
+			return
 
-#########################################################################################################################
-#																														#
-#																														#
-#	Menu																											#
-#																														#
-#																														#
-#########################################################################################################################
+	def debugInfo(self):
+		return json.dumps(self.data, indent=1)
+
+	def __str__(self):
+		value = ''
+		for x in vars(self).iterkeys():
+			if str(x) != 'data':
+				value += '{}: {}\n'.format(x, vars(self)[x])
+		return value
+
+
+def exportSkinWeights(debug=False, *args):
+	selected = ults.getSelected()
+
+	if selected:
+		if len(selected) > 1:
+			cmds.warning('Skin Export Failed: Select only a single mesh.')
+			return
+		else:
+			mesh = selected[0]
+
+			if not getMeshShapeNode(mesh):
+				cmds.warning('Skin Export Failed: Select a mesh.')
+				return
+
+			elif not getMeshSkinCluster(mesh):
+				cmds.warning('''Skin Export Failed: Mesh doesn't have a skin cluster.''')
+				return
+
+			else:
+				exporter = Export(mesh=mesh, debug=debug)
+
+				if debug:
+					t1 = time.time()
+					print 'Skin Export: Debug Mode {}\n\n'.format('-' * 100)
+					print exporter, '\n\n'
+					print exporter.debugInfo(), '\n\n'
+					print 'Skin Export Debug Mode: Completed in {} seconds. {}'.format(time.time() - t1, '-' * 100)
+					return
+				else:
+					filepath = xfer.mayaFileBrowse(label='Export Skin Weights', fileMode=0, okCaption='Export',
+					                               fileFilter="*.json")
+
+					if filepath:
+						exporter.setFilepath(filepath)
+						exporter.saveToFile()
+					else:
+						print 'Skin Export: Canceled.',
+					return
+	else:
+		cmds.warning('Skin Export Failed: No mesh was selected.')
+		return
+
+
+########################################################################################################################
+#
+#
+#	MENU
+#
+#
+########################################################################################################################
 
 def menu():
 	cmds.menuItem(l='Import Skin Weights', c=importSkinWeights)

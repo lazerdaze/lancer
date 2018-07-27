@@ -341,7 +341,7 @@ def autoUI(*args):
 	cmds.button(l='+', w=20, c=lambda *x: ults.jointLabel().addTypeFromUI(cmds.optionMenuGrp(om1, q=True, sl=True)))
 	cmds.setParent('..')
 
-	cmds.button(l='Create Rig', c=parts.autoRig)
+	#cmds.button(l='Create Rig', c=parts.autoRig)
 
 	cmds.setParent('..')
 

@@ -118,7 +118,7 @@ def write(path, data=None, isDebug=False):
 				writeFile.write(data)
 
 	writeFile.close()
-	print'File written to path: "{}" successfully in {} seconds.'.format(path, time.time() - t1)
+	print 'File saved to "{}" successfully in {} seconds.'.format(path, time.time() - t1),
 	return
 
 
@@ -147,7 +147,7 @@ def read(path, isDebug=False):
 				print data
 
 	readFile.close()
-	print'File read from path "{}" successfully in {} seconds.'.format(path, time.time() - t1)
+	print'File read from "{}" successfully in {} seconds.'.format(path, time.time() - t1)
 	return data if data else None
 
 
@@ -200,8 +200,6 @@ def mayaImportFile(filePath, *args):
 ########################################################################################################################
 
 
-
-
 ########################################################################################################################
 #
 #
@@ -234,6 +232,9 @@ class Base:
 	def run(self):
 		pass
 
+	def getData(self):
+		return self.data
+
 	def organizePaths(self):
 		path = splitPath(self.filePath, self.fileName, self.fileType)
 		self.fileDirectory = path[0]
@@ -251,10 +252,11 @@ class Base:
 		return
 
 	def getDebugInfo(self):
-		print ''
-		for x in sorted(vars(self).iterkeys()):
-			print '{}: {}'.format(x, vars(self)[x])
-		return vars(self)
+		value = ''
+		for x in vars(self).iterkeys():
+			if str(x) != 'data':
+				value += '{}: {}\n'.format(x, vars(self)[x])
+		return value
 
 	def __str__(self):
 		return 'filepath: {}'.format(str(self.filePath))
