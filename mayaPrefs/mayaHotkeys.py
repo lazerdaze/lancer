@@ -142,3 +142,24 @@ global proc incrementalSave () {
 
 incrementalSave;
 	''')
+
+
+# Alt + (Num 1 - 9)
+def cupSet(setIndex=1):
+	name = 'teaCupSelectSet_{}'.format(setIndex)
+
+	if 0 > setIndex > 9:
+		raise ValueError('Index must be greater than 0 and less than 10')
+		return
+	else:
+		if cmds.objExists(name):
+			cmds.select(name)
+			return
+		else:
+			selected = cmds.ls(sl=True)
+			if not selected:
+				cmds.warning('Nothing selected.')
+				return
+			else:
+				cmds.sets(selected, name=name)
+	return

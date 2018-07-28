@@ -9,7 +9,7 @@
 import sys
 from functools import partial
 from library.Qt import *
-from library.Qt import QtGui, QtWidgets
+from library.Qt import QtCore, QtGui, QtWidgets
 
 # Maya Modules
 from maya import cmds, mel, OpenMayaUI
@@ -128,7 +128,7 @@ class stretchedButton(QtWidgets.QPushButton):
 
 
 class toolTipSlider(QtWidgets.QSlider):
-	def __init__(self, offset=QPoint(0, -40), *args):
+	def __init__(self, offset=QtCore.QPoint(0, -40), *args):
 		QtWidgets.QSlider.__init__(self, *args)
 
 		self.offset = offset
