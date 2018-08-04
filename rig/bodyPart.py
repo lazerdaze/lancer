@@ -5,6 +5,15 @@
 #
 #
 
+'''
+TODO
+- Global Twist Scale
+- Foot Pivot Based on helpers
+- Collar Class
+- IK Spine
+- Finger Control Scale
+'''
+
 # Lancer Modules
 import naming
 import ults

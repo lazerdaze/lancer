@@ -5,16 +5,25 @@
 #
 #
 
+'''
+TODO
+- Left Right Control Color: Left Blue / Right Red
+- HIK Skeleton on FK Controls
+- Better Hand Controls (Fist / Spread)
+'''
+
 # Lancer Modules
 import parts
 import naming
 import skeleton
 import bodyPart
+import ults
 
 reload(parts)
 reload(naming)
 reload(skeleton)
 reload(bodyPart)
+reload(ults)
 
 # Python Modules
 import json
@@ -63,7 +72,6 @@ def queryLabels(root):
 #																														#
 #########################################################################################################################
 
-
 def rigFromTemplate(*args):
 	root = parts.ROOT(root='CenterRoot')
 
@@ -111,94 +119,135 @@ def rigFromTemplate(*args):
 	return
 
 
-def rigFromLabels(root, *args):
-	tree = queryLabels(root)
+def rigFromLabels(root):
+	amount = 0
+	step = 100.0 / 8.0
 
-	centerRoot = None
-	rootNode = None
-	centerCog = None
-	cogNode = None
-	centerHip = None
-	centerSpine = None
-	centerNeck = None
-	centerHead = None
+	cmds.progressWindow(title='Auto Rigging',
+	                    progress=amount,
+	                    status='Query',
+	                    isInterruptable=True)
+	while True:
+		if cmds.progressWindow(query=True, isCancelled=True):
+			break
 
-	leftArm = None
-	rightArm = None
+		tree = queryLabels(root)
 
-	leftLeg = None
-	rightLeg = None
+		centerRoot = None
+		rootNode = None
+		centerCog = None
+		cogNode = None
+		centerHip = None
+		centerSpine = None
+		centerNeck = None
+		centerHead = None
 
-	# print json.dumps(tree, indent=2)
-	# Root
-	try:
-		centerRoot = tree[naming.component.root.capitalize()][naming.side.center]
-		rootNode = bodyPart.ROOT(root=centerRoot).network
-	except:
-		rootNode = bodyPart.ROOT().network
-		print 'Auto Rig: "Root" Skipped.'
+		leftArm = None
+		rightArm = None
 
-	# Cog / Hip
-	try:
-		centerCog = tree[naming.component.cog.capitalize()][naming.side.center]
-		centerHip = tree[naming.component.hip.capitalize()][naming.side.center]
-		cogNode = bodyPart.COG(cog=centerCog, hip=centerHip, networkRoot=rootNode)
-	except:
-		print 'Auto Rig: "Cog" / "Hip" Skipped.'
+		leftLeg = None
+		rightLeg = None
 
-	# Spine
-	try:
-		centerSpine = tree[naming.component.spine.capitalize()][naming.side.center]
-		items = skeleton.getJointChainByLabel(centerSpine, naming.component.spine.capitalize())
+		cmds.progressWindow(edit=True, status='Rigging Root', step=step)
 
-		bodyPart.SPINE(objects=items, networkRoot=rootNode, attrControl=cogNode.fkControl[0])
-
-	except:
-		print 'Auto Rig: "Spine" Skipped.'
-
-	# Neck
-	try:
-		centerNeck = tree[naming.component.neck.capitalize()][naming.side.center]
-		items = skeleton.getJointChainByLabel(centerNeck, naming.component.neck.capitalize())
-
-		bodyPart.NECK(objects=items, networkRoot=rootNode, attrControl=cogNode.fkControl[0])
-
-	except:
-		print 'Auto Rig: "Neck" Skipped.'
-
-	# Head
-	try:
-		centerHead = tree[naming.component.head.capitalize()][naming.side.center]
-		bodyPart.HEAD(head=centerHead, networkRoot=rootNode)
-	except:
-		print 'Auto Rig: "Head" Skipped.'
-
-	# Arms
-	for side in [naming.side.left, naming.side.right]:
+		# Root
 		try:
-			collar = tree[naming.component.collar.capitalize()][side]
-			shoulder = tree[naming.component.shoulder.capitalize()][side]
-			elbow = tree[naming.component.elbow.capitalize()][side]
-			hand = tree[naming.component.hand.capitalize()][side]
-
-			bodyPart.ARM(side=side, collar=collar, shoulder=shoulder, elbow=elbow, hand=hand, networkRoot=rootNode)
+			centerRoot = tree[naming.component.root.capitalize()][naming.side.center]
+			rootNode = bodyPart.ROOT(root=centerRoot).network
 		except:
-			print 'Auto Rig: "{} Arm" Skipped.'.format(side)
+			rootNode = bodyPart.ROOT().network
+			print 'Auto Rig: "Root" Skipped.'
 
-	# Legs
-	for side in [naming.side.left, naming.side.right]:
+		cmds.progressWindow(edit=True, status='Rigging Cog', step=step)
+
+		# Cog / Hip
 		try:
-			hip = tree[naming.component.hip.capitalize()][side]
-			knee = tree[naming.component.knee.capitalize()][side]
-			foot = tree[naming.component.foot.capitalize()][side]
-			toe = tree[naming.component.toe.capitalize()][side]
-
-			bodyPart.LEG(side=side, hip=hip, knee=knee, foot=foot, toe=toe, networkRoot=rootNode)
+			centerCog = tree[naming.component.cog.capitalize()][naming.side.center]
+			centerHip = tree[naming.component.hip.capitalize()][naming.side.center]
+			cogNode = bodyPart.COG(cog=centerCog, hip=centerHip, networkRoot=rootNode)
 		except:
-			print 'Auto Rig: "{} Leg" Skipped.'.format(side)
+			print 'Auto Rig: "Cog" / "Hip" Skipped.'
 
-	cmds.select(d=True)
+		cmds.progressWindow(edit=True, status='Rigging Spine', step=step)
 
+		# Spine
+		try:
+			centerSpine = tree[naming.component.spine.capitalize()][naming.side.center]
+			items = skeleton.getJointChainByLabel(centerSpine, naming.component.spine.capitalize())
+
+			bodyPart.SPINE(objects=items, networkRoot=rootNode, attrControl=cogNode.fkControl[0])
+
+		except:
+			print 'Auto Rig: "Spine" Skipped.'
+
+		cmds.progressWindow(edit=True, status='Rigging Neck', step=step)
+
+		# Neck
+		try:
+			centerNeck = tree[naming.component.neck.capitalize()][naming.side.center]
+			items = skeleton.getJointChainByLabel(centerNeck, naming.component.neck.capitalize())
+
+			bodyPart.NECK(objects=items, networkRoot=rootNode, attrControl=cogNode.fkControl[0])
+
+		except:
+			print 'Auto Rig: "Neck" Skipped.'
+
+		cmds.progressWindow(edit=True, status='Rigging Head', step=step)
+
+		# Head
+		try:
+			centerHead = tree[naming.component.head.capitalize()][naming.side.center]
+			bodyPart.HEAD(head=centerHead, networkRoot=rootNode)
+		except:
+			print 'Auto Rig: "Head" Skipped.'
+
+		cmds.progressWindow(edit=True, status='Rigging Arms', step=step)
+
+		# Arms
+		for side in [naming.side.left, naming.side.right]:
+			try:
+				collar = tree[naming.component.collar.capitalize()][side]
+				shoulder = tree[naming.component.shoulder.capitalize()][side]
+				elbow = tree[naming.component.elbow.capitalize()][side]
+				hand = tree[naming.component.hand.capitalize()][side]
+
+				bodyPart.ARM(side=side, collar=collar, shoulder=shoulder, elbow=elbow, hand=hand, networkRoot=rootNode)
+			except:
+				print 'Auto Rig: "{} Arm" Skipped.'.format(side)
+
+		cmds.progressWindow(edit=True, status='Rigging Legs', step=step)
+
+		# Legs
+		for side in [naming.side.left, naming.side.right]:
+			try:
+				hip = tree[naming.component.hip.capitalize()][side]
+				knee = tree[naming.component.knee.capitalize()][side]
+				foot = tree[naming.component.foot.capitalize()][side]
+				toe = tree[naming.component.toe.capitalize()][side]
+
+				bodyPart.LEG(side=side, hip=hip, knee=knee, foot=foot, toe=toe, networkRoot=rootNode)
+			except:
+				print 'Auto Rig: "{} Leg" Skipped.'.format(side)
+
+		cmds.select(d=True)
+		cmds.progressWindow(edit=True, status='Finishing', step=step)
+		break
+
+	cmds.progressWindow(endProgress=True)
+	return
+
+
+def rigFromLabelsFunction(*args):
+	selected = ults.getSelected()
+
+	if selected:
+		root = selected[0]
+
+		if cmds.objectType(root) != 'joint':
+			cmds.warning('Auto Rig: Must specify a root joint.')
+			return
+		else:
+			rigFromLabels(root)
 	return
 
 
@@ -212,5 +261,5 @@ def rigFromLabels(root, *args):
 
 
 def menu():
-	cmds.menuItem(l='Rig From Template', c=rigFromTemplate)
+	cmds.menuItem(l='Rig Using Joint Labels', c=rigFromLabelsFunction)
 	return
