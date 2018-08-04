@@ -74,6 +74,8 @@ class component(object):
 
 	arm = 'arm'
 	collar = 'collar'
+	shoulder = 'shoulder'
+	elbow = 'elbow'
 	hand = 'hand'
 	finger = 'finger'
 	thumb = 'thumb'

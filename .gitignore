@@ -12,3 +12,6 @@ workFiles
 test
 axel
 workfiles
+BigTimelineWindow.py
+maya_to_keyframe_mp.py
+timeline_markers.py

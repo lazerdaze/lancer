@@ -5,11 +5,29 @@
 #
 #
 
-# PySide Modules
+# Qt Modules
+QTLOADED = False
+
+try:
+	from PySide2.QtCore import *
+	from PySide2.QtGui import *
+	from PySide2.QtWidgets import *
+
+	QTLOADED = True
+except ImportError:
+	try:
+		from library.Qt.QtCore import *
+		from library.Qt.QtGui import *
+		from library.Qt.QtWidgets import *
+
+		QTLOADED = True
+	except ImportError:
+		raise ImportError('Unable to load Qt.')
+
+# Python Modules
 import sys
 from functools import partial
-from library.Qt import *
-from library.Qt import QtCore, QtGui, QtWidgets
+
 
 # Maya Modules
 from maya import cmds, mel, OpenMayaUI
@@ -115,10 +133,10 @@ def tween(percent, *args):
 #
 ########################################################################################################################
 
-class stretchedButton(QtWidgets.QPushButton):
+class stretchedButton(QPushButton):
 	def __init__(self, *args):
-		QtWidgets.QPushButton.__init__(self, *args)
-		self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+		QPushButton.__init__(self, *args)
+		self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
 
 	def resizeEvent(self, evt):
 		font = self.font()
@@ -127,13 +145,13 @@ class stretchedButton(QtWidgets.QPushButton):
 		return
 
 
-class toolTipSlider(QtWidgets.QSlider):
-	def __init__(self, offset=QtCore.QPoint(0, -40), *args):
-		QtWidgets.QSlider.__init__(self, *args)
+class toolTipSlider(QSlider):
+	def __init__(self, offset=QPoint(0, -40), *args):
+		QSlider.__init__(self, *args)
 
 		self.offset = offset
-		self.style = QtWidgets.QApplication.style()
-		self.opt = QtWidgets.QStyleOptionSlider()
+		self.style = QApplication.style()
+		self.opt = QStyleOptionSlider()
 		self.valueChanged.connect(self.show_tip)
 
 	def show_tip(self, _):
@@ -141,7 +159,7 @@ class toolTipSlider(QtWidgets.QSlider):
 		rectHandle = self.style.subControlRect(self.style.CC_Slider, self.opt, self.style.SC_SliderHandle)
 		pos_local = rectHandle.topLeft() + self.offset
 		pos_global = self.mapToGlobal(pos_local)
-		QtWidgets.QToolTip.showText(pos_global, str(self.value()), self)
+		QToolTip.showText(pos_global, str(self.value()), self)
 
 
 def slider(min=0, max=100, default=50):
@@ -155,8 +173,8 @@ def slider(min=0, max=100, default=50):
 
 class control:
 	def __init__(self):
-		self.widget = QtWidgets.QWidget()
-		self.layout = QtWidgets.QVBoxLayout(self.widget)
+		self.widget = QWidget()
+		self.layout = QVBoxLayout(self.widget)
 
 		self.slider = slider()
 		self.layout.addWidget(self.slider)
@@ -168,7 +186,7 @@ class control:
 		return
 
 	def button(self, value=0, width=5, height=15, labelVisibility=False):
-		control = QtWidgets.QPushButton()
+		control = QPushButton()
 		control.setMinimumSize(width, height / 2)
 		control.setToolTip(str(int(value * ROUNDOFF)))
 		control.clicked.connect(lambda *x: self.onButtonPress(value))
@@ -178,8 +196,8 @@ class control:
 		return control
 
 	def buttonRow(self):
-		widget = QtWidgets.QWidget()
-		layout = QtWidgets.QHBoxLayout(widget)
+		widget = QWidget()
+		layout = QHBoxLayout(widget)
 		layout.setMargin(0)
 
 		for value in VALUERANGE:
@@ -250,7 +268,7 @@ def ui():
 	        command=tween)
 
 	# column = cmds.columnLayout('Keys', adj=True)
-	# widget = wrapInstance(long(OpenMayaUI.MQtUtil.findControl(column)), QtWidgets.QWidget)
+	# widget = wrapInstance(long(OpenMayaUI.MQtUtil.findControl(column)), QWidget)
 	# control = tweenKey.tweenControl(True, True)
 	# control.setParent(widget)
 	# cmds.setParent('..')
@@ -270,33 +288,31 @@ def ui():
 
 
 def getMayaWindow():
-	app = QtWidgets.QApplication.instance()
+	app = QApplication.instance()
 	return {o.objectName(): o for o in app.topLevelWidgets()}["MayaWindow"]
-
-def window():
-	return
 
 
 def windowQt(*args):
-	winName = 'tweenKeyWindowUI'
-	if cmds.window(winName, exists=True):
-		cmds.deleteUI(winName, wnd=True)
+	if QTLOADED:
+		winName = 'tweenKeyWindowUI'
+		if cmds.window(winName, exists=True):
+			cmds.deleteUI(winName, wnd=True)
 
-	# Window
-	window = QtWidgets.QMainWindow(getMayaWindow())
-	window.setObjectName(winName)
-	window.setWindowTitle('Tween Key')
+		# Window
+		window = QMainWindow(getMayaWindow())
+		window.setObjectName(winName)
+		window.setWindowTitle('Tween Key')
 
-	# Widget
-	widget = QtWidgets.QWidget()
-	layout = QtWidgets.QVBoxLayout(widget)
-	window.setCentralWidget(widget)
+		# Widget
+		widget = QWidget()
+		layout = QVBoxLayout(widget)
+		window.setCentralWidget(widget)
 
-	# Controls
-	layout.addWidget(control().widget)
+		# Controls
+		layout.addWidget(control().widget)
 
-	# Show UI
-	window.show()
+		# Show UI
+		window.show()
 	return
 
 

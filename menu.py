@@ -16,6 +16,7 @@ import rig.control
 import rig.parts
 import rig.auto
 import anim.stickyFeet
+import anim.refPlayer.ui
 import external
 
 reload(lancer)
@@ -27,10 +28,26 @@ reload(rig.auto)
 reload(channelBox.ui)
 reload(channelBox.tweenKey)
 reload(anim.stickyFeet)
+reload(anim.refPlayer.ui)
 reload(external)
 
 # Python Modules
 import os
+
+# Qt Modules
+QTLOADED = False
+
+try:
+	import PySide2
+	QTLOADED = True
+
+except ImportError:
+	try:
+		from library import Qt
+		QTLOADED = True
+
+	except ImportError:
+		raise ImportError('Unable to load Qt.')
 
 # Maya Modules
 from maya import cmds, mel
@@ -83,6 +100,11 @@ def externalNGSkinTools(*args):
 	MainWindow.open()
 	return
 
+def referencePlayer(*args):
+	reload(anim.refPlayer.ui)
+	anim.refPlayer.ui.windowUI()
+	return
+
 
 def show(*args):
 	name = 'LancerMenu'
@@ -113,6 +135,7 @@ def show(*args):
 	cmds.menuItem(d=True, l='Animation')
 	cmds.menuItem(l='Tween Key', c=channelBox.tweenKey.windowQt)
 	cmds.menuItem(l='Sticky Feet', c=anim.stickyFeet.ui)
+	cmds.menuItem(l='Reference Player', c=referencePlayer, enable=QTLOADED)
 
 	cmds.menuItem(d=True, l='External')
 	cmds.menuItem(l='Mesh Symmetry', c=externalMeshSymmetry)

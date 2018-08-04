@@ -490,7 +490,7 @@ def getJointRootByLabel(joint, label, child=None):
 			return child
 
 
-def getBindJoint(joint):
+def getBindJointLegacy(joint):
 	bindJoints = []
 
 	children = cmds.listRelatives(joint, children=True)
@@ -520,6 +520,41 @@ def getBindJoint(joint):
 					i += 1
 
 	return bindJoints if bindJoints else None
+
+
+def getBindJoint(joint):
+	bindJoints = []
+	bindDict = {}
+
+	children = cmds.listRelatives(joint, children=True)
+	if children:
+		for child in children:
+			if cmds.objectType(child) == 'joint':
+				label = getJointLabel(child)[1]
+				if label == 'Bind':
+					bindDict[child] = ults.getDistance(joint, child)
+
+	for key, value in sorted(bindDict.iteritems(), key=lambda (k, v): (v, k)):
+		bindJoints.append(key)
+
+	return bindJoints if bindJoints else None
+
+
+def getJointChainByLabel(joint, label):
+	chain = [joint]
+	chainDict = {}
+
+	children = cmds.listRelatives(joint, ad=True, type='joint')
+	if children:
+		for child in children:
+			childLabel = getJointLabel(child)[1]
+			if childLabel == label:
+				chainDict[child] = ults.getDistance(joint, child)
+
+	for key, value in sorted(chainDict.iteritems(), key=lambda (k, v): (v, k)):
+		chain.append(key)
+
+	return chain if chain else None
 
 
 class Query:
