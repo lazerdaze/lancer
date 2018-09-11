@@ -18,11 +18,11 @@ reload(ghost)
 
 # Python Modules
 from functools import partial
-from PySide2 import QtCore, QtGui, QtWidgets
-from shiboken2 import wrapInstance
+#from PySide2 import QtCore, QtGui, QtWidgets
+#from shiboken2 import wrapInstance
 
 # Maya Modules
-from maya import cmds, mel, OpenMayaUI
+from maya import cmds, mel
 
 ########################################################################################################################
 #
@@ -48,6 +48,53 @@ class mayaUI(object):
 	else:
 		channelPane = 'MayaWindow|MainChannelsLayersLayout|ChannelsLayersPaneLayout'
 		timeControl = 'MayaWindow|toolBar6|MainTimeSliderLayout|formLayout9|frameLayout2|timeControl1'
+
+
+########################################################################################################################
+#
+#
+#	SCRIPT JOBS
+#
+#
+########################################################################################################################
+
+
+def getCameras():
+	exclude = ['frontShape', 'perspShape', 'sideShape', 'topShape']
+	cameras = cmds.ls(type='camera')
+	renderCameras = [cam for cam in cameras if cam not in exclude]
+	return renderCameras if renderCameras else None
+
+
+def tearOffPanel():
+	renderCams = getCameras()
+
+	if renderCams:
+		window = cmds.window(t=renderCams[0], w=800, h=600)
+		cmds.paneLayout()
+		mpUI = cmds.modelPanel()
+		cmds.modelPanel(mpUI, e=True, cam=renderCams[0])
+		cmds.showWindow(window)
+
+		# Off
+		cmds.modelEditor(mpUI,
+						 e=True,
+						 allObjects=False,
+						 grid=False,
+						 manipulators=False,
+						 selectionHiliteDisplay=False,
+						 polymeshes=True,
+						 imagePlane=True,
+						 headsUpDisplay=False,
+						 displayAppearance='smoothShaded',
+						 )
+		return
+
+
+def openNewScene():
+	tearOffPanel()
+	return
+
 
 
 ########################################################################################################################
@@ -234,7 +281,7 @@ def removeUI(*args):
 	return
 
 
-def show(name=NAME):
+def show(name=NAME, *args):
 	defaultPreferences()
 	cmds.paneLayout(mayaUI.channelPane, e=True, cn='horizontal3')
 
@@ -287,3 +334,8 @@ def show(name=NAME):
 	                            ],
 	                attachControl=[[tab, 'top', 0, menuUI]]
 	                )
+
+	# ScriptJobs
+	#cmds.scriptJob(p=name, event=['SceneOpened', openNewScene])
+
+	return
