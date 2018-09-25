@@ -91,9 +91,14 @@ def loadPlugins():
 
 
 addToSysPath()
-addToMayaPluginPath()
 getSubDirectory()
-loadPlugins()
+
+if OSPLATFORM in ['Linux', 'Osx']:
+	pass
+else:
+	pass
+	addToMayaPluginPath()
+	loadPlugins()
 
 
 if __name__ == '__main__':
