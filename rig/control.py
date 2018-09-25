@@ -7,12 +7,13 @@
 
 # Lancer Modules
 import ults
-
 reload(ults)
 
 # Maya Modules
 from maya import cmds, mel
 
+# Python Modules
+from functools import partial
 
 class component(object):
 	circle = 'circle'
@@ -837,6 +838,14 @@ def create(name='control0', shape='circle', axis=[1, 0, 0], scale=1):
 #
 ########################################################################################################################
 
+def menuFunction(shape, *args):
+	create(shape=shape, axis=[0, 0, 0])
+	return
+
 
 def menu():
+	controlList = [str(var) for var in vars(component).keys() if not var.startswith('_')]
+
+	for control in sorted(controlList):
+		cmds.menuItem(l=control.capitalize(), c=partial(menuFunction, control))
 	return

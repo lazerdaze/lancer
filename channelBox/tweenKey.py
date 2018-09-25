@@ -12,14 +12,14 @@ try:
 	from PySide2.QtCore import *
 	from PySide2.QtGui import *
 	from PySide2.QtWidgets import *
-
+	from shiboken2 import wrapInstance
 	QTLOADED = True
 except ImportError:
 	try:
 		from library.Qt.QtCore import *
 		from library.Qt.QtGui import *
 		from library.Qt.QtWidgets import *
-
+		from shiboken import wrapInstance
 		QTLOADED = True
 	except ImportError:
 		raise ImportError('Unable to load Qt.')
@@ -287,32 +287,36 @@ def ui():
 ########################################################################################################################
 
 
+# def getMayaWindow():
+# 	app = QApplication.instance()
+# 	return {o.objectName(): o for o in app.topLevelWidgets()}["MayaWindow"]
+
 def getMayaWindow():
-	app = QApplication.instance()
-	return {o.objectName(): o for o in app.topLevelWidgets()}["MayaWindow"]
+	mayaPtr = OpenMayaUI.MQtUtil.mainWindow()
+	mayaWindow = wrapInstance(long(mayaPtr), QWidget)
+	return mayaWindow
 
 
 def windowQt(*args):
-	if QTLOADED:
-		winName = 'tweenKeyWindowUI'
-		if cmds.window(winName, exists=True):
-			cmds.deleteUI(winName, wnd=True)
+	winName = 'tweenKeyWindowUI'
+	if cmds.window(winName, exists=True):
+		cmds.deleteUI(winName, wnd=True)
 
-		# Window
-		window = QMainWindow(getMayaWindow())
-		window.setObjectName(winName)
-		window.setWindowTitle('Tween Key')
+	# Window
+	window = QMainWindow(getMayaWindow())
+	window.setObjectName(winName)
+	window.setWindowTitle('Tween Key')
 
-		# Widget
-		widget = QWidget()
-		layout = QVBoxLayout(widget)
-		window.setCentralWidget(widget)
+	# Widget
+	widget = QWidget()
+	layout = QVBoxLayout(widget)
+	window.setCentralWidget(widget)
 
-		# Controls
-		layout.addWidget(control().widget)
+	# Controls
+	layout.addWidget(control().widget)
 
-		# Show UI
-		window.show()
+	# Show UI
+	window.show()
 	return
 
 

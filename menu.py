@@ -15,6 +15,7 @@ import rig.skin
 import rig.control
 import rig.parts
 import rig.auto
+import rig.facePose.ui
 import anim.stickyFeet
 import anim.refPlayer.ui
 import external
@@ -25,6 +26,7 @@ reload(rig.skin)
 reload(rig.control)
 reload(rig.parts)
 reload(rig.auto)
+reload(rig.facePose.ui)
 reload(channelBox.ui)
 reload(channelBox.tweenKey)
 reload(anim.stickyFeet)
@@ -100,6 +102,12 @@ def externalNGSkinTools(*args):
 	MainWindow.open()
 	return
 
+def externalStudioLibaray(*args):
+	from external import studiolibrary
+	reload(studiolibrary)
+	studiolibrary.main.main()
+	return
+
 def referencePlayer(*args):
 	reload(anim.refPlayer.ui)
 	anim.refPlayer.ui.windowUI()
@@ -128,6 +136,11 @@ def show(*args):
 	cmds.menuItem(l='Parts', subMenu=True, to=True)
 	rig.parts.menu()
 	cmds.setParent('..', menu=True)
+
+	cmds.menuItem(l='Facial', subMenu=True, to=True)
+	rig.facePose.ui.menu()
+	cmds.setParent('..', menu=True)
+
 	cmds.menuItem(l='Auto', subMenu=True, to=True)
 	rig.auto.menu()
 	cmds.setParent('..', menu=True)
@@ -141,5 +154,5 @@ def show(*args):
 	cmds.menuItem(l='Mesh Symmetry', c=externalMeshSymmetry)
 	cmds.menuItem(l='Smooth Weights Tool', c=externalSmoothSkinWeight, enable=lancer.EXTERNALPLUGINS)
 	cmds.menuItem(l='NG Skin Weights Tool', c=externalNGSkinTools, enable=lancer.EXTERNALPLUGINS)
-
+	cmds.menuItem(l='Studio Library', c=externalStudioLibaray, enable=False)
 	return ui

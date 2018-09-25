@@ -300,6 +300,83 @@ class DETAILCONTROL(CONTROL):
 		                 )
 
 
+class FACECONTROL(CONTROL):
+	def __init__(self,
+	             name='face_control',
+	             scale=1,
+	             child=None,
+	             parent=None,
+	             index=0,
+	             side=None,
+	             label=None,
+	             axis=None,
+	             ):
+
+		CONTROL.__init__(self,
+		                 name=name,
+		                 typ=control.component.diamond,
+		                 scale=self.getScale(child) if child else scale,
+		                 child=child,
+		                 parent=parent,
+		                 index=index,
+		                 side=side,
+		                 label=label,
+		                 color=ults.component.ik,
+		                 axis=axis,
+		                 )
+
+		self.locator = None
+		self.aim = None
+		self.offset = None
+		self.updateHierarchy()
+
+	def getScale(self, obj):
+		scale = 1.0
+		if cmds.objectType(obj) == 'joint':
+			scale = cmds.getAttr('{}.radius'.format(obj))
+		return scale
+
+	def updateHierarchy(self):
+		loc = cmds.spaceLocator(name=naming.convention(self.name, 'locator'))[0]
+		ults.snap(self.transform, loc, t=True, r=True)
+		cmds.parent(loc, self.group)
+		cmds.parent(self.transform, loc)
+
+		self.locator = loc
+		self.offset = ults.createGroup(self.transform, naming.convention(self.transform, 'offset'))
+		self.aim = ults.createGroup(self.locator, naming.convention(self.transform, 'aim'))
+
+
+		if self.child:
+
+			# Locator Scale
+			for axis in ['x', 'y', 'z']:
+				cmds.setAttr('{}.localScale{}'.format(self.locator, axis.capitalize()), self.getScale(self.child) * 2)
+
+			# Aim Pivot
+			parent = cmds.listRelatives(self.child, parent=True)
+			self.parent = parent[0] if parent else None
+
+			# Right Side Caveat
+			self.side = ults.getSide(self.child)
+			if self.side == naming.side.right:
+				cmds.setAttr('{}.sx'.format(self.group), -1)
+
+			# Rotate Offset & Constraints
+			if self.parent:
+				cmds.delete(cmds.aimConstraint(self.parent, self.group, aimVector=[0,0,-1], skip=['x', 'z']))
+				cmds.parent(self.group, self.parent)
+				cmds.parentConstraint(self.transform, self.child, mo=True)
+				cmds.scaleConstraint(self.transform, self.child, mo=True)
+
+
+
+
+
+
+		return
+
+
 ########################################################################################################################
 #
 #
