@@ -93,7 +93,7 @@ def loadPlugins():
 addToSysPath()
 getSubDirectory()
 
-if OSPLATFORM in ['Linux', 'Osx']:
+if OSPLATFORM in ['Linux', 'Darwin']:
 	pass
 else:
 	pass

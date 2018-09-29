@@ -26,6 +26,8 @@
         <list>
           <option value="jt_pyside_ui.long" />
           <option value="maya.cmds" />
+          <option value="maya.cmds.keyframe" />
+          <option value="maya.cmds.*" />
         </list>
       </option>
     </inspection_tool>
