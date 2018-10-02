@@ -138,6 +138,13 @@ class TreeView:
         cmds.menuItem(label='Load All', c=self.loadAllReferences)
         cmds.menuItem(label='Unload All', c=self.unloadAllReferences)
 
+        cmds.menu(label='Extras')
+        cmds.menuItem(label='Show All')
+        cmds.menuItem(label='Hide All')
+
+        cmds.menu(label='UI')
+        cmds.menuItem(label='Refresh')
+
         # cmds.menu(label='Items')
         # cmds.menuItem(label='Add')
         # cmds.menuItem(label='Remove')
