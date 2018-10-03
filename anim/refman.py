@@ -9,8 +9,8 @@ from maya import cmds, mel
 ########################################################################################################################
 
 
-WINDOWNAME = 'CARWINDOWUI'
-WINDOWTITLE = 'Car Manager'
+WINDOWNAME = 'REFMANWINDOWUI'
+WINDOWTITLE = 'Reference Manager'
 
 
 ########################################################################################################################
@@ -27,6 +27,10 @@ def getAllReferences():
 
 def getAllTopLevelNodes():
     return cmds.ls(assemblies=True)
+
+
+def getAllSets():
+    return cmds.ls(set=True)
 
 
 def isReferenceLoaded(name):
@@ -63,7 +67,7 @@ def isXmlfReference(name):
 
 
 def openFile(loaded=False, *args):
-    multipleFilters = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;All Files (*.*)"
+    multipleFilters = 'Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;All Files (*.*)'
 
     # Choose file to open
     filename = cmds.fileDialog2(fileFilter=multipleFilters, dialogStyle=2, fileMode=1)
@@ -96,12 +100,13 @@ class Item(object):
                  namespace=None,
                  index=0,
                  visibility=True,
-                 proxy=True,
+                 proxy=False,
                  controls=True,
                  reference=None,
                  state=None,
                  loaded=True,
                  filepath=None,
+                 sets=None,
                  ):
         self.parent = parent
         self.name = name
@@ -115,15 +120,17 @@ class Item(object):
         self.state = state
         self.loaded = loaded
         self.filepath = filepath
+        self.sets = sets
 
-
-class TreeButton:
-    def __init__(self):
-        pass
+    def __str__(self):
+        value = ''
+        for x in vars(self).iterkeys():
+            value += '{}: {}\n'.format(x, vars(self)[x])
+        return value
 
 
 class TreeView:
-    def __init__(self):
+    def __init__(self, margin=5, padding=5):
         self.loadReferencesOnOpen = False
         self.items = {}
 
@@ -138,52 +145,49 @@ class TreeView:
         cmds.menuItem(label='Load All', c=self.loadAllReferences)
         cmds.menuItem(label='Unload All', c=self.unloadAllReferences)
 
-        cmds.menu(label='Extras')
+        cmds.menu(label='Extras', enable=False)
         cmds.menuItem(label='Show All')
         cmds.menuItem(label='Hide All')
 
         cmds.menu(label='UI')
-        cmds.menuItem(label='Refresh')
+        cmds.menuItem(label='Refresh', c=self.load)
 
-        # cmds.menu(label='Items')
-        # cmds.menuItem(label='Add')
-        # cmds.menuItem(label='Remove')
-        # cmds.menuItem(label='Refresh')
-        # cmds.menu(label='Help', helpMenu=True)
-        # cmds.menuItem(label='About...')
+        cmds.menu(label='Help', helpMenu=True)
+        cmds.menuItem(label='Print Debug Info', c=self.debugInfo)
+
         cmds.setParent('..')
 
         self.ui = cmds.treeView(parent=self.layout,
-                                numberOfButtons=2,
+                                numberOfButtons=3,
                                 abr=False,
                                 adr=False,
                                 ams=False,
                                 idc=self.doubleClickCallback,
                                 dc2=self.doubleClickCallback,
-                                pc=[[1, self.loadReferenceCallback], [2, self.setVisibleCallback]]
+                                pc=[[1, self.loadReferenceCallback],
+                                    [2, self.setVisibleCallback],
+                                    [3, self.selectControlsCallback],
+                                    ]
                                 )
         cmds.setParent('..')
 
-        cmds.formLayout(self.layout, e=True, attachForm=(self.menu, 'top', 0))
-        cmds.formLayout(self.layout, e=True, attachForm=(self.menu, 'left', 0))
-        cmds.formLayout(self.layout, e=True, attachForm=(self.menu, 'right', 0))
-        cmds.formLayout(self.layout, e=True, attachControl=(self.ui, 'top', 0, self.menu))
-        cmds.formLayout(self.layout, e=True, attachForm=(self.ui, 'bottom', 0))
-        cmds.formLayout(self.layout, e=True, attachForm=(self.ui, 'left', 0))
-        cmds.formLayout(self.layout, e=True, attachForm=(self.ui, 'right', 0))
+        cmds.formLayout(self.layout, e=True, attachForm=(self.menu, 'top', padding))
+        cmds.formLayout(self.layout, e=True, attachForm=(self.menu, 'left', padding))
+        cmds.formLayout(self.layout, e=True, attachForm=(self.menu, 'right', padding))
+        cmds.formLayout(self.layout, e=True, attachControl=(self.ui, 'top', margin, self.menu))
+        cmds.formLayout(self.layout, e=True, attachForm=(self.ui, 'bottom', padding))
+        cmds.formLayout(self.layout, e=True, attachForm=(self.ui, 'left', padding))
+        cmds.formLayout(self.layout, e=True, attachForm=(self.ui, 'right', padding))
 
-        # cmds.treeView(self.ui, e=True, addItem=("layer 1", ""))
-        # cmds.treeView(self.ui, e=True, addItem=("layer 2", ""))
-        # cmds.treeView(self.ui, e=True, addItem=("layer 3", ""))
-        # cmds.treeView(self.ui, e=True, addItem=("layer 4", ""))
-        # cmds.treeView(self.ui, e=True, addItem=("layer 5", ""))
-        # cmds.treeView(self.ui, e=True, addItem=("layer 6", ""))
-        # cmds.treeView(self.ui, edit=True,
-        #               pressCommand=[(1, pressTreeCallBack),
-        #                             (2, pressTreeCallBack),
-        #                             (3, pressTreeCallBack)])
         cmds.treeView(self.ui, edit=True, selectCommand=self.selectTreeCallBack)
         self.load()
+
+    def debugInfo(self, *args):
+        for item in self.items:
+            print item
+            print self.items[item]
+            print ''
+        return
 
     def loadReferenceCallback(self, *args):
         name = args[0]
@@ -206,6 +210,12 @@ class TreeView:
         self.items[name].visibility = False if value else True
         return
 
+    def selectControlsCallback(self, *args):
+        name = args[0]
+        nodes = self.items[name].controls
+        cmds.select(nodes)
+        return
+
     def doubleClickCallback(self, *args):
         return
 
@@ -217,7 +227,7 @@ class TreeView:
         loadAllReferences(True)
 
         for item in self.items:
-            cmds.treeView(self.ui, e=True, buttonState=(item, 1, "buttonUp"))
+            cmds.treeView(self.ui, e=True, buttonState=(item, 1, 'buttonUp'))
             itemData = self.items[item]
             itemData.loaded = True
             itemData.assembly = [x for x in getAllTopLevelNodes() if x.startswith(itemData.namespace)]
@@ -226,7 +236,7 @@ class TreeView:
     def unloadAllReferences(self, *args):
         loadAllReferences(False)
         for item in self.items:
-            cmds.treeView(self.ui, e=True, buttonState=(item, 1, "buttonDown"))
+            cmds.treeView(self.ui, e=True, buttonState=(item, 1, 'buttonDown'))
             self.items[item].loaded = False
         return
 
@@ -249,7 +259,7 @@ class TreeView:
         cmds.treeView(self.ui, e=True, removeAll=True)
         return
 
-    def load(self):
+    def load(self, *args):
         self.clear()
 
         references = getAllReferences()
@@ -260,6 +270,10 @@ class TreeView:
                         namespace = ref[:-2]
                         assembly = [x for x in getAllTopLevelNodes() if x.startswith(namespace)]
                         loaded = isReferenceLoaded(ref)
+                        sets = [x for x in getAllSets() if x.startswith(namespace)]
+
+                        controlSet = '{}:CONTROLS'.format(namespace)
+                        controls = cmds.sets(controlSet, q=True) if cmds.objExists(controlSet) else None
 
                         # Item Class
                         self.items[ref] = Item(name=ref,
@@ -268,16 +282,25 @@ class TreeView:
                                                assembly=assembly,
                                                loaded=loaded,
                                                filepath=referenceFilepath(ref),
+                                               controls=controls,
+                                               sets=sets,
                                                )
 
                         # Buttons
                         cmds.treeView(self.ui, e=True, addItem=(ref, ''))
                         cmds.treeView(self.ui, e=True,
-                                      buttonTextIcon=[[ref, 1, 'R'], [ref, 2, 'V']],
-                                      buttonStyle=[[ref, 1, "2StateButton"], [ref, 2, "2StateButton"]])
+                                      buttonTextIcon=[[ref, 1, 'R'],
+                                                      [ref, 2, 'V'],
+                                                      [ref, 3, 'C']
+                                                      ],
+                                      buttonStyle=[[ref, 1, '2StateButton'],
+                                                   [ref, 2, '2StateButton'],
+                                                   [ref, 3, 'pushButton']
+                                                   ]
+                                      )
 
                         if not loaded:
-                            cmds.treeView(self.ui, e=True, buttonState=(ref, 1, "buttonDown"))
+                            cmds.treeView(self.ui, e=True, buttonState=(ref, 1, 'buttonDown'))
 
         return
 
@@ -319,7 +342,7 @@ class TreeView:
 ########################################################################################################################
 
 
-def show(winName=WINDOWNAME, title=WINDOWTITLE):
+def show(winName=WINDOWNAME, title=WINDOWTITLE, *args):
     if cmds.window(winName, exists=True):
         cmds.deleteUI(winName, wnd=True)
 
