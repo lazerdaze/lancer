@@ -18,6 +18,7 @@ import rig.auto
 import rig.facePose.ui
 import anim.stickyFeet
 import anim.refPlayer.ui
+import anim.refman
 import external
 
 reload(lancer)
@@ -148,6 +149,7 @@ def show(*args):
 	cmds.menuItem(d=True, l='Animation')
 	cmds.menuItem(l='Tween Key', c=channelBox.tweenKey.windowQt)
 	cmds.menuItem(l='Sticky Feet', c=anim.stickyFeet.ui)
+	cmds.menuItem(l='Reference Manager', c=anim.refman.show)
 	cmds.menuItem(l='Reference Player', c=referencePlayer, enable=QTLOADED)
 
 	cmds.menuItem(d=True, l='External')

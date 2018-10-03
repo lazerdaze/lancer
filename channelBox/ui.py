@@ -39,15 +39,15 @@ COLUMN = 60
 
 
 class mayaUI(object):
-    mayaVersion = int(cmds.about(v=True))
+	mayaVersion = int(cmds.about(v=True))
 
-    if mayaVersion == 2018:
-        channelPane = 'ChannelBoxLayerEditor|MainChannelsLayersLayout|ChannelsLayersPaneLayout'
-        timeControl = 'TimeSlider|MainTimeSliderLayout|formLayout8|frameLayout2|timeControl1'
+	if mayaVersion == 2018:
+		channelPane = 'ChannelBoxLayerEditor|MainChannelsLayersLayout|ChannelsLayersPaneLayout'
+		timeControl = 'TimeSlider|MainTimeSliderLayout|formLayout8|frameLayout2|timeControl1'
 
-    else:
-        channelPane = 'MayaWindow|MainChannelsLayersLayout|ChannelsLayersPaneLayout'
-        timeControl = 'MayaWindow|toolBar6|MainTimeSliderLayout|formLayout9|frameLayout2|timeControl1'
+	else:
+		channelPane = 'MayaWindow|MainChannelsLayersLayout|ChannelsLayersPaneLayout'
+		timeControl = 'MayaWindow|toolBar6|MainTimeSliderLayout|formLayout9|frameLayout2|timeControl1'
 
 
 ########################################################################################################################
@@ -60,56 +60,177 @@ class mayaUI(object):
 
 
 def getCameras():
-    exclude = ['frontShape', 'perspShape', 'sideShape', 'topShape']
-    cameras = cmds.ls(type='camera')
-    renderCameras = [cam for cam in cameras if cam not in exclude]
-    return renderCameras if renderCameras else None
+	exclude = ['frontShape', 'perspShape', 'sideShape', 'topShape']
+	cameras = cmds.ls(type='camera')
+	renderCameras = [cam for cam in cameras if cam not in exclude]
+	return renderCameras if renderCameras else None
 
 
 def tearOffPanel():
-    renderCams = getCameras()
+	renderCams = getCameras()
 
-    if renderCams:
-        window = cmds.window(t=renderCams[0], w=800, h=600)
-        cmds.paneLayout()
-        mpUI = cmds.modelPanel()
-        cmds.modelPanel(mpUI, e=True, cam=renderCams[0])
-        cmds.showWindow(window)
+	if renderCams:
+		window = cmds.window(t=renderCams[0], w=800, h=600)
+		cmds.paneLayout()
+		mpUI = cmds.modelPanel()
+		cmds.modelPanel(mpUI, e=True, cam=renderCams[0])
+		cmds.showWindow(window)
 
-        # Off
-        cmds.modelEditor(mpUI,
-                         e=True,
-                         allObjects=False,
-                         grid=False,
-                         manipulators=False,
-                         selectionHiliteDisplay=False,
-                         polymeshes=True,
-                         imagePlane=True,
-                         headsUpDisplay=False,
-                         displayAppearance='smoothShaded',
-                         )
-        return
+		# Off
+		cmds.modelEditor(mpUI,
+		                 e=True,
+		                 allObjects=False,
+		                 grid=False,
+		                 manipulators=False,
+		                 selectionHiliteDisplay=False,
+		                 polymeshes=True,
+		                 imagePlane=True,
+		                 headsUpDisplay=False,
+		                 displayAppearance='smoothShaded',
+		                 )
+		return
 
 
 def openNewScene():
-    tearOffPanel()
-    mel.eval('generateAllUvTilePreviews;')
+	tearOffPanel()
+	mel.eval('generateAllUvTilePreviews;')
 
-    mel.eval('''
+	mel.eval('''
 	evaluationManager -mode parallel;
 	optionVar -iv gpuOverride  true;
 	setAttr "hardwareRenderingGlobals.vertexAnimationCache" 2;
 	setAttr "hardwareRenderingGlobals.enableTextureMaxRes" 1;
 	'''
-    )
-    #AEenableTextureMaxRes "hardwareRenderingGlobals";
-    #attrFieldSliderGrp -e -en true attrFieldSliderGrp3;
-	#AEReloadAllTextures;
-	#generateAllUvTilePreviews;
-	#setAttr "hardwareRenderingGlobals.textureMaxResolution" 4096;
+	         )
+	# AEenableTextureMaxRes "hardwareRenderingGlobals";
+	# attrFieldSliderGrp -e -en true attrFieldSliderGrp3;
+	# AEReloadAllTextures;
+	# generateAllUvTilePreviews;
+	# setAttr "hardwareRenderingGlobals.textureMaxResolution" 4096;
 
-    print 'Lancer: ScriptJob "Open New Scene" Successful'
-    return
+	print 'Lancer: ScriptJob "Open New Scene" Successful'
+	return
+
+
+########################################################################################################################
+#
+#
+#	PREFERENCES CLASS
+#
+#
+########################################################################################################################
+
+class Component(object):
+	# Evaluation Modes
+	dg = 'dg'
+	serial = 'serial'
+	parallel = 'parallel'
+	gpuOverride = 'gpuOverride'
+
+	# Tangents
+	auto = 'auto'
+	stepped = 'stepped'
+	linear = 'linear'
+	spline = 'spline'
+
+	# Playback
+	everyFrame = 'everyFrame'
+	maxFrame = 'maxFrame'
+
+	# Framerate
+	time24 = '24'
+	time30 = '30'
+	time60 = '60'
+
+
+class PreferencesMenu(object):
+	def __init__(self):
+		self.evaluation = cmds.evaluationManager(q=True, mode=True)[0]
+
+		self.ui = cmds.menuBarLayout()
+
+		cmds.menu(l='Scene')
+		cmds.menuItem(d=True, dl='On New Scene')
+		cmds.menuItem(l='Tear Off Copy', cb=True, c=self.tearOffCallback)
+		cmds.menuItem(l='Playback: Every Frame', cb=True)
+
+		cmds.menu(l='Evaluation')
+		cmds.radioMenuItemCollection()
+		cmds.menuItem(l='DG', rb=False, c=lambda *_: self.evalCallback(Component.dg), enable=False)
+		cmds.menuItem(l='Serial', rb=False, c=lambda *_: self.evalCallback(Component.serial), enable=False)
+		cmds.menuItem(l='Parallel', rb=True, c=lambda *_: self.evalCallback(Component.parallel))
+
+		cmds.menu(l='Tangents')
+		prefsRadioMenu(pref='default tangent', )
+		cmds.menuItem(l='', divider=True)
+		cmds.menuItem(l='Weighted tangents', checkBox=(cmds.keyTangent(q=True, g=True, wt=True)),
+		              c=lambda x: cmds.keyTangent(e=True, g=True, wt=x))
+
+		cmds.menu(l='Time')
+		prefsRadioMenu(pref='playback speed', )
+		cmds.menuItem(d=True)
+		cmds.menuItem(l='Snapping', cb=mel.eval('timeControl -q -snap $gPlayBackSlider;'), c=self.timeSnapCallback)
+
+		cmds.menu(l='UI', hm=True)
+		cmds.menuItem(l='Close', c=removeUI)
+		cmds.setParent('..')
+
+		# ScriptJobs
+		cmds.scriptJob(p=self.ui, event=['SceneOpened', self.setDefaults])
+		self.setDefaults()
+		savePrefs()
+
+	def setDefaults(self):
+		# Anim Layers
+		cmds.timeControl(mayaUI.timeControl, e=True,
+		                 animLayerFilterOptions='selected')
+		mel.eval('outlinerEditor -edit -animLayerFilterOptions selected graphEditor1OutlineEd;')
+
+		# Buffer Curves
+		mel.eval('animCurveEditor -edit -showBufferCurves true graphEditor1GraphEd;')
+
+		# Auto Frame
+		mel.eval('animCurveEditor -edit -autoFit true graphEditor1GraphEd;optionVar -intValue graphEditorAutoFit true;')
+
+		# Evaluation
+		cmds.evaluationManager(mode=Component.parallel)
+
+		mel.eval('generateAllUvTilePreviews;')
+
+		return
+
+	def timeSnapCallback(self, *args):
+		mel.eval('timeControl -e -snap {} $gPlayBackSlider;'.format(str(args[0]).lower()))
+		return
+
+	def tearOffCallback(self, *args):
+		if args[0]:
+			pass
+		else:
+			pass
+		return
+
+	def createTearOffScriptJob(self):
+		return
+
+	def killTearOffScriptJob(self):
+		return
+
+	def evalScriptJob(self):
+		return
+
+	def evalCallback(self, *args):
+		value = args[0]
+		if value == Component.dg:
+			value = 'off'
+		cmds.evaluationManager(mode=value)
+		self.evaluation = value
+		print 'Evaluation Mode: Set to {}.'.format(cmds.evaluationManager(q=True, mode=True)[0])
+		savePrefs()
+		return
+
+	def getUI(self):
+		return self.ui
 
 
 ########################################################################################################################
@@ -122,163 +243,153 @@ def openNewScene():
 
 
 def savePrefs():
-    cmds.savePrefs(g=True)
-    return
-
-
-def defaultPreferences():
-    # Anim Layers
-    cmds.timeControl(mayaUI.timeControl, e=True,
-                     animLayerFilterOptions='selected')
-    mel.eval('outlinerEditor -edit -animLayerFilterOptions selected graphEditor1OutlineEd;')
-
-    # Buffer Curves
-    mel.eval('animCurveEditor -edit -showBufferCurves true graphEditor1GraphEd;')
-    return
+	cmds.savePrefs(g=True)
+	print ''
+	return
 
 
 def savedLayout(*args):
-    # Saved Layout
-    mel.eval('setNamedPanelLayout "JTLayout";')
+	# Saved Layout
+	mel.eval('setNamedPanelLayout "JTLayout";')
 
-    var = ''
-    for cam in cmds.ls(type='camera'):
-        par = cmds.listRelatives(cam, parent=True)[0]
+	var = ''
+	for cam in cmds.ls(type='camera'):
+		par = cmds.listRelatives(cam, parent=True)[0]
 
-        if par not in ['front', 'persp', 'side', 'top']:
-            if not var:
-                var = par
+		if par not in ['front', 'persp', 'side', 'top']:
+			if not var:
+				var = par
 
-    if var:
-        mel.eval('lookThroughModelPanel %s modelPanel1;' % var)
-    return
+	if var:
+		mel.eval('lookThroughModelPanel %s modelPanel1;' % var)
+	return
 
 
 def prefFunction(pref, obj, *args):
-    if pref == 'evaluation':
-        cmds.evaluationManager(mode=obj)
-        print 'Evaluation Mode: %s' % cmds.evaluationManager(q=True, mode=True)[0]
-        savePrefs()
+	if pref == 'evaluation':
+		cmds.evaluationManager(mode=obj)
+		print 'Evaluation Mode: %s' % cmds.evaluationManager(q=True, mode=True)[0]
+		savePrefs()
 
-    elif pref == 'default tangent':
-        cmds.keyTangent(g=True, itt=obj)
-        cmds.keyTangent(g=True, ott=obj)
-        print 'Default Tangents: %s, %s' % (
-            cmds.keyTangent(q=True, g=True, itt=True)[0], cmds.keyTangent(q=True, g=True, ott=True)[0])
+	elif pref == 'default tangent':
+		cmds.keyTangent(g=True, itt=obj)
+		cmds.keyTangent(g=True, ott=obj)
+		print 'Default Tangents: %s, %s' % (
+			cmds.keyTangent(q=True, g=True, itt=True)[0], cmds.keyTangent(q=True, g=True, ott=True)[0])
 
-    elif pref == 'frames per second':
-        # Keep Keys at Current Frames
-        # cmds.currentUnit(time='', ua=True)
-        cmds.currentUnit(t=obj)
-        print 'Frames Per Second: %s' % cmds.currentUnit(q=True, t=True,
-                                                         ua=cmds.menuItem(keepFrames, q=True, checkBox=True))
+	elif pref == 'frames per second':
+		# Keep Keys at Current Frames
+		# cmds.currentUnit(time='', ua=True)
+		cmds.currentUnit(t=obj)
+		print 'Frames Per Second: %s' % cmds.currentUnit(q=True, t=True,
+		                                                 ua=cmds.menuItem(keepFrames, q=True, checkBox=True))
 
-    elif pref == 'playback speed':
-        cmds.playbackOptions(ps=obj)
-        print 'Playback Speed: %s' % cmds.playbackOptions(q=True, ps=True)
+	elif pref == 'playback speed':
+		cmds.playbackOptions(ps=obj)
+		print 'Playback Speed: %s' % cmds.playbackOptions(q=True, ps=True)
 
-    elif pref == 'up axis':
-        cmds.upAxis(ax=obj)
-        print 'Up Axis: %s' % cmds.upAxis(q=True, ax=True)
+	elif pref == 'up axis':
+		cmds.upAxis(ax=obj)
+		print 'Up Axis: %s' % cmds.upAxis(q=True, ax=True)
 
-    elif pref == 'working units':
-        cmds.currentUnit(l=obj)
-        print 'Working Units: %s' % cmds.currentUnit(q=True, l=True)
+	elif pref == 'working units':
+		cmds.currentUnit(l=obj)
+		print 'Working Units: %s' % cmds.currentUnit(q=True, l=True)
 
-    return
+	return
 
 
 def prefsRadioMenu(pref, *args):
-    if pref:
-        # Get pref type
-        if pref == 'evaluation':
-            list = ['off', 'serial', 'parallel']
-            current = cmds.evaluationManager(q=True, mode=True)[0]
+	if pref:
+		# Get pref type
+		if pref == 'evaluation':
+			list = ['off', 'serial', 'parallel']
+			current = cmds.evaluationManager(q=True, mode=True)[0]
 
-        elif pref == 'default tangent':
-            list = ['auto', 'step', 'linear', 'spline']
-            current = cmds.keyTangent(q=True, g=True, itt=True)[0]
+		elif pref == 'default tangent':
+			list = ['auto', 'step', 'linear', 'spline']
+			current = cmds.keyTangent(q=True, g=True, itt=True)[0]
 
-        elif pref == 'frames per second':
-            list = ['film', 'ntsc', 'ntscf']
-            current = cmds.currentUnit(q=True, t=True)
+		elif pref == 'frames per second':
+			list = ['film', 'ntsc', 'ntscf']
+			current = cmds.currentUnit(q=True, t=True)
 
-        elif pref == 'playback speed':
-            list = [0.0, 1.0]
-            current = cmds.playbackOptions(q=True, ps=True)
+		elif pref == 'playback speed':
+			list = [0.0, 1.0]
+			current = cmds.playbackOptions(q=True, ps=True)
 
-        elif pref == 'up axis':
-            list = ['y', 'z']
-            current = cmds.upAxis(q=True, ax=True)
+		elif pref == 'up axis':
+			list = ['y', 'z']
+			current = cmds.upAxis(q=True, ax=True)
 
-        elif pref == 'working units':
-            list = ['mm', 'cm', 'm']
-            current = cmds.currentUnit(q=True, l=True)
+		elif pref == 'working units':
+			list = ['mm', 'cm', 'm']
+			current = cmds.currentUnit(q=True, l=True)
 
-        # Build Menu
+		# Build Menu
 
-        # Divider
+		# Divider
 
-        cmds.menuItem(l=pref.capitalize(), divider=True)
-        cmds.radioMenuItemCollection()
+		cmds.menuItem(l=pref.capitalize(), divider=True)
+		cmds.radioMenuItemCollection()
 
-        # Radio Buttons
+		# Radio Buttons
 
-        for obj in list:
+		for obj in list:
 
-            if obj == current:
-                currentVar = True
+			if obj == current:
+				currentVar = True
 
-            else:
-                currentVar = False
+			else:
+				currentVar = False
 
-            item = cmds.menuItem(label=str(obj).capitalize(), radioButton=currentVar,
-                                 c=partial(prefFunction, pref, obj))
-    return
+			item = cmds.menuItem(label=str(obj).capitalize(), radioButton=currentVar,
+			                     c=partial(prefFunction, pref, obj))
+	return
 
 
 def playblastTemp():
-    cmds.playblast(
-        format='image',
-        sequenceTime=0,
-        clearCache=1,
-        viewer=1,
-        showOrnaments=1,
-        offScreen=True,
-        fp=4, percent=100,
-        compression='jpg',
-        quality=100,
-    )
-    return
+	cmds.playblast(
+			format='image',
+			sequenceTime=0,
+			clearCache=1,
+			viewer=1,
+			showOrnaments=1,
+			offScreen=True,
+			fp=4, percent=100,
+			compression='jpg',
+			quality=100,
+	)
+	return
 
 
 def menu():
-    ui = cmds.menuBarLayout()
-    cmds.menu(l='UI', hm=True)
-    cmds.menuItem(l='Close', c=removeUI)
+	ui = cmds.menuBarLayout()
+	cmds.menu(l='UI', hm=True)
+	cmds.menuItem(l='Close', c=removeUI)
 
-    cmds.menu(l='Evaluation')
-    prefsRadioMenu(pref='evaluation')
+	cmds.menu(l='Evaluation')
+	prefsRadioMenu(pref='evaluation')
 
-    # cmds.menu(l='Playblast')
-    # cmds.menuItem(l='Temp Settings', c=playblastTemp)
+	# cmds.menu(l='Playblast')
+	# cmds.menuItem(l='Temp Settings', c=playblastTemp)
 
-    cmds.menu(l='Tangents')
-    prefsRadioMenu(pref='default tangent', )
-    cmds.menuItem(l='', divider=True)
-    cmds.menuItem(l='Weighted tangents', checkBox=(cmds.keyTangent(q=True, g=True, wt=True)),
-                  c=lambda x: cmds.keyTangent(e=True, g=True, wt=x))
+	cmds.menu(l='Tangents')
+	prefsRadioMenu(pref='default tangent', )
+	cmds.menuItem(l='', divider=True)
+	cmds.menuItem(l='Weighted tangents', checkBox=(cmds.keyTangent(q=True, g=True, wt=True)),
+	              c=lambda x: cmds.keyTangent(e=True, g=True, wt=x))
 
-    cmds.menu(l='Time')
-    prefsRadioMenu(pref='playback speed', )
-    prefsRadioMenu(pref='frames per second', )
-    # cmds.menuItem(l='', divider=True)
-    # keepFrames = cmds.menuItem(l='Keep keys at current frames', checkBox=False)
+	cmds.menu(l='Time')
+	prefsRadioMenu(pref='playback speed', )
+	prefsRadioMenu(pref='frames per second', )
+	# cmds.menuItem(l='', divider=True)
+	# keepFrames = cmds.menuItem(l='Keep keys at current frames', checkBox=False)
 
-    # cmds.menu(l='World')
-    # prefsRadioMenu(pref='up axis', )
-    cmds.setParent('..')
-    return ui
+	# cmds.menu(l='World')
+	# prefsRadioMenu(pref='up axis', )
+	cmds.setParent('..')
+	return ui
 
 
 ########################################################################################################################
@@ -291,65 +402,61 @@ def menu():
 
 
 def removeUI(*args):
-    cmds.deleteUI(NAME)
-    cmds.paneLayout(mayaUI.channelPane, e=True, cn='horizontal2')
-    return
+	cmds.deleteUI(NAME)
+	cmds.paneLayout(mayaUI.channelPane, e=True, cn='horizontal2')
+	return
 
 
 def show(name=NAME, *args):
-    defaultPreferences()
-    cmds.paneLayout(mayaUI.channelPane, e=True, cn='horizontal3')
+	cmds.paneLayout(mayaUI.channelPane, e=True, cn='horizontal3')
 
-    # Main Layout
-    if cmds.layout(name, exists=True):
-        cmds.deleteUI(name)
+	# Main Layout
+	if cmds.layout(name, exists=True):
+		cmds.deleteUI(name)
 
-    cmds.formLayout(name, p=mayaUI.channelPane)
+	cmds.formLayout(name, p=mayaUI.channelPane)
 
-    cmds.separator(st='none', h=PADDING)
+	cmds.separator(st='none', h=PADDING)
 
-    # Menu
-    menuUI = menu()
+	# Menu
+	menuUI = PreferencesMenu().getUI()
 
-    # Main Layout
-    tab = cmds.tabLayout()
+	# Main Layout
+	tab = cmds.tabLayout()
 
-    keyUI = cmds.scrollLayout(cr=True)
-    tweenKey.ui()
-    cmds.setParent('..')
+	keyUI = cmds.scrollLayout(cr=True)
+	tweenKey.ui()
+	cmds.setParent('..')
 
-    motionTrailUI = motionTrail.ui()
+	motionTrailUI = motionTrail.ui()
 
-    ghostUI = ghost.ui()
-    noteUI = note.ui()
+	ghostUI = ghost.ui()
+	noteUI = note.ui()
 
-    # motionTrail.ui()
-    # note.ui()
+	# motionTrail.ui()
+	# note.ui()
 
-    # End UI
-    cmds.setParent('..')  # end tab
-    cmds.setParent('..')  # end form
+	# End UI
+	cmds.setParent('..')  # end tab
+	cmds.setParent('..')  # end form
 
-    cmds.tabLayout(tab,
-                   edit=True,
-                   tabLabel=((keyUI, 'Tween'),
-                             (motionTrailUI, 'Motion Trail'),
-                             (noteUI, 'Notes'),
-                             (ghostUI, 'Ghost'),
-                             ))
+	cmds.tabLayout(tab,
+	               edit=True,
+	               tabLabel=((keyUI, 'Tween'),
+	                         (motionTrailUI, 'Motion Trail'),
+	                         (noteUI, 'Notes'),
+	                         (ghostUI, 'Ghost'),
+	                         ))
 
-    cmds.formLayout('animToolsChannelBoxUI', e=True,
-                    attachForm=[(tab, 'left', 0),
-                                (tab, 'bottom', 0),
-                                (tab, 'right', 0),
-                                (menuUI, 'left', 0),
-                                (menuUI, 'top', 0),
-                                (menuUI, 'right', 0),
-                                ],
-                    attachControl=[[tab, 'top', 0, menuUI]]
-                    )
+	cmds.formLayout('animToolsChannelBoxUI', e=True,
+	                attachForm=[(tab, 'left', 0),
+	                            (tab, 'bottom', 0),
+	                            (tab, 'right', 0),
+	                            (menuUI, 'left', 0),
+	                            (menuUI, 'top', 0),
+	                            (menuUI, 'right', 0),
+	                            ],
+	                attachControl=[[tab, 'top', 0, menuUI]]
+	                )
 
-    # ScriptJobs
-    cmds.scriptJob(p=name, event=['SceneOpened', openNewScene])
-
-    return
+	return
