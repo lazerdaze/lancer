@@ -128,6 +128,9 @@ class Item(object):
             value += '{}: {}\n'.format(x, vars(self)[x])
         return value
 
+    def getAssembly(self):
+        return self.assembly
+
 
 class TreeView:
     def __init__(self, margin=5, padding=5):
@@ -145,9 +148,12 @@ class TreeView:
         cmds.menuItem(label='Load All', c=self.loadAllReferences)
         cmds.menuItem(label='Unload All', c=self.unloadAllReferences)
 
-        cmds.menu(label='Extras', enable=False)
-        cmds.menuItem(label='Show All')
-        cmds.menuItem(label='Hide All')
+        cmds.menu(label='Visibility')
+        cmds.menuItem(label='Show All', c=lambda *x: self.toggleAssembly(True))
+        cmds.menuItem(label='Hide All', c=lambda *x: self.toggleAssembly(False))
+        # cmds.menu(label='Extras', enable=False)
+        # cmds.menuItem(label='Show All')
+        # cmds.menuItem(label='Hide All')
 
         cmds.menu(label='UI')
         cmds.menuItem(label='Refresh', c=self.load)
@@ -181,6 +187,22 @@ class TreeView:
 
         cmds.treeView(self.ui, edit=True, selectCommand=self.selectTreeCallBack)
         self.load()
+
+        # ScriptJobs
+        cmds.scriptJob(p=self.ui, event=['PostSceneRead', self.load])
+
+    def isAssemblyVisibile(self, assembly, *args):
+        var = []
+        for a in assembly:
+            if cmds.objExists(a):
+                var.append(cmds.getAttr('{}.v'.format(a)))
+        if var:
+            if sum(var) >= float(len(var)) / 2.0:
+                return True
+            else:
+                return False
+        else:
+            return False
 
     def debugInfo(self, *args):
         for item in self.items:
@@ -230,7 +252,7 @@ class TreeView:
             cmds.treeView(self.ui, e=True, buttonState=(item, 1, 'buttonUp'))
             itemData = self.items[item]
             itemData.loaded = True
-            itemData.assembly = [x for x in getAllTopLevelNodes() if x.startswith(itemData.namespace)]
+            itemData.assembly = [x for x in getAllTopLevelNodes() if x.split(':')[0] == itemData.namespace]
         return
 
     def unloadAllReferences(self, *args):
@@ -240,13 +262,27 @@ class TreeView:
             self.items[item].loaded = False
         return
 
+    def toggleAssembly(self, var, *args):
+        for item in self.items:
+            cmds.treeView(self.ui, e=True, buttonState=(item, 2, 'buttonUp' if var else 'buttonDown'))
+            itemData = self.items[item]
+            itemData.visibility = var
+            assembly = itemData.assembly
+
+            for a in assembly:
+                try:
+                    cmds.setAttr('{}.v'.format(a), var)
+                except:
+                    pass
+        return
+
     def open(self, *args):
         openFile(loaded=self.loadReferencesOnOpen)
         self.load()
         return
 
     def getUI(self):
-        return self.ui
+        return self.layout
 
     def popupMenu(self):
         return
@@ -267,13 +303,17 @@ class TreeView:
             for ref in references:
                 if ref not in self.items:
                     if not isXmlfReference(ref):
-                        namespace = ref[:-2]
-                        assembly = [x for x in getAllTopLevelNodes() if x.startswith(namespace)]
+
+                        namespace = cmds.referenceQuery(ref, namespace=True)[1:]
+                        assembly = [x for x in getAllTopLevelNodes() if x.split(':')[0] == namespace]
+
                         loaded = isReferenceLoaded(ref)
-                        sets = [x for x in getAllSets() if x.startswith(namespace)]
+                        sets = [x for x in getAllSets() if x.split(':')[0] == namespace]
 
                         controlSet = '{}:CONTROLS'.format(namespace)
                         controls = cmds.sets(controlSet, q=True) if cmds.objExists(controlSet) else None
+
+                        isVisible = self.isAssemblyVisibile(assembly) if assembly else True
 
                         # Item Class
                         self.items[ref] = Item(name=ref,
@@ -284,6 +324,7 @@ class TreeView:
                                                filepath=referenceFilepath(ref),
                                                controls=controls,
                                                sets=sets,
+                                               visibility=isVisible,
                                                )
 
                         # Buttons
@@ -301,7 +342,8 @@ class TreeView:
 
                         if not loaded:
                             cmds.treeView(self.ui, e=True, buttonState=(ref, 1, 'buttonDown'))
-
+                        if not isVisible:
+                            cmds.treeView(self.ui, e=True, buttonState=(ref, 2, 'buttonDown'))
         return
 
     def buttonCallback(self, *args):
@@ -336,6 +378,19 @@ class TreeView:
 ########################################################################################################################
 #
 #
+#	UI
+#
+#
+########################################################################################################################
+
+
+def ui():
+    return TreeView().getUI()
+
+
+########################################################################################################################
+#
+#
 #	WINDOW
 #
 #
@@ -347,6 +402,6 @@ def show(winName=WINDOWNAME, title=WINDOWTITLE, *args):
         cmds.deleteUI(winName, wnd=True)
 
     cmds.window(winName, t=title)
-    TreeView()
+    ui()
     cmds.showWindow(winName)
     return
