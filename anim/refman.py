@@ -219,6 +219,7 @@ class TreeView:
         else:
             unloadReference(name)
         self.items[name].loaded = False if value else True
+        self.items[name].namespace = cmds.referenceQuery(name, namespace=True)[1:]
         return
 
     def setVisibleCallback(self, *args):
@@ -253,6 +254,10 @@ class TreeView:
             itemData = self.items[item]
             itemData.loaded = True
             itemData.assembly = [x for x in getAllTopLevelNodes() if x.split(':')[0] == itemData.namespace]
+            try:
+                itemData.namespace = cmds.referenceQuery(item, namespace=True)[1:]
+            except:
+                itemData.namespace = None
         return
 
     def unloadAllReferences(self, *args):
@@ -304,7 +309,11 @@ class TreeView:
                 if ref not in self.items:
                     if not isXmlfReference(ref):
 
-                        namespace = cmds.referenceQuery(ref, namespace=True)[1:]
+                        try:
+                            namespace = cmds.referenceQuery(ref, namespace=True)[1:]
+                        except:
+                            namespace = None
+
                         assembly = [x for x in getAllTopLevelNodes() if x.split(':')[0] == namespace]
 
                         loaded = isReferenceLoaded(ref)
