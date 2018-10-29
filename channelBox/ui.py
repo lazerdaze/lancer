@@ -441,7 +441,7 @@ def show(name=NAME, *args):
     tab = cmds.tabLayout()
 
     keyUI = cmds.scrollLayout(cr=True)
-    tweenKey.ui()
+    tweenKey.UI()
     cmds.setParent('..')
 
     motionTrailUI = motionTrail.ui()
