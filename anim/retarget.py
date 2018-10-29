@@ -1,3 +1,8 @@
+'''
+Reusing code from AXEL
+'''
+
+
 from maya import cmds, mel
 
 ANIMCURVES = ['animCurveTL',
