@@ -12,14 +12,14 @@ try:
 	from PySide2.QtCore import *
 	from PySide2.QtGui import *
 	from PySide2.QtWidgets import *
-	from shiboken2 import wrapInstance
+
 	QTLOADED = True
 except ImportError:
 	try:
 		from library.Qt.QtCore import *
 		from library.Qt.QtGui import *
 		from library.Qt.QtWidgets import *
-		from shiboken import wrapInstance
+
 		QTLOADED = True
 	except ImportError:
 		raise ImportError('Unable to load Qt.')
@@ -98,6 +98,12 @@ def getKeyable(obj):
 		var = cbb
 	else:
 		var = cmds.listAttr(obj, k=True)
+
+	# Exceptions
+	for x in ['translate', 'rotate', 'scale']:
+		if x in var:
+			var.remove(x)
+
 	return var
 
 
@@ -278,6 +284,30 @@ def ui():
 	return column
 
 
+class UI(object):
+	def __init__(self):
+		column = cmds.columnLayout(adj=True)
+		cmds.frameLayout(lv=False, bgs=True)
+		self.tweenInt = cmds.intField(minValue=0, maxValue=100, value=50, ed=False)
+		self.tweenSlide = cmds.floatSlider(minValue=0.0, maxValue=1.0, value=.5, cc=self.callback)
+
+		formRow(items=VALUERANGE,
+				special=SPECIALVALUES,
+				roundOff=ROUNDOFF,
+				command=self.callback)
+
+		cmds.setParent('..')
+		cmds.setParent('..')
+
+	def callback(self, percent, *args):
+		tween(percent)
+		cmds.intField(self.tweenInt, e=True, v=int(percent * 100))
+		cmds.floatSlider(self.tweenSlide, e=True, v=percent)
+		return
+
+
+
+
 ########################################################################################################################
 #
 #
@@ -287,36 +317,32 @@ def ui():
 ########################################################################################################################
 
 
-# def getMayaWindow():
-# 	app = QApplication.instance()
-# 	return {o.objectName(): o for o in app.topLevelWidgets()}["MayaWindow"]
-
 def getMayaWindow():
-	mayaPtr = OpenMayaUI.MQtUtil.mainWindow()
-	mayaWindow = wrapInstance(long(mayaPtr), QWidget)
-	return mayaWindow
+	app = QApplication.instance()
+	return {o.objectName(): o for o in app.topLevelWidgets()}["MayaWindow"]
 
 
 def windowQt(*args):
-	winName = 'tweenKeyWindowUI'
-	if cmds.window(winName, exists=True):
-		cmds.deleteUI(winName, wnd=True)
+	if QTLOADED:
+		winName = 'tweenKeyWindowUI'
+		if cmds.window(winName, exists=True):
+			cmds.deleteUI(winName, wnd=True)
 
-	# Window
-	window = QMainWindow(getMayaWindow())
-	window.setObjectName(winName)
-	window.setWindowTitle('Tween Key')
+		# Window
+		window = QMainWindow(getMayaWindow())
+		window.setObjectName(winName)
+		window.setWindowTitle('Tween Key')
 
-	# Widget
-	widget = QWidget()
-	layout = QVBoxLayout(widget)
-	window.setCentralWidget(widget)
+		# Widget
+		widget = QWidget()
+		layout = QVBoxLayout(widget)
+		window.setCentralWidget(widget)
 
-	# Controls
-	layout.addWidget(control().widget)
+		# Controls
+		layout.addWidget(control().widget)
 
-	# Show UI
-	window.show()
+		# Show UI
+		window.show()
 	return
 
 
@@ -326,6 +352,6 @@ def windowMaya(*args):
 		cmds.deleteUI(winName, wnd=True)
 
 	cmds.window(winName, t='Tween Key')
-	ui()
+	UI()
 	cmds.showWindow(winName)
 	return
