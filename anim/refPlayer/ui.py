@@ -54,7 +54,7 @@ from maya import cmds, mel, OpenMayaUI
 ########################################################################################################################
 
 DIRPATH = os.path.dirname(os.path.abspath(__file__))
-IMAGEPATH = os.path.join(DIRPATH, 'images')
+IMAGEPATH = os.path.join(DIRPATH, 'icons')
 WINDOWNAME = 'refPlayerWindowUI'
 
 

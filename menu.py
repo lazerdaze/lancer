@@ -19,6 +19,7 @@ import rig.facePose.ui
 import anim.stickyFeet
 import anim.refPlayer.ui
 import anim.refman
+import anim.axel.ui
 import external
 
 reload(lancer)
@@ -32,6 +33,7 @@ reload(channelBox.ui)
 reload(channelBox.tweenKey)
 reload(anim.stickyFeet)
 reload(anim.refPlayer.ui)
+reload(anim.axel.ui)
 reload(external)
 
 # Python Modules
@@ -114,6 +116,11 @@ def referencePlayer(*args):
 	anim.refPlayer.ui.windowUI()
 	return
 
+def AXEL(*args):
+	reload(anim.axel.ui)
+	anim.axel.ui.show()
+	return
+
 
 def show(*args):
 	name = 'LancerMenu'
@@ -149,6 +156,7 @@ def show(*args):
 	cmds.menuItem(d=True, l='Animation')
 	cmds.menuItem(l='Tween Key', c=channelBox.tweenKey.windowQt)
 	cmds.menuItem(l='Sticky Feet', c=anim.stickyFeet.ui)
+	cmds.menuItem(l='AXEL', c=AXEL)
 	cmds.menuItem(l='Reference Manager', c=anim.refman.show)
 	cmds.menuItem(l='Reference Player', c=referencePlayer, enable=QTLOADED)
 

@@ -2,6 +2,7 @@
 *.axie
 *.cup
 *.ui
+*.qrc
 legacy_eixml.py
 eixml.py
 studiolibrary
@@ -9,7 +10,7 @@ test_data
 extras
 workFiles
 test
-axel
+temp
 workfiles
 BigTimelineWindow.py
 maya_to_keyframe_mp.py

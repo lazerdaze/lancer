@@ -14,10 +14,6 @@ import json
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
-from shiboken2 import wrapInstance
-
-# Maya Modules
-from maya import cmds, mel, OpenMayaUI
 
 ########################################################################################################################
 #
@@ -434,8 +430,8 @@ class AssignedTagsWidget(QWidget):
 		self.setLayout(self.flowLayout)
 
 	def add(self, text):
-		self.tags.append(text)
-		self.flowLayout.add(text)
+		self.tags.append(str(text))
+		self.flowLayout.add(str(text))
 
 
 class Widget(QWidget):
@@ -478,4 +474,4 @@ def showWindow(name=WINNAME, title='Tags Editor'):
 	return
 
 
-showWindow()
+#showWindow()

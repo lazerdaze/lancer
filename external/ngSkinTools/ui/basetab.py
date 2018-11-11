@@ -145,7 +145,7 @@ class BaseTab(object):
     def createHelpButton(helpLink):
         import os.path as path
         
-        imageName = path.join(path.dirname(__file__),'images','help.png')
+        imageName = path.join(path.dirname(__file__),'icons','help.png')
         
         return cmds.symbolButton('?',image=imageName,height=Constants.BUTTON_HEIGHT,width=Constants.BUTTON_WIDTH_SMALL,
                                           annotation='Open manual at: '+helpLink.title,

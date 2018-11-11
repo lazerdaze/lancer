@@ -38,7 +38,7 @@ isDebug = True  # Print Debugging Information
 
 
 DIRPATH = os.path.dirname(os.path.abspath(__file__))
-UIPATH = os.path.join(DIRPATH, 'images')
+UIPATH = os.path.join(DIRPATH, 'icons')
 
 colorUI = [[.5, 1, .5], [.25, 1, .75], [0, 1, 1], [.25, .75, 1], [.5, .5, 1], [.75, .25, 1], [1, 0, 1],
            [1, .25, .75], [1, .25, .5], [1, .5, .25], [1, 1, .25], [.75, 1, .25]]

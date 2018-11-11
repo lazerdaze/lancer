@@ -21,8 +21,11 @@ from xml.dom.minidom import parse
 from xml.etree import ElementTree as etree
 
 # Maya Modules
-import maya.cmds as cmds
-
+MAYALOADED = True
+try:
+	import maya.cmds as cmds
+except:
+	MAYALOADED = False
 ########################################################################################################################
 #
 #
@@ -61,12 +64,45 @@ def pathBaseName(path):
 	return base if base else None
 
 
-def doesPathExist(path):
+def pathExist(path):
 	return os.path.exists(path)
 
 
-def doesFileExists(path):
+def fileExists(path):
 	return os.path.isfile(path)
+
+
+def directoryExist(path):
+	return os.path.isdir(path)
+
+
+def getAllFilesInPath(path):
+	if not directoryExist(path):
+		path = splitPath(path)[0]
+
+	if directoryExist(path):
+		return [os.path.abspath(os.path.join(path, f))
+		        for f in os.listdir(path)
+		        if os.path.isfile(os.path.join(path, f))]
+	else:
+		return None
+
+
+def getAllDirectoriesInPath(path):
+	if not directoryExist(path):
+		path = splitPath(path)[0]
+
+	if directoryExist(path):
+		return [os.path.abspath(os.path.join(path, f))
+		        for f in os.listdir(path)
+		        if os.path.isdir(os.path.join(path, f))]
+	else:
+		return None
+
+
+def hasExtension(path):
+	extension = splitPath(path)[2]
+	return extension if splitPath(path)[2] else False
 
 
 def splitPath(path, fileName=None, fileType=None):
@@ -123,7 +159,6 @@ def write(path, data=None, isDebug=False):
 
 
 def read(path, isDebug=False):
-	t1 = time.time()
 	data = None
 	fileType = splitPath(path)[2]
 
@@ -141,13 +176,13 @@ def read(path, isDebug=False):
 		elif fileType == FileType.css or fileType == FileType.qss:
 			data = readFile.read()
 
+
 		else:
 			data = readFile.read()
 			if isDebug:
 				print data
 
 	readFile.close()
-	print'File read from "{}" successfully in {} seconds.'.format(path, time.time() - t1)
 	return data if data else None
 
 
@@ -157,6 +192,19 @@ def importFile(path):
 	fileName = pathQuery[1]
 	fileType = pathQuery[2]
 	return read(path)
+
+
+class filepathQuery:
+	def __init__(self, filepath):
+		self.query = splitPath(filepath)
+		self.filepath = os.path.abspath(filepath)
+		self.directory = self.query[0]
+		self.name = self.query[1]
+		self.extension = self.query[2]
+
+
+def styleSheetImport(filepath):
+	return read(filepath)
 
 
 basicFilter = "*.mb"

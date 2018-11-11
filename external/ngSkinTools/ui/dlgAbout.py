@@ -38,7 +38,7 @@ class AboutDialog(BaseDialog):
         labelTitle = cmds.text(label=version.getReleaseName(), font='boldLabelFont')
         
         logoFrame = cmds.tabLayout(parent=layout,tv=False,childResizable=True,scrollable=False,width=130,height=130,innerMarginWidth=10)
-        cmds.image(image=os.path.join(os.path.dirname(__file__),'images','logo.png'))
+        cmds.image(image=os.path.join(os.path.dirname(__file__),'icons','logo.png'))
         layout.attachForm(logoFrame,10,10,None,None)
         
         cmds.setParent(layout)
