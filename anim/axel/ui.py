@@ -47,8 +47,8 @@ WIDTH = 800
 HEIGHT = 600
 
 ICONSPATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'icons')
-DEFAULTTHUMBNAIL = os.path.join(DIRPATH, 'icons', 'image_icon_128.png')
-TESTSEQUENCE = collectSequenceFromFilepath(os.path.join(DIRPATH, 'test', 'testSequence', 'thumbnail.0000.jpg'))
+DEFAULTTHUMBNAIL = os.path.join(DIRPATH, 'icons', 'thumbnail2.png')
+#TESTSEQUENCE = collectSequenceFromFilepath(os.path.join(DIRPATH, 'test', 'testSequence', 'thumbnail.0000.jpg'))
 
 
 ########################################################################################################################
@@ -476,7 +476,7 @@ class App(QMainWindow):
 ########################################################################################################################
 
 
-class ThumbnailWidget(QWidget):
+class ThumbnailWidget(QFrame):
 	stateChanged = Signal(str)
 	frameChanged = Signal(int)
 	clicked = Signal(bool)
@@ -485,7 +485,7 @@ class ThumbnailWidget(QWidget):
 	toggled = Signal(bool)
 
 	def __init__(self, *args, **kwargs):
-		QWidget.__init__(self, *args, **kwargs)
+		QFrame.__init__(self, *args, **kwargs)
 
 		self.createEnabled = False
 		self.sequence = None
@@ -500,6 +500,7 @@ class ThumbnailWidget(QWidget):
 		self.imageCache = []
 		self.hover = False
 		self.isScrubbing = False
+		self.hasSequence = False
 
 		# Widget
 		self.setMouseTracking(True)
@@ -517,7 +518,6 @@ class ThumbnailWidget(QWidget):
 		# Label
 		self.label = QLabel()
 		self.label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-		self.label.setMinimumSize(QSize(200, 200))
 		self.label.setPixmap(self.currentPixmap)
 		self.label.setAlignment(Qt.AlignCenter)
 		self.layout().addWidget(self.label)
@@ -549,14 +549,20 @@ class ThumbnailWidget(QWidget):
 		self.timeline.setEasingCurve(QEasingCurve.Linear)
 		self.timeline.setUpdateInterval(0)
 		self.timeline.setLoopCount(0)
+		self.stop()
 
 		self.timeline.frameChanged.connect(self.setSequence)
 		self.timeline.frameChanged.connect(self.progressBar.setValue)
 		self.timeline.stateChanged.connect(self.setState)
 
-		self.loadSequence(TESTSEQUENCE)
 
-	# self.play()
+
+	def getHasSequence(self):
+		return self.hasSequence
+
+	def setHasSequence(self, bool):
+		self.hasSequence = bool
+		return
 
 	def convertPositionToValue(self, position):
 		width = self.size().width()
@@ -588,7 +594,8 @@ class ThumbnailWidget(QWidget):
 		return
 
 	def mousePressEvent(self, event):
-		self.scrub(event.pos().x())
+		if self.hasSequence:
+			self.scrub(event.pos().x())
 		return
 
 	def mouseReleaseEvent(self, event):
@@ -605,20 +612,23 @@ class ThumbnailWidget(QWidget):
 		return
 
 	def mouseMoveEvent(self, event):
-		xpos = event.pos().x()
+		if self.hasSequence:
+			xpos = event.pos().x()
 
-		if self.size().width() >= xpos >= 0:
-			self.scrub(xpos)
+			if self.size().width() >= xpos >= 0:
+				self.scrub(xpos)
 		return
 
 	def enterEvent(self, event):
 		self.setHover(True)
-		self.play()
+		if self.hasSequence:
+			self.play()
 		return
 
 	def leaveEvent(self, event):
 		self.setHover(False)
-		self.pause()
+		if self.hasSequence:
+			self.pause()
 		return
 
 	def getHover(self):
@@ -658,6 +668,7 @@ class ThumbnailWidget(QWidget):
 		for item in sequence:
 			self.imageCache.append(QPixmap(item))
 
+		self.setHasSequence(True)
 		self.jumpToFrame(0)
 		return
 

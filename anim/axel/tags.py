@@ -31,10 +31,11 @@ PEOPLE = ['male',
 		  'child',
 		  'elderly',
 		  'baby',
+		  'teen',
 		  ]
 
 CHARACTER = ['biped',
-			 'quadruped'
+			 'quadruped',
 			 'monster',
 			 'creature',
 			 'zombie',
@@ -133,24 +134,6 @@ def buildDefaultList():
 ########################################################################################################################
 #
 #
-#	USER INTERFACE
-#
-#
-########################################################################################################################
-
-
-
-def getMayaWindow():
-	mayaPtr = OpenMayaUI.MQtUtil.mainWindow()
-	mayaWindow = wrapInstance(long(mayaPtr), QWidget)
-	return mayaWindow
-
-
-
-
-########################################################################################################################
-#
-#
 #	Line Edit
 #
 #
@@ -177,7 +160,6 @@ class TagLineEdit(QFrame):
 		self.model = QStringListModel()
 		self.model.setStringList(ALLTAGS)
 		self.completer.setModel(self.model)
-
 
 		self.layout().addWidget(self.lineEdit)
 		self.lineEdit.returnPressed.connect(self.callback)
@@ -206,6 +188,89 @@ class TagLineEdit(QFrame):
 		tags.append(text)
 		self.model.setStringList(tags)
 		return
+
+########################################################################################################################
+#
+#
+#	TreeView
+#
+#
+########################################################################################################################
+
+
+class TagTreeView(QTreeView):
+	selected = Signal(str)
+
+	def __init__(self, *args, **kwargs):
+		QTreeView.__init__(self, *args, **kwargs)
+
+		self.tagList = buildDefaultList()
+		self.itemList = {}
+
+		self.setHeaderHidden(True)
+
+		# Model
+		self.setModel(QStandardItemModel())
+		self.root = self.model().invisibleRootItem()
+
+		# Slots
+		self.clicked[QModelIndex].connect(self.getSelected)
+
+		self.load()
+		self.expandAll()
+		self.setSortingEnabled(True)
+		self.sortByColumn(0, Qt.AscendingOrder)
+
+	def getSelected(self, index):
+		item = self.model().itemFromIndex(index)
+		self.selected.emit(item.text())
+		return
+
+	def clear(self):
+		self.model().clear()
+		return
+
+	def createItem(self, parent=None, name='tag'):
+		if name not in self.itemList:
+			if parent:
+				if parent not in self.itemList:
+					parent = self.createItem(parent= None, name=parent)
+				else:
+					parent = self.itemList[parent]
+			else:
+				parent = self.root
+
+			row = QStandardItem(name)
+			parent.appendRow(row)
+			self.itemList[name] = row
+			return row
+
+	def load(self):
+		if self.tagList:
+			for item in self.tagList:
+
+				if type(self.tagList) is dict:
+					self.createItem(parent=self.tagList[item], name=item)
+
+				elif type(self.tagList) is list:
+					row = QStandardItem(item)
+					self.root.appendRow(row)
+					self.itemList[item] = row
+		return
+
+	def add(self):
+		return
+
+	def remove(self):
+		return
+
+	def setTagList(self, list):
+		self.tagList = list
+		return
+
+	def getTagList(self):
+		return self.tagList
+
 
 ########################################################################################################################
 #
@@ -275,8 +340,6 @@ class FlowLayout(QLayout):
 		return QSize(w + 2 * self.margin(), h + 2 * self.margin())
 
 	def doLayout(self, rect, testOnly=False):
-		"""
-		"""
 		x = rect.x()
 		y = rect.y()
 		lineHeight = 0
@@ -315,7 +378,7 @@ class TagButtonFlowLayout(FlowLayout):
 		self.addWidget(button)
 		return
 
-	def remove(self):
+	def remove(self, label):
 		print 'something'
 		return
 
@@ -434,19 +497,7 @@ class AssignedTagsWidget(QWidget):
 		self.flowLayout.add(str(text))
 
 
-class Widget(QWidget):
-	def __init__(self, *args, **kwargs):
-		QWidget.__init__(self, *args, **kwargs)
-
-		# Main Layout
-		self.setLayout(QVBoxLayout())
-
-		#
-		self.assignedWidget = AssignedTagsWidget()
-		self.layout().addWidget(self.assignedWidget)
-
-
-def showWindow(name=WINNAME, title='Tags Editor'):
+def showStandalone(name=WINNAME, title='Tags Editor'):
 	app = QApplication(sys.argv)
 
 	# Window
@@ -458,6 +509,10 @@ def showWindow(name=WINNAME, title='Tags Editor'):
 	widget = QWidget()
 	layout = QVBoxLayout(widget)
 	window.setCentralWidget(widget)
+
+	# Tree View
+	treeView = TagTreeView()
+	layout.addWidget(treeView)
 
 	# Controls
 	lineEdit = TagLineEdit()
@@ -474,4 +529,6 @@ def showWindow(name=WINNAME, title='Tags Editor'):
 	return
 
 
-#showWindow()
+if __name__ == '__main__':
+	showStandalone()
+

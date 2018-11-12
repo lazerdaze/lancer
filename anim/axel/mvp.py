@@ -500,8 +500,6 @@ class Ui_MainWindow(object):
         self.infoTabWidget.setTabText(self.infoTabWidget.indexOf(self.infoWidget), QtWidgets.QApplication.translate("MainWindow", "Info", None, -1))
         self.menuEdit.setTitle(QtWidgets.QApplication.translate("MainWindow", "Edit", None, -1))
 
-import axel_resource_rc
-
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)

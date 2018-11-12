@@ -56,7 +56,7 @@ EXTENSION = 'axel'
 DIRPATH = os.path.dirname(os.path.abspath(__file__))
 SUBDIR = os.walk(DIRPATH)
 DEFAULTLIBRARY = os.path.join(DIRPATH, 'default_library')
-PREFSFILEPATH = os.path.join(DIRPATH, 'user_prefs.json')
+PREFSFILEPATH = os.path.join(DIRPATH, 'user_prefserences.json')
 
 DEBUGMODE = True
 
