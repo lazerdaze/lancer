@@ -344,14 +344,31 @@ class LibraryTreeView(QTreeView):
 
 		# Settings
 		self.setAnimated(False)
-		self.setIndentation(20)
 		self.setSortingEnabled(True)
 		self.setHeaderHidden(True)
+		self.setFocusPolicy(Qt.NoFocus)
+		self.setDragDropMode(QAbstractItemView.InternalMove)
+		self.setContextMenuPolicy(Qt.CustomContextMenu)
 
 		# Slots
 		self.clicked[QModelIndex].connect(self.getSelected)
 		self.expanded[QModelIndex].connect(self.getExpanded)
 		self.collapsed[QModelIndex].connect(self.getCollapsed)
+		self.customContextMenuRequested.connect(self.popupMenu)
+
+	def popupMenu(self, position):
+		indexes = self.selectedIndexes()
+
+		if len(indexes) > 0:
+			index = indexes[0]
+
+			menu = QMenu(self)
+			menu.setWindowFlags(Qt.Popup | Qt.NoDropShadowWindowHint)
+			actionRename = menu.addAction('Rename')
+			menu.addSeparator()
+			actionRemove = menu.addAction('Remove')
+			menu.exec_(self.viewport().mapToGlobal(position))
+		return
 
 	def setupRoot(self):
 		item = Item(self.rootPath)

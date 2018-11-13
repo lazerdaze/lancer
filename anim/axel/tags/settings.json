@@ -1,0 +1,274 @@
+{
+ "teen": {
+  "children": [], 
+  "parent": "people"
+ }, 
+ "reptile": {
+  "children": [], 
+  "parent": "animal"
+ }, 
+ "drop": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "female": {
+  "children": [], 
+  "parent": "people"
+ }, 
+ "people": {
+  "children": [], 
+  "parent": null
+ }, 
+ "character": {
+  "children": [], 
+  "parent": null
+ }, 
+ "fish": {
+  "children": [], 
+  "parent": "animal"
+ }, 
+ "fall": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "elderly": {
+  "children": [], 
+  "parent": "people"
+ }, 
+ "walk": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "jump": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "laugh": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "hit": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "sport": {
+  "children": [], 
+  "parent": ""
+ }, 
+ "horse": {
+  "children": [], 
+  "parent": "animal"
+ }, 
+ "basketball": {
+  "children": [], 
+  "parent": "sport"
+ }, 
+ "sit": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "interact": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "tennis": {
+  "children": [], 
+  "parent": "sport"
+ }, 
+ "fox": {
+  "children": [], 
+  "parent": "animal"
+ }, 
+ "pick up": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "eat": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "attack": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "run": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "hockey": {
+  "children": [], 
+  "parent": "sport"
+ }, 
+ "animal": {
+  "children": [], 
+  "parent": null
+ }, 
+ "soccer": {
+  "children": [], 
+  "parent": "sport"
+ }, 
+ "bird": {
+  "children": [], 
+  "parent": "animal"
+ }, 
+ "kick": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "creature": {
+  "children": [], 
+  "parent": "character"
+ }, 
+ "swim": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "villian": {
+  "children": [], 
+  "parent": "character"
+ }, 
+ "hero": {
+  "children": [], 
+  "parent": "character"
+ }, 
+ "monster": {
+  "children": [], 
+  "parent": "character"
+ }, 
+ "football": {
+  "children": [], 
+  "parent": "sport"
+ }, 
+ "punch": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "bear": {
+  "children": [], 
+  "parent": "animal"
+ }, 
+ "hurt": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "zombie": {
+  "children": [], 
+  "parent": "character"
+ }, 
+ "push": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "cat": {
+  "children": [], 
+  "parent": "animal"
+ }, 
+ "baseball": {
+  "children": [], 
+  "parent": "sport"
+ }, 
+ "adult": {
+  "children": [], 
+  "parent": "people"
+ }, 
+ "rabbit": {
+  "children": [], 
+  "parent": "animal"
+ }, 
+ "child": {
+  "children": [], 
+  "parent": "people"
+ }, 
+ "baby": {
+  "children": [], 
+  "parent": "people"
+ }, 
+ "crawl": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "put down": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "shoot": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "pull": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "male": {
+  "children": [], 
+  "parent": "people"
+ }, 
+ "dog": {
+  "children": [], 
+  "parent": "animal"
+ }, 
+ "die": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "cry": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "tiger": {
+  "children": [], 
+  "parent": "animal"
+ }, 
+ "flip": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "roll": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "quadruped": {
+  "children": [], 
+  "parent": "character"
+ }, 
+ "reload": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "wolf": {
+  "children": [], 
+  "parent": "animal"
+ }, 
+ "exercise": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "biped": {
+  "children": [], 
+  "parent": "character"
+ }, 
+ "action": {
+  "children": [], 
+  "parent": null
+ }, 
+ "mammal": {
+  "children": [], 
+  "parent": "animal"
+ }, 
+ "climb": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "robot": {
+  "children": [], 
+  "parent": "character"
+ }, 
+ "block": {
+  "children": [], 
+  "parent": "action"
+ }, 
+ "talk": {
+  "children": [], 
+  "parent": "action"
+ }
+}

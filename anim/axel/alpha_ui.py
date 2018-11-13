@@ -58,6 +58,61 @@ DEBUGMODE = True
 ########################################################################################################################
 #
 #
+#	MENU WIDGET
+#
+#
+########################################################################################################################
+
+class FileMenu(QMenu):
+	newFolder = Signal()
+	importFolder = Signal()
+	newPose = Signal()
+	newAnimation = Signal()
+
+	def __init__(self, *args, **kwargs):
+		QMenu.__init__(self, *args, **kwargs)
+
+		self.setWindowFlags(Qt.Popup | Qt.NoDropShadowWindowHint)
+
+		self.actionNewDir = self.addAction('New Folder')
+		self.actionNewDir.triggered.connect(self.newFolder.emit)
+		self.addSeparator()
+
+		self.actionImportDir = self.addAction('Import Folder')
+		self.actionImportDir.triggered.connect(self.importFolder.emit)
+		self.addSeparator()
+
+		self.actionPose = self.addAction('New Pose')
+		self.actionPose.triggered.connect(self.newPose.emit)
+
+		self.actionAnim = self.addAction('New Animation')
+		self.actionAnim.triggered.connect(self.newAnimation.emit)
+
+
+class ContextMenu(FileMenu):
+	rename = Signal()
+	delete = Signal()
+	show = Signal()
+
+	def __init__(self, *args, **kwargs):
+		FileMenu.__init__(self, *args, **kwargs)
+
+		self.addSeparator()
+		self.actionRename = self.addAction('Rename')
+		self.actionRename.triggered.connect(self.rename.emit)
+
+		self.actionDelete = self.addAction('Delete')
+		self.actionDelete.triggered.connect(self.delete.emit)
+
+		self.addSeparator()
+		self.actionShow = self.addAction('Show In Explorer')
+		self.actionShow.triggered.connect(self.show.emit)
+
+
+
+########################################################################################################################
+#
+#
 #	RATING WIDGET
 #
 #
@@ -226,7 +281,7 @@ class InfoWidget(QFrame):
 			elif d == 'tags':
 				if type(data[d]) is list:
 					for tag in data[d]:
-						self.tagsWidget.add(tag)
+						#self.tagsWidget.add(tag)
 						pass
 
 			elif d == 'rating':
@@ -282,7 +337,6 @@ class LibraryWidget(QFrame):
 
 		# Tree View
 		self.treeView = LibraryTreeView(debug=self.debug)
-		self.treeView.setFocusPolicy(Qt.NoFocus)
 		self.treeView.setFrameShape(QFrame.NoFrame)
 		self.treeView.setEditTriggers(False)
 		self.layout().addWidget(self.treeView)
@@ -328,7 +382,9 @@ class Window(QMainWindow):
 		# Menu
 		menubar = self.menuBar()
 		menubar.setNativeMenuBar(False)
-		self.menuFile = menubar.addMenu('File')
+		self.menuFile = FileMenu(self)
+		self.menuFile.setTitle('File')
+		menubar.addMenu(self.menuFile)
 
 		# Central Widget
 		self.centralWidget = QWidget(self)
@@ -356,10 +412,12 @@ class Window(QMainWindow):
 		self.leftWidgetLayout.addWidget(self.libraryTabWidget)
 
 		self.libraryWidget = LibraryWidget()
-		self.libraryTabWidget.addTab(self.libraryWidget, 'Library')
+		self.libraryTabWidget.addTab(self.libraryWidget, 'Folders')
 		self.libraryWidget.selectedInstance.connect(self.loadInfoFromSelected)
-		
-		self.libraryTabWidget.addTab(QWidget(), 'Tags')
+
+		# Tags Widget
+		self.tagsWidget = tags.TagEditor()
+		self.libraryTabWidget.addTab(self.tagsWidget, 'Tags')
 
 		# Right Widget
 		self.rightWidget = QWidget()
@@ -461,7 +519,6 @@ def standalone(name=WINNAME, title='AXEL: Animation XML Export Library'):
 	window = Window()
 	window.setObjectName(name)
 	window.setWindowTitle(title)
-	app.setStyle(QStyleFactory.create('Fusion'))
 	window.setStyleSheet(getStyleSheet(os.path.join(DIRPATH, 'alpha_theme.css')))
 	window.show()
 	sys.exit(app.exec_())

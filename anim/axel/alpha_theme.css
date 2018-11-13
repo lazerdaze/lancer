@@ -22,6 +22,7 @@ color: white;
 
 QWidget{
 color:white;
+font-family: "Arial"
 }
 
 /*######################################################################################################################
@@ -75,6 +76,7 @@ border-top: 2px solid #33839f;
 padding-top:3px;
 }
 
+
 /*######################################################################################################################
 #
 #
@@ -84,10 +86,15 @@ padding-top:3px;
 ######################################################################################################################*/
 
 QMenu{
-padding:0;
-margin:0;
-outline:8px solid red;
 background-color:#0b0e0f;
+}
+
+QMenu::item{
+background:transparent;
+}
+
+QMenu::item:selected{
+background-color:#3f4d50;
 }
 
 /*######################################################################################################################
@@ -343,10 +350,6 @@ color:white;
 #
 ######################################################################################################################*/
 
-QTreeView{
-show-decoration-selected: 1;
-}
-
 QHeaderView::section {
 background-color: black;
 border:none;
@@ -354,14 +357,17 @@ margin:0;
 padding:0;
 }
 
+QTreeView{
+show-decoration-selected: 1;
+alternate-background-color: rgb(65, 65, 65);
+}
+
 QTreeView::item{
 background:none;
 color:white;
 border:none;
-padding:5 5 5 12;
-margin:0;
+padding:5 5 5 0;
 }
-
 
 QTreeView::item:hover {
 border:none;
@@ -385,9 +391,17 @@ border:none;
 background-color:#269bc4;
 }
 
-QTreeView::item:open{
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+border-image: none;
+image: url(./icons/branch_closed_white.png);
 }
 
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings  {
+border-image: none;
+image: url(./icons/branch_open_white.png);
+}
 
 
 /*######################################################################################################################
@@ -404,10 +418,12 @@ background:rgb(100, 100, 100);
 
 QSplitter::handle:horizontal{
 width: 10px;
+background:transparent;
 }
 
 QSplitter::handle:vertical{
 height: 10px;
+background:transparent;
 }
 
 QSplitter::handle:pressed{
