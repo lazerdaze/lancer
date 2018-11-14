@@ -188,7 +188,7 @@ height:15;
 ######################################################################################################################*/
 
 QTabWidget{
-background:rgb(75, 75, 75);
+background:transparent;
 }
 
 QTabWidget::pane > QWidget{
@@ -271,6 +271,7 @@ height: 5px;
 background:transparent;
 border:0;
 border-radius:0;
+
 }
 
 QScrollBar::groove {
@@ -407,13 +408,13 @@ background-color:#269bc4;
 QTreeView::branch:has-children:!has-siblings:closed,
 QTreeView::branch:closed:has-children:has-siblings {
 border-image: none;
-image: url(./icons/branch_closed_white.png);
+image: url(../resource/icons/branch_closed_white.png);
 }
 
 QTreeView::branch:open:has-children:!has-siblings,
 QTreeView::branch:open:has-children:has-siblings  {
 border-image: none;
-image: url(./icons/branch_open_white.png);
+image: url(../resource/icons/branch_open_white.png);
 }
 
 

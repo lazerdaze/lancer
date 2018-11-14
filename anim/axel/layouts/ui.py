@@ -6,13 +6,11 @@
 #
 
 # AXEL Modules
-from api import *
-from thumbnail import *
+from anim.axel.core.api import *
+from anim.axel.controls.item import *
 
 # Lancer Modules
-from library import xfer
-
-reload(xfer)
+from anim.axel.core import xfer
 
 # Qt Modules
 from PySide2.QtCore import *
@@ -21,9 +19,6 @@ from PySide2.QtWidgets import *
 
 # Python Modules
 import os
-import platform
-import sys
-import gc
 
 # Maya Modules
 MAYALOADED = True
@@ -46,9 +41,10 @@ TITLE = 'AXEL: Animation XML Export Library'
 WIDTH = 800
 HEIGHT = 600
 
-ICONSPATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'icons')
-DEFAULTTHUMBNAIL = os.path.join(DIRPATH, 'icons', 'thumbnail2.png')
 
+ICONSPATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'resource', 'icons')
+DEFAULTTHUMBNAIL = os.path.join(DIRPATH, 'icons', 'thumbnail2.png')
+print ICONSPATH
 
 # TESTSEQUENCE = collectSequenceFromFilepath(os.path.join(DIRPATH, 'test', 'testSequence', 'thumbnail.0000.jpg'))
 

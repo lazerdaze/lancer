@@ -5,14 +5,20 @@
 #
 #
 
-# Axel Modules
-import ui
-
 # Lancer Modules
-from library import xfer
+import xfer
 
-# Python Moduels
-import os, shutil
+# Python Modules
+import os
+import shutil
+import os
+import sys
+import json
+
+# Qt Modules
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
 # Maya Modules
 MAYALOADED = True
@@ -31,10 +37,12 @@ except:
 
 
 DIRPATH = os.path.dirname(os.path.abspath(__file__))
-TESTPATH = os.path.join(DIRPATH, 'test')
-TEMPPATH = os.path.join(DIRPATH, 'temp')
-TEMPTHUMBPATH = os.path.join(TEMPPATH, 'thumbnail')
-TEMPWINDOWNAME = 'thumbnailWindow'
+TESTPATH = os.path.join(os.path.dirname(DIRPATH), 'test')
+TEMPPATH = os.path.join(os.path.dirname(DIRPATH), 'temp')
+THUMBPATH = os.path.join(os.path.dirname(DIRPATH), 'resource', 'thumbnail')
+
+WINNAME = 'axelThumbnailWindowUI'
+TESTTHUMBNAIL = os.path.join('thumbnail.0000.jpg')
 
 THUMBWIDTH = 256
 THUMBHEIGHT = 256
@@ -71,7 +79,7 @@ def flushTempDirectory():
 	return
 
 
-def snapshot(filepath=TEMPTHUMBPATH, extension='jpg'):
+def snapshot(filepath=THUMBPATH, extension='jpg'):
 	filename = '{}.{}'.format(filepath, extension)
 	cmds.refresh(cv=True, fe="jpg", fn=filename)
 	return
@@ -98,7 +106,7 @@ def getFocusCamera():
 
 
 def createTempViewport(camera):
-	cmds.window(TEMPWINDOWNAME)
+	cmds.window(WINNAME)
 	cmds.paneLayout()
 	pbPanel = cmds.modelPanel(cam=camera)
 	cmds.modelEditor(pbPanel,
@@ -115,7 +123,7 @@ def createTempViewport(camera):
 	return pbPanel
 
 
-def createThumbnail(filepath=TEMPTHUMBPATH,
+def createThumbnail(filepath=THUMBPATH,
                     extension='jpg',
                     camera=None,
                     w=THUMBWIDTH,
@@ -142,14 +150,14 @@ def createThumbnail(filepath=TEMPTHUMBPATH,
 		               c=extension, fo=True, v=False, orn=False, os=True, sqt=False, qlt=100)
 
 		# Remove UI
-		cmds.deleteUI(TEMPWINDOWNAME, window=True)
+		cmds.deleteUI(WINNAME, window=True)
 
 		# Reset Pan Zoom
 		cmds.setAttr(cameraShape + '.panZoomEnabled', 0)
 		return filename
 
 
-def createSequence(filepath=TEMPTHUMBPATH,
+def createSequence(filepath=THUMBPATH,
                    extension='jpg',
                    camera=None,
                    w=THUMBWIDTH,
@@ -192,7 +200,7 @@ def createSequence(filepath=TEMPTHUMBPATH,
 		               )
 
 		# Remove UI
-		cmds.deleteUI(TEMPWINDOWNAME, window=True)
+		cmds.deleteUI(WINNAME, window=True)
 
 		# Reset Pan Zoom
 		cmds.setAttr(cameraShape + '.panZoomEnabled', 0)

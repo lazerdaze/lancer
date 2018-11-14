@@ -6,13 +6,9 @@
 #
 
 # AXEL Modules
-from api import *
-import ui
-from ui import *
-import tags
-
-reload(ui)
-reload(tags)
+from anim.axel.layouts.ui import *
+from anim.axel.controls import tag
+from anim.axel.controls import item
 
 # Lancer Modules
 from library import xfer
@@ -21,12 +17,10 @@ reload(xfer)
 
 # Qt Modules
 from PySide2.QtCore import *
-from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
 # Python Modules
 import os
-import platform
 import sys
 
 # Maya Modules
@@ -201,7 +195,7 @@ class RatingWidget(QWidget):
 ########################################################################################################################
 
 class FlowLayout(QLayout):
-	def __init__(self, parent=None, margin=0, spacing=-1):
+	def __init__(self, parent=None, margin=0, spacing=2):
 		QLayout.__init__(self, parent)
 
 		self.itemList = []
@@ -331,16 +325,20 @@ class ItemGridWidget(QWidget):
 		self.layout().setContentsMargins(0,0,0,0)
 
 		scroll = ResizeScrollArea()
-		self._wrapper = QWidget(scroll)
+		self._wrapper = QFrame(scroll)
+
 		self.flowLayout = FlowLayout(self._wrapper)
 		self._wrapper.setLayout(self.flowLayout)
+
 		scroll.setWidget(self._wrapper)
 		scroll.setWidgetResizable(True)
 		self.layout().addWidget(scroll)
 
 		for x in range(1, 20):
-			button = QPushButton(str(x))
-			button.setMinimumSize(40,40)
+			# button = QPushButton(str(x))
+			button = item.ThumbnailButton(item.TESTTHUMBNAIL)
+			button.setMinimumSize(100,123)
+			button.setMaximumSize(100,123)
 			self.addWidget(button)
 
 
@@ -455,7 +453,7 @@ class InfoWidget(QFrame):
 		self.tagsBox.setLayout(self.tagsBoxLayout)
 		self.layout().addWidget(self.tagsBox)
 
-		self.tagsWidget = tags.AssignedTagsWidget()
+		self.tagsWidget = tag.AssignedTagsWidget()
 		self.tagsBoxLayout.addWidget(self.tagsWidget)
 
 	def loadData(self, data):
@@ -603,7 +601,7 @@ class Window(QMainWindow):
 		self.libraryWidget.selectedInstance.connect(self.loadInfoFromSelected)
 
 		# Tags Widget
-		self.tagsWidget = tags.TagEditor()
+		self.tagsWidget = tag.TagEditor()
 		self.libraryTabWidget.addTab(self.tagsWidget, 'Tags')
 
 		# Center Widget
@@ -729,7 +727,7 @@ def standalone(name=WINNAME, title='AXEL: Animation XML Export Library'):
 	window = Window()
 	window.setObjectName(name)
 	window.setWindowTitle(title)
-	window.setStyleSheet(getStyleSheet(os.path.join(DIRPATH, 'alpha_theme.css')))
+	window.setStyleSheet(getStyleSheet(os.path.join(os.path.dirname(DIRPATH), 'theme', 'alpha_theme.css')))
 	window.show()
 	sys.exit(app.exec_())
 

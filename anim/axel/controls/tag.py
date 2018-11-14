@@ -32,7 +32,7 @@ from PySide2.QtWidgets import *
 
 WINNAME = 'axelTagsWindowUI'
 DIRPATH = os.path.dirname(os.path.abspath(__file__))
-SETTINGSPATH = os.path.join(DIRPATH, 'settings.json')
+SETTINGSPATH = os.path.join(os.path.dirname(DIRPATH), 'config', 'tag_config.json')
 
 PEOPLE = ['male',
           'female',

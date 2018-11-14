@@ -17,19 +17,15 @@ Future Stuff:
 - Add Meta node Functionality
 '''
 # PYTHON
-import platform
 import os
 import datetime
-import time
 
 # MAYA
 import maya.cmds as cmds
 import maya.mel as mel
-import maya.OpenMaya as api
-import maya.OpenMayaAnim as anim
 
 # EIXML
-import eixml
+from anim.axel.core import eixml
 
 reload(eixml)
 xml = eixml.eixml()
