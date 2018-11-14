@@ -63,95 +63,95 @@ DEBUGMODE = True
 KIND = ['pose', 'anim', 'axel']
 
 ANIMCURVES = ['animCurveTL',
-              'animCurveTA',
-              'animCurveTT',
-              'animCurveTU',
-              ]
+			  'animCurveTA',
+			  'animCurveTT',
+			  'animCurveTU',
+			  ]
 
 ANIMLAYERS = ['animBlendNodeAdditive']
 
 ROOTATTRIBUTES = ['fileName',
-                  'filePath',
-                  'fileType',
-                  'dateCreated',
-                  'objects',
-                  'namespaces',
-                  'animLayers',
-                  'frameStartTime',
-                  'frameEndTime',
-                  'frameTotalTime',
-                  'thumbnail'
-                  ]
+				  'filePath',
+				  'fileType',
+				  'dateCreated',
+				  'objects',
+				  'namespaces',
+				  'animLayers',
+				  'frameStartTime',
+				  'frameEndTime',
+				  'frameTotalTime',
+				  'thumbnail'
+				  ]
 
 OBJECTATTRIBUTES = ['name',
-                    'namespace',
-                    'type',
-                    ]
+					'namespace',
+					'type',
+					]
 
 POSEATTRIBUTES = ['name',
-                  'type',
-                  'value',
-                  ]
+				  'type',
+				  'value',
+				  ]
 
 LAYERATTRIBUTES = ['name',
-                   'parent',
-                   'mute',
-                   'solo',
-                   'lock',
-                   'override',
-                   'passThrough',
-                   'weight',
-                   ]
+				   'parent',
+				   'mute',
+				   'solo',
+				   'lock',
+				   'override',
+				   'passThrough',
+				   'weight',
+				   ]
 
 CURVEATTRIBUTES = ['name',
-                   'type',
-                   'preInfinity',
-                   'postInfinity',
-                   'weighted',
-                   ]
+				   'type',
+				   'preInfinity',
+				   'postInfinity',
+				   'weighted',
+				   ]
 
 KEYATTRIBUTES = ['time',
-                 'value',
-                 'inTangent',
-                 'outTangent',
-                 'inAngle',
-                 'outAngle',
-                 'inWeight',
-                 'outWeight',
-                 'ix',
-                 'iy',
-                 'ox',
-                 'oy',
-                 'tangentUnity',
-                 'tangentWeight',
-                 ]
+				 'value',
+				 'inTangent',
+				 'outTangent',
+				 'inAngle',
+				 'outAngle',
+				 'inWeight',
+				 'outWeight',
+				 'ix',
+				 'iy',
+				 'ox',
+				 'oy',
+				 'tangentUnity',
+				 'tangentWeight',
+				 ]
 
 METAATTRIBUTES = ['name',
-                  'kind',
-                  'owner',
-                  'created',
-                  'rating',
-                  'size',
-                  'start',
-                  'end',
-                  'items',
-                  'shapes',
-                  'layers',
-                  'comment',
-                  'tags',
-                  ]
+				  'kind',
+				  'owner',
+				  'created',
+				  'rating',
+				  'size',
+				  'start',
+				  'end',
+				  'items',
+				  'shapes',
+				  'layers',
+				  'comment',
+				  'tags',
+				  ]
 
 METADATA = {
-	'name'   : 'test',
+	'name': 'test',
 	'comment': 'This is a comment.',
-	'tags'   : ['tag1', 'tag2'],
-	'kind'   : 'animation',
+	'tags': ['tag1', 'tag2'],
+	'kind': 'animation',
 	'objects': 10,
-	'size'   : '10000',
-	'start'  : 0,
-	'end'    : 100,
+	'size': '10000',
+	'start': 0,
+	'end': 100,
 	'created': '10/1/2018',
-	'owner'  : None,
+	'owner': None,
 }
 
 
@@ -345,10 +345,10 @@ def getSelectedObjects(shapes=False):
 
 def getFileValues(filepath, kind, comment=''):
 	values = {
-		'filePath'   : filepath,
-		'fileType'   : kind,
+		'filePath': filepath,
+		'fileType': kind,
 		'dateCreated': datetime.datetime.now().strftime('%Y/%m/%d %I:%M%p'),
-		'comment'    : comment,
+		'comment': comment,
 	}
 	return values
 
@@ -367,9 +367,9 @@ def getAllKeys(animCurve):
 
 def getObjectValues(node):
 	values = {
-		'name'     : node.split(':')[-1],
+		'name': node.split(':')[-1],
 		'namespace': node.split(':')[0] if ':' in node else '',
-		'type'     : str(cmds.objectType(node))
+		'type': str(cmds.objectType(node))
 	}
 	return values
 
@@ -398,30 +398,30 @@ def getStaticValues(attr):
 
 def getCurveValues(attr, animCurve):
 	values = {
-		'name'        : animCurve,
-		'type'        : cmds.nodeType(animCurve),
-		'preInfinity' : cmds.setInfinity(attr, at=animCurve, q=True, pri=True)[0],
+		'name': animCurve,
+		'type': cmds.nodeType(animCurve),
+		'preInfinity': cmds.setInfinity(attr, at=animCurve, q=True, pri=True)[0],
 		'postInfinity': cmds.setInfinity(attr, at=animCurve, q=True, poi=True)[0],
-		'weighted'    : int(cmds.keyTangent(animCurve, q=True, wt=True)[0]),
+		'weighted': int(cmds.keyTangent(animCurve, q=True, wt=True)[0]),
 	}
 	return values
 
 
 def getKeyValues(animCurve, key):
 	values = {
-		'time'         : key,
-		'value'        : cmds.keyframe(animCurve, q=True, t=(key, key), vc=True)[0],
-		'inTangent'    : cmds.keyTangent(animCurve, q=True, t=(key, key), itt=True)[0],
-		'outTangent'   : cmds.keyTangent(animCurve, q=True, t=(key, key), ott=True)[0],
-		'inAngle'      : cmds.keyTangent(animCurve, q=True, t=(key, key), ia=True)[0],
-		'outAngle'     : cmds.keyTangent(animCurve, q=True, t=(key, key), oa=True)[0],
-		'inWeight'     : cmds.keyTangent(animCurve, q=True, t=(key, key), iw=True)[0],
-		'outWeight'    : cmds.keyTangent(animCurve, q=True, t=(key, key), ow=True)[0],
-		'ix'           : cmds.keyTangent(animCurve, q=True, t=(key, key), ix=True)[0],
-		'iy'           : cmds.keyTangent(animCurve, q=True, t=(key, key), iy=True)[0],
-		'ox'           : cmds.keyTangent(animCurve, q=True, t=(key, key), ox=True)[0],
-		'oy'           : cmds.keyTangent(animCurve, q=True, t=(key, key), oy=True)[0],
-		'tangentUnity' : int(cmds.keyTangent(animCurve, q=True, t=(key, key), l=True)[0]),
+		'time': key,
+		'value': cmds.keyframe(animCurve, q=True, t=(key, key), vc=True)[0],
+		'inTangent': cmds.keyTangent(animCurve, q=True, t=(key, key), itt=True)[0],
+		'outTangent': cmds.keyTangent(animCurve, q=True, t=(key, key), ott=True)[0],
+		'inAngle': cmds.keyTangent(animCurve, q=True, t=(key, key), ia=True)[0],
+		'outAngle': cmds.keyTangent(animCurve, q=True, t=(key, key), oa=True)[0],
+		'inWeight': cmds.keyTangent(animCurve, q=True, t=(key, key), iw=True)[0],
+		'outWeight': cmds.keyTangent(animCurve, q=True, t=(key, key), ow=True)[0],
+		'ix': cmds.keyTangent(animCurve, q=True, t=(key, key), ix=True)[0],
+		'iy': cmds.keyTangent(animCurve, q=True, t=(key, key), iy=True)[0],
+		'ox': cmds.keyTangent(animCurve, q=True, t=(key, key), ox=True)[0],
+		'oy': cmds.keyTangent(animCurve, q=True, t=(key, key), oy=True)[0],
+		'tangentUnity': int(cmds.keyTangent(animCurve, q=True, t=(key, key), l=True)[0]),
 		'tangentWeight': int(cmds.keyTangent(animCurve, q=True, t=(key, key), wl=True)[0]),
 	}
 	return values
@@ -429,14 +429,14 @@ def getKeyValues(animCurve, key):
 
 def getLayerValues(layerName):
 	values = {
-		'name'       : layerName,
-		'parent'     : cmds.animLayer(layerName, q=True, p=True),
-		'mute'       : int(cmds.animLayer(layerName, q=True, m=True)),
-		'solo'       : int(cmds.animLayer(layerName, q=True, m=True)),
-		'lock'       : int(cmds.animLayer(layerName, q=True, m=True)),
-		'override'   : int(cmds.animLayer(layerName, q=True, o=True)),
+		'name': layerName,
+		'parent': cmds.animLayer(layerName, q=True, p=True),
+		'mute': int(cmds.animLayer(layerName, q=True, m=True)),
+		'solo': int(cmds.animLayer(layerName, q=True, m=True)),
+		'lock': int(cmds.animLayer(layerName, q=True, m=True)),
+		'override': int(cmds.animLayer(layerName, q=True, o=True)),
 		'passthrough': int(cmds.animLayer(layerName, q=True, pth=True)),
-		'weight'     : float(cmds.animLayer(layerName, q=True, w=True)),
+		'weight': float(cmds.animLayer(layerName, q=True, w=True)),
 	}
 	return values
 
@@ -619,34 +619,46 @@ def buildAnimLayerTree(obj, attr, animLayers):
 class BaseDirectories(object):
 	def __init__(self, filepath):
 		self.datapath = os.path.join(filepath, 'data.xml')
-		self.thumbpath = os.path.join(filepath, 'thumbnail')
-		self.thumbnail = os.path.join(self.thumbpath, 'thumbnail.0000.jpg')
+		self.thumbnaildir = os.path.join(filepath, 'thumbnail')
+		self.thumbnailpath = os.path.join(self.thumbnaildir, 'thumbnail.0000.jpg')
 		self.metadatapath = os.path.join(filepath, 'metadata.json')
+
+	def getDataFilepath(self):
+		return self.datapath
+
+	def getThumbnailDirFilepath(self):
+		return self.thumbnaildir
+
+	def getThumbnailFilepath(self):
+		return self.thumbnailpath
+
+	def getMetdataFilepath(self):
+		return self.metadatapath
 
 
 class Base(BaseDirectories):
 	def __init__(self,
-	             name=None,
-	             filepath=None,
-	             items=None,
-	             data=None,
-	             kind=None,
-	             comment=None,
-	             layers=False,
-	             shapes=False,
-	             tags=None,
-	             rating=0,
-	             thumbnail=None,
-	             created=None,
-	             owner=None,
-	             start=None,
-	             end=None,
-	             size=None,
-	             ):
+				 name=None,
+				 filepath=None,
+				 items=None,
+				 data=None,
+				 kind=None,
+				 comment=None,
+				 layers=False,
+				 shapes=False,
+				 tags=None,
+				 rating=0,
+				 thumbnail=None,
+				 created=None,
+				 owner=None,
+				 start=None,
+				 end=None,
+				 size=None,
+				 ):
 
 		BaseDirectories.__init__(self,
-		                         filepath=filepath,
-		                         )
+								 filepath=filepath,
+								 )
 
 		'''
 		:param name:
@@ -868,7 +880,7 @@ class Xml(object):
 
 	def convertStrToList(self, string):
 		return str(string).replace('[', '').replace(']', '').replace("u'", '').replace("'", '').replace(" ",
-		                                                                                                '').split(',')
+																										'').split(',')
 
 	def createRoot(self, name):
 		root = etree.Element(name)
@@ -915,24 +927,24 @@ class Xml(object):
 
 class Export(Base, Xml):
 	def __init__(self,
-	             name,
-	             filepath,
-	             kind,
-	             items=None,
-	             tags=None,
-	             comment=None,
-	             layers=False,
-	             ):
+				 name,
+				 filepath,
+				 kind,
+				 items=None,
+				 tags=None,
+				 comment=None,
+				 layers=False,
+				 ):
 
 		Base.__init__(self,
-		              name=name,
-		              filepath=filepath,
-		              items=items,
-		              kind=kind,
-		              tags=tags,
-		              comment=comment,
-		              layers=layers,
-		              )
+					  name=name,
+					  filepath=filepath,
+					  items=items,
+					  kind=kind,
+					  tags=tags,
+					  comment=comment,
+					  layers=layers,
+					  )
 
 	def createDirectories(self):
 		createDirectory(self.filepath)
@@ -1032,11 +1044,11 @@ class Export(Base, Xml):
 
 class Import(Base, Xml):
 	def __init__(self,
-	             filepath,
-	             ):
+				 filepath,
+				 ):
 		Base.__init__(self,
-		              filepath=filepath,
-		              )
+					  filepath=filepath,
+					  )
 
 	def readMetadata(self):
 		if fileExist(self.metadatapath):
@@ -1061,24 +1073,24 @@ class Import(Base, Xml):
 
 class AbstractItem(Export, Import):
 	def __init__(self,
-	             filepath,
-	             name=None,
-	             kind=None,
-	             items=None,
-	             comment=None,
-	             tags=None,
-	             layers=False,
-	             ):
+				 filepath,
+				 name=None,
+				 kind=None,
+				 items=None,
+				 comment=None,
+				 tags=None,
+				 layers=False,
+				 ):
 		Export.__init__(self,
-		                filepath=filepath,
-		                name=name,
-		                kind=kind,
-		                items=items,
-		                tags=tags,
-		                comment=comment,
-		                layers=layers,
-		                )
+						filepath=filepath,
+						name=name,
+						kind=kind,
+						items=items,
+						tags=tags,
+						comment=comment,
+						layers=layers,
+						)
 
 		Import.__init__(self,
-		                filepath=filepath,
-		                )
+						filepath=filepath,
+						)

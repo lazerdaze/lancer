@@ -109,7 +109,6 @@ class ContextMenu(FileMenu):
 		self.actionShow.triggered.connect(self.show.emit)
 
 
-
 ########################################################################################################################
 #
 #
@@ -196,10 +195,198 @@ class RatingWidget(QWidget):
 ########################################################################################################################
 #
 #
+#	Item Grid Widget
+#
+#
+########################################################################################################################
+
+class FlowLayout(QLayout):
+	def __init__(self, parent=None, margin=0, spacing=-1):
+		QLayout.__init__(self, parent)
+
+		self.itemList = []
+
+		if parent is not None:
+			self.setMargin(margin)
+
+		self.setSpacing(spacing)
+
+	def __del__(self):
+		item = self.takeAt(0)
+		while item:
+			item = self.takeAt(0)
+
+	def addItem(self, item):
+		self.itemList.append(item)
+
+	def count(self):
+		return len(self.itemList)
+
+	def itemAt(self, index):
+		if index >= 0 and index < len(self.itemList):
+			return self.itemList[index]
+
+		return None
+
+	def takeAt(self, index):
+		if index >= 0 and index < len(self.itemList):
+			return self.itemList.pop(index)
+
+		return None
+
+	def expandingDirections(self):
+		return Qt.Orientations(Qt.Orientation(0))
+
+	def hasHeightForWidth(self):
+		return True
+
+	def heightForWidth(self, width):
+		height = self.doLayout(QRect(0, 0, width, 0), True)
+		return height
+
+	def setGeometry(self, rect):
+		super(FlowLayout, self).setGeometry(rect)
+		self.doLayout(rect, False)
+
+	def sizeHint(self):
+		return self.minimumSize()
+
+	def minimumSize(self):
+		size = QSize()
+
+		for item in self.itemList:
+			size = size.expandedTo(item.minimumSize())
+
+		size += QSize(2 * self.contentsMargins().top(), 2 * self.contentsMargins().top())
+		return size
+
+	def doLayout(self, rect, testOnly):
+		x = rect.x()
+		y = rect.y()
+		lineHeight = 0
+
+		for item in self.itemList:
+			wid = item.widget()
+			spaceX = self.spacing() + wid.style().layoutSpacing(QSizePolicy.PushButton,
+																QSizePolicy.PushButton, Qt.Horizontal)
+			spaceY = self.spacing() + wid.style().layoutSpacing(QSizePolicy.PushButton,
+																QSizePolicy.PushButton, Qt.Vertical)
+			nextX = x + item.sizeHint().width() + spaceX
+			if nextX - spaceX > rect.right() and lineHeight > 0:
+				x = rect.x()
+				y = y + lineHeight + spaceY
+				nextX = x + item.sizeHint().width() + spaceX
+				lineHeight = 0
+
+			if not testOnly:
+				item.setGeometry(QRect(QPoint(x, y), item.sizeHint()))
+
+			x = nextX
+			lineHeight = max(lineHeight, item.sizeHint().height())
+
+		return y + lineHeight - rect.y()
+
+
+class ResizeScrollArea(QScrollArea):
+	def __init(self, parent=None):
+		QScrollArea.__init__(self, parent)
+
+	def resizeEvent(self, event):
+		wrapper = self.findChild(QWidget)
+		flow = wrapper.findChild(FlowLayout)
+
+		if wrapper and flow:
+			width = self.viewport().width()
+			height = flow.heightForWidth(width)
+			size = QSize(width, height)
+			point = self.viewport().rect().topLeft()
+			flow.setGeometry(QRect(point, size))
+			self.viewport().update()
+		super(ResizeScrollArea, self).resizeEvent(event)
+
+
+class ItemButton(QWidget):
+	def __init__(self, *args, **kwargs):
+		QWidget.__init__(self, *args, **kwargs)
+
+		self.instance = None
+
+	def getInstance(self):
+		return self.instance
+
+	def setInstance(self, instance):
+		self.instance = instance
+		return
+
+
+class ItemGridWidget(QWidget):
+	def __init__(self, *args, **kwargs):
+		QWidget.__init__(self, *args, **kwargs)
+
+		self.items = {}
+
+		# Layout
+		self.setLayout(QVBoxLayout())
+		self.layout().setSpacing(0)
+		self.layout().setContentsMargins(0,0,0,0)
+
+		scroll = ResizeScrollArea()
+		self._wrapper = QWidget(scroll)
+		self.flowLayout = FlowLayout(self._wrapper)
+		self._wrapper.setLayout(self.flowLayout)
+		scroll.setWidget(self._wrapper)
+		scroll.setWidgetResizable(True)
+		self.layout().addWidget(scroll)
+
+		for x in range(1, 20):
+			button = QPushButton(str(x))
+			button.setMinimumSize(40,40)
+			self.addWidget(button)
+
+
+	def addWidget(self, widget):
+		self.flowLayout.addWidget(widget)
+		widget.setParent(self._wrapper)
+
+	def removeWidget(self, widget):
+		self.flowLayout.removeWidget(widget)
+		widget.setParent(None)
+		del widget
+		return
+
+	def getItems(self):
+		return self.items
+
+	def add(self, item):
+		if item not in self.items:
+			widget = ItemButton()
+			self.items[item] = widget
+			self.addWidget(widget)
+		return
+
+	def remove(self, item):
+		if item in self.items:
+			widget = self.items[item]
+			self.removeWidget(widget)
+			del self.items[item]
+		return
+
+	def clear(self):
+		for i in reversed(range(self.flowLayout.count())):
+			self.flowLayout.itemAt(i).widget().setParent(None)
+
+		self.items = {}
+		return
+
+
+########################################################################################################################
+#
+#
 #	INFO WIDGET
 #
 #
 ########################################################################################################################
+
 
 class InfoWidget(QFrame):
 	def __init__(self):
@@ -281,7 +468,7 @@ class InfoWidget(QFrame):
 			elif d == 'tags':
 				if type(data[d]) is list:
 					for tag in data[d]:
-						#self.tagsWidget.add(tag)
+						# self.tagsWidget.add(tag)
 						pass
 
 			elif d == 'rating':
@@ -419,6 +606,22 @@ class Window(QMainWindow):
 		self.tagsWidget = tags.TagEditor()
 		self.libraryTabWidget.addTab(self.tagsWidget, 'Tags')
 
+		# Center Widget
+		self.centerWidget = QWidget()
+		self.centerWidget.setLayout(QVBoxLayout())
+		self.centerWidget.layout().setSpacing(5)
+		self.centerWidget.layout().setContentsMargins(0, 0, 0, 0)
+
+		self.centralSplitter.addWidget(self.centerWidget)
+
+		# Items Widget
+		self.itemsTabWidget = QTabWidget()
+		self.itemsTabWidget.setCurrentIndex(0)
+		self.centerWidget.layout().addWidget(self.itemsTabWidget)
+
+		self.itemsWidget = ItemGridWidget()
+		self.itemsTabWidget.addTab(self.itemsWidget, 'Items')
+
 		# Right Widget
 		self.rightWidget = QWidget()
 		self.rightLayout = QVBoxLayout(self.rightWidget)
@@ -486,10 +689,17 @@ class Window(QMainWindow):
 
 		self.rightStackedWidget.setCurrentIndex(0)
 
-
 	def loadInfoFromSelected(self, instance):
 		if instance.getKind() != component.directory:
 			self.infoWidget.loadData(instance.getMetadata())
+
+			# Update Thumbnail
+			thumbnail = instance.getThumbnailFilepath()
+			if os.path.isfile(thumbnail):
+				self.previewWidget.loadSequenceFromFilepath(thumbnail)
+			else:
+				self.previewWidget.clear()
+
 			self.rightWidget.setHidden(False)
 		else:
 			self.infoWidget.clear()

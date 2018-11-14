@@ -1,18 +1,15 @@
 {
-"comment": "This is a comment.\nThis is another line.\tThis is a tab line.\nThis is a third line.", 
-"rating": 2, 
-"tags": [
-"tag1", 
-"tag2"
-], 
-"items": [], 
+"comment": "This is a test file for a sphere object.",
+"rating": 0,
+"tags": [],
+"items": ["pSphere1"],
 "owner": "tiradoj", 
-"size": "0.007MB", 
-"layers": true, 
+"size": "6 KB",
+"layers": false,
 "kind": "animation", 
-"end": 100, 
-"name": "test DADA4", 
-"created": "2018/10/31", 
-"shapes": true, 
-"start": 0
+"end": 10.0,
+"name": "psphere1",
+"created": "2018/10/21 12:47AM",
+"shapes": false,
+"start": 1.0
 }

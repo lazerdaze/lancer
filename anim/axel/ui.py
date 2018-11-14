@@ -48,7 +48,9 @@ HEIGHT = 600
 
 ICONSPATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'icons')
 DEFAULTTHUMBNAIL = os.path.join(DIRPATH, 'icons', 'thumbnail2.png')
-#TESTSEQUENCE = collectSequenceFromFilepath(os.path.join(DIRPATH, 'test', 'testSequence', 'thumbnail.0000.jpg'))
+
+
+# TESTSEQUENCE = collectSequenceFromFilepath(os.path.join(DIRPATH, 'test', 'testSequence', 'thumbnail.0000.jpg'))
 
 
 ########################################################################################################################
@@ -77,8 +79,8 @@ class Item(AbstractItem):
 	def __init__(self, filepath):
 
 		AbstractItem.__init__(self,
-		                      filepath=filepath,
-		                      )
+							  filepath=filepath,
+							  )
 
 		self.rootItem = None
 		self.loaded = False
@@ -134,7 +136,6 @@ class ItemModel(QStandardItemModel):
 		self.rootItem = Item(self.rootPath)
 		self.parentItem = self.invisibleRootItem()
 		self.items = []
-
 
 		# Columns
 		self.setColumnCount(0)
@@ -207,8 +208,8 @@ class ItemModel(QStandardItemModel):
 
 class LibraryDataModel(QStandardItemModel):
 	def __init__(self,
-	             filepath=DEFAULTLIBRARY,
-	             ):
+				 filepath=DEFAULTLIBRARY,
+				 ):
 		QStandardItemModel.__init__(self)
 
 		self.filepath = filepath
@@ -326,11 +327,11 @@ class LibraryTreeView(QTreeView):
 	selectedInstance = Signal(object)
 
 	def __init__(self,
-	             rootPath=DEFAULTLIBRARY,
-	             debug=True,
-	             ):
+				 rootPath=DEFAULTLIBRARY,
+				 debug=True,
+				 ):
 		QTreeView.__init__(self,
-		                   )
+						   )
 		self.rootPath = rootPath
 		self.debug = debug
 
@@ -459,12 +460,12 @@ class LibraryTreeView(QTreeView):
 
 class App(QMainWindow):
 	def __init__(self,
-	             parent=None,
-	             name=WINDOWNAME,
-	             title=TITLE,
-	             width=WIDTH,
-	             height=HEIGHT,
-	             ):
+				 parent=None,
+				 name=WINDOWNAME,
+				 title=TITLE,
+				 width=WIDTH,
+				 height=HEIGHT,
+				 ):
 		QMainWindow.__init__(self, parent=parent)
 
 		self.setObjectName(name)
@@ -512,7 +513,8 @@ class ThumbnailWidget(QFrame):
 		self.duration = 100
 		self.frameRate = 41.667
 		self.currentFrame = 0
-		self.currentPixmap = QPixmap(DEFAULTTHUMBNAIL)
+		self.defaultPixmap = QPixmap(DEFAULTTHUMBNAIL)
+		self.currentPixmap = self.defaultPixmap
 		self.isLoop = True
 		self.imageCache = []
 		self.hover = False
@@ -551,7 +553,7 @@ class ThumbnailWidget(QFrame):
 										margin:0;
 										}
 										QProgressBar::chunk{
-										background:grey;
+										background:white;
 										padding:0;
 										margin:0;
 										border:none;
@@ -572,7 +574,12 @@ class ThumbnailWidget(QFrame):
 		self.timeline.frameChanged.connect(self.progressBar.setValue)
 		self.timeline.stateChanged.connect(self.setState)
 
-
+	def clear(self):
+		self.updatePixmap(self.defaultPixmap)
+		self.setHasSequence(False)
+		self.sequence = None
+		self.progressBar.setValue(0)
+		return
 
 	def getHasSequence(self):
 		return self.hasSequence
@@ -583,7 +590,7 @@ class ThumbnailWidget(QFrame):
 
 	def convertPositionToValue(self, position):
 		width = self.size().width()
-		return int((float(self.duration) / float(width)) * float(position))
+		return int((float(self.duration + 1) / float(width)) * float(position))
 
 	def play(self):
 		if self.sequence:
@@ -689,6 +696,15 @@ class ThumbnailWidget(QFrame):
 		self.jumpToFrame(0)
 		return
 
+	def loadSequenceFromFilepath(self, filepath):
+		sequence = collectSequenceFromFilepath(filepath)
+
+		if len(sequence) > 0 :
+			self.loadSequence(sequence)
+		else:
+			self.updatePixmap(QPixmap(sequence[0]))
+		return
+
 	def updatePixmap(self, pixmap):
 		self.label.setPixmap(pixmap)
 		self.currentPixmap = pixmap
@@ -737,8 +753,6 @@ class ThumbnailWidget(QFrame):
 		return
 
 	def jumpToFrame(self, frame):
-		if self.currentState != QTimeLine.Paused:
-			self.timeline.setPaused(True)
 		self.setSequence(frame)
 		self.timeline.frameChanged.emit(frame)
 		return
@@ -1070,12 +1084,12 @@ class ExportWidget(BaseWidget):
 				return
 			else:
 				Export(filepath=filepath,
-				       kind=kind,
-				       items=objects,
-				       tags=tags,
-				       comment=comment,
-				       layers=layers,
-				       )
+					   kind=kind,
+					   items=objects,
+					   tags=tags,
+					   comment=comment,
+					   layers=layers,
+					   )
 			return
 
 	def createThumbnailCallback(self, isDebug=True):
