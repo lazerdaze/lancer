@@ -1,0 +1,172 @@
+//Maya Preference 2018 (Release 1)
+//
+//
+
+//
+// The runtime commands referenced by the hotkeys
+//
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("def cupSet(setIndex=1):\n   name = 'teaCupSelectSet_{}'.format(setIndex)\n\n   if 0 > setIndex > 9:\n      raise ValueError('Index must be greater than 0 and less than 10')\n      return\n   else:\n      if cmds.objExists(name):\n         cmds.select(name)\n         return\n      else:\n         selected = cmds.ls(sl=True)\n         if not selected:\n            cmds.warning('Nothing selected.')\n            return\n         else:\n            cmds.sets(selected, name=name)\n   return\n\ncupSet(5)")
+	cup5;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("def hotMove():\n   moveQuery = cmds.manipMoveContext('Move', q=True, mode=True) + 2\n   if moveQuery > 2:\n      moveQuery = 0\n   if moveQuery == 0:\n      moveName = 'object'\n   elif moveQuery == 2:\n      moveName = 'world'\n   cmds.manipMoveContext('Move', edit=True, mode=moveQuery)\n   cmds.headsUpMessage('Move: ' + moveName)\n\nhotMove()")
+	hotMove;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("def hotRotate():\n   rotateQuery = cmds.manipRotateContext('Rotate', q=True, mode=True) + 1\n   if rotateQuery > 1:\n      rotateQuery = 0\n   if rotateQuery == 0:\n      rotateName = 'object'\n   elif rotateQuery == 1:\n      rotateName = 'world'\n   cmds.manipRotateContext('Rotate', edit=True, mode=rotateQuery)\n   cmds.headsUpMessage('Rotate: ' + rotateName)\n\nhotRotate()")
+	hotRotate;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("def zeroAttrToDefaults():\n   selected = cmds.ls(sl=True)\n   if selected:\n      for obj in selected:\n         attributes = cmds.listAttr(obj, k=True)\n         if attributes:\n            for attr in attributes:\n               default = cmds.attributeQuery(attr, node=obj, ld=True)[0]\n               try:\n                  cmds.setAttr('{}.{}'.format(obj, attr), default)\n               except:\n                  print 'Unable to zero out \"{}.{}\". Skipped.'.format(obj, attr)\n   return\n\nzeroAttrToDefaults()")
+	zeroOut;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("def cupSet(setIndex=1):\n   name = 'teaCupSelectSet_{}'.format(setIndex)\n\n   if 0 > setIndex > 9:\n      raise ValueError('Index must be greater than 0 and less than 10')\n      return\n   else:\n      if cmds.objExists(name):\n         cmds.select(name)\n         return\n      else:\n         selected = cmds.ls(sl=True)\n         if not selected:\n            cmds.warning('Nothing selected.')\n            return\n         else:\n            cmds.sets(selected, name=name)\n   return\n\ncupSet(1)")
+	cup1;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("def cupSet(setIndex=1):\n   name = 'teaCupSelectSet_{}'.format(setIndex)\n\n   if 0 > setIndex > 9:\n      raise ValueError('Index must be greater than 0 and less than 10')\n      return\n   else:\n      if cmds.objExists(name):\n         cmds.select(name)\n         return\n      else:\n         selected = cmds.ls(sl=True)\n         if not selected:\n            cmds.warning('Nothing selected.')\n            return\n         else:\n            cmds.sets(selected, name=name)\n   return\n\ncupSet(2)")
+	cup2;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("def cupSet(setIndex=1):\n   name = 'teaCupSelectSet_{}'.format(setIndex)\n\n   if 0 > setIndex > 9:\n      raise ValueError('Index must be greater than 0 and less than 10')\n      return\n   else:\n      if cmds.objExists(name):\n         cmds.select(name)\n         return\n      else:\n         selected = cmds.ls(sl=True)\n         if not selected:\n            cmds.warning('Nothing selected.')\n            return\n         else:\n            cmds.sets(selected, name=name)\n   return\n\ncupSet(3)")
+	cup3;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("def keyframeSpecial():\n   mel.eval('performSetKeyframeArgList 1 {\"0\", \"animationList\"}; keyframe -time `currentTime -q` -tds 1;')\n\nkeyframeSpecial()")
+	keySpecial;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("def cupSet(setIndex=1):\n   name = 'teaCupSelectSet_{}'.format(setIndex)\n\n   if 0 > setIndex > 9:\n      raise ValueError('Index must be greater than 0 and less than 10')\n      return\n   else:\n      if cmds.objExists(name):\n         cmds.select(name)\n         return\n      else:\n         selected = cmds.ls(sl=True)\n         if not selected:\n            cmds.warning('Nothing selected.')\n            return\n         else:\n            cmds.sets(selected, name=name)\n   return\n\ncupSet(4)")
+	cup4;
+
+//
+// The name commands referenced by the hotkeys
+//
+nameCommand
+	-annotation "hotMoveNameCommand"
+	-sourceType "mel"
+	-command ("hotMove")
+	hotMoveNameCommand;
+
+nameCommand
+	-annotation "hotRotateNameCommand"
+	-sourceType "mel"
+	-command ("hotRotate")
+	hotRotateNameCommand;
+
+nameCommand
+	-annotation "zeroOutNameCommand"
+	-sourceType "mel"
+	-command ("zeroOut")
+	zeroOutNameCommand;
+
+nameCommand
+	-annotation "keySpecialNameCommand"
+	-sourceType "mel"
+	-command ("keySpecial")
+	keySpecialNameCommand;
+
+nameCommand
+	-annotation "cup1NameCommand"
+	-sourceType "mel"
+	-command ("cup1")
+	cup1NameCommand;
+
+nameCommand
+	-annotation "cup2NameCommand"
+	-sourceType "mel"
+	-command ("cup2")
+	cup2NameCommand;
+
+nameCommand
+	-annotation "cup3NameCommand"
+	-sourceType "mel"
+	-command ("cup3")
+	cup3NameCommand;
+
+nameCommand
+	-annotation "cup4NameCommand"
+	-sourceType "mel"
+	-command ("cup4")
+	cup4NameCommand;
+
+nameCommand
+	-annotation "cup5NameCommand"
+	-sourceType "mel"
+	-command ("cup5")
+	cup5NameCommand;
+
+//
+// The user hotkeys
+//
+//
+// The hotkey set
+//
+hotkeySet -source "Maya_Default" -current Maya_Default_Duplicate;
+//
+// The hotkey contexts and hotkeys
+//
+hotkey -keyShortcut "2" -alt -name ("cup2NameCommand");
+hotkey -keyShortcut "e" -alt -name ("hotRotateNameCommand");
+hotkey -keyShortcut "4" -alt -name ("cup4NameCommand");
+hotkey -keyShortcut "1" -alt -name ("cup1NameCommand");
+hotkey -keyShortcut "3" -alt -name ("cup3NameCommand");
+hotkey -keyShortcut "0" -alt -name ("zeroOutNameCommand");
+hotkey -keyShortcut "w" -alt -name ("hotMoveNameCommand");
+hotkey -keyShortcut "5" -alt -name ("cup5NameCommand");
+hotkey -keyShortcut "s" -alt -name ("keySpecialNameCommand");
+hotkeyCtx -type "Editor" -addClient "outlinerPanel";
+hotkeyCtx -type "Editor" -addClient "graphEditor";
+hotkeyCtx -type "Editor" -addClient "shapePanel";
+hotkeyCtx -type "Editor" -addClient "posePanel";
+hotkeyCtx -type "Editor" -addClient "hyperShadePanel";
+hotkeyCtx -type "Editor" -addClient "nodeEditorPanel";
+hotkeyCtx -type "Editor" -addClient "profilerPanel";
+hotkeyCtx -type "Editor" -addClient "timeEditorPanel";
+hotkeyCtx -type "Editor" -addClient "polyTexturePlacementPanel";
+hotkeyCtx -type "Editor" -addClient "hyperGraphPanel";
+hotkeyCtx -type "Tool" -addClient "xgmIGBrush";
+hotkeyCtx -type "Tool" -addClient "polyCutUV";
+hotkeyCtx -type "Tool" -addClient "sculptMeshCache";
+hotkeyCtx -type "Tool" -addClient "texCutContext";
+hotkeyCtx -type "Tool" -addClient "texSculptCacheContext";
+hotkeyCtx -type "Tool" -addClient "Unfold3DBrush";
+hotkeyCtx -type "Tool" -addClient "SymmetrizeUVBrush";
