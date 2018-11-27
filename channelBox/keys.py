@@ -49,16 +49,16 @@ def attributeHasAnimLayer(attribute):
 
 
 def detectThreshold(value, prev, next, threshold):
-    if next > value <= prev + threshold:
-        return True
-    elif next < value >= prev - threshold:
-        return True
-    elif prev > value <= next + threshold:
-        return True
-    elif prev < value >= next - threshold:
-        return True
-    else:
-        return False
+    if prev < value < next or prev > value > next:
+        if next > value <= prev + threshold:
+            return True
+        elif next < value >= prev - threshold:
+            return True
+        elif prev > value <= next + threshold:
+            return True
+        elif prev < value >= next - threshold:
+            return True
+    return False
 
 
 ########################################################################################################################
