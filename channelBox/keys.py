@@ -44,6 +44,23 @@ def attributeHasAnimation(attribute):
     return False
 
 
+def attributeHasAnimLayer(attribute):
+    return
+
+
+def detectThreshold(value, prev, next, threshold):
+    if next > value <= prev + threshold:
+        return True
+    elif next < value >= prev - threshold:
+        return True
+    elif prev > value <= next + threshold:
+        return True
+    elif prev < value >= next - threshold:
+        return True
+    else:
+        return False
+
+
 ########################################################################################################################
 #
 #
@@ -53,13 +70,15 @@ def attributeHasAnimation(attribute):
 ########################################################################################################################
 
 
-def deleteRedundant(item, attribute, threshold=1):
-    #TODO: Add Threshold
+def deleteRedundant(item, attribute, threshold=None, *args):
+    # TODO: Add Threshold
+    # TODO: Detect anim layers feature
 
     if attributeHasAnimation('{}.{}'.format(item, attribute)):
         frames = cmds.keyframe(item, q=1, at=attribute)
         values = cmds.keyframe(item, q=1, at=attribute, vc=1)
         classArray = []
+        crushKeys = []
 
         i = 0
         while i < len(frames):
@@ -68,19 +87,25 @@ def deleteRedundant(item, attribute, threshold=1):
             i += 1
 
         i = 1
-        crushKeys = []
+
         while i < (len(classArray) - 1):
             keyA = classArray[i - 1].getValue()
             keyB = classArray[i].getValue()
             keyC = classArray[i + 1].getValue()
             if keyB == keyA and keyB == keyC:
-                # print("Redundant key at frame: " + str(classArray[i].getFrame()))
                 crushKeys.append(classArray[i].getFrame())
+            # else:
+            #     if threshold:
+            #         if detectThreshold(value=float(keyB),
+            #                            prev=float(keyA),
+            #                            next=float(keyC),
+            #                            threshold=float(threshold)
+            #                            ):
+            #             crushKeys.append(classArray[i].getFrame())
             i += 1
 
         for frame in crushKeys:
             cmds.cutKey(item, at=attribute, cl=1, t=(frame, frame))
-            # print("Key Obliterated")
     return
 
 
@@ -105,7 +130,7 @@ def deleteAllRedundant(*args):
                 break
             else:
                 for attr in cmds.listAttr(item, k=True):
-                    deleteRedundant(item, attr, 1)
+                    deleteRedundant(item, attr, 0.001)
 
         cmds.progressWindow(endProgress=True)
     return
