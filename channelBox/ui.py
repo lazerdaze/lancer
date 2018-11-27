@@ -11,12 +11,14 @@ import tweenKey
 import motionTrail
 import ghost
 import anim.refman as refman
+import keys
 
 reload(note)
 reload(tweenKey)
 reload(motionTrail)
 reload(ghost)
 reload(refman)
+reload(keys)
 
 # Python Modules
 from functools import partial
@@ -165,6 +167,9 @@ class PreferencesMenu(object):
         cmds.menuItem(d=True)
         cmds.menuItem(l='Print Debug Info', c=self.debugEvaluation)
 
+        cmds.menu(l='Keys')
+        cmds.menuItem(l='Delete Redundant', c=keys.deleteAllRedundant)
+
         cmds.menu(l='Tangents')
         prefsRadioMenu(pref='default tangent', )
         cmds.menuItem(l='', divider=True)
@@ -185,7 +190,7 @@ class PreferencesMenu(object):
 
         # Defaults
         self.setDefaults()
-        self.createTearOffScriptJob()
+        #self.createTearOffScriptJob()
         savePrefs()
 
     def debugEvaluation(self, *args):
