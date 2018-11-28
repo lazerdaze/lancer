@@ -168,7 +168,8 @@ class PreferencesMenu(object):
         cmds.menuItem(l='Print Debug Info', c=self.debugEvaluation)
 
         cmds.menu(l='Keys')
-        cmds.menuItem(l='Delete Redundant', c=keys.deleteAllRedundant)
+        cmds.menuItem(l='Delete Redundant', c=keys.deleteRedundant)
+        cmds.menuItem(l='Delete All Static Channels', c=keys.deleteStaticAllChannels)
 
         cmds.menu(l='Tangents')
         prefsRadioMenu(pref='default tangent', )
