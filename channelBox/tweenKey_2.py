@@ -22,12 +22,12 @@ class TweenKeyWidget(QWidget):
 	barColor = Qt.black
 	handleColor = Qt.red
 
-	margin = 15
-	keyWidth = 3
+	margin = 15.0
+	keyWidth = 3.0
 
-	barHeight = 5
-	handleHeight = 5
-	handleWidth = 5
+	barHeight = 5.0
+	handleHeight = 10.0
+	handleWidth = 10.0
 
 	valueChanged = Signal(float)
 
@@ -66,28 +66,30 @@ class TweenKeyWidget(QWidget):
 		painter.setBrush(QBrush(self.barColor))
 		painter.setPen(QPen(self.barColor))
 		painter.drawRect(barRect)
-
-		# Handle
-		xPos = self.convertValueToWidth(self.width(), max(self.values), self.currentValue)
-		painter.setBrush(QBrush(self.handleColor))
-		painter.setPen(QPen(self.handleColor))
-		painter.drawEllipse(QPoint(xPos,
-		                           self.height() / 2.0),
-		                    self.handleWidth,
-		                    self.handleHeight,
-		                    )
-
-		colorRect = QRect(self.margin,
-		                  (self.height() / 2.0) - (float(self.barHeight) / 2.0),
-		                  xPos - (self.handleWidth * 2),
-		                  self.handleHeight,
-		                  )
-
-		painter.drawRect(colorRect)
-
 		return
 
 	def drawHandle(self, painter):
+		xPos = self.convertValueToWidth(self.width(), max(self.values), self.currentValue)
+		painter.setBrush(QBrush(self.handleColor))
+		painter.setPen(QPen(self.handleColor))
+		# painter.drawEllipse(QPoint(xPos,
+		#                            self.height() / 2.0),
+		#                     self.handleWidth,
+		#                     self.handleHeight,
+		#                     )
+
+		centerX = xPos
+		centerY = self.height() / 2.0
+
+		points = [QPoint(xPos - (self.handleWidth / 2.0), centerY - (self.handleHeight / 2.0)),
+		          QPoint(xPos - (self.handleWidth / 2.0), centerY + (self.handleHeight / 2.0)),
+		          QPoint(xPos + (self.handleWidth / 2.0), centerY + (self.handleHeight / 2.0)),
+		          QPoint(xPos + (self.handleWidth / 2.0), centerY - (self.handleHeight / 2.0)),
+		          QPoint(xPos, centerY - self.handleHeight),
+		          ]
+		polygon = QPolygon(points)
+		painter.drawPolygon(polygon)
+
 		return
 
 	def drawKeys(self, painter):
@@ -129,10 +131,9 @@ class TweenKeyWidget(QWidget):
 			painter.drawLine(x, (self.height() / 2.0) + self.margin, x, self.height())
 
 			# Circle
-			painter.setBrush(QBrush(self.barColor))
-			painter.setPen(QPen(self.barColor))
-
-			painter.drawEllipse(QPoint(x, self.height() / 2.0), self.handleWidth * 0.75, self.handleHeight * 0.75)
+			# painter.setBrush(QBrush(self.barColor))
+			# painter.setPen(QPen(self.barColor))
+			# painter.drawEllipse(QPoint(x, self.height() / 2.0), self.handleWidth * 0.75, self.handleHeight * 0.75)
 		return
 
 	def paintEvent(self, event):
@@ -141,6 +142,7 @@ class TweenKeyWidget(QWidget):
 		painter.setRenderHint(QPainter.HighQualityAntialiasing)
 		#self.drawKeys(painter)
 		self.drawBar(painter)
+		self.drawHandle(painter)
 		return
 
 	def mousePressEvent(self, event):

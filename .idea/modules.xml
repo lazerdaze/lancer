@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/lancer.iml" filepath="$PROJECT_DIR$/.idea/lancer.iml" />
-      <module fileurl="file://I:/prism/.idea/prism.iml" filepath="I:/prism/.idea/prism.iml" />
     </modules>
   </component>
 </project>
