@@ -6,22 +6,14 @@
 #
 
 # Lancer Modules
-import ults
+from rig.api.utils import rigging
 import library.xfer as xfer
-import network
-
-reload(ults)
-reload(xfer)
-reload(network)
 
 # Maya Modules
 import maya.cmds as cmds
-import maya.mel as mel
-import maya.api.OpenMaya as om
 
 # Python Modules
 import os
-from math import *
 import json
 import time
 
@@ -60,7 +52,7 @@ DIRPATH = os.path.dirname(os.path.abspath(__file__))
 
 def onSelected(function):
 	def wrapper(*args):
-		selected = ults.getSelected()
+		selected = rigging.getSelected()
 		if selected:
 			for obj in selected:
 				return function(obj)
@@ -102,7 +94,7 @@ def getAllBindJoints(root):
 
 def selectJointHierarchy(*args):
 	allJoints = []
-	selected = ults.getSelected()
+	selected = rigging.getSelected()
 	if selected:
 		for joint in selected:
 			joints = getAllJointChildren(joint) + [joint]
@@ -114,7 +106,7 @@ def selectJointHierarchy(*args):
 
 def selectAllBindJoints(*args):
 	allJoints = []
-	selected = ults.getSelected()
+	selected = rigging.getSelected()
 	if selected:
 		for joint in selected:
 			joints = getAllBindJoints(joint) + [joint]
@@ -126,7 +118,7 @@ def selectAllBindJoints(*args):
 
 def selectAllNonBindJoints(joint):
 	allJoints = []
-	selected = ults.getSelected()
+	selected = rigging.getSelected()
 	if selected:
 		for joint in selected:
 			joints = getAllJointChildren(joint)
@@ -199,7 +191,7 @@ def getJointOrder(root):
 
 
 def revertJointToBindPose(*args):
-	selected = ults.getSelected()
+	selected = rigging.getSelected()
 	if selected:
 		conn = cmds.listConnections('{}.bindPose'.format(selected[0]))
 		root = getJointRoot(selected[0])
@@ -232,7 +224,7 @@ def restoreBindPose(poseName):
 
 
 def createBindPosePrompt(*args):
-	selected = ults.getSelected()
+	selected = rigging.getSelected()
 	if selected:
 		root = selected[0]
 
@@ -268,7 +260,7 @@ def restoreBindPoseUI(poseList):
 
 
 def restoreBindPosePrompt():
-	selected = ults.getSelected()
+	selected = rigging.getSelected()
 	if selected:
 		root = selected[0]
 
@@ -444,7 +436,7 @@ def setJointLabel(joint, side=None, typ=None, otherType=None):
 		typ = 'Other'
 
 	if side:
-		sideAttr = ults.setEnumByString(joint, 'side', side)
+		sideAttr = rigging.setEnumByString(joint, 'side', side)
 
 	if typ:
 		if typ == 'Other':
@@ -453,7 +445,7 @@ def setJointLabel(joint, side=None, typ=None, otherType=None):
 			cmds.setAttr('{}.otherType'.format(joint), otherType, type='string')
 
 		else:
-			typeAttr = ults.setEnumByString(joint, 'type', typ)
+			typeAttr = rigging.setEnumByString(joint, 'type', typ)
 
 	return
 
@@ -504,8 +496,8 @@ def getBindJointLegacy(joint):
 					# Position in chain - Distance
 
 					if i != 0:
-						posBefore = ults.getDistance(joint, bindJoints[i - 1])
-						posAfter = ults.getDistance(joint, child)
+						posBefore = rigging.getDistance(joint, bindJoints[i - 1])
+						posAfter = rigging.getDistance(joint, child)
 
 						# Negetive Values
 
@@ -532,7 +524,7 @@ def getBindJoint(joint):
 			if cmds.objectType(child) == 'joint':
 				label = getJointLabel(child)[1]
 				if label == 'Bind':
-					bindDict[child] = ults.getDistance(joint, child)
+					bindDict[child] = rigging.getDistance(joint, child)
 
 	for key, value in sorted(bindDict.iteritems(), key=lambda (k, v): (v, k)):
 		bindJoints.append(key)
@@ -549,7 +541,7 @@ def getJointChainByLabel(joint, label):
 		for child in children:
 			childLabel = getJointLabel(child)[1]
 			if childLabel == label:
-				chainDict[child] = ults.getDistance(joint, child)
+				chainDict[child] = rigging.getDistance(joint, child)
 
 	for key, value in sorted(chainDict.iteritems(), key=lambda (k, v): (v, k)):
 		chain.append(key)
@@ -693,7 +685,7 @@ def createSkeletonNetworkNode(name='skeletonNetwork'):
 def createSkeletonNetwork(root=None, name='skeletonNetwork'):
 	skeletonNetwork = None
 	if not root:
-		selected = ults.getSelected()
+		selected = rigging.getSelected()
 		if selected:
 			root = getJointRoot(selected[0])
 	if root:
@@ -819,7 +811,7 @@ def mirrorSelectedSkeleton(joint):
 
 				loc = cmds.spaceLocator()
 				grp = cmds.group(loc)
-				ults.snap(jnt, loc, t=True)
+				rigging.snap(jnt, loc, t=True)
 				cmds.setAttr('{}.sx'.format(grp), -1)
 				pc = cmds.pointConstraint(loc, op)[0]
 				cleanUp.append(grp)
@@ -995,7 +987,7 @@ def buildSkeletonTree(root, tree={}):
 
 
 def exportTemplate(debug=False, *args):
-	selected = ults.getSelected()
+	selected = rigging.getSelected()
 	if selected:
 		selected = selected[0]
 		root = getJointRoot(selected)

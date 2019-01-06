@@ -6,7 +6,7 @@
 #
 
 # Lancer Modules
-import ults
+import rig.api.utils.rigging
 
 # Maya Modules
 import maya.cmds as cmds
@@ -20,7 +20,7 @@ import maya.cmds as cmds
 #########################################################################################################################
 
 
-rootNetwork = ults.component.character
+rootNetwork = rig.api.utils.rigging.component.character
 
 
 def create(n='network', typ='', *args):
@@ -30,22 +30,22 @@ def create(n='network', typ='', *args):
 	cmds.addAttr(node, ln='children', dt='string')
 	cmds.addAttr(node, ln='set', at='message')
 
-	if typ != ults.component.fkik:
+	if typ != rig.api.utils.rigging.component.fkik:
 		cmds.addAttr(node, ln='fkikNetwork', at='message')
 
-	if typ != ults.component.root:
+	if typ != rig.api.utils.rigging.component.root:
 		cmds.addAttr(node, ln='index', dv=0, at='long')
 		cmds.addAttr(node, ln='side', dt='string')
 		cmds.addAttr(node, ln='characterNetwork', at='message')
 		cmds.addAttr(node, ln='parentNetwork', at='message')
 
-	if typ in [ults.component.arm, ults.component.leg]:
+	if typ in [rig.api.utils.rigging.component.arm, rig.api.utils.rigging.component.leg]:
 		# cmds.addAttr(node, ln='index', dv=0, at='long')
 		# cmds.addAttr(node, ln='side', dt='string')
 		# cmds.addAttr(node, ln='side', at='enum', en='none:center:left:right')
 		cmds.addAttr(node, ln='opposite', at='message')
 
-	if typ == ults.component.character:
+	if typ == rig.api.utils.rigging.component.character:
 		cmds.addAttr(node, ln='characterName', dt='string')
 		cmds.addAttr(node, ln='globalScale', dv=1)
 		cmds.addAttr(node, ln='cog', at='message')
@@ -57,33 +57,33 @@ def create(n='network', typ='', *args):
 	# cmds.addAttr(node, ln='control', dt='string', m=True)
 	# cmds.addAttr(node, ln='bindJoint', dt='string', m=True)
 
-	elif typ == ults.component.cog:
+	elif typ == rig.api.utils.rigging.component.cog:
 		# cmds.addAttr(node, ln='control', dt='string', m=True)
 		# cmds.addAttr(node, ln='bindJoint', dt='string', m=True)
 		pass
-	elif typ == ults.component.spine:
+	elif typ == rig.api.utils.rigging.component.spine:
 		cmds.addAttr(node, ln='neckHead', at='message')
 		cmds.addAttr(node, ln='tail', at='message')
-	elif typ == ults.component.collar:
+	elif typ == rig.api.utils.rigging.component.collar:
 		pass
 	# cmds.addAttr(node, ln='side', dt='string')
 
-	elif typ == ults.component.arm:
+	elif typ == rig.api.utils.rigging.component.arm:
 		cmds.addAttr(node, ln='collar', at='message')
 		cmds.addAttr(node, ln='hand', at='message')
-	elif typ == ults.component.hand:
+	elif typ == rig.api.utils.rigging.component.hand:
 		pass
 	# cmds.addAttr(node, ln='side', dt='string')
 	# cmds.addAttr(node, ln='finger', dt='string', m=True)
-	elif typ == ults.component.foot:
+	elif typ == rig.api.utils.rigging.component.foot:
 		pass
 	# cmds.addAttr(node, ln='side', dt='string')
 	# cmds.addAttr(node, ln='FKIK', min=0, max=1, dv=0)
-	elif typ == ults.component.leg:
+	elif typ == rig.api.utils.rigging.component.leg:
 		cmds.addAttr(node, ln='hip', at='message')
 		cmds.addAttr(node, ln='foot', at='message')
 
-	elif typ == ults.component.fkik:
+	elif typ == rig.api.utils.rigging.component.fkik:
 		cmds.addAttr(node, ln='FKIK', dv=0, min=0, max=1)
 		cmds.addAttr(node, ln='ikHandle', at='message')
 		cmds.addAttr(node, ln='ikPoleVector', at='message')
@@ -160,7 +160,7 @@ def multiConnectToNetwork(objects, network, ln,):
 		else:
 			i = 0
 
-	objects = ults.listCheck(objects)
+	objects = rig.api.utils.rigging.listCheck(objects)
 
 	for x in objects:
 		connectToRoot(x)
@@ -215,13 +215,13 @@ class queryNetwork():
 		self.hip = None
 		self.set = None
 
-		selected = ults.listCheck(selected)
+		selected = rig.api.utils.rigging.listCheck(selected)
 
 		if selected:
 			self.getNetworkFromSelected(selected)
 
 		else:
-			if typ == ults.component.character:
+			if typ == rig.api.utils.rigging.component.character:
 				self.getRoot()
 			else:
 				self.network = self.findNetwork(typ)
@@ -254,7 +254,7 @@ class queryNetwork():
 
 		# Get Root
 
-		root = self.findNetwork(ults.component.character)
+		root = self.findNetwork(rig.api.utils.rigging.component.character)
 		self.network = root
 
 		# Get CharacterName
@@ -264,32 +264,32 @@ class queryNetwork():
 		# Get COG
 
 		if root:
-			self.cog = self.getConnected(root, ults.component.cog)
+			self.cog = self.getConnected(root, rig.api.utils.rigging.component.cog)
 
 		# Get HIP
 
 		if root:
-			self.hip = self.getConnected(root, ults.component.hip)
+			self.hip = self.getConnected(root, rig.api.utils.rigging.component.hip)
 
 		# Get Spine
 		if root:
-			self.spine = self.getConnected(root, ults.component.spine)
+			self.spine = self.getConnected(root, rig.api.utils.rigging.component.spine)
 
 		# Get Arm
 		if root:
-			self.arm = self.getConnected(root, ults.component.arm)
+			self.arm = self.getConnected(root, rig.api.utils.rigging.component.arm)
 
 		# Get Leg
 		if root:
-			self.leg = self.getConnected(root, ults.component.leg)
+			self.leg = self.getConnected(root, rig.api.utils.rigging.component.leg)
 
 		# Get FKIK
 		if root:
-			self.fkik = self.getConnected(root, ults.component.fkik)
+			self.fkik = self.getConnected(root, rig.api.utils.rigging.component.fkik)
 
 		# Get Set
 		if root:
-			self.set = self.getConnected(root, ults.component.set)
+			self.set = self.getConnected(root, rig.api.utils.rigging.component.set)
 
 	def networkPromptUI(self, *args):
 		networks = self.findAllNetworksByType(self.typ)

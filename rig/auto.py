@@ -13,23 +13,12 @@ TODO
 '''
 
 # Lancer Modules
-import parts
-import naming
-import skeleton
-import bodyPart
-import ults
-
-reload(parts)
-reload(naming)
-reload(skeleton)
-reload(bodyPart)
-reload(ults)
+from api import *
 
 # Python Modules
-import json
 
 # Maya Modules
-from maya import cmds, mel
+from maya import cmds
 
 
 #########################################################################################################################
@@ -73,48 +62,48 @@ def queryLabels(root):
 #########################################################################################################################
 
 def rigFromTemplate(*args):
-	root = parts.ROOT(root='CenterRoot')
+	root = rig.parts.ROOT(root='CenterRoot')
 
-	cog = parts.COG(cog='CenterCOG',
-	                hip='CenterHip',
-	                networkRoot=root.network,
-	                )
-	spine = parts.SPINE(objects=['CenterSpine0', 'CenterSpine1', 'CenterSpine2', ],
-	                    networkRoot=root.network)
+	cog = rig.parts.COG(cog='CenterCOG',
+	                    hip='CenterHip',
+	                    networkRoot=root.network,
+	                    )
+	spine = rig.parts.SPINE(objects=['CenterSpine0', 'CenterSpine1', 'CenterSpine2', ],
+	                        networkRoot=root.network)
 
-	neck = parts.NECK(objects=['CenterNeck0'], networkRoot=root.network)
-	head = parts.HEAD(head='CenterHead', networkRoot=root.network)
+	neck = rig.parts.NECK(objects=['CenterNeck0'], networkRoot=root.network)
+	head = rig.parts.HEAD(head='CenterHead', networkRoot=root.network)
 
-	armL = parts.ARM(side=naming.side.left,
-	                 collar='LeftArmCollar',
-	                 shoulder='LeftArmShoulder',
-	                 elbow='LeftArmElbow',
-	                 hand='LeftArmHand',
-	                 networkRoot=root.network,
-	                 )
-	armR = parts.ARM(side=naming.side.right,
-	                 collar='RightArmCollar',
-	                 shoulder='RightArmShoulder',
-	                 elbow='RightArmElbow',
-	                 hand='RightArmHand',
-	                 networkRoot=root.network,
-	                 )
+	armL = rig.parts.ARM(side=naming.side.left,
+	                     collar='LeftArmCollar',
+	                     shoulder='LeftArmShoulder',
+	                     elbow='LeftArmElbow',
+	                     hand='LeftArmHand',
+	                     networkRoot=root.network,
+	                     )
+	armR = rig.parts.ARM(side=naming.side.right,
+	                     collar='RightArmCollar',
+	                     shoulder='RightArmShoulder',
+	                     elbow='RightArmElbow',
+	                     hand='RightArmHand',
+	                     networkRoot=root.network,
+	                     )
 
-	legL = parts.LEG(side='Left',
-	                 hip='LeftLegHip',
-	                 knee='LeftLegKnee',
-	                 foot='LeftLegFoot',
-	                 toe='LeftLegToe',
-	                 networkRoot=root.network,
-	                 )
+	legL = rig.parts.LEG(side='Left',
+	                     hip='LeftLegHip',
+	                     knee='LeftLegKnee',
+	                     foot='LeftLegFoot',
+	                     toe='LeftLegToe',
+	                     networkRoot=root.network,
+	                     )
 
-	legR = parts.LEG(side='Right',
-	                 hip='RightLegHip',
-	                 knee='RightLegKnee',
-	                 foot='RightLegFoot',
-	                 toe='RightLegToe',
-	                 networkRoot=root.network,
-	                 )
+	legR = rig.parts.LEG(side='Right',
+	                     hip='RightLegHip',
+	                     knee='RightLegKnee',
+	                     foot='RightLegFoot',
+	                     toe='RightLegToe',
+	                     networkRoot=root.network,
+	                     )
 	cmds.select(d=True)
 	return
 
@@ -238,7 +227,7 @@ def rigFromLabels(root):
 
 
 def rigFromLabelsFunction(*args):
-	selected = ults.getSelected()
+	selected = rigging.getSelected()
 
 	if selected:
 		root = selected[0]

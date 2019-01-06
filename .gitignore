@@ -3,6 +3,7 @@
 *.cup
 *.ui
 *.qrc
+*.ai
 legacy_eixml.py
 eixml.py
 studiolibrary

@@ -1,22 +1,27 @@
-# LANCER.RIG.ULTS
+# LANCER. JT RIG TOOLS. Copyright 2018 Justin Tirado. All Rights Reserved.
 #
 #
 #
 #
 #
-
-# Lancer
-import naming
-import control
-
+import external.tf_smoothSkinWeight as tf_smoothSkinWeight
+import rig.api.utils.skin
+reload(rig.api.utils.skin)
 # Maya Modules
 import maya.cmds as cmds
 import maya.mel as mel
 import maya.api.OpenMaya as om
 
 # Python Modules
+import os
 from math import *
 import json
+
+# Global Variables
+pad = 5  # UI Padding
+mar = 10  # UI Margins
+col = 60  # UI Label Columns Width
+isDebug = True  # Print Debugging Information
 
 
 #########################################################################################################################
@@ -27,7 +32,7 @@ import json
 #																														#
 #########################################################################################################################
 
-class component(object):
+class componentType(object):
 	left = 'left'
 	right = 'right'
 	center = 'center'
@@ -39,7 +44,6 @@ class component(object):
 	character = 'character'
 	set = 'set'
 	noodle = 'noodle'
-	attr = 'attr'
 
 	root = 'root'
 	cog = 'cog'
@@ -142,7 +146,7 @@ def curveShape(n='curve', typ='circle', axis=[0, 0, 0], *args):
 
 	elif typ == 'triangle':
 		curve = mel.eval(
-				'curve -d 1 -p -1.03923 0 0.6 -p 1.03923 0 0.6 -p 0 0 -1.2 -p -1.03923 0 0.6 -k 0 -k 1 -k 2 -k 3')
+			'curve -d 1 -p -1.03923 0 0.6 -p 1.03923 0 0.6 -p 0 0 -1.2 -p -1.03923 0 0.6 -k 0 -k 1 -k 2 -k 3')
 
 	elif typ == 'house':
 		curve = cmds.curve(d=1, p=[[0.0, 3.279783964168176e-16, 1.953102539721272],
@@ -304,7 +308,7 @@ def curveShape(n='curve', typ='circle', axis=[0, 0, 0], *args):
 
 	elif typ == 'hexagon':
 		curve = mel.eval(
-				'curve  -d 1 -p -0.5 1 0.866025 -p 0.5 1 0.866025 -p 0.5 -1 0.866025 -p 1 -1 0 -p 1 1 0 -p 0.5 1 -0.866025 -p 0.5 -1 -0.866025 -p -0.5 -1 -0.866026 -p -0.5 1 -0.866026 -p -1 1 -1.5885e-007 -p -1 -1 -1.5885e-007 -p -0.5 -1 0.866025 -p -0.5 1 0.866025 -p -1 1 -1.5885e-007 -p -0.5 1 -0.866026 -p 0.5 1 -0.866025 -p 1 1 0 -p 0.5 1 0.866025 -p 0.5 -1 0.866025 -p -0.5 -1 0.866025 -p -1 -1 -1.5885e-007 -p -0.5 -1 -0.866026 -p 0.5 -1 -0.866025 -p 1 -1 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23')
+			'curve  -d 1 -p -0.5 1 0.866025 -p 0.5 1 0.866025 -p 0.5 -1 0.866025 -p 1 -1 0 -p 1 1 0 -p 0.5 1 -0.866025 -p 0.5 -1 -0.866025 -p -0.5 -1 -0.866026 -p -0.5 1 -0.866026 -p -1 1 -1.5885e-007 -p -1 -1 -1.5885e-007 -p -0.5 -1 0.866025 -p -0.5 1 0.866025 -p -1 1 -1.5885e-007 -p -0.5 1 -0.866026 -p 0.5 1 -0.866025 -p 1 1 0 -p 0.5 1 0.866025 -p 0.5 -1 0.866025 -p -0.5 -1 0.866025 -p -1 -1 -1.5885e-007 -p -0.5 -1 -0.866026 -p 0.5 -1 -0.866025 -p 1 -1 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23')
 
 	elif typ == 'mover':
 		curve = cmds.curve(d=1, p=[[3.0151795805144164, -1.8909139247979197e-21, -8.515919247109593e-06],
@@ -543,27 +547,27 @@ def curveShape(n='curve', typ='circle', axis=[0, 0, 0], *args):
 	# 3D
 	elif typ == 'pyramid':
 		curve = mel.eval(
-				'curve  -d 1 -p -1 0 0 -p 0 0 1 -p 0 1 0 -p -1 0 0 -p 1 0 0 -p 0 1 0 -p 1 0 0 -p 0 0 1 -p 0 1 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8')
+			'curve  -d 1 -p -1 0 0 -p 0 0 1 -p 0 1 0 -p -1 0 0 -p 1 0 0 -p 0 1 0 -p 1 0 0 -p 0 0 1 -p 0 1 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8')
 
 	elif typ == 'cube':
 		curve = mel.eval(
-				'curve -d 1 -p 0.5 0.5 0.5 -p 0.5 0.5 -0.5 -p -0.5 0.5 -0.5 -p -0.5 -0.5 -0.5 -p 0.5 -0.5 -0.5 -p 0.5 0.5 -0.5 -p -0.5 0.5 -0.5 -p -0.5 0.5 0.5 -p 0.5 0.5 0.5 -p 0.5 -0.5 0.5 -p 0.5 -0.5 -0.5 -p -0.5 -0.5 -0.5 -p -0.5 -0.5 0.5 -p 0.5 -0.5 0.5 -p -0.5 -0.5 0.5 -p -0.5 0.5 0.5 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15')
+			'curve -d 1 -p 0.5 0.5 0.5 -p 0.5 0.5 -0.5 -p -0.5 0.5 -0.5 -p -0.5 -0.5 -0.5 -p 0.5 -0.5 -0.5 -p 0.5 0.5 -0.5 -p -0.5 0.5 -0.5 -p -0.5 0.5 0.5 -p 0.5 0.5 0.5 -p 0.5 -0.5 0.5 -p 0.5 -0.5 -0.5 -p -0.5 -0.5 -0.5 -p -0.5 -0.5 0.5 -p 0.5 -0.5 0.5 -p -0.5 -0.5 0.5 -p -0.5 0.5 0.5 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15')
 
 	elif typ == 'rombus':
 		curve = mel.eval(
-				'curve -d 1 -p 0 1 0 -p 1 0 0 -p 0 0 1 -p -1 0 0 -p 0 0 -1 -p 0 1 0 -p 0 0 1 -p 0 -1 0 -p 0 0 -1 -p 1 0 0 -p 0 1 0 -p -1 0 0 -p 0 -1 0 -p 1 0 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13')
+			'curve -d 1 -p 0 1 0 -p 1 0 0 -p 0 0 1 -p -1 0 0 -p 0 0 -1 -p 0 1 0 -p 0 0 1 -p 0 -1 0 -p 0 0 -1 -p 1 0 0 -p 0 1 0 -p -1 0 0 -p 0 -1 0 -p 1 0 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13')
 
 	elif typ == 'cone':
 		curve = mel.eval(
-				'curve -d 1 -p 0.5 -1 0.866025 -p -0.5 -1 0.866025 -p 0 1 0 -p 0.5 -1 0.866025 -p 1 -1 0 -p 0 1 0 -p 0.5 -1 -0.866025 -p 1 -1 0 -p 0 1 0 -p -0.5 -1 -0.866026 -p 0.5 -1 -0.866025 -p 0 1 0 -p -1 -1 -1.5885e-007 -p -0.5 -1 -0.866026 -p 0 1 0 -p -0.5 -1 0.866025 -p -1 -1 -1.5885e-007 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16')
+			'curve -d 1 -p 0.5 -1 0.866025 -p -0.5 -1 0.866025 -p 0 1 0 -p 0.5 -1 0.866025 -p 1 -1 0 -p 0 1 0 -p 0.5 -1 -0.866025 -p 1 -1 0 -p 0 1 0 -p -0.5 -1 -0.866026 -p 0.5 -1 -0.866025 -p 0 1 0 -p -1 -1 -1.5885e-007 -p -0.5 -1 -0.866026 -p 0 1 0 -p -0.5 -1 0.866025 -p -1 -1 -1.5885e-007 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16')
 
 	elif typ == 'rotateSphere':
 		curve = mel.eval(
-				'curve -d 1 -p 0 0.35 -1.001567 -p -0.336638 0.677886 -0.751175 -p -0.0959835 0.677886 -0.751175 -p -0.0959835 0.850458 -0.500783 -p -0.0959835 0.954001 -0.0987656 -p -0.500783 0.850458 -0.0987656 -p -0.751175 0.677886 -0.0987656 -p -0.751175 0.677886 -0.336638 -p -1.001567 0.35 0 -p -0.751175 0.677886 0.336638 -p -0.751175 0.677886 0.0987656 -p -0.500783 0.850458 0.0987656 -p -0.0959835 0.954001 0.0987656 -p -0.0959835 0.850458 0.500783 -p -0.0959835 0.677886 0.751175 -p -0.336638 0.677886 0.751175 -p 0 0.35 1.001567 -p 0.336638 0.677886 0.751175 -p 0.0959835 0.677886 0.751175 -p 0.0959835 0.850458 0.500783 -p 0.0959835 0.954001 0.0987656 -p 0.500783 0.850458 0.0987656 -p 0.751175 0.677886 0.0987656 -p 0.751175 0.677886 0.336638 -p 1.001567 0.35 0 -p 0.751175 0.677886 -0.336638 -p 0.751175 0.677886 -0.0987656 -p 0.500783 0.850458 -0.0987656 -p 0.0959835 0.954001 -0.0987656 -p 0.0959835 0.850458 -0.500783 -p 0.0959835 0.677886 -0.751175 -p 0.336638 0.677886 -0.751175 -p 0 0.35 -1.001567 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32')
+			'curve -d 1 -p 0 0.35 -1.001567 -p -0.336638 0.677886 -0.751175 -p -0.0959835 0.677886 -0.751175 -p -0.0959835 0.850458 -0.500783 -p -0.0959835 0.954001 -0.0987656 -p -0.500783 0.850458 -0.0987656 -p -0.751175 0.677886 -0.0987656 -p -0.751175 0.677886 -0.336638 -p -1.001567 0.35 0 -p -0.751175 0.677886 0.336638 -p -0.751175 0.677886 0.0987656 -p -0.500783 0.850458 0.0987656 -p -0.0959835 0.954001 0.0987656 -p -0.0959835 0.850458 0.500783 -p -0.0959835 0.677886 0.751175 -p -0.336638 0.677886 0.751175 -p 0 0.35 1.001567 -p 0.336638 0.677886 0.751175 -p 0.0959835 0.677886 0.751175 -p 0.0959835 0.850458 0.500783 -p 0.0959835 0.954001 0.0987656 -p 0.500783 0.850458 0.0987656 -p 0.751175 0.677886 0.0987656 -p 0.751175 0.677886 0.336638 -p 1.001567 0.35 0 -p 0.751175 0.677886 -0.336638 -p 0.751175 0.677886 -0.0987656 -p 0.500783 0.850458 -0.0987656 -p 0.0959835 0.954001 -0.0987656 -p 0.0959835 0.850458 -0.500783 -p 0.0959835 0.677886 -0.751175 -p 0.336638 0.677886 -0.751175 -p 0 0.35 -1.001567 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32')
 
 	elif typ == 'jack':
 		curve = mel.eval(
-				'curve -d 1 -p 0 0 0 -p 0.75 0 0 -p 1 0.25 0 -p 1.25 0 0 -p 1 -0.25 0 -p 0.75 0 0 -p 1 0 0.25 -p 1.25 0 0 -p 1 0 -0.25 -p 1 0.25 0 -p 1 0 0.25 -p 1 -0.25 0 -p 1 0 -0.25 -p 0.75 0 0 -p 0 0 0 -p -0.75 0 0 -p -1 0.25 0 -p -1.25 0 0 -p -1 -0.25 0 -p -0.75 0 0 -p -1 0 0.25 -p -1.25 0 0 -p -1 0 -0.25 -p -1 0.25 0 -p -1 0 0.25 -p -1 -0.25 0 -p -1 0 -0.25 -p -0.75 0 0 -p 0 0 0 -p 0 0.75 0 -p 0 1 -0.25 -p 0 1.25 0 -p 0 1 0.25 -p 0 0.75 0 -p -0.25 1 0 -p 0 1.25 0 -p 0.25 1 0 -p 0 1 0.25 -p -0.25 1 0 -p 0 1 -0.25 -p 0.25 1 0 -p 0 0.75 0 -p 0 0 0 -p 0 -0.75 0 -p 0 -1 -0.25 -p 0 -1.25 0 -p 0 -1 0.25 -p 0 -0.75 0 -p -0.25 -1 0 -p 0 -1.25 0 -p 0.25 -1 0 -p 0 -1 -0.25 -p -0.25 -1 0 -p 0 -1 0.25 -p 0.25 -1 0 -p 0 -0.75 0 -p 0 0 0 -p 0 0 -0.75 -p 0 0.25 -1 -p 0 0 -1.25 -p 0 -0.25 -1 -p 0 0 -0.75 -p -0.25 0 -1 -p 0 0 -1.25 -p 0.25 0 -1 -p 0 0.25 -1 -p -0.25 0 -1 -p 0 -0.25 -1 -p 0.25 0 -1 -p 0 0 -0.75 -p 0 0 0 -p 0 0 0.75 -p 0 0.25 1 -p 0 0 1.25 -p 0 -0.25 1 -p 0 0 0.75 -p -0.25 0 1 -p 0 0 1.25 -p 0.25 0 1 -p 0 0.25 1 -p -0.25 0 1 -p 0 -0.25 1 -p 0.25 0 1 -p 0 0 0.75 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32 -k 33 -k 34 -k 35 -k 36 -k 37 -k 38 -k 39 -k 40 -k 41 -k 42 -k 43 -k 44 -k 45 -k 46 -k 47 -k 48 -k 49 -k 50 -k 51 -k 52 -k 53 -k 54 -k 55 -k 56 -k 57 -k 58 -k 59 -k 60 -k 61 -k 62 -k 63 -k 64 -k 65 -k 66 -k 67 -k 68 -k 69 -k 70 -k 71 -k 72 -k 73 -k 74 -k 75 -k 76 -k 77 -k 78 -k 79 -k 80 -k 81 -k 82 -k 83')
+			'curve -d 1 -p 0 0 0 -p 0.75 0 0 -p 1 0.25 0 -p 1.25 0 0 -p 1 -0.25 0 -p 0.75 0 0 -p 1 0 0.25 -p 1.25 0 0 -p 1 0 -0.25 -p 1 0.25 0 -p 1 0 0.25 -p 1 -0.25 0 -p 1 0 -0.25 -p 0.75 0 0 -p 0 0 0 -p -0.75 0 0 -p -1 0.25 0 -p -1.25 0 0 -p -1 -0.25 0 -p -0.75 0 0 -p -1 0 0.25 -p -1.25 0 0 -p -1 0 -0.25 -p -1 0.25 0 -p -1 0 0.25 -p -1 -0.25 0 -p -1 0 -0.25 -p -0.75 0 0 -p 0 0 0 -p 0 0.75 0 -p 0 1 -0.25 -p 0 1.25 0 -p 0 1 0.25 -p 0 0.75 0 -p -0.25 1 0 -p 0 1.25 0 -p 0.25 1 0 -p 0 1 0.25 -p -0.25 1 0 -p 0 1 -0.25 -p 0.25 1 0 -p 0 0.75 0 -p 0 0 0 -p 0 -0.75 0 -p 0 -1 -0.25 -p 0 -1.25 0 -p 0 -1 0.25 -p 0 -0.75 0 -p -0.25 -1 0 -p 0 -1.25 0 -p 0.25 -1 0 -p 0 -1 -0.25 -p -0.25 -1 0 -p 0 -1 0.25 -p 0.25 -1 0 -p 0 -0.75 0 -p 0 0 0 -p 0 0 -0.75 -p 0 0.25 -1 -p 0 0 -1.25 -p 0 -0.25 -1 -p 0 0 -0.75 -p -0.25 0 -1 -p 0 0 -1.25 -p 0.25 0 -1 -p 0 0.25 -1 -p -0.25 0 -1 -p 0 -0.25 -1 -p 0.25 0 -1 -p 0 0 -0.75 -p 0 0 0 -p 0 0 0.75 -p 0 0.25 1 -p 0 0 1.25 -p 0 -0.25 1 -p 0 0 0.75 -p -0.25 0 1 -p 0 0 1.25 -p 0.25 0 1 -p 0 0.25 1 -p -0.25 0 1 -p 0 -0.25 1 -p 0.25 0 1 -p 0 0 0.75 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32 -k 33 -k 34 -k 35 -k 36 -k 37 -k 38 -k 39 -k 40 -k 41 -k 42 -k 43 -k 44 -k 45 -k 46 -k 47 -k 48 -k 49 -k 50 -k 51 -k 52 -k 53 -k 54 -k 55 -k 56 -k 57 -k 58 -k 59 -k 60 -k 61 -k 62 -k 63 -k 64 -k 65 -k 66 -k 67 -k 68 -k 69 -k 70 -k 71 -k 72 -k 73 -k 74 -k 75 -k 76 -k 77 -k 78 -k 79 -k 80 -k 81 -k 82 -k 83')
 
 	elif typ == 'cylinder':
 		curve = cmds.curve(d=1, p=[[0.679679916801789, -1.000000000044628, -0.6796799168017885],
@@ -640,7 +644,7 @@ def scaleCurve(selected=[], *args):
 	return
 
 
-def control2(child='', n='control', typ='circle', axis=[0, 0, 0], t=True, r=True, parent=True, scale=1, nest=False,
+def control(child='', n='control', typ='circle', axis=[0, 0, 0], t=True, r=True, parent=True, scale=1, nest=False,
             *args):
 	ctl = curveShape(n=n, typ=typ, axis=axis)
 	grp = cmds.group(ctl, n='{}_grp'.format(ctl))
@@ -667,6 +671,8 @@ def control2(child='', n='control', typ='circle', axis=[0, 0, 0], t=True, r=True
 			if parent:
 				cmds.parentConstraint(ctl, child, mo=True)
 
+
+
 	return [ctl, grp]
 
 
@@ -683,60 +689,23 @@ def snap(par, child, t=False, r=False):
 	return
 
 
-def createGroup(obj, n='grp'):
+def createGroup(obj, n='', *args):
+	if not n:
+		n = '{}_grp'.format(obj)
+
+	if cmds.objExists(n):
+		n = '{}#'.format(n)
+
 	grp = cmds.group(n=n, em=True)
 	snap(obj, grp, t=True, r=True)
 	par = cmds.listRelatives(obj, parent=True)
 
 	if par:
-		par = par[0]
 		cmds.parent(grp, par)
 
 	cmds.parent(obj, grp)
 
 	return grp
-
-
-def hideAttributes(obj):
-	attributes = cmds.listAttr(obj, k=True)
-	if attributes:
-		for attr in attributes:
-			cmds.setAttr('{}.{}'.format(obj, attr), keyable=False, channelBox=False)
-	return
-
-
-def lockAttributes(obj, hide=False):
-	hide = False if hide else True
-	attributes = cmds.listAttr(obj, k=True)
-	if attributes:
-		for attr in attributes:
-			cmds.setAttr('{}.{}'.format(obj, attr), lock=True, keyable=hide, channelBox=hide)
-	return
-
-
-def lockTranslate(obj, hide=False):
-	for axis in ['x', 'y', 'z']:
-		cmds.setAttr('{}.t{}'.format(obj, axis), lock=True, keyable=hide, channelBox=hide)
-	return
-
-
-def lockRotate(obj, hide=False):
-	for axis in ['x', 'y', 'z']:
-		cmds.setAttr('{}.r{}'.format(obj, axis), lock=True, keyable=hide, channelBox=hide)
-	return
-
-
-def lockScale(obj, hide=False):
-	for axis in ['x', 'y', 'z']:
-		cmds.setAttr('{}.s{}'.format(obj, axis), lock=True, keyable=hide, channelBox=hide)
-	return
-
-
-def setVisibility(obj, hide=True):
-	hide = False if hide else True
-	attrName = '{}.v'.format(obj)
-	cmds.setAttr(attrName, hide, lock=False)
-	return
 
 
 def createLocalWorld(obj, local, world, n='localWorld', t=False, r=True):
@@ -747,7 +716,7 @@ def createLocalWorld(obj, local, world, n='localWorld', t=False, r=True):
 
 	null = createGroup(obj, n=name)
 
-	cmds.addAttr(obj, ln=n, min=0, max=1, dv=1, k=True)
+	cmds.addAttr(obj, ln=n, min=0, max=1, dv=0, k=True)
 
 	if t and r:
 		pc = cmds.parentConstraint(local, world, null, mo=True)[0]
@@ -763,7 +732,7 @@ def createLocalWorld(obj, local, world, n='localWorld', t=False, r=True):
 
 	cmds.connectAttr('{}.{}'.format(obj, n), '{}.{}'.format(pc, pcAttr[-1]))
 
-	reverse = cmds.createNode('reverse', name='{}_re0'.format(name))
+	reverse = cmds.createNode('reverse')
 	cmds.connectAttr('{}.{}'.format(obj, n), '{}.inputX'.format(reverse))
 	cmds.connectAttr('{}.outputX'.format(reverse), '{}.{}'.format(pc, pcAttr[0]))
 
@@ -778,15 +747,15 @@ def getPositionSide(obj, *args):
 		position = cmds.xform(obj, q=True, ws=True, rp=True)[0]
 
 	if 'e' in str(position):
-		return component.center
+		return componentType.center
 
 	else:
 
 		if position > 0:
-			return component.left
+			return componentType.left
 
 		elif position < 0:
-			return component.right
+			return componentType.right
 
 		elif position == 0:
 			if type(obj) is list:
@@ -797,40 +766,9 @@ def getPositionSide(obj, *args):
 						newObj.append(o)
 					getPositionSide(newObj)
 				else:
-					return component.center
+					return componentType.center
 			else:
-				return component.center
-
-
-def getSide(obj):
-	if type(obj) is list:
-		position = cmds.xform(obj[0], q=True, ws=True, rp=True)[0]
-
-	else:
-		position = cmds.xform(obj, q=True, ws=True, rp=True)[0]
-
-	if 'e' in str(position):
-		return naming.side.center
-
-	else:
-		if position > 0:
-			return naming.side.left
-
-		elif position < 0:
-			return naming.side.right
-
-		elif position == 0:
-			if type(obj) is list:
-				if len(obj) > 1:
-					obj.remove(obj[0])
-					newObj = []
-					for o in obj:
-						newObj.append(o)
-					getPositionSide(newObj)
-				else:
-					return naming.side.center
-			else:
-				return naming.side.center
+				return componentType.center
 
 
 def getChild(root, typ='joint', *args):
@@ -848,7 +786,7 @@ def zeroJointOrient(jnt, *args):
 	return
 
 
-def freezeTransform(obj, t=True, r=True, s=True):
+def freezeTransform(obj, t=True, r=True, s=True, *args):
 	if t:
 		cmds.makeIdentity(obj, apply=True, t=True)
 	if r:
@@ -859,7 +797,7 @@ def freezeTransform(obj, t=True, r=True, s=True):
 
 
 class queryJoint():
-	def __init__(self, jnt):
+	def __init__(self, jnt, *args):
 		skinCluster = getConnectedObj(jnt, 'objectColorRGB')
 		verts = []
 
@@ -891,12 +829,9 @@ class queryJoint():
 		self.skinCluster = skinCluster
 		self.verts = verts
 
-	def __str__(self):
-		return str(self.__dict__)
 
-
-class estimateBoundsByJoint:
-	def __init__(self, jnt):
+class estimateBoundsByJoint():
+	def __init__(self, jnt, *args):
 		self.verts = []
 		self.minX = []
 		self.maxX = []
@@ -911,15 +846,6 @@ class estimateBoundsByJoint:
 		if cmds.objectType(jnt, isType='joint'):
 			query = queryJoint(jnt)
 			verts = query.verts
-
-			if not verts:
-				children = cmds.listRelatives(jnt, children=True, type='joint')
-				if children:
-					for child in children:
-						childVerts = queryJoint(child).verts
-						if childVerts:
-							verts = childVerts
-							break
 
 			if verts:
 				for vert in verts:
@@ -942,9 +868,6 @@ class estimateBoundsByJoint:
 
 		else:
 			cmds.warning('Object is not a joint.')
-
-	def __str__(self):
-		return str(self.__dict__)
 
 
 def createJoint(obj=None, n='joint_0', *args):
@@ -1008,7 +931,7 @@ def createJointChain(selected=[], typ='bind', world=False, *args):
 
 def createBindChain(selected, *args):
 	selected = listCheck(selected)
-	bindJnt = createJointChain(selected, typ=component.bind)
+	bindJnt = createJointChain(selected, typ=componentType.bind)
 	for jnt in bindJnt:
 		i = bindJnt.index(jnt)
 		cmds.parentConstraint(jnt, selected[i], mo=True)
@@ -1095,7 +1018,7 @@ def handJointHierarchy(root, *args):
 	return jointList
 
 
-def getDistance(start, end):
+def getDistance(start, end, *args):
 	if type(start) is list:
 		startPos = start
 	else:
@@ -1106,7 +1029,7 @@ def getDistance(start, end):
 	else:
 		endPos = cmds.xform(end, q=True, ws=True, rp=True)
 	distance = sqrt(
-			pow((startPos[0] - endPos[0]), 2) + pow((startPos[1] - endPos[1]), 2) + pow((startPos[2] - endPos[2]), 2))
+		pow((startPos[0] - endPos[0]), 2) + pow((startPos[1] - endPos[1]), 2) + pow((startPos[2] - endPos[2]), 2))
 	return distance
 
 
@@ -1170,13 +1093,12 @@ def setOnMotionPath(selected, curve, name='motionPath', uValue=0, *args):
 	# Create Nodes
 	mp = cmds.createNode('motionPath', n='{}_mp'.format(name))
 
-	mpAttr = {
-		'follow'      : 1,
-		'fractionMode': 0,
-		'worldUpType' : 3,
-		'frontAxis'   : 2,
-		'upAxis'      : 1,
-	}
+	mpAttr = {'follow': 1,
+	          'fractionMode': 0,
+	          'worldUpType': 3,
+	          'frontAxis': 2,
+	          'upAxis': 1,
+	          }
 	for attr in mpAttr:
 		cmds.setAttr('{}.{}'.format(mp, attr), mpAttr[attr])
 
@@ -1222,70 +1144,50 @@ def locOnCurve(curve, intLoc=1, n='locator', upObject='', start=False, end=False
 	return locList
 
 
-def swapShape(par, child):
-	snap(par, child)
-	parShape = cmds.listRelatives(par, shapes=True)[0]
-	childShape = cmds.listRelatives(child, shapes=True)[0]
-	cmds.parent(childShape, par, r=True, s=True)
-	cmds.delete(child, parShape)
-	cmds.rename(childShape, parShape)
-	return
+def makePoleVector(ik, start, end, *args):
+	poleVector = cmds.poleVectorConstraint(start, ik)
+	curve = makeNurbsCurve([start, end], n='{}_curve'.format(start))
+
+	curveCVs = cmds.ls('{0}.cv[:]'.format(curve), fl=True)
+	clusters = clusterCurve(curve, n='{}Cluster'.format(curve))
+
+	i = 0
+	for par in [start, end]:
+		cmds.parent(clusters[i], par)
+		i += 1
+
+	# CleanUp
+	cmds.setAttr('{}.template'.format(cmds.listRelatives(curve, shapes=True)[0]), 1)
+
+	grp = cmds.group(curve, n='{}_grp'.format(curve))
+	cmds.parent(grp, start)
+	cmds.setAttr('{}.inheritsTransform'.format(grp), 0)
+	zeroAttrs(grp)
+
+	return [curve, grp]
 
 
-def getCurveCVs(curve):
-	return cmds.ls('{}.cv[:]'.format(curve), fl=True)
+def makeAimVector(par, child, *args):
+	aim = cmds.aimConstraint(par, child, mo=True, aimVector=[1, 0, 0], upVector=[0, 1, 0], worldUpType='objectrotation',
+	                         worldUpVector=[0, 1, 0], worldUpObject=par)
+	curve = makeNurbsCurve([par, child], n='{}_curve'.format(par))
+	curveCVs = cmds.ls('{0}.cv[:]'.format(curve), fl=True)
+	clusters = clusterCurve(curve, n='{}Cluster'.format(curve))
 
+	i = 0
+	for x in [par, child]:
+		cmds.parent(clusters[i], x)
+		i += 1
 
-def getCurvePoints(curve):
-	pointList = []
-	curveCVs = getCurveCVs(curve)
-	for cv in curveCVs:
-		pointList.append(cmds.xform(cv, q=True, ws=True, t=True))
-	return pointList
+	# CleanUp
+	cmds.setAttr('{}.template'.format(cmds.listRelatives(curve, shapes=True)[0]), 1)
 
+	grp = cmds.group(curve, n='{}_grp'.format(curve))
+	cmds.parent(grp, par)
+	cmds.setAttr('{}.inheritsTransform'.format(grp), 0)
+	zeroAttrs(grp)
 
-def createAimVectorHelper(start, end, name='poleVector_helper'):
-	# Create Curve
-	curve = cmds.curve(n=name, d=1, p=[[0, 0, 0], [0, 0, 0]])
-	curveShape = cmds.rename(cmds.listRelatives(curve, shapes=True)[0],
-	                         '{}Shape'.format(name))
-	cmds.parent(curveShape, end, r=True, s=True)
-	cmds.delete(curve)
-
-	# Create Nodes
-	mult = cmds.createNode('multMatrix', name='{}_multMatrix0'.format(name))
-	dec = cmds.createNode('decomposeMatrix', name='{}_decomposeMatrix0'.format(name))
-
-	# Create Connections
-	cmds.connectAttr('{}.worldMatrix[0]'.format(start), '{}.matrixIn[0]'.format(mult))
-	cmds.connectAttr('{}.worldInverseMatrix[0]'.format(end), '{}.matrixIn[1]'.format(mult))
-
-	cmds.connectAttr('{}.matrixSum'.format(mult), '{}.inputMatrix'.format(dec))
-	cmds.connectAttr('{}.outputTranslate'.format(dec), '{}.controlPoints[1]'.format(curveShape))
-	return curveShape
-
-
-def createPoleVector(joint, ctl, ik, name='ik_poleVector'):
-	poleVector = cmds.poleVectorConstraint(ctl, ik)
-	shape = createAimVectorHelper(joint, ctl, name='{}_helper'.format(name))
-	return [poleVector, shape]
-
-
-def createAimVector(par, child, name='aimVector', aimVector=[0, 0, 1]):
-	aim = cmds.aimConstraint(par,
-	                         child,
-	                         name='{}_constraint0'.format(name),
-	                         mo=True,
-	                         aimVector=aimVector,
-	                         upVector=[0, 1, 0],
-	                         worldUpType='objectrotation',
-	                         worldUpVector=[0, 1, 0],
-	                         worldUpObject=par,
-	                         )
-
-	shape = createAimVectorHelper(child, par, name='{}_helper'.format(name))
-
-	return [aim, shape]
+	return [curve, grp]
 
 
 def zeroAttrs(obj, *args):
@@ -1373,7 +1275,7 @@ def getVertPosition(obj, *args):
 		cmds.xform(v, q=True, ws=True, t=True)
 
 
-def createFKIK(obj, fk, ik, ctl, n='FKIK'):
+def createFKIK(obj, fk, ik, ctl, n='FKIK', *args):
 	# Add Attribute
 
 	if not cmds.attributeQuery(n, node=ctl, ex=True):
@@ -1394,9 +1296,9 @@ def createFKIK(obj, fk, ik, ctl, n='FKIK'):
 		i = obj.index(x)
 
 		if len(obj) == 1:
-			pc = cmds.parentConstraint(fk, ik, x, n='{}_{}_pc0'.format(x, n), mo=True)[0]
+			pc = cmds.parentConstraint(fk, ik, x, n='{}_{}_pc1'.format(x, n), mo=True)[0]
 		else:
-			pc = cmds.parentConstraint(fk[i], ik[i], x, n='{}_{}_pc0'.format(x, n), mo=True)[0]
+			pc = cmds.parentConstraint(fk[i], ik[i], x, n='{}_{}_pc1'.format(x, n), mo=True)[0]
 		pcAttr = cmds.parentConstraint(pc, q=True, wal=True)
 
 		cmds.connectAttr('{}.{}'.format(ctl, n), '{}.{}'.format(pc, pcAttr[-1]), f=True)
@@ -1410,7 +1312,7 @@ def createFKIK(obj, fk, ik, ctl, n='FKIK'):
 
 	# Return
 
-	return [pcList, reList]
+	return [pcList, reList, n]
 
 
 def createSet(objs, n='set1', *args):
@@ -1493,14 +1395,6 @@ def createDistanceNode(start, end, n='distanceBetween1', *args):
 def addEmptyAttr(obj, n='customAttr', *args):
 	cmds.addAttr(obj, ln=n, at='enum', en='-:', k=True)
 	cmds.setAttr('{}.{}'.format(obj, n), e=True, channelBox=True)
-	return
-
-
-def addBoolAttr(obj, name):
-	attrName = '{}.{}'.format(obj, name)
-	cmds.addAttr(obj, ln=name, at='enum', en='off:on')
-	cmds.setAttr(attrName, e=True, cb=True)
-	return attrName
 
 
 def toggleJointLabel(*args):
@@ -1541,19 +1435,11 @@ def niceString(var, *args):
 	return newVar
 
 
-def setEnumByString(obj, attr, value):
+def setEnumByString(obj, attr, value, *args):
 	enumString = cmds.attributeQuery(attr, node=obj, listEnum=1)[0]
 	enumList = enumString.split(':')
-	index = enumList.index(str(value))
-	attribute = '{}.{}'.format(obj, attr)
-	cmds.setAttr(attribute, index)
-	return attribute
-
-
-def addSideAttr(obj):
-	cmds.addAttr(obj, ln='side', at='enum', en='Center:Left:Right:None:', keyable=True)
-	cmds.setAttr('{}.side'.format(obj), 3, keyable=False, cb=False)
-	return
+	index = enumList.index(value)
+	cmds.setAttr('{}.{}'.format(obj, attr), index)
 
 
 class jointLabel():
@@ -1601,35 +1487,35 @@ class jointLabel():
 	def get(self, typ, side='center'):
 		chain = []
 
-		if typ == component.root:
+		if typ == componentType.root:
 			chain.append(self.masterDict['Root'][side.capitalize()][0])
 
-		elif typ == component.cog:
+		elif typ == componentType.cog:
 			chain.append(self.masterDict['COG'][side.capitalize()][0])
 
-		elif typ == component.hip:
+		elif typ == componentType.hip:
 			chain.append(self.masterDict['Hip'][side.capitalize()][0])
 
-		elif typ == component.spine:
+		elif typ == componentType.spine:
 			chain = self.masterDict['Spine'][side.capitalize()]
 
-		elif typ == component.head:
+		elif typ == componentType.head:
 			for x in ['Neck', 'Head']:
 				chain.append(self.masterDict[x][side.capitalize()][0])
 
-		elif typ == component.arm:
+		elif typ == componentType.arm:
 			for x in ['Collar', 'Shoulder', 'Elbow', 'Hand']:
 				chain.append(self.masterDict[x][side.capitalize()][0])
 
-		elif typ == component.hand:
+		elif typ == componentType.hand:
 			for x in ['Thumb', 'Index Finger', 'Middle Finger', 'Ring Finger', 'Pinky Finger']:
 				chain.append(self.masterDict[x][side.capitalize()])
 
-		elif typ == component.leg:
+		elif typ == componentType.leg:
 			for x in ['Hip', 'Knee', 'Foot', 'Toe']:
 				chain.append(self.masterDict[x][side.capitalize()][0])
 
-		elif typ == component.foot:
+		elif typ == componentType.foot:
 			for x in ['Big Toe', 'Index Toe', 'Middle Toe', 'Ring Toe', 'Pinky Toe']:
 				chain.append(self.masterDict[x][side.capitalize()][0])
 
@@ -1637,6 +1523,8 @@ class jointLabel():
 
 	def populate(self, joints, *args):
 		joints = listCheck(joints)
+
+		pUI = progressWindow(st='Analyzing Joints...', max=len(self.masterList) * len(joints))
 
 		for x in self.masterList:
 			leftList = []
@@ -1657,18 +1545,19 @@ class jointLabel():
 					else:
 						noneList.append(jnt)
 
+				pUI.update()
+
+			if pUI.cancel():
+				break
+
 			if x != 'None':
-				self.masterDict[x] = {
-					'None'  : noneList, 'Left': sortJointHierarchy(leftList),
-					'Center': sortJointHierarchy(centerList),
-					'Right' : sortJointHierarchy(rightList, )
-				}
+				self.masterDict[x] = {'None': noneList, 'Left': sortJointHierarchy(leftList),
+				                      'Center': sortJointHierarchy(centerList),
+				                      'Right': sortJointHierarchy(rightList, )}
 			else:
-				self.masterDict[x] = {
-					'None'  : noneList, 'Left': leftList,
-					'Center': centerList,
-					'Right' : rightList
-				}
+				self.masterDict[x] = {'None': noneList, 'Left': leftList,
+				                      'Center': centerList,
+				                      'Right': rightList}
 
 	def isDebug(self):
 		print(json.dumps(self.masterDict, indent=8))
@@ -1715,21 +1604,15 @@ def colorIndexList(*args):
 	return indexColor
 
 
-def presetWireColor(selected, typ):
-	if typ == component.fk:
+def presetWireColor(selected, typ, *args):
+	if typ == componentType.fk:
 		color = [0, 0, 1]
 
-	elif typ == component.ik:
+	elif typ == componentType.ik:
 		color = [1, 0, 0]
 
-	elif typ == component.center:
+	elif typ == componentType.center:
 		color = [1, 1, 0]
-
-	elif typ == component.attr:
-		color = [.75, 0, .75]
-
-	elif typ == naming.rig.detail:
-		color = [0, .5, 0]
 
 	overrideColor(selected, color=color, )
 
@@ -1744,590 +1627,38 @@ def overrideColor(selected=[], color=[], reset=False, index=False, *args):
 
 	if selected:
 		for obj in selected:
-			shapes = cmds.listRelatives(obj, shapes=True, f=True)
+			shape = cmds.listRelatives(obj, shapes=True, f=True)
 
-			if shapes:
-				for shape in shapes:
+			if shape:
+				shape = shape[0]
 
-					if reset:
-						for attr in attrList:
-							cmds.setAttr('{0}.{1}'.format(shape, attr), 0)
+				if reset:
+					for attr in attrList:
+						cmds.setAttr('{0}.{1}'.format(shape, attr), 0)
 
-					else:
+				else:
 
-						cmds.setAttr('{0}.useObjectColor'.format(shape), 0)
-						cmds.setAttr('{0}.overrideEnabled'.format(shape), 1)
+					cmds.setAttr('{0}.useObjectColor'.format(shape), 0)
+					cmds.setAttr('{0}.overrideEnabled'.format(shape), 1)
 
-						if index:
-							if color:
+					if index:
+						if color:
 
-								cmds.setAttr('{0}.overrideRGBColors'.format(shape), 0)
-								cmds.setAttr('{0}.overrideColor'.format(shape), color)
-
-							else:
-								for attr in attrList:
-									cmds.setAttr('{0}.{1}'.format(shape, attr), 0)
+							cmds.setAttr('{0}.overrideRGBColors'.format(shape), 0)
+							cmds.setAttr('{0}.overrideColor'.format(shape), color)
 
 						else:
-							if color:
-								cmds.setAttr('{0}.overrideRGBColors'.format(shape), 1)
-
-								i = 0
-								for x in ['R', 'G', 'B']:
-									cmds.setAttr('{0}.overrideColor{1}'.format(shape, x), color[i])
-									i += 1
-
-
-def createFollicle(name='follicle0', debug=False):
-	shape = cmds.createNode('follicle', name='{}Shape'.format(name))
-	transform = cmds.listRelatives(shape, parent=True)[0]
-
-	cmds.select(d=True)
-	joint = cmds.joint(name='{}_joint'.format(name))
-	if not debug:
-		cmds.setAttr('{}.drawStyle'.format(joint), 2)
-	else:
-		cmds.setAttr('{}.displayLocalAxis'.format(joint), 1)
-	cmds.parent(shape, joint, r=True, s=True)
-	cmds.delete(transform)
-	transform = cmds.listRelatives(shape, parent=True)[0]
-
-	cmds.connectAttr('{}.outRotate'.format(shape), '{}.rotate'.format(transform))
-	cmds.connectAttr('{}.outTranslate'.format(shape), '{}.translate'.format(transform))
-
-	return [transform, shape]
-
-
-class createFlexiPlane:
-	def __init__(self, name='felxi', amount=5, width=10, side=naming.side.left, debug=False):
-		"""
-		:param name:    Name of component.
-		:param amount:  Amount of follicles to be created.
-		:param width:   Total length of the plane.
-		"""
-		# Global Node
-		globalGrp = cmds.group(name='{}_global_grp'.format(name), em=True)
-		masterGrp = cmds.group(globalGrp, name='{}_grp'.format(name))
-
-		# Nurbs Plane
-		axis = [0, 1, 0]
-		plane = cmds.nurbsPlane(name='{}_plane'.format(name), ax=axis, w=width, lr=0.1, d=3, u=amount, v=1, ch=0)[0]
-		planeShape = cmds.listRelatives(plane, shapes=True)[0]
-		cmds.parent(plane, globalGrp)
-
-		# BlendShape
-		dup = cmds.duplicate(plane, name='{}_twist_blend'.format(plane))
-		blendshape = cmds.blendShape(dup, plane, name='{}_blendShape0'.format(name), weight=[0, 1])
-
-		step = 1.0 / float(amount - 1)
-		uPos = 0
-		vPos = 0.5
-		posList = []
-
-		for x in range(amount):
-			posList.append(uPos)
-			uPos += step
-
-		if side == naming.side.right:
-			posList = list(reversed(posList))
-
-		# Follicles
-		follicleList = []
-		follicleScale = []
-		for x in range(amount):
-			follicle = createFollicle('{}_{}_follicle'.format(name, x), debug=debug)
-			follicleTransform = follicle[0]
-			follicleShape = follicle[1]
-
-			cmds.connectAttr('{}.local'.format(planeShape), '{}.inputSurface'.format(follicleShape))
-			cmds.connectAttr('{}.worldMatrix[0]'.format(planeShape), '{}.inputWorldMatrix'.format(follicleShape))
-			cmds.setAttr('{}.parameterU'.format(follicleShape), posList[x])
-			cmds.setAttr('{}.parameterV'.format(follicleShape), vPos)
-			cmds.setAttr('{}.v'.format(follicleShape), 0)
-			follicleScale.append(cmds.scaleConstraint(globalGrp, follicleTransform, mo=True)[0])
-			follicleList.append(follicleTransform)
-
-		# Locators
-		pos = [width / 2 * -1, 0, width / 2]
-		if side == naming.side.right:
-			pos = list(reversed(pos))
-
-		locList = []
-		locGrpList = []
-		i = 0
-		for x in pos:
-			loc = cmds.spaceLocator(name='{}_{}_locator'.format(name, i))[0]
-			cmds.xform(loc, ws=True, t=[x, 0, 0])
-			freezeTransform(loc)
-			cmds.parent(loc, globalGrp)
-			locList.append(loc)
-			i += 1
-
-		# Curve
-		clusterList = []
-		clusterGrp = cmds.group(name='{}_cluster_grp'.format(name), em=True)
-		curve = makeNurbsCurve(locList, n='{}_curve'.format(name), d=2)
-		i = 0
-		for x in ['0:1', '1', '1:2']:
-			cluster = cmds.cluster('{}.cv[{}]'.format(curve, x), rel=True, name='{}_{}_cluster'.format(name, i))
-			clusterShape = cluster[0]
-			cluster = cluster[1]
-			cmds.xform(cluster, ws=True, rp=[pos[i], 0, 0])
-			cmds.setAttr('{}.v'.format(cluster), 0)
-			cmds.connectAttr('{}.t'.format(locList[i]), '{}.t'.format(cluster))
-			cmds.parent(cluster, clusterGrp)
-			clusterList.append(clusterShape)
-			i += 1
-
-		cmds.percent(clusterList[0], '{}.cv[1]'.format(curve), v=.5)
-		cmds.percent(clusterList[-1], '{}.cv[1]'.format(curve), v=.5)
-
-		# TwistDeformer
-		twist = cmds.nonLinear(dup, type='twist', name='{}_twist'.format(name))
-		twistShape = cmds.rename(twist[0], '{}_twist'.format(name))
-		twistTransform = cmds.rename(twist[1], '{}_twistHandle'.format(name))
-		cmds.setAttr('{}.rz'.format(twistTransform), -90 if side == naming.side.left else 90)
-
-		rangeNode = cmds.createNode('setRange', name='{}_twist_setRange0'.format(name))
-		addList = []
-		for axis in ['x', 'y', 'z']:
-			cmds.setAttr('{}.oldMax{}'.format(rangeNode, axis.upper()), 1)
-
-		cmds.addAttr(globalGrp, ln='startTwist', min=0, max=1, dv=1, k=True)
-		cmds.addAttr(globalGrp, ln='endTwist', min=0, max=1, dv=1, k=True)
-		cmds.addAttr(globalGrp, ln='startTwistAmount', k=True, at='doubleAngle')
-		cmds.addAttr(globalGrp, ln='endTwistAmount', k=True, at='doubleAngle')
-		cmds.addAttr(globalGrp, ln='startTwistAdd', k=True, at='doubleAngle')
-		cmds.addAttr(globalGrp, ln='endTwistAdd', k=True, at='doubleAngle')
-		cmds.addAttr(globalGrp, ln='twistSide',
-		             min=-1,
-		             max=1,
-		             dv=-1 if side == naming.side.left else 1,
-		             k=True,
-		             )
-
-		mirror = cmds.createNode('multiplyDivide', name='{}_mirror_mult0'.format(name))
-
-		axis = 'X'
-		for attr in ['start', 'end']:
-			add = cmds.createNode('addDoubleLinear', name='{}_{}_add0'.format(name, attr))
-			cmds.connectAttr('{}.{}TwistAmount'.format(globalGrp, attr), '{}.input1'.format(add))
-			cmds.connectAttr('{}.{}TwistAdd'.format(globalGrp, attr), '{}.input2'.format(add))
-
-			cmds.connectAttr('{}.output'.format(add), '{}.max{}'.format(rangeNode, axis))
-			cmds.connectAttr('{}.{}Twist'.format(globalGrp, attr), '{}.value{}'.format(rangeNode, axis))
-
-			cmds.connectAttr('{}.twistSide'.format(globalGrp), '{}.input1{}'.format(mirror, axis))
-			cmds.connectAttr('{}.outValue{}'.format(rangeNode, axis), '{}.input2{}'.format(mirror, axis))
-			cmds.connectAttr('{}.output{}'.format(mirror, axis), '{}.{}Angle'.format(twistShape, attr))
-			axis = 'Y'
-
-		# Wire Deformer
-		wire = cmds.wire(dup, wire=curve, name='{}_wire0'.format(name))
-		wireShape = wire[0]
-		wireBaseTransform = cmds.listConnections('{}.baseWire[0]'.format(wireShape))[0]
-		cmds.setAttr('{}.dropoffDistance[0]'.format(wire[0]), 20)
-
-		# SnS
-		cmds.addAttr(globalGrp, ln='sns', min=0, max=1, dv=1, k=True)
-		cmds.addAttr(globalGrp, ln='snsAdd', k=True)
-		# cmds.addAttr(globalGrp, ln='snsHighBound', k=True, min=0, max=1, dv=1)
-		# cmds.addAttr(globalGrp, ln='snsLowBound', k=True, min=0, max=1, dv=1)
-
-		curveInfo = createCurveInfo(curve)
-		divideA = cmds.createNode('multiplyDivide', name='{}_divide0'.format(name))
-		cmds.setAttr('{}.operation'.format(divideA), 2)
-		cmds.setAttr('{}.input2X'.format(divideA), width)
-		divideB = cmds.createNode('multiplyDivide', name='{}_divide0'.format(name))
-		cmds.setAttr('{}.operation'.format(divideB), 2)
-		cmds.setAttr('{}.input1X'.format(divideB), 1)
-
-		cmds.connectAttr('{}.arcLength'.format(curveInfo), '{}.input1X'.format(divideA))
-		cmds.connectAttr('{}.outputX'.format(divideA), '{}.input2X'.format(divideB))
-
-		setRange = cmds.createNode('setRange', name='{}_sns_setRange0'.format(name))
-		cmds.setAttr('{}.minX'.format(setRange), 1)
-		cmds.setAttr('{}.oldMaxX'.format(setRange), 1)
-		cmds.connectAttr('{}.sns'.format(globalGrp), '{}.valueX'.format(setRange))
-		cmds.connectAttr('{}.outputX'.format(divideB), '{}.maxX'.format(setRange))
-
-		add = cmds.createNode('addDoubleLinear', name='{}_add0'.format(name))
-		cmds.connectAttr('{}.outValueX'.format(setRange), '{}.input1'.format(add))
-		cmds.connectAttr('{}.snsAdd'.format(globalGrp), '{}.input2'.format(add))
-
-		var = 0
-		step = 1.0 / float(amount - 1)
-		stepRangePos = []
-
-		for x in range(amount):
-			if x == 0:
-				stepRangePos.append(.1)
-			else:
-				stepRangePos.append(var)
-			var += step
-
-		stepRangeNeg = list(reversed(stepRangePos))
-
-		for scale in follicleScale:
-			i = follicleScale.index(scale)
-			for axis in ['y', 'z']:
-				cmds.connectAttr('{}.output'.format(add), '{}.offset{}'.format(scale, axis.upper()))
-
-		# Hierarchy
-		extrasGrp = cmds.group(clusterGrp, curve, twistTransform, dup, wireBaseTransform,
-		                       name='{}_extras_grp'.format(name))
-		cmds.setAttr('{}.v'.format(extrasGrp), 0)
-		cmds.setAttr('{}.inheritsTransform'.format(extrasGrp), 0)
-
-		follicleGrp = cmds.group(follicleList, name='{}_follicle_grp'.format(name))
-		cmds.setAttr('{}.inheritsTransform'.format(follicleGrp), 0)
-		cmds.parent(extrasGrp, follicleGrp, masterGrp)
-
-		for x in [follicleGrp, clusterGrp, extrasGrp, plane]:
-			lockAttributes(x)
-
-		setVisibility(globalGrp)
-		lockScale(globalGrp)
-
-		# Return
-		self.plane = plane
-		self.planeShape = planeShape
-		self.planeBlend = dup
-		self.planeBlendShape = blendshape
-		self.follicle = follicleList
-		self.curve = curve
-		self.twist = twistTransform
-		self.twistShape = twistShape
-		self.wire = wire
-		self.wireBase = wireBaseTransform
-		self.control = locList
-		self.group = locGrpList
-		self.parent = globalGrp
-		self.masterGroup = masterGrp
-		self.extra = extrasGrp
-
-
-def createCurveInfo(curve):
-	node = cmds.createNode('curveInfo', name='{}_curveInfo0'.format(curve))
-	shape = cmds.listRelatives(curve, shapes=True)[0]
-	cmds.connectAttr('{}.worldSpace[0]'.format(shape), '{}.inputCurve'.format(node))
-	return node
-
-
-class createIKTwist:
-	def __init__(self, start, end, name='ikTwist'):
-		cmds.select(d=True)
-
-		ikJoint = []
-		i = 0
-		for x in [end, start]:
-			joint = cmds.joint(name='{}_{}_joint'.format(name, i))
-			cmds.setAttr('{}.drawStyle'.format(joint), 2)
-			snap(x, joint, t=True, r=True)
-			ikJoint.append(joint)
-			i += 1
-
-		globalGrp = createGroup(ikJoint[0], n='{}_grp'.format(name))
-		cmds.parent(globalGrp, start)
-		freezeTransform(ikJoint[0])
-
-		ik = cmds.ikHandle(sj=ikJoint[0], ee=ikJoint[1], sol='ikSCsolver', name='{}_ik'.format(name))[0]
-		setVisibility(ik)
-		parent = cmds.listRelatives(start, parent=True)
-		if parent:
-			cmds.parent(ik, parent[0])
-
-		self.joint = ikJoint
-		self.ikHandle = ik
-		self.parent = globalGrp
-
-
-def createNullChain(nullNames):
-	nullNames = listCheck(nullNames)
-	nullList = []
-	for null in nullNames:
-		i = nullNames.index(null)
-		grp = cmds.group(name='{}_null0'.format(null), em=True)
-		if len(nullNames) > 1 and i != 0:
-			cmds.parent(grp, nullList[i - 1])
-		nullList.append(grp)
-	return nullList
-
-
-def moveRotatePivot(parent, child):
-	if type(parent) is list:
-		cmds.xform(child, ws=True, rp=parent)
-	else:
-		pos = cmds.xform(parent, q=True, ws=True, rp=True)
-		cmds.xform(child, ws=True, rp=pos)
-	return
-
-
-class createIKFootRollNulls:
-	def __init__(self, foot, toe, control=None, name='ik_footPivot'):
-		'''
-		Global
-		Swivel
-			Heel
-			Toe
-			Ball
-		Bank
-			Inner
-			Outter
-		Rock
-			Heel
-			Toe
-		Ball XYZ
-			(Ik Handle)
-		Toe Raise
-			(Toe Joint Orient)
-
-		:param foot:
-		:param toe:
-		:param ik:
-		:param control:
-		:param name:
-		'''
-		self.start = foot
-		self.end = toe
-		self.control = control
-		self.name = name
-
-		self.side = getPositionSide(foot)
-		self.parent = None
-		self.swivel = None
-		self.bank = None
-		self.rock = None
-		self.ball = None
-		self.toe = None
-
-		self.wire = None
-
-		self.create()
-		self.defaultPositions()
-
-	def create(self):
-		partName = ['heel', 'ball', 'toe']
-		globalGrp = cmds.group(name='{}_global_grp0'.format(self.name), em=True)
-		self.control = self.control if self.control else globalGrp
-
-		# Swivel
-		swivelName = ['{}_swivel_{}'.format(self.name, x) for x in partName]
-		swivelList = createNullChain(swivelName)
-		cmds.parent(swivelList[0], globalGrp)
-		addEmptyAttr(self.control, n='swivelControl')
-		for null in swivelList:
-			i = swivelList.index(null)
-			attrName = 'swivel{}'.format(partName[i].capitalize())
-			cmds.addAttr(self.control, ln=attrName, k=True, at='doubleAngle')
-			cmds.connectAttr('{}.{}'.format(self.control, attrName), '{}.ry'.format(null))
-
-		# Bank
-		bankName = ['{}_bank_{}'.format(self.name, x) for x in ['inner', 'outter']]
-		bankList = createNullChain(bankName)
-		cmds.parent(bankList[0], swivelList[-1])
-		addEmptyAttr(self.control, n='bankControl')
-		cmds.addAttr(self.control, ln='bank', k=True, min=-180, max=180, dv=0)
-		bankCon = cmds.createNode('condition', name='{}_bank_condition0'.format(self.name))
-		cmds.setAttr('{}.operation'.format(bankCon), 2)
-		cmds.setAttr('{}.colorIfFalseR'.format(bankCon), 0)
-		cmds.setAttr('{}.colorIfFalseG'.format(bankCon), 0)
-		cmds.setAttr('{}.colorIfFalseB'.format(bankCon), 0)
-		cmds.connectAttr('{}.bank'.format(self.control), '{}.firstTerm'.format(bankCon))
-		cmds.connectAttr('{}.bank'.format(self.control), '{}.colorIfTrueR'.format(bankCon))
-		cmds.connectAttr('{}.bank'.format(self.control), '{}.colorIfFalseG'.format(bankCon))
-
-		if self.side == 'left':
-			cmds.connectAttr('{}.outColorR'.format(bankCon), '{}.rz'.format(bankList[0]))
-			cmds.connectAttr('{}.outColorG'.format(bankCon), '{}.rz'.format(bankList[1]))
-		if self.side == 'right':
-			cmds.connectAttr('{}.outColorR'.format(bankCon), '{}.rz'.format(bankList[1]))
-			cmds.connectAttr('{}.outColorG'.format(bankCon), '{}.rz'.format(bankList[0]))
-
-		# Rock
-		rockName = ['{}_rock_{}'.format(self.name, x) for x in ['heel', 'toe']]
-		rockList = createNullChain(rockName)
-		cmds.parent(rockList[0], bankList[-1])
-
-		# Ball
-		ballOffset = cmds.group(name='{}_ball_offset_null0'.format(self.name), em=True)
-		ballGrp = cmds.group(ballOffset, name='{}_ball_null0'.format(self.name))
-		cmds.parent(ballGrp, rockList[-1])
-		addEmptyAttr(self.control, n='ballControl')
-		for attr in ['x', 'y', 'z']:
-			cmds.addAttr(self.control, ln='ball{}'.format(attr.upper()), k=True, at='doubleAngle')
-			cmds.connectAttr('{}.ball{}'.format(self.control, attr.upper()), '{}.r{}'.format(ballOffset, attr))
-
-		# Toe
-		toeGrp = cmds.group(name='{}_toe_grp0'.format(self.name), em=True)
-		cmds.parent(toeGrp, rockList[-1])
-		addEmptyAttr(self.control, n='toeControl')
-		for attr in ['x', 'y', 'z']:
-			cmds.addAttr(self.control, ln='toe{}'.format(attr.upper()), k=True, at='doubleAngle')
-			cmds.connectAttr('{}.toe{}'.format(self.control, attr.upper()), '{}.r{}'.format(toeGrp, attr))
-
-		# Foot Roll
-		rollAngle = [90, 45, 90]
-		addEmptyAttr(self.control, n='rollControl')
-		cmds.addAttr(self.control, ln='roll', k=True, dv=0)
-		for attr in partName:
-			i = partName.index(attr)
-			cmds.addAttr(self.control,
-			             ln='angle{}'.format(attr.capitalize()),
-			             k=True,
-			             min=-180,
-			             max=180,
-			             dv=rollAngle[i],
-			             )
-
-		# Foot Roll - Heel
-		mul = cmds.createNode('multDoubleLinear', name='{}_heel_multiply0'.format(self.name))
-		cmds.setAttr('{}.input2'.format(mul), -1)
-		cmds.connectAttr('{}.angleHeel'.format(self.control), '{}.input1'.format(mul))
-		range = cmds.createNode('setRange', name='{}_heel_range0'.format(self.name))
-		cmds.setAttr('{}.oldMinX'.format(range), -10)
-		cmds.connectAttr('{}.output'.format(mul), '{}.minX'.format(range))
-		cmds.connectAttr('{}.roll'.format(self.control), '{}.valueX'.format(range))
-		cmds.connectAttr('{}.outValueX'.format(range), '{}.rx'.format(rockList[0]))
-
-		# Foot Roll - Toe
-		range = cmds.createNode('setRange', name='{}_toe_range0'.format(self.name))
-		cmds.setAttr('{}.oldMinX'.format(range), 10)
-		cmds.setAttr('{}.oldMaxX'.format(range), 20)
-		cmds.connectAttr('{}.angleToe'.format(self.control), '{}.maxX'.format(range))
-		cmds.connectAttr('{}.roll'.format(self.control), '{}.valueX'.format(range))
-		cmds.connectAttr('{}.outValueX'.format(range), '{}.rx'.format(rockList[1]))
-
-		# Foot Roll - Ball
-		range = cmds.createNode('setRange', name='{}_ball_range0'.format(self.name))
-		cmds.setAttr('{}.oldMaxX'.format(range), 10)
-		cmds.setAttr('{}.oldMinY'.format(range), 10)
-		cmds.setAttr('{}.oldMaxY'.format(range), 20)
-		cmds.connectAttr('{}.angleBall'.format(self.control), '{}.maxX'.format(range))
-		cmds.connectAttr('{}.angleBall'.format(self.control), '{}.minY'.format(range))
-		cmds.connectAttr('{}.roll'.format(self.control), '{}.valueX'.format(range))
-		cmds.connectAttr('{}.roll'.format(self.control), '{}.valueY'.format(range))
-		con = cmds.createNode('condition', name='{}_ball_condition0'.format(self.name))
-		cmds.setAttr('{}.secondTerm'.format(con), 10)
-		cmds.setAttr('{}.operation'.format(con), 2)
-		cmds.connectAttr('{}.roll'.format(self.control), '{}.firstTerm'.format(con))
-		cmds.connectAttr('{}.outValueX'.format(range), '{}.colorIfFalseR'.format(con))
-		cmds.connectAttr('{}.outValueY'.format(range), '{}.colorIfTrueR'.format(con))
-		cmds.connectAttr('{}.outColorR'.format(con), '{}.rx'.format(ballGrp))
-
-		# Return
-		self.parent = globalGrp
-		self.swivel = swivelList
-		self.bank = bankList
-		self.rock = rockList
-		self.ball = [ballOffset, ballGrp]
-		self.toe = listCheck(toeGrp)
-		return
-
-	def defaultPositions(self):
-		locators = getDefaultIKFootRollPositions(foot=self.start, toe=self.end)
-		snap(locators.parent, self.parent, t=True, r=True)
-		snap(self.end, self.toe[0], t=True, r=True)
-
-		for x in [self.swivel[0], self.rock[0]]:
-			moveRotatePivot(locators.heel, x)
-
-		for x in [self.swivel[1]]:
-			moveRotatePivot(locators.ball, x)
-
-		for x in [self.swivel[2], self.rock[1]]:
-			moveRotatePivot(locators.toe, x)
-
-		moveRotatePivot(locators.inner, self.bank[0])
-		moveRotatePivot(locators.outter, self.bank[1])
-
-		for x in self.ball:
-			moveRotatePivot(self.end, x)
-
-		cmds.delete(locators.parent)
-		return
-
-	def accuratePositions(self):
-		startBounds = estimateBoundsByJoint(self.start)
-		endBounds = estimateBoundsByJoint(self.end)
-
-		if self.side == 'left':
-			minX = [startBounds.minX[0], 0, startBounds.minX[2]]
-			maxX = [startBounds.maxX[0], 0, startBounds.maxX[2]]
-		else:
-			minX = [startBounds.maxX[0], 0, startBounds.maxX[2]]
-			maxX = [startBounds.minX[0], 0, startBounds.minX[2]]
-
-		# moveRotatePivot(minX, self.bank[0])
-		moveRotatePivot(maxX, self.bank[1])
-
-		for x in [self.swivel[0], self.rock[0]]:
-			moveRotatePivot([startBounds.minZ[0], 0, startBounds.minZ[2]], x)
-
-		for x in [self.swivel[2], self.rock[1]]:
-			moveRotatePivot([endBounds.maxZ[0], 0, endBounds.maxZ[2]], x)
-		return
-
-	def createWire(self):
-		self.wire = control.wire(typ=control.component.cubeSpecial, axis=[0, 0, 0])
-		snap(self.rock[0], self.wire, r=True, t=True)
-
-		var = [getDistance(self.bank[0], self.bank[1]),
-		       getDistance(self.parent, self.start),
-		       getDistance(self.rock[0], self.rock[1])]
-
-		i=0
-		for axis in ['x', 'y', 'z']:
-			cmds.setAttr('{}.s{}'.format(self.wire, axis), var[i])
-			i+=1
-		presetWireColor(self.wire, typ=component.ik)
-		freezeTransform(self.wire)
-		return
-
-
-class getDefaultIKFootRollPositions:
-	def __init__(self, foot, toe):
-		side = getPositionSide(foot)
-		distance = getDistance(foot, toe)
-
-		self.parent = cmds.spaceLocator(name='foot0')[0]
-		snap(foot, self.parent, t=True)
-		cmds.setAttr('{}.ty'.format(self.parent), 0)
-
-		self.ball = cmds.spaceLocator(name='ball0')[0]
-		snap(toe, self.ball, t=True)
-		cmds.setAttr('{}.ty'.format(self.ball), 0)
-
-		cmds.delete(cmds.aimConstraint(self.ball, self.parent, aimVector=[0, 0, 1]))
-		snap(self.parent, self.ball, r=True)
-		cmds.parent(self.ball, self.parent)
-
-		self.toe = cmds.spaceLocator(name='toe0')[0]
-		cmds.parent(self.toe, self.parent)
-		zeroAttrs(self.toe)
-		cmds.setAttr('{}.tz'.format(self.toe), distance + (distance / 4))
-
-		self.heel = cmds.spaceLocator(name='heel0')[0]
-		cmds.parent(self.heel, self.parent)
-		zeroAttrs(self.heel)
-		cmds.setAttr('{}.tz'.format(self.heel), (distance / 4) * -1)
-
-		if side == 'left':
-			innerM = -1
-			outterM = 1
-		else:
-			innerM = 1
-			outterM = -1
-
-		self.inner = cmds.spaceLocator(name='inner0')[0]
-		cmds.parent(self.inner, self.parent)
-		zeroAttrs(self.inner)
-		cmds.setAttr('{}.tx'.format(self.inner), (distance / 3) * innerM)
-
-		self.outter = cmds.spaceLocator(name='outter0')[0]
-		cmds.parent(self.outter, self.parent)
-		zeroAttrs(self.outter)
-		cmds.setAttr('{}.tx'.format(self.outter), (distance / 3) * outterM)
+							for attr in attrList:
+								cmds.setAttr('{0}.{1}'.format(shape, attr), 0)
+
+					else:
+						if color:
+							cmds.setAttr('{0}.overrideRGBColors'.format(shape), 1)
+
+							i = 0
+							for x in ['R', 'G', 'B']:
+								cmds.setAttr('{0}.overrideColor{1}'.format(shape, x), color[i])
+								i += 1
 
 
 #########################################################################################################################
@@ -2339,7 +1670,7 @@ class getDefaultIKFootRollPositions:
 #########################################################################################################################
 
 
-rootNetwork = component.character
+rootNetwork = componentType.character
 
 
 def network(n='network', typ='', *args):
@@ -2349,22 +1680,22 @@ def network(n='network', typ='', *args):
 	cmds.addAttr(node, ln='children', dt='string')
 	cmds.addAttr(node, ln='set', at='message')
 
-	if typ != component.fkik:
+	if typ != componentType.fkik:
 		cmds.addAttr(node, ln='fkikNetwork', at='message')
 
-	if typ != component.root:
+	if typ != componentType.root:
 		cmds.addAttr(node, ln='index', dv=0, at='long')
 		cmds.addAttr(node, ln='side', dt='string')
 		cmds.addAttr(node, ln='characterNetwork', at='message')
 		cmds.addAttr(node, ln='parentNetwork', at='message')
 
-	if typ in [component.arm, component.leg]:
+	if typ in [componentType.arm, componentType.leg]:
 		# cmds.addAttr(node, ln='index', dv=0, at='long')
 		# cmds.addAttr(node, ln='side', dt='string')
 		# cmds.addAttr(node, ln='side', at='enum', en='none:center:left:right')
 		cmds.addAttr(node, ln='opposite', at='message')
 
-	if typ == component.character:
+	if typ == componentType.character:
 		cmds.addAttr(node, ln='characterName', dt='string')
 		cmds.addAttr(node, ln='globalScale', dv=1)
 		cmds.addAttr(node, ln='cog', at='message')
@@ -2376,33 +1707,33 @@ def network(n='network', typ='', *args):
 	# cmds.addAttr(node, ln='control', dt='string', m=True)
 	# cmds.addAttr(node, ln='bindJoint', dt='string', m=True)
 
-	elif typ == component.cog:
+	elif typ == componentType.cog:
 		# cmds.addAttr(node, ln='control', dt='string', m=True)
 		# cmds.addAttr(node, ln='bindJoint', dt='string', m=True)
 		pass
-	elif typ == component.spine:
+	elif typ == componentType.spine:
 		cmds.addAttr(node, ln='neckHead', at='message')
 		cmds.addAttr(node, ln='tail', at='message')
-	elif typ == component.collar:
+	elif typ == componentType.collar:
 		pass
 	# cmds.addAttr(node, ln='side', dt='string')
 
-	elif typ == component.arm:
+	elif typ == componentType.arm:
 		cmds.addAttr(node, ln='collar', at='message')
 		cmds.addAttr(node, ln='hand', at='message')
-	elif typ == component.hand:
+	elif typ == componentType.hand:
 		pass
 	# cmds.addAttr(node, ln='side', dt='string')
 	# cmds.addAttr(node, ln='finger', dt='string', m=True)
-	elif typ == component.foot:
+	elif typ == componentType.foot:
 		pass
 	# cmds.addAttr(node, ln='side', dt='string')
 	# cmds.addAttr(node, ln='FKIK', min=0, max=1, dv=0)
-	elif typ == component.leg:
+	elif typ == componentType.leg:
 		cmds.addAttr(node, ln='hip', at='message')
 		cmds.addAttr(node, ln='foot', at='message')
 
-	elif typ == component.fkik:
+	elif typ == componentType.fkik:
 		cmds.addAttr(node, ln='FKIK', dv=0, min=0, max=1)
 		cmds.addAttr(node, ln='ikHandle', at='message')
 		cmds.addAttr(node, ln='ikPoleVector', at='message')
@@ -2540,7 +1871,7 @@ class queryNetwork():
 			self.getNetworkFromSelected(selected)
 
 		else:
-			if typ == component.character:
+			if typ == componentType.character:
 				self.getRoot()
 			else:
 				self.network = self.findNetwork(typ)
@@ -2573,7 +1904,7 @@ class queryNetwork():
 
 		# Get Root
 
-		root = self.findNetwork(component.character)
+		root = self.findNetwork(componentType.character)
 		self.network = root
 
 		# Get CharacterName
@@ -2583,32 +1914,32 @@ class queryNetwork():
 		# Get COG
 
 		if root:
-			self.cog = self.getConnected(root, component.cog)
+			self.cog = self.getConnected(root, componentType.cog)
 
 		# Get HIP
 
 		if root:
-			self.hip = self.getConnected(root, component.hip)
+			self.hip = self.getConnected(root, componentType.hip)
 
 		# Get Spine
 		if root:
-			self.spine = self.getConnected(root, component.spine)
+			self.spine = self.getConnected(root, componentType.spine)
 
 		# Get Arm
 		if root:
-			self.arm = self.getConnected(root, component.arm)
+			self.arm = self.getConnected(root, componentType.arm)
 
 		# Get Leg
 		if root:
-			self.leg = self.getConnected(root, component.leg)
+			self.leg = self.getConnected(root, componentType.leg)
 
 		# Get FKIK
 		if root:
-			self.fkik = self.getConnected(root, component.fkik)
+			self.fkik = self.getConnected(root, componentType.fkik)
 
 		# Get Set
 		if root:
-			self.set = self.getConnected(root, component.set)
+			self.set = self.getConnected(root, componentType.set)
 
 	def networkPromptUI(self, *args):
 		networks = self.findAllNetworksByType(self.typ)
@@ -2658,3 +1989,1704 @@ class queryNetwork():
 
 		self.network = network
 		self.parent = parent
+
+
+#########################################################################################################################
+#																														#
+#																														#
+#	MODULES / COMPONENTS 																								#
+#																														#
+#																														#
+#########################################################################################################################
+
+
+characterName = 'character'
+
+
+class MODULE(object):
+	def __init__(self, selected=None, name='character', scale=1, typ='root', index=0, *args):
+		'''
+		Base Class to create rig components: Bind Joints, FK, IK, & FKIK Switching.
+
+		:param selected:    Objects to be rigged.
+		:param name:        Name of rig network
+		:param typ:         Component type
+		:param scale:       Scale of rig controls
+		:param args:        Extra argument for MayaUI
+		'''
+
+		self.selected = self.getSelected(selected)
+		self.name = name
+		self.scale = scale
+		self.typ = typ
+		self.index = index
+
+		self.side = getPositionSide(self.selected[0]) if self.selected else 'center'
+
+		self.bindJoint = None
+		self.control = []
+		self.fkJoint = None
+		self.fkControl = None
+		self.ikJoint = None
+		self.ikControl = None
+		self.ikHandle = None
+		self.ikPoleVector = None
+		self.fkPoleVector = None
+		self.group = None
+		self.fkikNetwork = None
+		self.network = None
+		self.set = None
+		self.attrControl = None
+		self.rootQuery = queryNetwork()
+
+		self.createNetwork()
+
+	def createName(self, suffix, index=0):
+		return '{}_{}_{}{}'.format(self.typ, self.side[0].upper(), suffix, index)
+
+	def getSelected(self, selected):
+		selected = listCheck(selected)
+		if not selected:
+			selected = getSelected()
+		return selected
+
+	def createBindJoints(self):
+		self.bindJoint = createBindChain(self.selected)
+
+	def createFK(self, objects):
+		objects = listCheck(objects)
+
+		fk = createFKChain(objects, scale=self.scale)
+		self.fkJoint = fk.joint
+		self.fkControl = fk.control
+
+		for x in self.fkControl:
+			self.control.append(x[0])
+			presetWireColor(x[0], typ=componentType.fk)
+
+	def createIK(self, objects):
+		objects = listCheck(objects)
+
+		ik = createIKChain(objects, scale=self.scale, typ=self.typ)
+
+		self.ikJoint = ik.joint
+		self.ikControl = ik.control
+		self.ikHandle = ik.ikHandle
+		self.ikPoleVector = ik.poleVector
+
+		for x in self.ikControl:
+			self.control.append(x[0])
+			presetWireColor(x[0], typ=componentType.ik)
+
+	def createFKIK(self, objects):
+		self.createFK(objects)
+		self.createIK(objects)
+		self.createFKPoleVector()
+		self.createFKIKNetwork(objects, self.fkJoint, self.ikJoint)
+
+		self.createAttrControl(objects[-1])
+
+	def createFKPoleVector(self):
+		fkPoleVector = cmds.group(n=self.createName('_FKPoleVector_null'), em=True)
+		snap(self.ikControl[1][0], fkPoleVector, t=True, r=True)
+		cmds.parent(fkPoleVector, self.fkJoint[1])
+		self.fkPoleVector = fkPoleVector
+
+	def createAttrControl(self, selected):
+		if self.typ == componentType.arm:
+			axis = [1, -1, 0]
+		elif self.typ == componentType.leg:
+			axis = [0, 2, 0]
+		else:
+			axis = [0, 0, 0]
+
+		self.attrControl = control(n=self.createName('attr_ctl'), typ='lollipop', axis=axis,
+		                           parent=False, scale=self.scale)
+
+		for attr in cmds.listAttr(self.attrControl[0], k=True):
+			cmds.setAttr('{}.{}'.format(self.attrControl[0], attr), lock=True, k=False, cb=False)
+
+		cmds.addAttr(self.attrControl[0], ln='FKIK', dv=0, min=0, max=1, k=True)
+		cmds.connectAttr('{}.FKIK'.format(self.attrControl[0]), '{}.FKIK'.format(self.fkikNetwork))
+
+		snap(selected, self.attrControl[1], t=True)
+		cmds.parent(self.attrControl[1], selected)
+
+		connectToNetwork(self.attrControl[0], self.fkikNetwork, 'attributeControl')
+
+		overrideColor(self.attrControl[0], color=[.355, 0.0, .468])
+
+	def createFKIKNetwork(self, obj=None, fk=None, ik=None):
+		fkikNet = network(n=self.createName('fkik_network'), typ=componentType.fkik)
+		self.setNetworkDefaults(fkikNet)
+		connectToNetwork(fkikNet, self.network, 'fkikNetwork')
+
+		if fk and ik:
+			fkik = createFKIK(obj=obj, fk=fk, ik=ik, ctl=fkikNet)
+			for f in self.fkControl:
+				i = self.fkControl.index(f)
+				cmds.connectAttr('{}.outputX'.format(fkik[1][i]), '{}.v'.format(f[0]))
+
+			for i in self.ikControl:
+				cmds.connectAttr('{}.FKIK'.format(fkikNet), '{}.v'.format(i[0]))
+
+		if self.bindJoint:
+			multiConnectToNetwork(self.bindJoint, fkikNet, 'bindJoint')
+
+		if self.fkControl:
+			fkControl = [x[0] for x in self.fkControl]
+			multiConnectToNetwork(self.fkJoint, fkikNet, 'fkJoint')
+			multiConnectToNetwork(fkControl, fkikNet, 'fkControl')
+
+		if self.ikHandle:
+			connectToNetwork(self.ikHandle, fkikNet, 'ikHandle')
+		# connectToNetwork(self.ikPoleVector, fkikNet, 'ikPoleVector')
+
+		if self.fkPoleVector:
+			connectToNetwork(self.fkPoleVector, fkikNet, 'fkPoleVector')
+
+		if self.ikControl:
+			ikControl = [x[0] for x in self.ikControl]
+			multiConnectToNetwork(self.ikJoint, fkikNet, 'ikJoint')
+			multiConnectToNetwork(ikControl, fkikNet, 'ikControl')
+
+		self.fkikNetwork = fkikNet
+
+	def createNetwork(self):
+		self.network = network(n=self.createName('network'), typ=self.typ)
+		self.setNetworkDefaults(self.network)
+
+	def setNetworkDefaults(self, network):
+		cmds.setAttr('{}.index'.format(network), self.index)
+		cmds.setAttr('{}.side'.format(network), self.side, type='string', lock=True)
+
+	def createSet(self):
+		self.set = createSet(self.control, n=self.createName('control_set'))
+		connectToNetwork(self.set, self.network, componentType.set)
+
+
+class ROOT(MODULE):
+
+	def __init__(self, selected=None, name='character', scale=1, *args):
+		super(ROOT, self).__init__(selected=selected, name=name, scale=scale, typ=componentType.character)
+
+		self.createControls()
+		self.updateNetwork()
+
+	def determineControlScale(self):
+		self.parent = False
+
+		if self.selected:
+			self.parent = True
+
+			children = cmds.listRelatives(self.selected[0], ad=True)
+
+			posList = []
+
+			if children:
+				for child in children:
+					if cmds.objectType(child, isType='joint'):
+						pos = cmds.xform(child, q=True, ws=True, rp=True)
+						posList.append(pos[1])
+			if posList:
+				self.scale = int(max(posList) / 2)
+
+	def createControls(self):
+		self.determineControlScale()
+
+		# Controls
+
+		ctl = control(self.selected, n='root_ctl', typ='root', r=False, scale=self.scale + 2, parent=False)
+		offset = control(self.selected, n='root_offset_ctl', typ='center', r=False, scale=self.scale - 2,
+		                 parent=self.parent)
+		presetWireColor([ctl[0], offset[0]], typ=componentType.center)
+		cmds.parent(offset[1], ctl[0])
+
+		# Global Scale
+
+		cmds.addAttr(ctl[0], ln='globalScale', dv=1)
+		cmds.setAttr('{}.globalScale'.format(ctl[0]), k=False, channelBox=True)
+
+		for axis in ['x', 'y', 'z']:
+			cmds.connectAttr('{}.globalScale'.format(ctl[0]), '{}.s{}'.format(ctl[0], axis))
+
+			if self.selected:
+				cmds.connectAttr('{}.globalScale'.format(ctl[0]), '{}.s{}'.format(self.selected[0], axis))
+
+			cmds.setAttr('{}.s{}'.format(ctl[0], axis), k=False, channelBox=False, lock=True)
+			cmds.setAttr('{}.s{}'.format(offset[0], axis), k=False, channelBox=False, lock=True)
+
+		cmds.connectAttr('{}.globalScale'.format(ctl[0]), '{}.globalScale'.format(self.network))
+
+		# Master Group
+		self.group = createGroup(ctl[1], n='{}_RIG'.format(self.name))
+
+		# Return
+		self.fkControl = [ctl, offset]
+		for x in self.fkControl:
+			self.control.append(x[0])
+
+	def updateNetwork(self):
+		cmds.setAttr('{}.characterName'.format(self.network), self.name, type='string')
+		self.createSet()
+		multiConnectToNetwork(self.control, self.network, 'control')
+
+
+class COG(MODULE):
+
+	def __init__(self, selected=None, name='cog', scale=1, *args):
+		super(COG, self).__init__(selected=selected, name=name, scale=scale, typ=componentType.cog)
+
+		if self.selected:
+			self.createControls()
+			self.updateNetwork()
+
+	def determineControlScale(self):
+		self.scale = cmds.xform(self.selected[0], q=True, ws=True, rp=True)[1] / 4 + 1
+
+	def createControls(self):
+		self.determineControlScale()
+		self.createBindJoints()
+
+		ctl = control(self.bindJoint, n='cog_ctl', typ='center', r=False, parent=False, scale=self.scale, nest=True)
+		presetWireColor(ctl, typ=componentType.center)
+
+		self.fkControl = ctl
+		self.control.append(ctl[0])
+
+	def updateNetwork(self):
+		self.createSet()
+
+		if self.rootQuery.network:
+			connectToNetwork(self.network, self.rootQuery.network, componentType.cog)
+			rootCtl = getConnectedObj(self.rootQuery.network, 'control[0]')
+			cmds.parent(self.fkControl[1], rootCtl)
+
+		multiConnectToNetwork(self.control, self.network, 'control')
+		multiConnectToNetwork(self.bindJoint, self.network, 'bindJoint')
+
+
+class HIP(MODULE):
+
+	def __init__(self, selected=None, name='hip', scale=1, *args):
+		super(HIP, self).__init__(selected=selected, name=name, scale=scale, typ=componentType.hip)
+
+		if self.selected:
+			self.createControls()
+			self.updateNetwork()
+
+	def determineControlScale(self):
+		self.scale = cmds.xform(self.selected[0], q=True, ws=True, rp=True)[1] / 4
+
+	def createControls(self):
+		self.determineControlScale()
+		self.createBindJoints()
+
+		ctl = control(self.bindJoint, n='hip_ctl', typ='circle', r=False, parent=False, scale=self.scale, nest=True)
+		presetWireColor(ctl, typ=componentType.center)
+
+		self.fkControl = ctl
+		self.control.append(ctl[0])
+
+	def updateNetwork(self):
+		self.createSet()
+
+		if self.rootQuery.network:
+			connectToNetwork(self.network, self.rootQuery.network, componentType.hip)
+
+		if self.rootQuery.cog:
+			cog = getConnectedObj(self.rootQuery.cog, 'control[0]')
+
+			if cog:
+				cmds.parent(self.fkControl[1], cog)
+
+		multiConnectToNetwork(self.control, self.network, 'control')
+		multiConnectToNetwork(self.bindJoint, self.network, 'bindJoint')
+
+
+class SPINE(MODULE):
+	def __init__(self, selected=None, name='spine', scale=1, *args):
+		super(SPINE, self).__init__(selected=selected, name=name, scale=scale, typ=componentType.spine)
+
+		if self.selected:
+			self.createControls()
+			self.updateNetwork()
+
+	def determineControlScale(self):
+		bound = estimateBoundsByJoint(self.selected[0])
+		if bound:
+			self.scale = bound.maxX[0]
+
+	def createControls(self):
+		self.determineControlScale()
+		self.createBindJoints()
+		self.createFK(self.bindJoint)
+
+		i = 0
+		for jnt in self.fkJoint:
+			cmds.parentConstraint(jnt, self.bindJoint[i], mo=True)
+			i += 1
+
+	def updateNetwork(self):
+		self.createSet()
+		self.createFKIKNetwork()
+
+		if self.rootQuery.network:
+			connectToNetwork(self.network, self.rootQuery.network, componentType.spine)
+
+		if self.rootQuery.cog:
+			cog = getConnectedObj(self.rootQuery.cog, 'control[0]')
+			cogBind = getConnectedObj(self.rootQuery.cog, 'bindJoint[0]')
+
+			if cog:
+				cmds.parent(self.fkControl[0][1], cog)
+				cmds.parent(self.bindJoint[0], cogBind)
+
+
+class HEAD(MODULE):
+	def __init__(self, selected=None, name='head', scale=1, *args):
+		super(HEAD, self).__init__(selected=selected, name=name, scale=scale, typ=componentType.head)
+
+		if self.selected:
+			self.createControls()
+			self.createFKIKNetwork()
+			self.createFKIK()
+			self.updateNetwork()
+
+	def createControls(self):
+		self.createBindJoints()
+		self.createFK(self.bindJoint)
+		cmds.parentConstraint(self.fkControl[0][0], self.bindJoint[0])
+		self.createIK(self.bindJoint)
+
+	def createIK(self, objects):
+		cmds.select(d=True)
+
+		distance = cmds.xform(objects[-1], q=True, ws=True, rp=True)[1] / 2
+
+		ikJnt = cmds.joint(n='{}_ik_jnt'.format(removeJointStr(objects[-1])))
+		cmds.setAttr('{}.v'.format(ikJnt), 0)
+		ikCtl = control(n='{}_ik_ctl'.format(removeJointStr(objects[-1])), axis=[1, 0, 0], t=False, r=False)
+
+		snap(objects[-1], ikJnt, t=True, r=True)
+		snap(objects[-1], ikCtl[-1], t=True, r=False)
+		cmds.xform(ikCtl[-1], ws=True, t=[0, 0, distance], r=True)
+
+		cmds.parent(ikJnt, self.fkControl[0][0])
+		makeAimVector(ikCtl[0], ikJnt)
+
+		presetWireColor(ikCtl[0], typ=componentType.ik)
+
+		self.ikJoint = [ikJnt]
+		self.ikControl = [ikCtl]
+
+	def createFKIK(self):
+		fkik = createFKIK(self.bindJoint[-1], self.fkJoint[-1], self.ikJoint[-1], ctl=self.fkikNetwork)
+		cmds.connectAttr('{}.outputX'.format(fkik[1][0]), '{}.v'.format(self.fkControl[-1][1]))
+		cmds.connectAttr('{}.{}'.format(self.fkikNetwork, fkik[2]), '{}.v'.format(self.ikControl[0][1]))
+
+	def updateNetwork(self):
+		self.createSet()
+
+		if self.rootQuery.network:
+			connectToNetwork(self.network, self.rootQuery.network, componentType.head)
+
+			rootCtl = getConnectedObj(self.rootQuery.network, 'control[0]')
+
+			if rootCtl:
+				cmds.parent(self.ikControl[0][1], rootCtl)
+
+			if self.rootQuery.cog:
+				cog = getConnectedObj(self.rootQuery.cog, 'control[0]')
+				if cog:
+					createLocalWorld(self.fkControl[-1][0], local=self.bindJoint[0], world=cog)
+
+			if self.rootQuery.spine:
+				spineFKIK = getConnectedObj(self.rootQuery.spine, 'fkikNetwork')
+				spineJnt = cmds.listConnections('{}.bindJoint'.format(spineFKIK))
+
+				if spineJnt:
+					cmds.parent(self.fkControl[0][-1], self.bindJoint[0], spineJnt[-1])
+
+
+class COLLAR(MODULE):
+	def __init__(self, selected=None, name='collar', scale=1, index=0, *args):
+		super(COLLAR, self).__init__(selected=selected, name=name, scale=scale, index=index, typ=componentType.collar)
+
+		if self.selected:
+			self.bindJoint = [self.selected[0]]
+			self.createControls()
+			self.createFKIKNetwork(self.bindJoint[0], self.fkJoint[0], self.ikJoint[0])
+			self.updateNetwork()
+
+	def createControls(self):
+		self.createFK(self.bindJoint[0])
+		self.createIK(self.selected)
+		self.createFKPoleVector()
+
+	def createIK(self, selected):
+		ikJnt = createJointChain(selected, typ='ik_aux', world=False)
+		ikCtl = control(selected[1], n='{}_ik_ctl'.format(removeJointStr(selected[0])), axis=[1, 0, 0],
+		                parent=False)
+		ikHandle = cmds.ikHandle(n='collar_{}_ikHandle'.format(self.side[0].upper()), sj=ikJnt[0], ee=ikJnt[1],
+		                         sol='ikSCsolver')[0]
+		cmds.setAttr('{}.v'.format(ikHandle), 0)
+		cmds.parent(ikHandle, ikCtl[0])
+
+		presetWireColor(ikCtl[0], componentType.ik)
+
+		self.control.append(ikCtl[0])
+
+		self.ikJoint = ikJnt
+		self.ikControl = [ikCtl]
+		self.ikHandle = ikHandle
+
+	def createFKPoleVector(self):
+		fkPoleVector = cmds.group(n='{}_fkPoleVector_null'.format(self.fkJoint[0]), em=True)
+		snap(self.ikJoint[1], fkPoleVector, t=True, r=True)
+		cmds.parent(fkPoleVector, self.fkJoint[0])
+
+		self.fkPoleVector = fkPoleVector
+
+	def updateNetwork(self):
+		if self.rootQuery.network:
+			if self.rootQuery.cog:
+				cog = cmds.listConnections('{}.control[0]'.format(self.rootQuery.cog))
+				if cog:
+					cmds.parent(self.ikControl[0][1], cog)
+
+			if self.rootQuery.spine:
+				spineFKIK = getConnectedObj(self.rootQuery.spine, 'fkikNetwork')
+				spineJnt = cmds.listConnections('{}.bindJoint'.format(spineFKIK))
+				if spineFKIK:
+					cmds.parent(self.fkControl[0][1], self.ikJoint[0], spineJnt[-1])
+
+
+class ARM(MODULE):
+	def __init__(self, selected=None, name='arm', scale=1, index=0, *args):
+		super(ARM, self).__init__(selected=selected, name=name, scale=scale, index=index, typ=componentType.arm)
+
+		if self.selected:
+			self.createControls()
+			self.updateNetwork()
+
+	def createControls(self):
+		self.createBindJoints()
+
+		if len(self.bindJoint) == 4:
+			self.createFKIK([self.bindJoint[1], self.bindJoint[2], self.bindJoint[3]])
+			self.createCollar(self.bindJoint[0], self.bindJoint[1])
+
+		elif len(self.bindJoint) == 3:
+			self.createFKIK(self.bindJoint)
+
+		self.createHand()
+
+	def createCollar(self, start, end):
+		collar = COLLAR([start, end])
+		presetWireColor(collar.fkControl[0], componentType.fk)
+		presetWireColor(collar.ikControl[0], componentType.ik)
+
+		connectToNetwork(collar.network, self.network, 'collar')
+		cmds.parent(self.fkControl[0][1], self.ikControl[0][1], collar.bindJoint[0])
+
+		self.control = self.control + collar.control
+
+		if self.rootQuery.cog:
+			cog = cmds.listConnections('{}.control'.format(self.rootQuery.cog))[0]
+			if cog:
+				createLocalWorld(self.fkControl[0][0], local=collar.bindJoint[0], world=cog)
+
+		cmds.addAttr(self.attrControl[0], ln='collarFKIK', dv=0, min=0, max=1, k=True)
+		cmds.connectAttr('{}.collarFKIK'.format(self.attrControl[0]), '{}.FKIK'.format(collar.fkikNetwork))
+
+	def createHand(self):
+		hand = HAND(self.selected[-1])
+		connectToNetwork(hand.network, self.network, 'hand')
+
+		self.control = self.control + hand.control
+
+		cmds.parent(hand.group, [x[0] for x in hand.bindJoint], self.bindJoint[-1])
+
+	def updateNetwork(self):
+		self.createSet()
+
+		if self.rootQuery.network:
+			connectToNetwork(self.network, self.rootQuery.network, componentType.arm)
+			rootCtl = cmds.listConnections('{}.control'.format(self.rootQuery.network))
+
+			if rootCtl:
+				cmds.parent(self.ikControl[1][1], self.ikControl[2][1], rootCtl[0])
+
+			if self.rootQuery.spine:
+				spineFKIK = getConnectedObj(self.rootQuery.spine, 'fkikNetwork')
+				spineJnt = cmds.listConnections('{}.bindJoint'.format(spineFKIK))
+
+				if spineJnt:
+					cmds.parent(self.bindJoint[0], spineJnt[-1])
+
+
+class LEG(MODULE):
+	def __init__(self, selected=None, name='leg', scale=1, *args):
+		super(LEG, self).__init__(selected=selected, name=name, scale=scale, typ=componentType.leg)
+
+		if self.selected:
+			self.createControls()
+			self.updateNetwork()
+
+	def createControls(self):
+		self.createBindJoints()
+
+		if len(self.bindJoint) == 4:
+			self.createFK(self.bindJoint)
+			self.createIKLeg([self.bindJoint[0], self.bindJoint[1], self.bindJoint[2]])
+			self.createFKIKNetwork(self.bindJoint, self.fkJoint, self.ikJoint)
+			self.createAttrControl(self.bindJoint[2])
+
+		elif len(self.bindJoint) == 3:
+			self.createFKIK(self.bindJoint)
+
+	def createIKLeg(self, objects):
+		self.createIK(objects)
+
+		ballJnt = createJointChain(self.bindJoint[-1], typ=componentType.ik, world=True)[0]
+		cmds.parent(ballJnt, self.ikJoint[-1])
+		self.ikJoint.append(ballJnt)
+
+		self.createFoot()
+
+	def createFoot(self):
+		foot = createIKFootPivot(n=self.createName('ik_footPivot'), ik=self.ikHandle,
+		                         start=self.selected[2], end=self.ikJoint[-1], ctl=self.ikControl[-1][0])
+
+	def updateNetwork(self):
+		cmds.setAttr('{}.FKIK'.format(self.attrControl[0]), 1)
+
+		if self.rootQuery.network:
+			connectToNetwork(self.network, self.rootQuery.network, componentType.leg)
+			rootCtl = cmds.listConnections('{}.control'.format(self.rootQuery.network))
+
+			if rootCtl:
+				cmds.parent(self.ikControl[1][1], self.ikControl[2][1], rootCtl[0])
+
+			cogCtl = None
+			if self.rootQuery.cog:
+				cogCtl = cmds.listConnections('{}.control'.format(self.rootQuery.cog))
+
+			if self.rootQuery.hip:
+				hipCtl = cmds.listConnections('{}.control'.format(self.rootQuery.hip))
+				hipBind = getConnectedObj(self.rootQuery.hip, 'bindJoint[0]')
+
+				if hipBind:
+					cmds.parent(self.bindJoint[0], hipBind)
+
+				if hipCtl:
+					cmds.parent(self.ikControl[0][1], self.fkControl[0][1], hipCtl[0])
+
+					if cogCtl:
+						createLocalWorld(self.fkControl[0][0], local=hipCtl[0], world=cogCtl[0])
+
+
+class HAND(MODULE):
+	def __init__(self, selected=None, name='hand', scale=1, index=0, *args):
+		super(HAND, self).__init__(selected=selected, name=name, scale=scale, index=0, typ=componentType.hand)
+
+		self.handDict = {componentType.thumb: [],
+		                 componentType.index: [],
+		                 componentType.middle: [],
+		                 componentType.ring: [],
+		                 componentType.pinky: [],
+		                 }
+
+		if self.selected:
+			self.createControls()
+
+	def createControls(self):
+		self.bindJoint = []
+
+		cmds.addAttr(self.network, ln='finger', dt='string', m=True)
+
+		jointChain = self.getJointOrder()
+		if jointChain:
+			masterGrp = cmds.group(n=self.createName('rig_fk_ctl_grp'), em=True)
+			snap(self.selected[0], masterGrp, t=True, r=True)
+
+			i = 0
+			for chain in jointChain:
+				fingerRig = FINGER(jointChain[chain], index=i)
+				connectToNetwork(fingerRig.network, self.network, 'finger')
+
+				self.control = self.control + fingerRig.control
+				self.bindJoint.append(fingerRig.bindJoint)
+				cmds.parent(fingerRig.fkControl[0][1], masterGrp)
+				i += 1
+
+			self.group = masterGrp
+
+	def getJointOrder(self):
+		return self.getJointOrderByName() if not self.getJointOrderByLabel() else self.getJointOrderByLabel()
+
+	def getJointOrderByName(self):
+		chain = handJointHierarchy(self.selected)
+
+		handDict = self.handDict
+
+		for x in self.handDict:
+			for jnt in chain:
+				for j in jnt:
+					if x in j:
+						handDict[x] = jnt
+						break
+
+		return handDict
+
+	def getJointOrderByLabel(self):
+		chain = handJointHierarchy(self.selected)
+		handDict = self.handDict
+
+		newChain = []
+		for c in chain:
+			for x in c:
+				newChain.append(x)
+
+		newChain = jointLabel(newChain).get(self.typ, self.side)
+
+		i = 0
+		for x in self.handDict:
+			handDict[x] = newChain[i]
+			i += 1
+
+		return handDict
+
+
+class FINGER(MODULE):
+	def __init__(self, selected=None, name='finger', scale=1, index=0, *args):
+		super(FINGER, self).__init__(selected=selected, name=name, scale=scale, index=index, typ=componentType.finger)
+
+		if self.selected:
+			self.createControls()
+			self.updateNetwork()
+
+	def createControls(self):
+		self.determineControlScale(self.selected[-1])
+		self.createBindJoints()
+		self.createFK(self.bindJoint)
+
+		i = 0
+		for jnt in self.fkJoint:
+			cmds.parentConstraint(jnt, self.bindJoint[i], mo=True)
+			i += 1
+
+	def determineControlScale(self, selected):
+		bound = estimateBoundsByJoint(selected)
+		if bound:
+			self.scale = getDistance(bound.maxZ, bound.minZ) / 2
+
+	def updateNetwork(self):
+		self.createFKIKNetwork()
+
+
+class NOODLE(MODULE):
+	def __init__(self, selected=None, name='limb', typ=componentType.noodle, scale=1, *args):
+		super(NOODLE, self).__init__(selected=selected, name=name, scale=scale, typ=typ)
+
+		if self.selected:
+
+			if len(self.selected) % 2 == 0:
+				cmds.warning('Need Odd Number of Joints.')
+
+			else:
+				self.midNum = (len(self.selected) / 2) + 1
+				self.mainControl = None
+
+				self.createControls()
+				self.createConnections()
+				self.updateNetwork()
+
+	def createControls(self):
+		self.bindJoint = self.createBindJoints(self.selected)
+		self.createBindControls()
+		self.createMainControls()
+
+		upperList = [self.mainControl[0][0], self.mainControl[1][0], self.mainControl[2][0]]
+		lowerList = [self.mainControl[2][0], self.mainControl[3][0], self.mainControl[4][0]]
+
+		self.upperBound = self.createCurveBound(upperList, name='upperBound_curve1', amount=self.midNum)
+		self.lowerBound = self.createCurveBound(lowerList, name='lowerBound_curve1', amount=self.midNum)
+
+	# self.smoothBound = self.createCurveBound([x[0] for x in self.mainControl], name='smoothBound_curve1',
+	#                                         amount=len(self.bindJoint))
+
+	def createBindControls(self):
+		for jnt in self.bindJoint:
+			ctl = control(jnt, n='{}_ctl'.format(removeJointStr(jnt)), typ='circle', axis=[1, 0, 0], nest=True,
+			              parent=False)
+			self.control.append(ctl)
+
+	def createMainControls(self):
+		start = self.bindJoint[0]
+		mid = self.bindJoint[len(self.bindJoint) / 2]
+		end = self.bindJoint[-1]
+
+		# Main Controls
+
+		mainCtlList = []
+		i = 0
+		for jnt in [start, mid, end]:
+			ctl = control(jnt, n=self.createName('main_{}_ctl'.format(i)),
+			              typ='square',
+			              axis=[1, 0, 0], parent=False)
+			mainCtlList.append(ctl)
+			i += 1
+
+		# Main Curve
+		self.mainBound = self.makeCurve(selected=[x[0] for x in mainCtlList],
+		                                name=self.createName('main_curve1'), amount=len(self.bindJoint))
+
+		# Int Controls
+
+		intCtlList = []
+		i = 0
+		for obj in ['upper', 'lower']:
+			ctl = control(n=self.createName('{}Bound_{}_ctl'.format(obj, i)),
+			              typ='square',
+			              axis=[1, 0, 0])
+			cmds.delete(cmds.pointConstraint(mainCtlList[i][1], mainCtlList[i + 1][1], ctl[1]))
+			snap(mainCtlList[i][1], ctl[1], r=True, t=False)
+			intCtlList.append(ctl)
+			i += 1
+
+		mainCtlList.insert(1, intCtlList[0])
+		mainCtlList.insert(3, intCtlList[1])
+
+		self.mainControl = mainCtlList
+
+	def createCurveBound(self, selected, name, amount, parent=True, start=True, end=True, d=2):
+		return self.makeCurve(selected,
+		                      name=self.createName(name),
+		                      amount=amount,
+		                      parent=parent,
+		                      start=start,
+		                      end=end,
+		                      d=d)
+
+	def createBindJoints(self, selected):
+		bindJoints = createJointChain(selected, typ=self.typ, world=True)
+
+		i = 0
+		for jnt in bindJoints:
+			cmds.parentConstraint(jnt, selected[i], mo=True)
+			cmds.scaleConstraint(jnt, selected[i], mo=True)
+			i += 1
+
+		return bindJoints
+
+	class makeCurve(object):
+		def __init__(self, selected, name, amount, upObject=None, parent=True, start=True, end=True, d=1):
+			curve = makeNurbsCurve(selected, n=name, d=d)
+			clusters = clusterCurve(curve, n='{}_cluster'.format(curve))
+			null = locOnCurve(curve=curve, intLoc=amount, n='{}_null'.format(curve), upObject=upObject, start=start,
+			                  end=end)
+			grp = cmds.group(null, n='{}_null_grp'.format(name))
+
+			if parent:
+				i = 0
+				for c in clusters:
+					cmds.parent(c, selected[i])
+					i += 1
+
+			self.curve = curve
+			self.cluster = clusters
+			self.null = null
+			self.group = grp
+
+	def createConnections(self):
+
+		cmds.addAttr(self.network, ln='smooth', at='double', dv=0, min=0, max=1)
+
+		for i in [self.midNum / 2, self.midNum]:
+			cmds.parent(self.mainControl[i][1], self.mainBound.null[i])
+
+		del (self.upperBound.null)[-1]
+
+		i = 0
+		for null in self.upperBound.null + self.lowerBound.null:
+			cmds.parent(self.control[i][1], null)
+			i += 1
+
+	def updateNetwork(self):
+		pass
+
+
+class createFKChain():
+	def __init__(self, objs, scale=1, *args):
+
+		self.control = None
+		self.joint = None
+
+		jointList = []
+		controlList = []
+
+		objs = createJointChain(objs, typ='fk', world=True)
+
+		for obj in objs:
+			ctl = control(obj, n='{}_ctl'.format(removeJointStr(obj)), axis=[1, 0, 0], parent=False, nest=True,
+			              scale=scale)
+			controlList.append(ctl)
+
+		i = 0
+		for x in controlList:
+			if i != 0:
+				cmds.parent(x[-1], controlList[i - 1][0])
+			i += 1
+
+		self.joint = objs
+		self.control = controlList
+
+
+class createIKChain():
+	def __init__(self, objs, typ=componentType.limb, scale=1, jnt=True, stretch=True, *args):
+
+		if typ == componentType.arm:
+			axis = [1, 0, 0]
+		elif typ == componentType.leg:
+			axis = [0, 0, 0]
+		else:
+			axis = [1, 0, 0]
+
+		side = getPositionSide(objs)
+		prefix = '{}_{}'.format(typ, side[0].upper())
+
+		jointList = []
+		controlList = []
+
+		if jnt:
+			objs = createJointChain(objs, typ='ik', world=False)
+
+		start = objs[0]
+		mid = objs[1]
+		end = objs[2]
+
+		# Controls
+
+		for obj in [start, mid, end]:
+			ctl = control(obj, n='{}_ctl'.format(removeJointStr(obj)), axis=axis, r=False, parent=False, scale=scale)
+			controlList.append(ctl)
+
+		# Hip Constraint
+
+		# cmds.pointConstraint(controlList[0][0], start, mo=True)
+		cmds.parent(start, controlList[0][0])
+
+		# Create IK
+
+		if typ == componentType.leg:
+			cmds.setAttr('{}.ty'.format(controlList[-1][-1]), 0)
+
+		handle = \
+			cmds.ikHandle(name='{}_{}_ikHandle_0'.format(typ, side[0].upper()), sj=start, ee=end, sol='ikRPsolver')[0]
+		cmds.parent(handle, controlList[-1][0])
+		cmds.orientConstraint(handle, end, mo=True)
+		cmds.setAttr('{}.v'.format(handle), 0)
+
+		distance = getDistance(start, end)
+
+		pvPos = getPoleVectorPosition(start, mid, end)
+		cmds.xform(controlList[1][1], ws=True, t=pvPos)
+
+		# PoleVector
+
+		pv = makePoleVector(handle, controlList[1][0], mid)
+
+		# Create Stretch
+		'''
+		sCtl = controlList[-1][0]
+
+		addEmptyAttr(sCtl, n='stretch')
+		cmds.addAttr(sCtl, ln='addStretch', dv=0, k=True)
+		cmds.addAttr(sCtl, ln='autoStretch', dv=0, min=0, max=1, k=True)
+		cmds.addAttr(sCtl, ln='pin', dv=0, min=-10, max=10, k=True)
+		cmds.addAttr(sCtl, ln='slide', dv=0, min=-10, max=10, k=True)
+
+		stretchLoc = cmds.spaceLocator(n='{}_stretch_loc'.format(sCtl))[0]
+		cmds.setAttr('{}.v'.format(stretchLoc), 0)
+		snap(end, stretchLoc, r=True, t=True)
+		cmds.parent(stretchLoc, sCtl)
+		distanceA = getDistance(objs[0], objs[1])
+		distanceB = getDistance(objs[1], objs[2])
+
+		# Auto / Add Stretch
+		disA = createDistanceNode(controlList[0][0], stretchLoc, n='{}_distance_0'.format(prefix))[0]
+
+		amd = cmds.createNode('multiplyDivide', n='{}_autoStretch_ik_md_0'.format(prefix))
+		cmds.setAttr('{}.operation'.format(amd), 2)
+		cmds.setAttr('{}.input2X'.format(amd), distanceA + distanceB)
+		cmds.connectAttr('{}.distance'.format(disA), '{}.input1X'.format(amd))
+
+		aco = cmds.createNode('condition', n='{}_autoStretch_ik_cn_0'.format(prefix))
+		cmds.setAttr('{}.operation'.format(aco), 2)
+		cmds.connectAttr('{}.distance'.format(disA), '{}.firstTerm'.format(aco))
+		cmds.connectAttr('{}.input2X'.format(amd), '{}.secondTerm'.format(aco))
+		cmds.connectAttr('{}.outputX'.format(amd), '{}.colorIfTrueR'.format(aco))
+
+		asr = cmds.createNode('setRange', n='{}_autoStretch_ik_sr_0'.format(prefix))
+		cmds.setAttr('{}.minX'.format(asr), 1)
+		cmds.setAttr('{}.oldMaxX'.format(asr), 1)
+		cmds.connectAttr('{}.autoStretch'.format(sCtl), '{}.valueX'.format(asr))
+		cmds.connectAttr('{}.outColorR'.format(aco), '{}.maxX'.format(asr))
+
+		apm = cmds.createNode('plusMinusAverage', n='{}_autoStretch_ik_pm_0'.format(prefix))
+		cmds.connectAttr('{}.addStretch'.format(sCtl), '{}.input3D[0].input3Dx'.format(apm))
+		cmds.connectAttr('{}.addStretch'.format(sCtl), '{}.input3D[0].input3Dy'.format(apm))
+		cmds.connectAttr('{}.outValueX'.format(asr), '{}.input3D[1].input3Dx'.format(apm))
+		cmds.connectAttr('{}.outValueX'.format(asr), '{}.input3D[1].input3Dy'.format(apm))
+
+		# Sliding Stretch
+
+		slm = cmds.createNode('multiplyDivide', n='{}_slide_ik_md_0'.format(prefix))
+		cmds.setAttr('{}.input2X'.format(slm), -1)
+		cmds.connectAttr('{}.slide'.format(sCtl), '{}.input1X'.format(slm))
+
+		slc = cmds.createNode('condition', n='{}_slide_ik_cn_0'.format(prefix))
+		cmds.setAttr('{}.operation'.format(slc), 2)
+		cmds.connectAttr('{}.slide'.format(sCtl), '{}.firstTerm'.format(slc))
+		cmds.connectAttr('{}.slide'.format(sCtl), '{}.colorIfTrueG'.format(slc))
+		cmds.connectAttr('{}.slide'.format(sCtl), '{}.colorIfFalseG'.format(slc))
+		cmds.connectAttr('{}.outputX'.format(slm), '{}.colorIfTrueR'.format(slc))
+		cmds.connectAttr('{}.outputX'.format(slm), '{}.colorIfFalseR'.format(slc))
+
+		cmds.connectAttr('{}.outColorR'.format(slc), '{}.input3D[2].input3Dx'.format(apm))
+		cmds.connectAttr('{}.outColorG'.format(slc), '{}.input3D[2].input3Dy'.format(apm))
+
+		# Pinning / Locking
+
+		disB = createDistanceNode(controlList[0][0], controlList[1][0], n='{}_distance_0'.format(prefix))[0]
+		disC = createDistanceNode(controlList[1][0], stretchLoc, n='{}_distance_0'.format(prefix))[0]
+
+		pmd = cmds.createNode('multiplyDivide', n='{}_pin_ik_md_0'.format(prefix))
+		cmds.setAttr('{}.input2X'.format(pmd), distanceA)
+		cmds.setAttr('{}.input2Y'.format(pmd), distanceB)
+		cmds.connectAttr('{}.distance'.format(disB), '{}.input1X'.format(pmd))
+		cmds.connectAttr('{}.distance'.format(disC), '{}.input1Y'.format(pmd))
+
+		pbc = cmds.createNode('blendColors', n='{}_pin_ik_bc_0'.format(prefix))
+		cmds.connectAttr('{}.pin'.format(sCtl), '{}.blender'.format(pbc))
+		cmds.connectAttr('{}.outputX'.format(pmd), '{}.color1R'.format(pbc))
+		cmds.connectAttr('{}.outputY'.format(pmd), '{}.color1G'.format(pbc))
+
+		cmds.connectAttr('{}.output3Dx'.format(apm), '{}.color2R'.format(pbc))
+		cmds.connectAttr('{}.output3Dy'.format(apm), '{}.color2G'.format(pbc))
+
+		# Scale
+
+		cmds.connectAttr('{}.outputR'.format(pbc), '{}.sx'.format(objs[0]))
+		cmds.connectAttr('{}.outputG'.format(pbc), '{}.sx'.format(objs[1]))
+		'''
+		# Return
+		self.joint = objs
+		self.ikHandle = handle
+		self.poleVector = pv
+		self.control = controlList
+
+
+class createIKFootPivot():
+	def __init__(self, n='ik_footPivot', ik=None, start=None, end=None, ctl=None, *args):
+
+		side = getPositionSide(start)
+
+		# Query IK
+
+		if not ik:
+			ik = queryIK(start).ikHandle
+
+		# Create Nulls
+
+		grpList = []
+
+		for grp in ['inner', 'outter', 'heel', 'toe', 'ball']:
+			g = cmds.group(n='{}_{}_null'.format(n, grp), em=True)
+			grpList.append(g)
+
+		i = 0
+		for g in grpList:
+			if i != 0:
+				cmds.parent(g, grpList[i - 1])
+			i += 1
+
+		masterGrp = cmds.group(grpList[0], n='{}_grp'.format(n))
+
+		# Toe Raise
+
+		toeRaise = cmds.group(n='{}_toeRaise_null'.format(n), em=True)
+		cmds.parent(toeRaise, grpList[3])
+		grpList.append(toeRaise)
+
+		# Pivot Locations
+
+		snap(start, masterGrp, t=True, r=False)
+		loc = cmds.spaceLocator()
+		snap(end, loc, t=True, r=False)
+		cmds.delete(
+			cmds.aimConstraint(loc, masterGrp, aimVector=[0, 0, 1], upVector=[0, 1, 0], worldUpType='vector',
+			                   worldUpVector=[0, 1, 0], skip=['x', 'z']))
+		cmds.delete(loc)
+
+		bounds = estimateBoundsByJoint(start)
+
+		if bounds.verts:
+			if side == componentType.right:
+				grpList[0], grpList[1] = grpList[1], grpList[0]
+
+			i = 0
+			for b in [bounds.minX, bounds.maxX, bounds.minZ, bounds.maxZ]:
+				cmds.xform(grpList[i], ws=True, rp=[b[0], 0, b[2]])
+				i += 1
+
+		for grp in [grpList[4], grpList[5]]:
+			snap(end, grp, t=True, r=False)
+			freezeTransform(grp)
+
+		# Ball Control
+
+		ballCtl = control(end, n='{}_ball_ctl'.format(n), axis=[1, 0, 0], parent=False)
+		cmds.parent(ballCtl[1], grpList[4])
+
+		# Toe Control
+
+		toeCtl = control(grpList[3], n='{}_toe_ctl'.format(n), axis=[1, 0, 0], parent=False)
+		cmds.parent(toeCtl[1], grpList[5])
+		snap(end, toeCtl[1], t=False, r=True)
+
+		toePos = cmds.xform(grpList[5], q=True, ws=True, rp=True)
+		cmds.xform(toeCtl[0], ws=True, rp=toePos)
+		cmds.xform(toeCtl[1], ws=True, rp=toePos)
+		cmds.orientConstraint(toeCtl[0], end, mo=True)
+
+		# Main Control
+
+		if not ctl:
+			ctl = network(n='{}_Network_0'.format(n), typ='foot')
+			cmds.setAttr('{}.side'.format(ctl), side, type='string', l=True)
+
+			i = 0
+			for null in ['inner', 'outter', 'heel', 'toe', 'ball', 'toeRaise']:
+				connectToNetwork(grpList[i], ctl, '{}_pivot'.format(null))
+				i += 1
+
+		else:
+			cmds.parent(masterGrp, ctl)
+
+		addEmptyAttr(ctl, n='footPivot')
+
+		attrDict = {
+			'roll': 0,
+			'heelAngle': 45,
+			'ballAngle': 45,
+			'toeAngle': 70,
+			'toeRaise': 0,
+			'bank': 0,
+		}
+
+		for attr in attrDict:
+			cmds.addAttr(ctl, ln=attr, at='double', dv=attrDict[attr], k=True)
+
+		# Control Visibility
+
+		cmds.addAttr(ctl, ln='footControls', at='bool', k=True)
+		cmds.setAttr('{}.footControls'.format(ctl), e=True, channelBox=True)
+
+		for x in [ballCtl[1], toeCtl[1]]:
+			cmds.connectAttr('{}.footControls'.format(ctl), '{}.v'.format(x))
+
+		# Heel
+
+		mul = cmds.createNode('multDoubleLinear')
+		cmds.setAttr('{}.input2'.format(mul), -1)
+
+		cmds.connectAttr('{}.heelAngle'.format(ctl), '{}.input1'.format(mul))
+
+		range = cmds.createNode('setRange')
+		cmds.setAttr('{}.oldMinX'.format(range), -10)
+
+		cmds.connectAttr('{}.output'.format(mul), '{}.minX'.format(range))
+		cmds.connectAttr('{}.roll'.format(ctl), '{}.valueX'.format(range))
+
+		cmds.connectAttr('{}.outValueX'.format(range), '{}.rx'.format(grpList[2]))
+
+		# Toe Pivot Connections
+
+		range = cmds.createNode('setRange')
+		cmds.setAttr('{}.oldMinX'.format(range), 10)
+		cmds.setAttr('{}.oldMaxX'.format(range), 20)
+
+		cmds.connectAttr('{}.toeAngle'.format(ctl), '{}.maxX'.format(range))
+		cmds.connectAttr('{}.roll'.format(ctl), '{}.valueX'.format(range))
+
+		cmds.connectAttr('{}.outValueX'.format(range), '{}.rx'.format(grpList[3]))
+		cmds.connectAttr('{}.toeRaise'.format(ctl), '{}.rx'.format(toeRaise))
+
+		# Ball Pivot Connections
+
+		range = cmds.createNode('setRange')
+		cmds.setAttr('{}.oldMaxX'.format(range), 10)
+		cmds.setAttr('{}.oldMinY'.format(range), 10)
+		cmds.setAttr('{}.oldMaxY'.format(range), 20)
+
+		cmds.connectAttr('{}.ballAngle'.format(ctl), '{}.maxX'.format(range))
+		cmds.connectAttr('{}.ballAngle'.format(ctl), '{}.minY'.format(range))
+		cmds.connectAttr('{}.roll'.format(ctl), '{}.valueX'.format(range))
+		cmds.connectAttr('{}.roll'.format(ctl), '{}.valueY'.format(range))
+
+		con = cmds.createNode('condition')
+		cmds.setAttr('{}.secondTerm'.format(con), 10)
+		cmds.setAttr('{}.operation'.format(con), 2)
+
+		cmds.connectAttr('{}.roll'.format(ctl), '{}.firstTerm'.format(con))
+		cmds.connectAttr('{}.outValueX'.format(range), '{}.colorIfFalseR'.format(con))
+		cmds.connectAttr('{}.outValueY'.format(range), '{}.colorIfTrueR'.format(con))
+		cmds.connectAttr('{}.outColorR'.format(con), '{}.rx'.format(grpList[4]))
+
+		# Inner / Outter
+
+		con = cmds.createNode('condition')
+		cmds.setAttr('{}.operation'.format(con), 2)
+
+		cmds.connectAttr('{}.bank'.format(ctl), '{}.firstTerm'.format(con))
+		cmds.connectAttr('{}.bank'.format(ctl), '{}.colorIfTrueR'.format(con))
+		cmds.connectAttr('{}.bank'.format(ctl), '{}.colorIfFalseG'.format(con))
+
+		cmds.connectAttr('{}.outColorR'.format(con), '{}.rz'.format(grpList[0]))
+		cmds.connectAttr('{}.outColorG'.format(con), '{}.rz'.format(grpList[1]))
+
+		# IK
+
+		if ik:
+			cmds.parent(ik, ballCtl[0])
+
+		# Return
+
+		# self.network = net
+		self.pivot = grpList
+		self.group = masterGrp
+		self.control = [ballCtl, toeCtl]
+		self.attr = attrDict
+
+
+#########################################################################################################################
+#																														#
+#																														#
+#	Auto Rig    																								        #
+#																														#
+#																														#
+#########################################################################################################################
+
+class autoRig():
+	def __init__(self, characterName='character', *args):
+
+		selected = cmds.ls(sl=True)
+
+		if not selected:
+			selected = self.queryScene()
+
+		if selected:
+			joints = cmds.listRelatives(selected[0], ad=True, type='joint')
+			joints.append(selected[0])
+
+			jointQuery = jointLabel(joints, isDebug=False)
+
+			# BiPed
+			root = jointQuery.get(componentType.root)
+			cog = jointQuery.get(componentType.cog)
+			hip = jointQuery.get(componentType.hip)
+			spine = jointQuery.get(componentType.spine)
+			head = jointQuery.get(componentType.head)
+			armLeft = jointQuery.get(componentType.arm, componentType.left)
+			armRight = jointQuery.get(componentType.arm, componentType.right)
+			legLeft = jointQuery.get(componentType.leg, componentType.left)
+			legRight = jointQuery.get(componentType.leg, componentType.right)
+
+			pUI = progressWindow(st='Creating Control Modules...', max=9)
+
+			ROOT(root)
+			pUI.update()
+
+			COG(cog)
+			pUI.update()
+
+			HIP(hip)
+			pUI.update()
+
+			SPINE(spine)
+			pUI.update()
+
+			HEAD(head)
+			pUI.update()
+
+			ARM(armLeft)
+			pUI.update()
+
+			ARM(armRight)
+			pUI.update()
+
+			LEG(legLeft)
+			pUI.update()
+
+			LEG(legRight)
+			pUI.update()
+
+	def queryScene(self):
+		joints = cmds.ls(type='joint')
+		return jointLabel(joints).get(componentType.root)
+
+
+#########################################################################################################################
+#																														#
+#																														#
+#	UI																						        #
+#																														#
+#																														#
+#########################################################################################################################
+
+
+DIRPATH = os.path.dirname(os.path.abspath(__file__))
+UIPATH = os.path.join(DIRPATH, 'icons')
+
+colorUI = [[.5, 1, .5], [.25, 1, .75], [0, 1, 1], [.25, .75, 1], [.5, .5, 1], [.75, .25, 1], [1, 0, 1],
+           [1, .25, .75], [1, .25, .5], [1, .5, .25], [1, 1, .25], [.75, 1, .25]]
+
+
+def UIImage(n='icon_01.png', *args):
+	var = os.path.join(UIPATH, n)
+	return var
+
+
+def button(l='Button', i='circle.png', c=None, bgc=[], *args):
+	b = cmds.nodeIconButton(label=l, style='iconAndTextHorizontal', h=40, image1=i, nbg=False)
+	if bgc:
+		cmds.nodeIconButton(b, e=True, bgc=bgc)
+	if c:
+		cmds.nodeIconButton(b, e=True, c=c)
+	return b
+
+
+def autoRow(items, label='', *args):
+	if label:
+		rowUI = cmds.rowLayout(nc=2, ad2=2)
+		cmds.text(l=label, al='right', w=10)
+
+	form = cmds.formLayout(nd=100)
+	cmds.setParent('..')
+
+	length = float(len(items))
+	step = 100 / length
+
+	i = 0
+	for x in items:
+
+		if cmds.control(x, q=True, exists=True):
+
+			x = cmds.control(x, e=True, p=form)
+
+		elif cmds.layout(x, q=True, exists=True):
+			x = cmds.layout(x, e=True, p=form)
+
+		if i == 0:
+			cmds.formLayout(form, edit=True, attachForm=[(x, 'left', 0), (x, 'top', 0), (x, 'bottom', 0), ],
+			                attachPosition=[(x, 'right', 1, step), ], )
+
+		else:
+			cmds.formLayout(form, edit=True,
+			                attachForm=[(x, 'top', 0), (x, 'bottom', 0), ],
+			                attachControl=[(x, 'left', 2, items[i - 1]), ],
+			                attachPosition=[(x, 'right', 1, step), ]
+			                )
+
+		step += 100 / length
+		i += 1
+
+	if label:
+		cmds.setParent('..')
+		return rowUI
+
+	else:
+		return form
+
+
+def divider(label='', mar=10, *args):
+	if label:
+		ui = cmds.rowLayout(nc=2, ad2=2, )
+		cmds.text(l=label + '  ', al='left')
+		cmds.columnLayout(bgc=[.5, .5, .5], h=1)
+		cmds.setParent('..')
+		cmds.setParent('..')
+	else:
+		ui = cmds.columnLayout(h=mar, adj=True)
+		cmds.columnLayout(bgc=[.5, .5, .5], h=1)
+		cmds.setParent('..')
+		cmds.setParent('..')
+	return ui
+
+
+def colorIndexSlider(l='', c='', index=False, *args):
+	indexColor = colorIndexList()
+	ui = cmds.colorIndexSliderGrp(l=l, min=1, max=32, value=1, cw=[[1, col], [2, col]], rat=(2, 'both', 0))
+
+	if index:
+		cmds.colorIndexSliderGrp(ui, e=True, cc=lambda *x: overrideColor(
+			color=cmds.colorIndexSliderGrp(ui, q=True, v=True) - 1, index=True))
+
+	else:
+		if c:
+			cmds.colorIndexSliderGrp(ui, e=True,
+			                         cc=lambda *x: c(indexColor[cmds.colorIndexSliderGrp(ui, q=True, v=True) - 1]))
+
+	return ui
+
+
+def colorSlider(l='', c='', *args):
+	ui = cmds.colorSliderGrp(l=l, cw=[[1, col], [2, col]], rat=(2, 'both', 0))
+
+	if c:
+		cmds.colorSliderGrp(ui, e=True, cc=lambda *_: c(cmds.colorSliderGrp(ui, q=True, rgb=True)))
+
+	return ui
+
+
+def colorPalette(l='', color=[], h=100, d=(), r=4, c='', *args):
+	global col
+
+	indexColor = colorIndexList()
+
+	if l:
+		cmds.rowLayout(nc=2, ad2=2, cw=(1, col), rat=(1, 'both', 0), cat=(1, 'both', 0))
+		cmds.text(l=l, align='right')
+
+	cmds.frameLayout(lv=False)
+
+	if not color:
+		color = indexColor
+
+	if not d:
+		varW = r
+		varH = len(color) / r
+		d = (varH, varW)
+
+	port = cmds.palettePort(dim=d, h=h, td=True, ced=False)
+
+	for col in range(len(color)):
+		cmds.palettePort(port, e=True, rgb=(col, color[col][0], color[col][1], color[col][2]))
+
+	cmds.setParent('..')
+
+	if c:
+		cmds.palettePort(port, e=True, cc=lambda *_: c(color=cmds.palettePort(port, q=True, rgb=True)))
+
+	if l:
+		cmds.setParent('..')
+
+	return port
+
+
+class progressWindow():
+	def __init__(self, l='Loading', st='Calculating...', max=100):
+		self.value = 0
+		self.max = max
+		self.ui = cmds.progressWindow(t=l, progress=self.value, st=st, max=max, ii=True)
+		self.reachedMax = False
+
+	def update(self, step=1):
+		self.value += step
+		cmds.progressWindow(self.ui, e=True, progress=self.value)
+
+		if self.value >= self.max:
+			self.reachedMax = True
+			self.kill()
+
+	def cancel(self):
+		if cmds.progressWindow(self.ui, q=True, ic=True):
+			self.kill()
+			return True
+		else:
+			return False
+
+	def kill(self):
+		cmds.progressWindow(self.ui, endProgress=1)
+
+
+def selectedDisplayUI(*args):
+	ui = cmds.columnLayout(adj=True)
+	row = cmds.rowLayout(nc=2)
+	cmds.text(l='Selected: ')
+	updateSelectedTextUI = cmds.text(l=len(cmds.ls(sl=True)))
+	cmds.setParent('..')
+	cmds.setParent('..')
+
+	cmds.scriptJob(p=row, protected=True, e=['SelectionChanged', lambda *_: cmds.text(updateSelectedTextUI, e=True,
+	                                                                                  l=len(cmds.ls(sl=True)))])
+	return ui
+
+
+def skeletonUI():
+	# Header
+	ui = cmds.columnLayout(adj=True)
+
+	# Body UI
+	cmds.frameLayout(l='Display', mh=mar, mw=mar, bgs=True, cl=True)
+	j1 = cmds.button(l='Toggle LRA', enable=False)
+	j2 = cmds.button(l='Show', enable=False)
+	j3 = cmds.button(l='Hide', enable=False)
+	autoRow([j1, j2, j3])
+	divider('Joint Scale')
+	jdUI = cmds.floatSliderGrp(field=True, pre=2, min=0.01, max=10.00, v=cmds.jointDisplayScale(q=True),
+	                           cc=lambda *x: cmds.jointDisplayScale(cmds.floatSliderGrp(jdUI, q=True, v=True)))
+	cmds.setParent('..')
+
+	cmds.frameLayout(l='Create', mh=mar, mw=mar, bgs=True, cl=True)
+	b1 = cmds.button(l='Create Joint', c=createJoint)
+	b2 = cmds.button(l='Orient Chain', c=orientJointChain)
+	b3 = cmds.button(l='Select Hierarchy', c=getJointHierarchy)
+	autoRow([b1, b2, b3])
+	cmds.setParent('..')
+
+	cmds.frameLayout(l='Joint Labels', mh=mar, mw=mar, bgs=True, cl=True)
+	a1 = cmds.button(l='Toggle Visibility', c=toggleJointLabel)
+	a2 = cmds.button(l='Show', c=lambda *x: mel.eval('displayJointLabels 4;'))
+	a3 = cmds.button(l='Hide', c=lambda *x: mel.eval('displayJointLabels 3;'))
+	autoRow([a1, a2, a3])
+
+	# Add Label UI
+	divider('Add Label')
+	cmds.rowLayout(nc=2, adj=1, cat=[1, 'right', -4], rat=[1, 'both', 0])
+	om1 = cmds.optionMenuGrp(adj=1, rat=[1, 'both', -2], cat=[1, 'right', 0],
+	                         cc=lambda *x: jointLabel().addTypeFromUI(cmds.optionMenuGrp(om1, q=True, sl=True)))
+	for l in jointLabel().masterList:
+		cmds.menuItem(l=l, dtg=l)
+	cmds.button(l='+', w=20, c=lambda *x: jointLabel().addTypeFromUI(cmds.optionMenuGrp(om1, q=True, sl=True)))
+	cmds.setParent('..')
+
+	cmds.setParent('..')
+
+	cmds.frameLayout(l='Skinning', mh=mar, mw=mar, bgs=True, cl=True)
+	cmds.button(l='Paint Skin Weights Tool', c=lambda *x: mel.eval('ArtPaintSkinWeightsToolOptions;'))
+	cmds.button(l='Smooth Skin Weight Tool', c=tf_smoothSkinWeight.paint)
+	cmds.button(l='Mirror Skin Weights', c=lambda *x: [rig.api.utils.skin.mirrorSkinWeights(mesh=x) for x in cmds.ls(sl=True)])
+	cmds.setParent('..')
+
+	# End UI
+	cmds.setParent('..')
+
+	return ui
+
+
+def rigUI():
+	ui = cmds.columnLayout(adj=True)
+
+	# Root
+
+	cmds.frameLayout(mh=10, mw=10, bgs=True, cll=False, cl=True, lv=False)
+	nameField = cmds.textFieldGrp(l='Rig Name: ', tx='character', adj=2, cw2=[60, 60], nbg=False)
+	button(l='1. Root', i=UIImage('icon_01_100.png'), c=lambda *x: ROOT(
+		name=cmds.textFieldGrp(nameField, q=True, tx=True) if cmds.textFieldGrp(nameField, q=True,
+		                                                                        tx=True) else 'character'))
+	cmds.setParent('..')
+
+	# Cog
+
+	cmds.frameLayout(l='2. COG Setup', bgs=True, mh=10, mw=10, cll=False, cl=True, lv=False)
+	button(l='2. Center of Gravity', i=UIImage('icon_02_100.png'), c=COG)
+	cmds.setParent('..')
+
+	# Spine
+
+	cmds.frameLayout(l='3. Spine Setup', bgs=True, mh=10, mw=10, cll=False, cl=True, lv=False)
+	button(l='3. Spine', i=UIImage('icon_06_100.png'), c=SPINE)
+	cmds.setParent('..')
+
+	# Neck / Head
+
+	cmds.frameLayout(l='4. Neck / Head Setup', bgs=True, mh=10, mw=10, cll=False, cl=True, lv=False)
+	button(l='4. Neck / Head', i=UIImage('icon_03_100.png'), c=HEAD)
+	cmds.setParent('..')
+
+	# Arms
+
+	cmds.frameLayout(l='5. Arms / Hands', bgs=True, mh=10, mw=10, cll=False, cl=True, lv=False)
+	button(l='5. Arm', i=UIImage('icon_05_100.png'), c=ARM)
+	cmds.setParent('..')
+
+	# Legs
+
+	cmds.frameLayout(l='6. Legs / Feet', bgs=True, mh=10, mw=10, cll=False, cl=True, lv=False)
+	button(l='6. Hip', i=UIImage('icon_04_100.png'), c=HIP)
+	button(l='7. Leg', i=UIImage('icon_04_100.png'), c=LEG)
+	cmds.setParent('..')
+
+	cmds.setParent('..')
+
+	return ui
+
+
+def autoUI(*args):
+	global procressControl
+
+	# Head UI
+	ui = cmds.columnLayout(adj=True)
+
+	# Body UI
+	cmds.frameLayout(l='Joint Labels', mh=mar, mw=mar, bgs=True, cl=True)
+	a1 = cmds.button(l='Toggle Visibility', c=toggleJointLabel)
+	a2 = cmds.button(l='Show', c=lambda *x: mel.eval('displayJointLabels 4;'))
+	a3 = cmds.button(l='Hide', c=lambda *x: mel.eval('displayJointLabels 3;'))
+	autoRow([a1, a2, a3])
+
+	# Add Label UI
+	divider('Add Label')
+	cmds.rowLayout(nc=2, adj=1, cat=[1, 'right', -4], rat=[1, 'both', 0])
+	om1 = cmds.optionMenuGrp(adj=1, rat=[1, 'both', -2], cat=[1, 'right', 0],
+	                         cc=lambda *x: jointLabel().addTypeFromUI(cmds.optionMenuGrp(om1, q=True, sl=True)))
+	for l in jointLabel().masterList:
+		cmds.menuItem(l=l, dtg=l)
+	cmds.button(l='+', w=20, c=lambda *x: jointLabel().addTypeFromUI(cmds.optionMenuGrp(om1, q=True, sl=True)))
+	cmds.setParent('..')
+
+	cmds.button(l='Create Rig', c=autoRig)
+
+	cmds.setParent('..')
+
+	# End UI
+	cmds.setParent('..')
+
+	return ui
+
+
+def colorUI(cl=True, cll=True, *args):
+	ui = cmds.columnLayout(adj=True)
+
+	cmds.frameLayout(l='Color', mh=mar, mw=mar, bgs=True, cl=cl, cll=cll)
+	cmds.button(l='Disable Color', c=lambda *x: overrideColor(reset=True))
+	divider('Index')
+	colorPalette(c=overrideColor)
+	cmds.setParent('..')
+	cmds.setParent('..')
+
+	return ui
+
+
+class getAllInScene():
+
+	def __init__(self):
+		self.ui()
+
+	def get(self, dupe=False, *args):
+		uiquery = cmds.optionMenu(self.getAllInSceneOptionUI, q=True, v=True)
+
+		objectList = []
+
+		if dupe == True:
+
+			objects = [f for f in cmds.ls() if '|' in f]
+			objects.sort(key=lambda obj: obj.count('|'), reverse=True)
+
+			for obj in objects:
+				objectList.append(obj)
+
+
+		else:
+
+			objects = cmds.ls(type=uiquery)
+
+			for obj in objects:
+				if cmds.objectType(obj) == uiquery:
+					objectList.append(obj)
+
+		cmds.textScrollList(self.getAllInSceneListUI, e=True, ra=True)
+		cmds.textScrollList(self.getAllInSceneListUI, e=True, append=objectList)
+
+	def selectTextScrollObject(self, control, *args):
+		uiquery = cmds.textScrollList(control, q=True, si=True)
+
+		try:
+			cmds.select(uiquery)
+		except:
+			pass
+
+	def ui(self, cl=True, h=100, *args):
+		cmds.columnLayout(adj=True)
+		cmds.frameLayout(l='List Objects in Scene', cl=cl, mh=mar, mw=mar, bgs=True, cll=True,
+		                 ann='Find all nodes in the scene by type.')
+
+		cmds.rowLayout(nc=2, ad2=1, rat=[1, 'both', -2], cat=[1, 'left', -2])
+		self.getAllInSceneOptionUI = cmds.optionMenu(cc=self.get)
+		nodeList = ['transform', 'locator', 'mesh', 'joint', 'network', 'nurbsSurface', 'nurbsCurve']
+		for opt in sorted(nodeList):
+			cmds.menuItem(l=opt, p=self.getAllInSceneOptionUI)
+		b1 = cmds.button(l='Find Duplicates', c=lambda *x: self.get(dupe=True))
+		cmds.setParent('..')
+
+		self.getAllInSceneListUI = cmds.textScrollList(h=h,
+		                                               sc=lambda *x: self.selectTextScrollObject(
+			                                               self.getAllInSceneListUI))
+		cmds.setParent('..')
+		cmds.setParent('..')
+
+		self.get()
+
+
+def miscUI(cl=True, cll=True, *args):
+	ui = cmds.columnLayout(adj=True)
+	cmds.frameLayout(l='Misc.', mh=mar, mw=mar, bgs=True, cl=cl, cll=cll)
+	cmds.button(l='Create Locator')
+	cmds.button(l='Snap')
+	cmds.setParent('..')
+	cmds.setParent('..')
+	return ui
+
+
+def toolUI(*args):
+	ui = cmds.columnLayout(adj=True)
+	getAllInScene()
+	colorUI()
+	miscUI()
+	cmds.setParent('..')
+	return ui
+
+
+# Main Window UI
+
+
+def UI():
+	uiName = 'JTRIGTOOLS'
+	if cmds.window(uiName, exists=True):
+		cmds.deleteUI(uiName, window=True)
+
+	win = cmds.window(uiName, title=uiName)
+
+	# Start Header
+
+	form = cmds.formLayout()
+	sUI = selectedDisplayUI()
+
+	# Start Body
+
+	tab = cmds.tabLayout()
+	tab0 = toolUI()
+	tab1 = skeletonUI()
+	tab2 = rigUI()
+	tab3 = autoUI()
+
+	# End Body
+
+	cmds.formLayout(form, e=True,
+	                attachForm=((sUI, 'top', 0), (sUI, 'left', 0), (sUI, 'right', 0),))
+
+	cmds.formLayout(form, e=True,
+	                attachForm=((tab, 'bottom', 0), (tab, 'left', 0), (tab, 'right', 0),),
+	                attachControl=(tab, 'top', 0, sUI), )
+
+	cmds.tabLayout(tab, e=True, tabLabel=((tab0, 'Tools'), (tab1, 'Skeleton'), (tab2, 'Modules'), (tab3, 'Auto Rig')))
+
+	cmds.setParent('..')
+
+	cmds.setParent('..')
+	cmds.setParent('..')  # end form
+	cmds.showWindow(uiName)

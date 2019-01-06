@@ -1,39 +1,14 @@
-# LANCER.RIG.COMPONENT
-#
-#
-#
-#
-#
-
-# Lancer Modules
-import naming
-import ults
-import control
-import network
-import skeleton
-
-reload(naming)
-reload(ults)
-reload(control)
-reload(network)
-reload(skeleton)
-
-# Maya Modules
 from maya import cmds
 
-
-########################################################################################################################
-#
-#
-#	CONTROL BASE CLASS
-#
-#
-########################################################################################################################
+from naming import *
+from skeleton import *
+from control import *
+from rigging import *
 
 
 class CONTROL(object):
 	def __init__(self,
-	             name=naming.rig.control,
+	             name=Component.control,
 	             typ='circle',
 	             scale=1,
 	             axis=None,
@@ -98,28 +73,28 @@ class CONTROL(object):
 		return
 
 	def setAttributes(self, selected):
-		for attr in [naming.rig.character,
-		             naming.rig.skeletonNetwork,
-		             naming.rig.rigNetwork,
-		             naming.rig.rigNetworkRoot,
+		for attr in [Component.character,
+		             Component.skeletonNetwork,
+		             Component.rigNetwork,
+		             Component.rigNetworkRoot,
 		             ]:
 			cmds.addAttr(selected, ln=attr, at='message')
 
-		cmds.addAttr(selected, ln=naming.rig.index, at='long', dv=self.index)
+		cmds.addAttr(selected, ln=Component.index, at='long', dv=self.index)
 		return
 
 	def setColor(self):
 		if type(self.color) is str:
-			ults.presetWireColor(self.transform, self.color)
+			rigging.presetWireColor(self.transform, self.color)
 		if type(self.color) is list:
-			ults.overrideColor(ults.listCheck(self.transform), color=self.color)
+			rigging.overrideColor(rigging.listCheck(self.transform), color=self.color)
 		return
 
 	def createGroup(self):
-		self.group = cmds.group(name=naming.convention(self.transform, naming.rig.grp), em=True)
+		self.group = cmds.group(name=naming.convention(self.transform, Component.grp), em=True)
 		cmds.parent(self.transform, self.group)
 		if self.child:
-			ults.snap(self.child, self.group, t=True, r=True)
+			rigging.snap(self.child, self.group, t=True, r=True)
 		self.setAttributes(self.group)
 		return
 
@@ -150,15 +125,6 @@ class CONTROL(object):
 		return
 
 
-########################################################################################################################
-#
-#
-#	FK CONTROL SUB CLASS
-#
-#
-########################################################################################################################
-
-
 class FKCONTROL(CONTROL):
 	def __init__(self,
 	             name='fk_control',
@@ -179,18 +145,9 @@ class FKCONTROL(CONTROL):
 		                 index=index,
 		                 side=side,
 		                 label=label,
-		                 color=ults.component.fk,
+		                 color=rigging.component.fk,
 		                 axis=axis,
 		                 )
-
-
-########################################################################################################################
-#
-#
-#	IK CONTROL SUB CLASS
-#
-#
-########################################################################################################################
 
 
 class IKCONTROL(CONTROL):
@@ -213,18 +170,9 @@ class IKCONTROL(CONTROL):
 		                 index=index,
 		                 side=side,
 		                 label=label,
-		                 color=ults.component.ik,
+		                 color=rigging.component.ik,
 		                 axis=axis,
 		                 )
-
-
-########################################################################################################################
-#
-#
-#	ATTR CONTROL SUB CLASS
-#
-#
-########################################################################################################################
 
 
 class ATTRCONTROL(CONTROL):
@@ -247,18 +195,10 @@ class ATTRCONTROL(CONTROL):
 		                 index=index,
 		                 side=side,
 		                 label=label,
-		                 color=ults.component.attr,
+		                 color=rigging.component.attr,
 		                 axis=axis,
 		                 )
 
-
-########################################################################################################################
-#
-#
-#	DETAIL CONTROL SUB CLASS
-#
-#
-########################################################################################################################
 
 class DETAILCONTROL(CONTROL):
 	def __init__(self,
@@ -310,25 +250,16 @@ class GRANDCHILDCONTROL(CONTROL):
 		                 )
 
 
-########################################################################################################################
-#
-#
-#	CHAIN BASE CLASS
-#
-#
-########################################################################################################################
-
-
-def createJointChain(objects, name=naming.rig.jnt):
+def createJointChain(objects, name=Component.jnt):
 	jointList = []
 	cmds.select(d=True)
 
 	for obj in objects:
-		jntName = '{}_{}'.format(ults.removeJointStr(str(obj)), name)
+		jntName = '{}_{}'.format(rigging.removeJointStr(str(obj)), name)
 		jnt = cmds.joint(n=jntName)
 		cmds.setAttr('{}.drawStyle'.format(jnt), 2)
 
-		ults.snap(obj, jnt, t=True, r=True)
+		rigging.snap(obj, jnt, t=True, r=True)
 
 		if cmds.objectType(obj, isType='joint'):
 			radius = cmds.getAttr('{0}.radius'.format(obj))
@@ -340,7 +271,7 @@ def createJointChain(objects, name=naming.rig.jnt):
 	for jnt in jointList:
 
 		i = jointList.index(jnt)
-		ults.freezeTransform(jnt)
+		rigging.freezeTransform(jnt)
 
 		if i != 0:
 			cmds.parent(jnt, jointList[i - 1])
@@ -387,7 +318,7 @@ class CHAIN(object):
 			ctl = self.controlClass(name=naming.convention(self.name,
 			                                               objectType.split(' ')[0].lower(),
 			                                               objectIndex if objectIndex else i,
-			                                               naming.rig.ctl,
+			                                               Component.ctl,
 			                                               ),
 			                        child=obj,
 			                        scale=self.scale,
@@ -412,16 +343,16 @@ class CHAIN(object):
 		return
 
 	def createParent(self):
-		self.parent = ults.createGroup(self.group[0], n=naming.convention(self.name, naming.rig.grp))
+		self.parent = rigging.createGroup(self.group[0], n=naming.convention(self.name, Component.grp))
 		return
 
 	def lockGroups(self):
 		for grp in self.group:
-			ults.lockAttributes(grp, hide=True)
+			rigging.lockAttributes(grp, hide=True)
 
 	def lockCtlScale(self):
 		for ctl in self.control:
-			ults.lockScale(ctl)
+			rigging.lockScale(ctl)
 		return
 
 	def limitRotations(self):
@@ -430,19 +361,10 @@ class CHAIN(object):
 		return
 
 
-########################################################################################################################
-#
-#
-#	FK CHAIN SUB CLASS
-#
-#
-########################################################################################################################
-
-
 class FKCHAIN(CHAIN):
 	def __init__(self,
 	             objects,
-	             name=ults.component.fk,
+	             name=rigging.component.fk,
 	             scale=1,
 	             axis=None,
 	             side=None,
@@ -472,32 +394,23 @@ class FKCHAIN(CHAIN):
 			return
 
 	def createStretch(self):
-		attrName = naming.rig.stretch
+		attrName = Component.stretch
 		stretchGroup = []
 		cmds.addAttr(self.parent, ln=attrName, m=True, at='double', k=True)
 		for ctl in self.control:
 			i = self.control.index(ctl)
-			grp = ults.createGroup(ctl, n=naming.convention(ctl, attrName, naming.rig.grp))
+			grp = rigging.createGroup(ctl, n=naming.convention(ctl, attrName, Component.grp))
 			cmds.connectAttr('{}.{}[{}]'.format(self.parent, attrName, i), '{}.tx'.format(grp))
-			ults.lockAttributes(grp, hide=True)
+			rigging.lockAttributes(grp, hide=True)
 			stretchGroup.append(grp)
 
 		self.stretchGroup = stretchGroup
 
 
-########################################################################################################################
-#
-#
-#	IK CHAIN SUB CLASS
-#
-#
-########################################################################################################################
-
-
 class IKCHAIN(CHAIN):
 	def __init__(self,
 	             objects,
-	             name=ults.component.ik,
+	             name=rigging.component.ik,
 	             scale=1,
 	             axis=None,
 	             side=None,
@@ -521,7 +434,7 @@ class IKCHAIN(CHAIN):
 		self.lockCtlScale()
 
 	def createJointChain(self):
-		name = naming.convention(naming.rig.ik, naming.rig.chain, naming.rig.jnt)
+		name = naming.convention(Component.ik, Component.chain, Component.jnt)
 		self.joint = createJointChain(self.objects, name=name)
 		cmds.parent(self.joint[0], self.control[0])
 		return
@@ -539,7 +452,7 @@ class IKCHAIN(CHAIN):
 		start = self.joint[0]
 		mid = self.joint[1]
 		end = self.joint[2]
-		self.ikHandle = cmds.ikHandle(name=naming.convention(self.name, naming.rig.ikHandle),
+		self.ikHandle = cmds.ikHandle(name=naming.convention(self.name, Component.ikHandle),
 		                              sj=start,
 		                              ee=end,
 		                              sol='ikRPsolver')[0]
@@ -549,21 +462,21 @@ class IKCHAIN(CHAIN):
 		cmds.setAttr('{}.v'.format(self.ikHandle), 0)
 
 		# Pole Vector
-		pvPos = ults.getPoleVectorPosition(start, mid, end)
+		pvPos = rigging.getPoleVectorPosition(start, mid, end)
 		cmds.xform(self.group[1], ws=True, t=pvPos)
-		poleVector = ults.createPoleVector(joint=mid,
-		                                   ctl=self.control[1],
-		                                   ik=self.ikHandle,
-		                                   name='{}_poleVector'.format(self.name),
-		                                   )
+		poleVector = rigging.createPoleVector(joint=mid,
+		                                      ctl=self.control[1],
+		                                      ik=self.ikHandle,
+		                                      name='{}_poleVector'.format(self.name),
+		                                      )
 
-		ults.swapShape(par=self.control[1],
-		               child=control.wire(control.component.sphere,
+		rigging.swapShape(par=self.control[1],
+		                  child=control.wire(control.component.sphere,
 		                                  scale=self.scale / 3,
 		                                  ),
-		               )
+		                  )
 
-		ults.lockRotate(self.control[1])
+		rigging.lockRotate(self.control[1])
 
 		'''
 		rotateNull = cmds.group(name='{}_rotate_null'.format(self.ikHandle), em=True)
@@ -576,20 +489,20 @@ class IKCHAIN(CHAIN):
 		cmds.aimConstraint(self.control[-1], poleVectorOffset, wut='object', wuo=rotateNull)
 		cmds.parent(self.group[1], poleVectorOffset)
 		'''
-		ults.presetWireColor(self.control[1], ults.component.ik)
+		rigging.presetWireColor(self.control[1], rigging.component.ik)
 		return
 
 	def createStretch(self):
-		attrName = naming.rig.stretch
+		attrName = Component.stretch
 		stretchGroup = []
 		cmds.addAttr(self.parent, ln=attrName, m=True, at='double', k=True)
 		for joint in self.joint:
 			i = self.joint.index(joint)
 			grp = cmds.group(joint, em=True, n=naming.convention(joint,
 			                                                     attrName,
-			                                                     naming.rig.grp
+			                                                     Component.grp
 			                                                     ))
-			ults.snap(joint, grp, t=True, r=True)
+			rigging.snap(joint, grp, t=True, r=True)
 			if i == 0:
 				cmds.parent(grp, self.parent)
 			else:
@@ -601,24 +514,16 @@ class IKCHAIN(CHAIN):
 			cmds.connectAttr('{}.{}[{}]'.format(self.parent, attrName, i), '{}.input1'.format(add), f=True)
 			cmds.setAttr('{}.input2'.format(add), origPos)
 			cmds.connectAttr('{}.output'.format(add), '{}.tx'.format(grp))
-			ults.lockAttributes(grp, hide=True)
+			rigging.lockAttributes(grp, hide=True)
 			stretchGroup.append(grp)
 
 		self.stretchGroup = stretchGroup
 
 
-########################################################################################################################
-#
-#
-#	DETAIL CHAIN SUB CLASS
-#
-#
-########################################################################################################################
-
 class DETAILCHAIN(CHAIN):
 	def __init__(self,
 	             joint,
-	             name=naming.rig.detail,
+	             name=Component.detail,
 	             scale=1,
 	             axis=None,
 	             ):
@@ -629,7 +534,7 @@ class DETAILCHAIN(CHAIN):
 		               name=name,
 		               scale=scale,
 		               axis=axis,
-		               side=ults.getSide(joint),
+		               side=rigging.getSide(joint),
 		               )
 
 		self.joint = joint
@@ -650,18 +555,10 @@ class DETAILCHAIN(CHAIN):
 		return
 
 
-########################################################################################################################
-#
-#
-#	RIBBON CHAIN SUB CLASS
-#
-#
-########################################################################################################################
-
 class RIBBONCHAIN(CHAIN):
 	def __init__(self,
 	             objects,
-	             name=naming.rig.ribbon,
+	             name=Component.ribbon,
 	             scale=1,
 	             axis=None,
 	             side=None,
@@ -681,8 +578,8 @@ class RIBBONCHAIN(CHAIN):
 		startObject = self.objects[0]
 		endObject = self.objects[-1]
 		amount = len(self.objects)
-		distance = ults.getDistance(startObject, endObject)
-		flex = ults.createFlexiPlane(name=self.name, amount=amount, width=distance, side=self.side)
+		distance = rigging.getDistance(startObject, endObject)
+		flex = rigging.createFlexiPlane(name=self.name, amount=amount, width=distance, side=self.side)
 
 		cmds.delete(cmds.parentConstraint(startObject, endObject, flex.parent))
 
@@ -696,14 +593,6 @@ class RIBBONCHAIN(CHAIN):
 		return
 
 
-########################################################################################################################
-#
-#
-#	RIBBON CLASS
-#
-#
-########################################################################################################################
-
 class RIBBONLIMB:
 	def __init__(self,
 	             start,
@@ -712,7 +601,7 @@ class RIBBONLIMB:
 	             upperObjects,
 	             midObject,
 	             lowerObjects,
-	             name=naming.rig.ribbon,
+	             name=Component.ribbon,
 	             scale=1,
 	             axis=None,
 	             side=naming.side.left,
@@ -766,7 +655,7 @@ class RIBBONLIMB:
 			ctl = CONTROL(name=naming.convention(self.name,
 			                                     'main',
 			                                     i,
-			                                     naming.rig.ctl,
+			                                     Component.ctl,
 			                                     ),
 			              typ=control.component.octagon,
 			              scale=self.scale,
@@ -779,7 +668,7 @@ class RIBBONLIMB:
 			self.mainControl.append(ctl.transform)
 			self.mainGroup.append(ctl.group)
 
-		ults.snap(self.mid, self.mainGroup[-1], r=True)
+		rigging.snap(self.mid, self.mainGroup[-1], r=True)
 
 		cmds.delete(cmds.orientConstraint(self.mainGroup[0], self.mainGroup[2], self.mainGroup[1]))
 		return
@@ -789,7 +678,7 @@ class RIBBONLIMB:
 			ctl = CONTROL(name=naming.convention(self.name,
 			                                     'intermediate',
 			                                     i,
-			                                     naming.rig.ctl,
+			                                     Component.ctl,
 			                                     ),
 			              typ=control.component.hexigon,
 			              scale=self.scale,
@@ -817,14 +706,14 @@ class RIBBONLIMB:
 	def createDetailControls(self):
 		upperIndex = len(self.upperObjects) - 1
 		midIndex = upperIndex + 1
-		objects = self.upperObjects + ults.listCheck(self.midObject) + self.lowerObjects
+		objects = self.upperObjects + rigging.listCheck(self.midObject) + self.lowerObjects
 		i = 0
 		for obj in objects:
 			i = objects.index(obj)
 			ctl = DETAILCONTROL(name=naming.convention(self.name,
 			                                           'detail',
 			                                           i,
-			                                           naming.rig.ctl,
+			                                           Component.ctl,
 			                                           ),
 			                    scale=self.scale,
 			                    axis=self.axis,
@@ -853,12 +742,12 @@ class RIBBONLIMB:
 		return
 
 	def createFlexiPlane(self, start, end, amount, name):
-		distance = ults.getDistance(start, end)
-		flex = ults.createFlexiPlane(name=name,
-		                             amount=amount,
-		                             width=distance,
-		                             side=self.side,
-		                             )
+		distance = rigging.getDistance(start, end)
+		flex = rigging.createFlexiPlane(name=name,
+		                                amount=amount,
+		                                width=distance,
+		                                side=self.side,
+		                                )
 
 		cmds.delete(cmds.parentConstraint(start, end, flex.parent))
 		return flex
@@ -866,14 +755,14 @@ class RIBBONLIMB:
 	def createRibbon(self):
 		self.upperFlexiPlane = self.createFlexiPlane(start=self.start,
 		                                             end=self.mid,
-		                                             amount=len(self.upperObjects + ults.listCheck(self.midObject)),
+		                                             amount=len(self.upperObjects + rigging.listCheck(self.midObject)),
 		                                             name=naming.convention(self.name,
 		                                                                    'upper',
 		                                                                    ),
 		                                             )
 		self.lowerFlexiPlane = self.createFlexiPlane(start=self.mid,
 		                                             end=self.end,
-		                                             amount=len(self.upperObjects + ults.listCheck(self.midObject)),
+		                                             amount=len(self.upperObjects + rigging.listCheck(self.midObject)),
 		                                             name=naming.convention(self.name,
 		                                                                    'lower',
 		                                                                    ),
@@ -930,25 +819,17 @@ class RIBBONLIMB:
 	def cleanUp(self):
 
 		for obj in self.mainControl:
-			ults.lockScale(obj)
+			rigging.lockScale(obj)
 
 		return
 
-
-########################################################################################################################
-#
-#
-#	TWIST CLASS
-#
-#
-########################################################################################################################
 
 class TWISTCHAIN:
 	def __init__(self,
 	             start,
 	             mid,
 	             end,
-	             name=naming.rig.aux,
+	             name=Component.aux,
 	             scale=1,
 	             axis=None,
 	             ):
@@ -958,7 +839,7 @@ class TWISTCHAIN:
 
 		self.name = name
 		self.scale = scale
-		self.side = ults.getSide(start)
+		self.side = rigging.getSide(start)
 		self.axis = axis
 
 		self.upperObject = skeleton.getBindJoint(start)
@@ -970,7 +851,7 @@ class TWISTCHAIN:
 		                              axis=self.axis,
 		                              name=naming.convention(self.name,
 		                                                     'upper',
-		                                                     naming.rig.detail,
+		                                                     Component.detail,
 		                                                     )
 		                              )
 		self.lowerChain = DETAILCHAIN(joint=self.mid,
@@ -978,7 +859,7 @@ class TWISTCHAIN:
 		                              axis=self.axis,
 		                              name=naming.convention(self.name,
 		                                                     'lower',
-		                                                     naming.rig.detail
+		                                                     Component.detail
 		                                                     )
 		                              )
 
@@ -1000,15 +881,15 @@ class TWISTCHAIN:
 		self.createSnS()
 
 	def createIKTwist(self):
-		self.upperTwist = ults.createIKTwist(start=self.start,
-		                                     end=self.mid,
-		                                     name=naming.convention(self.name, 'upper_twist'),
-		                                     )
+		self.upperTwist = rigging.createIKTwist(start=self.start,
+		                                        end=self.mid,
+		                                        name=naming.convention(self.name, 'upper_twist'),
+		                                        )
 
-		self.lowerTwist = ults.createIKTwist(start=self.end,
-		                                     end=self.mid,
-		                                     name=naming.convention(self.name, 'lower_twist'),
-		                                     )
+		self.lowerTwist = rigging.createIKTwist(start=self.end,
+		                                        end=self.mid,
+		                                        name=naming.convention(self.name, 'lower_twist'),
+		                                        )
 
 		self.createTwistConnections(self.upperChain.group, self.upperTwist.joint[0], self.upperTwist.parent,
 		                            typ='upper')
@@ -1036,10 +917,10 @@ class TWISTCHAIN:
 		return
 
 	def createStretch(self, objects, start, end, ctl, typ):
-		attrName = naming.rig.stretch
+		attrName = Component.stretch
 		cmds.addAttr(ctl, ln=attrName, m=True, at='double', k=True)
-		distance = ults.createDistanceNode(start=start, end=end,
-		                                   n=naming.convention(self.name, '{}_distance0'.format(typ)))
+		distance = rigging.createDistanceNode(start=start, end=end,
+		                                      n=naming.convention(self.name, '{}_distance0'.format(typ)))
 
 		max = 1.0
 		if typ == 'upper':
@@ -1051,7 +932,7 @@ class TWISTCHAIN:
 		for obj in objects:
 			i = objects.index(obj)
 			cmds.setAttr('{}.{}[{}]'.format(ctl, attrName, i), var)
-			grp = ults.createGroup(obj, n=naming.convention(obj, attrName, naming.rig.grp))
+			grp = rigging.createGroup(obj, n=naming.convention(obj, attrName, Component.grp))
 			self.stretch.append(grp)
 			if i != 0:
 				sub = cmds.createNode('plusMinusAverage', name='{}_subtract0'.format(grp))
@@ -1071,7 +952,7 @@ class TWISTCHAIN:
 		cmds.addAttr(globalGrp, ln='sns', min=0, max=1, dv=0, k=True)
 		cmds.addAttr(globalGrp, ln='snsAdd', k=True)
 
-		maxDistance = ults.getDistance(self.start, self.mid) + ults.getDistance(self.mid, self.end)
+		maxDistance = rigging.getDistance(self.start, self.mid) + rigging.getDistance(self.mid, self.end)
 		# distance = ults.createDistanceNode(self.start, self.end)
 		distanceAdd = cmds.createNode('addDoubleLinear', name='{}_add0'.format(self.name))
 		cmds.connectAttr('{}.distance'.format(self.distance[0]), '{}.input1'.format(distanceAdd))

@@ -14,11 +14,8 @@
 
 # Lancer Modules
 from library import xfer
-import skeleton
-import ults
-
-reload(xfer)
-reload(ults)
+from rigging import *
+from skeleton import *
 
 # Python Modules
 import json
@@ -27,7 +24,7 @@ import time
 # Maya Modules
 import maya.OpenMaya as OpenMaya
 import maya.OpenMayaAnim as OpenMayaAnim
-from maya import cmds, mel
+from maya import cmds
 
 
 ########################################################################################################################
@@ -488,7 +485,7 @@ class Export:
 
 
 def exportSkinWeights(debug=False, *args):
-	selected = ults.getSelected()
+	selected = rigging.getSelected()
 
 	if selected:
 		if len(selected) > 1:

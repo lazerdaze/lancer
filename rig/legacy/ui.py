@@ -6,14 +6,11 @@
 #
 
 # Lancer Modules
-import library.xfer as xfer
-import ults
-import network
-import parts
-import skin
-import skeleton
-
-reload(skeleton)
+import rig.parts
+import rig.api.utils.rigging
+import rig.parts.brain.network
+import rig.api.utils.skin
+import rig.api.utils.skeleton
 
 # Maya Modules
 import maya.cmds as cmds
@@ -117,11 +114,11 @@ def divider(label='', mar=10, *args):
 
 
 def colorIndexSlider(l='', c='', index=False, *args):
-	indexColor = ults.colorIndexList()
+	indexColor = rig.api.utils.rigging.colorIndexList()
 	ui = cmds.colorIndexSliderGrp(l=l, min=1, max=32, value=1, cw=[[1, col], [2, col]], rat=(2, 'both', 0))
 
 	if index:
-		cmds.colorIndexSliderGrp(ui, e=True, cc=lambda *x: ults.overrideColor(
+		cmds.colorIndexSliderGrp(ui, e=True, cc=lambda *x: rig.api.utils.rigging.overrideColor(
 				color=cmds.colorIndexSliderGrp(ui, q=True, v=True) - 1, index=True))
 
 	else:
@@ -144,7 +141,7 @@ def colorSlider(l='', c='', *args):
 def colorPalette(l='', color=[], h=100, d=(), r=4, c='', *args):
 	global col
 
-	indexColor = ults.colorIndexList()
+	indexColor = rig.api.utils.rigging.colorIndexList()
 
 	if l:
 		cmds.rowLayout(nc=2, ad2=2, cw=(1, col), rat=(1, 'both', 0), cat=(1, 'both', 0))
@@ -233,14 +230,14 @@ def skeletonUI():
 	cmds.setParent('..')
 
 	cmds.frameLayout(l='Create', mh=mar, mw=mar, bgs=True, cl=True)
-	b1 = cmds.button(l='Create Joint', c=ults.createJoint)
-	b2 = cmds.button(l='Orient Chain', c=ults.orientJointChain)
-	b3 = cmds.button(l='Select Hierarchy', c=ults.getJointHierarchy)
+	b1 = cmds.button(l='Create Joint', c=rig.api.utils.rigging.createJoint)
+	b2 = cmds.button(l='Orient Chain', c=rig.api.utils.rigging.orientJointChain)
+	b3 = cmds.button(l='Select Hierarchy', c=rig.api.utils.rigging.getJointHierarchy)
 	autoRow([b1, b2, b3])
 	cmds.setParent('..')
 
 	cmds.frameLayout(l='Joint Labels', mh=mar, mw=mar, bgs=True, cl=True)
-	a1 = cmds.button(l='Toggle Visibility', c=ults.toggleJointLabel)
+	a1 = cmds.button(l='Toggle Visibility', c=rig.api.utils.rigging.toggleJointLabel)
 	a2 = cmds.button(l='Show', c=lambda *x: mel.eval('displayJointLabels 4;'))
 	a3 = cmds.button(l='Hide', c=lambda *x: mel.eval('displayJointLabels 3;'))
 	autoRow([a1, a2, a3])
@@ -249,10 +246,10 @@ def skeletonUI():
 	divider('Add Label')
 	cmds.rowLayout(nc=2, adj=1, cat=[1, 'right', -4], rat=[1, 'both', 0])
 	om1 = cmds.optionMenuGrp(adj=1, rat=[1, 'both', -2], cat=[1, 'right', 0],
-	                         cc=lambda *x: ults.jointLabel().addTypeFromUI(cmds.optionMenuGrp(om1, q=True, sl=True)))
-	for l in ults.jointLabel().masterList:
+	                         cc=lambda *x: rig.api.utils.rigging.jointLabel().addTypeFromUI(cmds.optionMenuGrp(om1, q=True, sl=True)))
+	for l in rig.api.utils.rigging.jointLabel().masterList:
 		cmds.menuItem(l=l, dtg=l)
-	cmds.button(l='+', w=20, c=lambda *x: ults.jointLabel().addTypeFromUI(cmds.optionMenuGrp(om1, q=True, sl=True)))
+	cmds.button(l='+', w=20, c=lambda *x: rig.api.utils.rigging.jointLabel().addTypeFromUI(cmds.optionMenuGrp(om1, q=True, sl=True)))
 	cmds.setParent('..')
 
 	cmds.setParent('..')
@@ -260,7 +257,7 @@ def skeletonUI():
 	cmds.frameLayout(l='Skinning', mh=mar, mw=mar, bgs=True, cl=True)
 	swb1 = cmds.button(l='Paint Weights', c=lambda *x: mel.eval('ArtPaintSkinWeightsToolOptions;'))
 	#swb2 = cmds.button(l='Smooth Weights', c=tf_smoothSkinWeight.paint)
-	swb3 = cmds.button(l='Mirror Weights', c=lambda *x: [skin.mirrorSkinWeights(mesh=x) for x in cmds.ls(sl=True)])
+	swb3 = cmds.button(l='Mirror Weights', c=lambda *x: [rig.api.utils.skin.mirrorSkinWeights(mesh=x) for x in cmds.ls(sl=True)])
 	autoRow([swb1, swb3])
 	cmds.setParent('..')
 
@@ -277,7 +274,7 @@ def rigUI():
 
 	cmds.frameLayout(mh=10, mw=10, bgs=True, cll=False, cl=True, lv=False)
 	nameField = cmds.textFieldGrp(l='Rig Name: ', tx='character', adj=2, cw2=[60, 60], nbg=False)
-	button(l='1. Root', i=UIImage('icon_01_100.png'), c=lambda *x: parts.ROOT(
+	button(l='1. Root', i=UIImage('icon_01_100.png'), c=lambda *x: rig.parts.ROOT(
 			name=cmds.textFieldGrp(nameField, q=True, tx=True) if cmds.textFieldGrp(nameField, q=True,
 			                                                                        tx=True) else 'character'))
 	cmds.setParent('..')
@@ -285,25 +282,25 @@ def rigUI():
 	# Cog
 
 	cmds.frameLayout(l='2. COG Setup', bgs=True, mh=10, mw=10, cll=False, cl=True, lv=False)
-	button(l='2. Center of Gravity', i=UIImage('icon_02_100.png'), c=parts.COG)
+	button(l='2. Center of Gravity', i=UIImage('icon_02_100.png'), c=rig.parts.COG)
 	cmds.setParent('..')
 
 	# Spine
 
 	cmds.frameLayout(l='3. Spine Setup', bgs=True, mh=10, mw=10, cll=False, cl=True, lv=False)
-	button(l='3. Spine', i=UIImage('icon_06_100.png'), c=parts.SPINE)
+	button(l='3. Spine', i=UIImage('icon_06_100.png'), c=rig.parts.SPINE)
 	cmds.setParent('..')
 
 	# Neck / Head
 
 	cmds.frameLayout(l='4. Neck / Head Setup', bgs=True, mh=10, mw=10, cll=False, cl=True, lv=False)
-	button(l='4. Neck / Head', i=UIImage('icon_03_100.png'), c=parts.HEAD)
+	button(l='4. Neck / Head', i=UIImage('icon_03_100.png'), c=rig.parts.HEAD)
 	cmds.setParent('..')
 
 	# Arms
 
 	cmds.frameLayout(l='5. Arms / Hands', bgs=True, mh=10, mw=10, cll=False, cl=True, lv=False)
-	button(l='5. Arm', i=UIImage('icon_05_100.png'), c=parts.ARM)
+	button(l='5. Arm', i=UIImage('icon_05_100.png'), c=rig.parts.ARM)
 	cmds.setParent('..')
 
 	# Legs
@@ -326,7 +323,7 @@ def autoUI(*args):
 
 	# Body UI
 	cmds.frameLayout(l='Joint Labels', mh=mar, mw=mar, bgs=True, cl=True)
-	a1 = cmds.button(l='Toggle Visibility', c=ults.toggleJointLabel)
+	a1 = cmds.button(l='Toggle Visibility', c=rig.api.utils.rigging.toggleJointLabel)
 	a2 = cmds.button(l='Show', c=lambda *x: mel.eval('displayJointLabels 4;'))
 	a3 = cmds.button(l='Hide', c=lambda *x: mel.eval('displayJointLabels 3;'))
 	autoRow([a1, a2, a3])
@@ -335,10 +332,10 @@ def autoUI(*args):
 	divider('Add Label')
 	cmds.rowLayout(nc=2, adj=1, cat=[1, 'right', -4], rat=[1, 'both', 0])
 	om1 = cmds.optionMenuGrp(adj=1, rat=[1, 'both', -2], cat=[1, 'right', 0],
-	                         cc=lambda *x: ults.jointLabel().addTypeFromUI(cmds.optionMenuGrp(om1, q=True, sl=True)))
-	for l in ults.jointLabel().masterList:
+	                         cc=lambda *x: rig.api.utils.rigging.jointLabel().addTypeFromUI(cmds.optionMenuGrp(om1, q=True, sl=True)))
+	for l in rig.api.utils.rigging.jointLabel().masterList:
 		cmds.menuItem(l=l, dtg=l)
-	cmds.button(l='+', w=20, c=lambda *x: ults.jointLabel().addTypeFromUI(cmds.optionMenuGrp(om1, q=True, sl=True)))
+	cmds.button(l='+', w=20, c=lambda *x: rig.api.utils.rigging.jointLabel().addTypeFromUI(cmds.optionMenuGrp(om1, q=True, sl=True)))
 	cmds.setParent('..')
 
 	#cmds.button(l='Create Rig', c=parts.autoRig)
@@ -355,9 +352,9 @@ def colorUI(cl=True, cll=True, *args):
 	ui = cmds.columnLayout(adj=True)
 
 	cmds.frameLayout(l='Color', mh=mar, mw=mar, bgs=True, cl=cl, cll=cll)
-	cmds.button(l='Disable Color', c=lambda *x: ults.overrideColor(reset=True))
+	cmds.button(l='Disable Color', c=lambda *x: rig.api.utils.rigging.overrideColor(reset=True))
 	divider('Index')
-	colorPalette(c=ults.overrideColor)
+	colorPalette(c=rig.api.utils.rigging.overrideColor)
 	cmds.setParent('..')
 	cmds.setParent('..')
 
@@ -449,9 +446,9 @@ def menuUI():
 	ui = cmds.menuBarLayout()
 
 	cmds.menu(l='Skeleton')
-	skeleton.menu()
+	rig.api.utils.skeleton.menu()
 	cmds.menu(l='Skin')
-	skin.menu()
+	rig.api.utils.skin.menu()
 	cmds.setParent('..')
 
 	return ui
