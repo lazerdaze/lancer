@@ -13,7 +13,9 @@ TODO
 '''
 
 # Lancer Modules
-from api import *
+import rig.utils.joint
+from utils import *
+from parts.body import *
 
 # Python Modules
 
@@ -31,9 +33,9 @@ from maya import cmds
 
 def queryLabels(root):
 	tree = {}
-	children = skeleton.getAllJointChildren(root)
+	children = rig.utils.joint.getAllJointChildren(root)
 
-	for label in skeleton.MAYAJOINTLABELS + [naming.component.cog.capitalize()]:
+	for label in rig.utils.joint.MAYAJOINTLABELS + [naming.component.cog.capitalize()]:
 		tree[label] = {
 			naming.side.center: None,
 			naming.side.left  : None,
@@ -41,7 +43,7 @@ def queryLabels(root):
 		}
 
 	for child in sorted(children + [root]):
-		label = skeleton.getJointLabel(child)
+		label = rig.utils.joint.getJointLabel(child)
 		side = label[0]
 		typ = label[1]
 
@@ -62,26 +64,26 @@ def queryLabels(root):
 #########################################################################################################################
 
 def rigFromTemplate(*args):
-	root = rig.parts.ROOT(root='CenterRoot')
+	root = ROOT(root='CenterRoot')
 
-	cog = rig.parts.COG(cog='CenterCOG',
+	cog = COG(cog='CenterCOG',
 	                    hip='CenterHip',
 	                    networkRoot=root.network,
 	                    )
-	spine = rig.parts.SPINE(objects=['CenterSpine0', 'CenterSpine1', 'CenterSpine2', ],
+	spine = SPINE(objects=['CenterSpine0', 'CenterSpine1', 'CenterSpine2', ],
 	                        networkRoot=root.network)
 
-	neck = rig.parts.NECK(objects=['CenterNeck0'], networkRoot=root.network)
-	head = rig.parts.HEAD(head='CenterHead', networkRoot=root.network)
+	neck = NECK(objects=['CenterNeck0'], networkRoot=root.network)
+	head = HEAD(head='CenterHead', networkRoot=root.network)
 
-	armL = rig.parts.ARM(side=naming.side.left,
+	armL = ARM(side=naming.side.left,
 	                     collar='LeftArmCollar',
 	                     shoulder='LeftArmShoulder',
 	                     elbow='LeftArmElbow',
 	                     hand='LeftArmHand',
 	                     networkRoot=root.network,
 	                     )
-	armR = rig.parts.ARM(side=naming.side.right,
+	armR = ARM(side=naming.side.right,
 	                     collar='RightArmCollar',
 	                     shoulder='RightArmShoulder',
 	                     elbow='RightArmElbow',
@@ -89,7 +91,7 @@ def rigFromTemplate(*args):
 	                     networkRoot=root.network,
 	                     )
 
-	legL = rig.parts.LEG(side='Left',
+	legL = LEG(side='Left',
 	                     hip='LeftLegHip',
 	                     knee='LeftLegKnee',
 	                     foot='LeftLegFoot',
@@ -97,7 +99,7 @@ def rigFromTemplate(*args):
 	                     networkRoot=root.network,
 	                     )
 
-	legR = rig.parts.LEG(side='Right',
+	legR = LEG(side='Right',
 	                     hip='RightLegHip',
 	                     knee='RightLegKnee',
 	                     foot='RightLegFoot',
@@ -142,9 +144,9 @@ def rigFromLabels(root):
 		# Root
 		try:
 			centerRoot = tree[naming.component.root.capitalize()][naming.side.center]
-			rootNode = bodyPart.ROOT(root=centerRoot).network
+			rootNode = ROOT(root=centerRoot).network
 		except:
-			rootNode = bodyPart.ROOT().network
+			rootNode = ROOT().network
 			print 'Auto Rig: "Root" Skipped.'
 
 		cmds.progressWindow(edit=True, status='Rigging Cog', step=step)
@@ -153,7 +155,7 @@ def rigFromLabels(root):
 		try:
 			centerCog = tree[naming.component.cog.capitalize()][naming.side.center]
 			centerHip = tree[naming.component.hip.capitalize()][naming.side.center]
-			cogNode = bodyPart.COG(cog=centerCog, hip=centerHip, networkRoot=rootNode)
+			cogNode = COG(cog=centerCog, hip=centerHip, networkRoot=rootNode)
 		except:
 			print 'Auto Rig: "Cog" / "Hip" Skipped.'
 
@@ -162,9 +164,9 @@ def rigFromLabels(root):
 		# Spine
 		try:
 			centerSpine = tree[naming.component.spine.capitalize()][naming.side.center]
-			items = skeleton.getJointChainByLabel(centerSpine, naming.component.spine.capitalize())
+			items = rig.utils.joint.getJointChainByLabel(centerSpine, naming.component.spine.capitalize())
 
-			bodyPart.SPINE(objects=items, networkRoot=rootNode, attrControl=cogNode.fkControl[0])
+			SPINE(objects=items, networkRoot=rootNode, attrControl=cogNode.fkControl[0])
 
 		except:
 			print 'Auto Rig: "Spine" Skipped.'
@@ -174,9 +176,9 @@ def rigFromLabels(root):
 		# Neck
 		try:
 			centerNeck = tree[naming.component.neck.capitalize()][naming.side.center]
-			items = skeleton.getJointChainByLabel(centerNeck, naming.component.neck.capitalize())
+			items = rig.utils.joint.getJointChainByLabel(centerNeck, naming.component.neck.capitalize())
 
-			bodyPart.NECK(objects=items, networkRoot=rootNode, attrControl=cogNode.fkControl[0])
+			NECK(objects=items, networkRoot=rootNode, attrControl=cogNode.fkControl[0])
 
 		except:
 			print 'Auto Rig: "Neck" Skipped.'
@@ -186,7 +188,7 @@ def rigFromLabels(root):
 		# Head
 		try:
 			centerHead = tree[naming.component.head.capitalize()][naming.side.center]
-			bodyPart.HEAD(head=centerHead, networkRoot=rootNode)
+			HEAD(head=centerHead, networkRoot=rootNode)
 		except:
 			print 'Auto Rig: "Head" Skipped.'
 
@@ -200,7 +202,7 @@ def rigFromLabels(root):
 				elbow = tree[naming.component.elbow.capitalize()][side]
 				hand = tree[naming.component.hand.capitalize()][side]
 
-				bodyPart.ARM(side=side, collar=collar, shoulder=shoulder, elbow=elbow, hand=hand, networkRoot=rootNode)
+				ARM(side=side, collar=collar, shoulder=shoulder, elbow=elbow, hand=hand, networkRoot=rootNode)
 			except:
 				print 'Auto Rig: "{} Arm" Skipped.'.format(side)
 
@@ -214,7 +216,7 @@ def rigFromLabels(root):
 				foot = tree[naming.component.foot.capitalize()][side]
 				toe = tree[naming.component.toe.capitalize()][side]
 
-				bodyPart.LEG(side=side, hip=hip, knee=knee, foot=foot, toe=toe, networkRoot=rootNode)
+				LEG(side=side, hip=hip, knee=knee, foot=foot, toe=toe, networkRoot=rootNode)
 			except:
 				print 'Auto Rig: "{} Leg" Skipped.'.format(side)
 

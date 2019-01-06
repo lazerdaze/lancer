@@ -11,9 +11,9 @@ import channelBox.ui
 import channelBox.tweenKey
 import rig.parts
 import rig.legacy.ui
-import rig.api.utils.skeleton
-import rig.api.utils.skin
-import rig.api.utils.control
+import rig.utils.skeleton
+import rig.utils.skin
+import rig.utils.control
 import rig.auto
 import rig.facePose.ui
 import anim.stickyFeet
@@ -94,12 +94,6 @@ def referencePlayer(*args):
 	anim.refPlayer.ui.windowUI()
 	return
 
-def AXEL(*args):
-	reload(anim.axel.ui)
-	anim.axel.ui.show()
-	return
-
-
 def show(*args):
 	name = 'LancerMenu'
 	deletUI(name)
@@ -111,13 +105,13 @@ def show(*args):
 	cmds.menuItem(d=True, l='Rigging')
 	cmds.menuItem(label='Rig Tools', c=rigUI)
 	cmds.menuItem(l='Skeleton', subMenu=True, to=True)
-	rig.api.utils.skeleton.menu()
+	rig.utils.skeleton.menu()
 	cmds.setParent('..', menu=True)
 	cmds.menuItem(l='Skin', subMenu=True, to=True)
-	rig.api.utils.skin.menu()
+	rig.utils.skin.menu()
 	cmds.setParent('..', menu=True)
 	cmds.menuItem(l='Control', subMenu=True, to=True)
-	rig.api.utils.control.menu()
+	rig.utils.control.menu()
 	cmds.setParent('..', menu=True)
 	cmds.menuItem(l='Parts', subMenu=True, to=True)
 	rig.parts.menu()
@@ -134,7 +128,6 @@ def show(*args):
 	cmds.menuItem(d=True, l='Animation')
 	cmds.menuItem(l='Tween Key', c=channelBox.tweenKey.windowQt)
 	cmds.menuItem(l='Sticky Feet', c=anim.stickyFeet.ui)
-	cmds.menuItem(l='AXEL', c=AXEL)
 	cmds.menuItem(l='Reference Manager', c=anim.refman.show)
 	cmds.menuItem(l='Reference Player', c=referencePlayer, enable=QTLOADED)
 

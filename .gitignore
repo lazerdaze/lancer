@@ -9,10 +9,8 @@ eixml.py
 studiolibrary
 test_data
 extras
-workFiles
 test
 temp
-workfiles
 BigTimelineWindow.py
 maya_to_keyframe_mp.py
 timeline_markers.py
