@@ -990,6 +990,7 @@ class Joint(Node):
 	             name='rig',
 	             radius=1,
 	             index=0,
+				 sector=None,
 	             drawStyle=0,
 	             side=None,
 	             type=None,
@@ -998,6 +999,7 @@ class Joint(Node):
 		Node.__init__(self,
 		              name=name,
 		              kind=Component.joint,
+					  sector=sector,
 		              index=index,
 		              side=side,
 		              )
@@ -1034,6 +1036,14 @@ class Joint(Node):
 				cmds.setAttr(attributeName(self.name, MayaAttr.type), self.otherType, type=MayaAttrType.string)
 
 			# Set Kind
+			addAttribute(node=self.name,
+						 attribute=UserAttr.kind,
+						 kind=MayaAttrType.string,
+						 value=self.kind,
+						 keyable=False,
+						 channelBox=False,
+						 lock=True,
+						 )
 
 			# Set Index
 			addAttribute(node=self.name,

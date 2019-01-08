@@ -1,4 +1,28 @@
-class Type(object):
+'''
+Naming Conventions:
+	- "leg_R_..._type"
+	- [Component][Side][...][Type]
+	- checking for string at the beginning is fastest / end is second fastest
+
+	- "componentSideType"
+	- Camel Case
+
+	- "_hrc"
+	- Hierarchy
+	- No transform values
+
+	- "_buffer"
+	- Original Position of an Object
+
+	- "_srt"
+	- Scaling Rotation Translation
+
+
+	"arm_L_finger_A_0_fk_control"
+'''
+
+
+class MayaNodeType(object):
 	transform = 'transform'
 	mesh = 'mesh'
 	joint = 'joint'
@@ -187,10 +211,10 @@ class Part(object):
 
 
 AnimCurves = ['animCurveUL',
-              'animCurveUU',
-              'animCurveUA',
-              'animCurveUT'
-              ]
+			  'animCurveUU',
+			  'animCurveUA',
+			  'animCurveUT'
+			  ]
 
 
 def longName(*args):
@@ -222,6 +246,10 @@ def attributeName(*args):
 			else:
 				var = str(arg)
 	return var
+
+
+def camelName(*args):
+	return
 
 
 def removeJointStr(obj, *args):

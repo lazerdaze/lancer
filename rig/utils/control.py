@@ -24,7 +24,7 @@ def createControl(name='control', shape=WireType.circle, axis=None, scale=1, ind
 	# Curve Shape
 	curve = createWire(kind=shape, axis=axis)
 	curveShape = cmds.rename(cmds.listRelatives(curve, shapes=True)[0],
-	                         '{}Shape'.format(name))
+							 '{}Shape'.format(name))
 
 	# Set Scale
 	for axis in ['x', 'y', 'z']:
@@ -41,11 +41,11 @@ def createControl(name='control', shape=WireType.circle, axis=None, scale=1, ind
 
 	# Add Kind Attribute
 	addAttribute(node=node,
-	             attribute=UserAttr.kind,
-	             kind=MayaAttrType.string,
-	             value=Component.control,
-	             lock=True,
-	             )
+				 attribute=UserAttr.kind,
+				 kind=MayaAttrType.string,
+				 value=Component.control,
+				 lock=True,
+				 )
 
 	# Color
 	if color and isinstance(color, list):
@@ -72,23 +72,27 @@ def createControl(name='control', shape=WireType.circle, axis=None, scale=1, ind
 
 class Control(Node):
 	def __init__(self,
-	             name='rig',
-	             item=None,
-	             kind=Component.control,
-	             wire=WireType.circleRotate,
-	             axis=None,
-	             scale=1,
-	             index=0,
-	             side=None,
-	             color=WireColor.blue,
-	             ):
+				 name='rig',
+				 prefix=None,
+				 item=None,
+				 kind=Component.control,
+				 wire=WireType.circleRotate,
+				 axis=None,
+				 scale=1,
+				 index=0,
+				 side=None,
+				 sector=None,
+				 color=WireColor.blue,
+				 ):
 		Node.__init__(self,
-		              name=name,
-		              kind=kind,
-		              index=index,
-		              side=side,
-		              color=color
-		              )
+					  name=name,
+					  prefix=prefix,
+					  kind=kind,
+					  index=index,
+					  side=side,
+					  sector=sector,
+					  color=color,
+					  )
 
 		self.item = item
 
@@ -105,28 +109,35 @@ class Control(Node):
 		# Init
 		self.create(wire, axis, scale, index, color)
 
+	def getItem(self):
+		return self.item
+
+	def setItem(self, item):
+		self.item = item
+		return
+
 	def create(self, wire, axis, scale, index, color):
 		if not self.isValid():
 
 			# Main Control
 			result = createControl(name=self.name,
-			                       shape=wire,
-			                       axis=axis,
-			                       scale=scale,
-			                       index=index,
-			                       color=color,
-			                       )
+								   shape=wire,
+								   axis=axis,
+								   scale=scale,
+								   index=index,
+								   color=color,
+								   )
 			self.transform = result[0]
 			self.shape = result[1]
 
 			# Offset Control
 			resultOffset = createControl(
-					name=self.name.replace(Component.control, longName(Component.offset, Component.control)),
-					shape=wire,
-					axis=axis,
-					scale=scale * .75,
-					index=index,
-					color=color,
+				name=self.name.replace(Component.control, longName(Component.offset, Component.control)),
+				shape=wire,
+				axis=axis,
+				scale=scale * .75,
+				index=index,
+				color=color,
 			)
 
 			self.offsetTransform = resultOffset[0]
@@ -138,26 +149,26 @@ class Control(Node):
 			attribute = UserAttr.offsetVisibility
 
 			addAttribute(node=self.transform,
-			             attribute=attribute,
-			             kind=MayaAttrType.bool,
-			             keyable=False,
-			             channelBox=True,
-			             destinationNode=self.offsetTransform,
-			             destinationAttribute=MayaAttr.visibility,
-			             )
+						 attribute=attribute,
+						 kind=MayaAttrType.bool,
+						 keyable=False,
+						 channelBox=True,
+						 destinationNode=self.offsetTransform,
+						 destinationAttribute=MayaAttr.visibility,
+						 )
 
 			createMonoRelationship(source=self.transform,
-			                       destination=self.offsetTransform,
-			                       sourceAttr=Component.offset,
-			                       destinationAttr=Component.parent,
-			                       )
+								   destination=self.offsetTransform,
+								   sourceAttr=Component.offset,
+								   destinationAttr=Component.parent,
+								   )
 
 			# Create Nulls
 			nulls = createNull(longName(self.name, Component.origin),
-			                   longName(self.name, Component.offset),
-			                   longName(self.name, Component.zero),
-			                   node=self.transform,
-			                   )
+							   longName(self.name, Component.offset),
+							   longName(self.name, Component.zero),
+							   node=self.transform,
+							   )
 
 			self.nullOrigin = nulls[0]
 			self.nullOffset = nulls[1]
@@ -174,6 +185,8 @@ class Control(Node):
 		return
 
 	def connectItem(self):
+		if self.item:
+			pass
 		return
 
 
@@ -188,24 +201,24 @@ class Control(Node):
 
 class FKControl(Control):
 	def __init__(self,
-	             name='rig',
-	             axis=None,
-	             scale=1,
-	             index=0,
-	             side=None,
-	             wire=WireType.circleRotate,
-	             color=WireColor.blue,
-	             ):
+				 name='rig',
+				 axis=None,
+				 scale=1,
+				 index=0,
+				 side=None,
+				 wire=WireType.circleRotate,
+				 color=WireColor.blue,
+				 ):
 		Control.__init__(self,
-		                 name=name,
-		                 kind=Component.fkControl,
-		                 wire=wire,
-		                 axis=axis,
-		                 scale=scale,
-		                 index=index,
-		                 side=side,
-		                 color=color,
-		                 )
+						 name=name,
+						 kind=Component.fkControl,
+						 wire=wire,
+						 axis=axis,
+						 scale=scale,
+						 index=index,
+						 side=side,
+						 color=color,
+						 )
 
 
 ########################################################################################################################
@@ -218,24 +231,24 @@ class FKControl(Control):
 
 class IKControl(Control):
 	def __init__(self,
-	             name='rig',
-	             axis=None,
-	             scale=1,
-	             index=0,
-	             side=None,
-	             wire=WireType.sphere,
-	             color=WireColor.red,
-	             ):
+				 name='rig',
+				 axis=None,
+				 scale=1,
+				 index=0,
+				 side=None,
+				 wire=WireType.sphere,
+				 color=WireColor.red,
+				 ):
 		Control.__init__(self,
-		                 name=name,
-		                 kind=Component.ikControl,
-		                 wire=wire,
-		                 axis=axis,
-		                 scale=scale,
-		                 index=index,
-		                 side=side,
-		                 color=color,
-		                 )
+						 name=name,
+						 kind=Component.ikControl,
+						 wire=wire,
+						 axis=axis,
+						 scale=scale,
+						 index=index,
+						 side=side,
+						 color=color,
+						 )
 
 
 ########################################################################################################################
@@ -248,24 +261,24 @@ class IKControl(Control):
 
 class MasterControl(Control):
 	def __init__(self,
-	             name='rig',
-	             axis=None,
-	             scale=1,
-	             index=0,
-	             side=None,
-	             wire=WireType.lollipop,
-	             color=WireColor.purple,
-	             ):
+				 name='rig',
+				 axis=None,
+				 scale=1,
+				 index=0,
+				 side=None,
+				 wire=WireType.lollipop,
+				 color=WireColor.purple,
+				 ):
 		Control.__init__(self,
-		                 name=name,
-		                 kind=Component.masterControl,
-		                 wire=wire,
-		                 axis=axis,
-		                 scale=scale,
-		                 index=index,
-		                 side=side,
-		                 color=color,
-		                 )
+						 name=name,
+						 kind=Component.masterControl,
+						 wire=wire,
+						 axis=axis,
+						 scale=scale,
+						 index=index,
+						 side=side,
+						 color=color,
+						 )
 
 
 ########################################################################################################################
@@ -278,21 +291,21 @@ class MasterControl(Control):
 
 class DetailControl(Control):
 	def __init__(self,
-	             name='rig',
-	             axis=None,
-	             scale=1,
-	             index=0,
-	             side=None,
-	             wire=WireType.doubleLollipop,
-	             color=WireColor.lightBlue,
-	             ):
+				 name='rig',
+				 axis=None,
+				 scale=1,
+				 index=0,
+				 side=None,
+				 wire=WireType.doubleLollipop,
+				 color=WireColor.lightBlue,
+				 ):
 		Control.__init__(self,
-		                 name=name,
-		                 kind=Component.detailControl,
-		                 wire=wire,
-		                 axis=axis,
-		                 scale=scale,
-		                 index=index,
-		                 side=side,
-		                 color=color,
-		                 )
+						 name=name,
+						 kind=Component.detailControl,
+						 wire=wire,
+						 axis=axis,
+						 scale=scale,
+						 index=index,
+						 side=side,
+						 color=color,
+						 )

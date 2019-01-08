@@ -1,72 +1,73 @@
 # Lancer Modules
 from naming import *
+from node import *
 
 # Maya Modules
 from maya import cmds
 
 DataTypes = ['string',
-             'stringArray',
-             'matrix',
-             'reflectanceRGB',
-             'spectrumRGB',
-             'float2',
-             'float3',
-             'double2',
-             'double3',
-             'long2',
-             'long3',
-             'short2',
-             'short3',
-             'doubleArray',
-             'floatArray',
-             'Int32Array',
-             'vectorArray',
-             'nurbsCurve',
-             'nurbsSurface',
-             'mesh',
-             'lattice',
-             'pointArray',
-             ]
+			 'stringArray',
+			 'matrix',
+			 'reflectanceRGB',
+			 'spectrumRGB',
+			 'float2',
+			 'float3',
+			 'double2',
+			 'double3',
+			 'long2',
+			 'long3',
+			 'short2',
+			 'short3',
+			 'doubleArray',
+			 'floatArray',
+			 'Int32Array',
+			 'vectorArray',
+			 'nurbsCurve',
+			 'nurbsSurface',
+			 'mesh',
+			 'lattice',
+			 'pointArray',
+			 ]
 
 AttributeTypes = ['bool',
-                  'long',
-                  'short',
-                  'byte',
-                  'char',
-                  'enum',
-                  'float',
-                  'double',
-                  'doubleAngle',
-                  'doubleLinear',
-                  'compound',
-                  'message',
-                  'time',
-                  'fltMatrix',
-                  'reflectance',
-                  'spectrum',
-                  'float2',
-                  'float3',
-                  'double2',
-                  'double3',
-                  'long2',
-                  'long3',
-                  'short2',
-                  'short3'
-                  ]
+				  'long',
+				  'short',
+				  'byte',
+				  'char',
+				  'enum',
+				  'float',
+				  'double',
+				  'doubleAngle',
+				  'doubleLinear',
+				  'compound',
+				  'message',
+				  'time',
+				  'fltMatrix',
+				  'reflectance',
+				  'spectrum',
+				  'float2',
+				  'float3',
+				  'double2',
+				  'double3',
+				  'long2',
+				  'long3',
+				  'short2',
+				  'short3'
+				  ]
 
 
 def addAttribute(node,
-                 attribute,
-                 kind=MayaAttrType.float,
-                 value=None,
-                 minValue=None,
-                 maxValue=None,
-                 keyable=True,
-                 channelBox=True,
-                 lock=False,
-                 destinationNode=None,
-                 destinationAttribute=None,
-                 ):
+				 attribute,
+				 kind=MayaAttrType.float,
+				 value=None,
+				 minValue=None,
+				 maxValue=None,
+				 keyable=True,
+				 channelBox=True,
+				 lock=False,
+				 destinationNode=None,
+				 destinationAttribute=None,
+				 ):
 	name = attributeName(node, attribute)
 
 	if not attributeExist(node, attribute):
@@ -141,7 +142,64 @@ def attributeLocked(node, attribute):
 	return cmds.getAttr(attributeName(node, attribute), lock=True)
 
 
-def connectAttribute(parent, child):
+def connectAttribute(*args, **kwargs):
+	# Get Keywords
+	offset = kwargs.get('offset', False)
+	source = kwargs.get('source', None)
+	sourceAttr = kwargs.get('sourceAttr', None)
+	destination = kwargs.get('destination', None)
+	destinationAttr = kwargs.get('destinationAttr', None)
+
+	# Get Args
+	if len(args) == 2:
+		if not source:
+			source = args[0]
+
+		if not destination:
+			destination = args[1]
+
+	if source and destination:
+		if not sourceAttr and not destinationAttr:
+			if '.' in source:
+				sourceResult = source.split('.')
+				source = sourceResult[0]
+				sourceAttr = sourceResult[1]
+
+			if '.' in destination:
+				destinationResult = destination.split('.')
+				destination = destinationResult[0]
+				destinationAttr = destinationResult[1]
+
+		# Connect
+		if sourceAttr and destinationAttr:
+			sourceName = attributeName(source, sourceAttr)
+			destinationName = attributeName(destination, destinationAttr)
+
+			if attributeExist(source, sourceAttr) and attributeExist(destination, destinationAttr):
+
+				# Offset
+				if offset:
+					offsetNode = createNode(name=longName(source, Component.offset, 1),
+											kind=MayaNodeType.addDoubleLinear
+											)
+
+					sourceValue = cmds.getAttr(sourceName)
+					destinationValue = cmds.getAttr(destinationName)
+
+					cmds.setAttr(attributeName(offsetNode, 'input2'), destinationValue - sourceValue)
+
+					# Connect Offset
+					cmds.connectAttr(sourceName, attributeName(offsetNode, 'input1'))
+					sourceName = attributeName(offsetNode, 'output')
+
+				cmds.connectAttr(sourceName, destinationName, force=True)
+
+			else:
+				raise ValueError('Source or destination attribute does not exist.')
+		else:
+			raise ValueError('A valid source or destination attribute was not provided.')
+	else:
+		raise ValueError('Must provide two nodes.')
 	return
 
 
@@ -286,12 +344,12 @@ def addIndexAttribute(node, value):
 	if not attributeExist(node, name):
 
 		addAttribute(node=node,
-		             attribute=name,
-		             kind=MayaAttrType.int,
-		             value=value,
-		             keyable=False,
-		             channelBox=False,
-		             )
+					 attribute=name,
+					 kind=MayaAttrType.int,
+					 value=value,
+					 keyable=False,
+					 channelBox=False,
+					 )
 	else:
 		cmds.setAttr(attributeName(node, name), value)
 

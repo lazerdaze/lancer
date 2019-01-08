@@ -45,7 +45,7 @@ def nodeWorldRotation(node):
 	return
 
 
-def createNode(name, kind=Type.null):
+def createNode(name, kind=MayaNodeType.null):
 	return cmds.createNode(kind, name=name, skipSelect=True)
 
 
@@ -59,28 +59,40 @@ def createNode(name, kind=Type.null):
 
 class Node(object):
 	def __init__(self,
-	             name,
-	             parent=None,
-	             kind=None,
-	             children=None,
-	             exists=False,
-	             index=0,
-	             side=None,
-	             color=None,
-	             ):
-		self.name = longName(name, side[0].upper() if side else side, index, kind)
+				 name,
+				 prefix=None,
+				 parent=None,
+				 kind=None,
+				 children=None,
+				 exists=False,
+				 sector=None,
+				 index=0,
+				 side=None,
+				 color=None,
+				 ):
+
+		self.name = longName(prefix,
+							 side[0].upper() if side else None,
+							 name,
+							 sector[0].upper() if sector else None,
+							 index,
+							 kind
+							 )
 		self.kind = kind
 		self.parent = parent
 		self.children = children if isinstance(children, list) else []
 		self.exists = exists
 		self.color = color
+		self.index = index
+		self.sector = sector
+		self.side = side
 
 		# Nodes
 		self.transform = None
 		self.shape = None
 
 		# Maya Attributes
-		self.index = index
+
 		self.translateX = 0
 		self.translateY = 0
 		self.translateZ = 0
