@@ -8,6 +8,9 @@ class Type(object):
 	blendWeighted = 'blendWeighted'
 	animCurve = 'animCurve'
 	unitConversion = 'unitConversion'
+	distanceBetween = 'distanceBetween'
+	angleBetween = 'angleBetween'
+	addDoubleLinear = 'addDoubleLinear'
 
 
 class Component(object):
@@ -23,6 +26,8 @@ class Component(object):
 	fkik = 'fkik'
 	set = 'set'
 	joint = 'joint'
+	leaf = '{}_leaf'.format(joint)
+
 	control = 'control'
 	fkControl = 'fk_{}'.format(control)
 	ikControl = 'ik_{}'.format(control)

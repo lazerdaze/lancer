@@ -4,6 +4,7 @@ from general import *
 from node import *
 from error import *
 from network import *
+from constraint import *
 
 # Maya Modules
 from maya import cmds
@@ -55,7 +56,7 @@ def createControl(name='control', shape=WireType.circle, axis=None, scale=1, ind
 		i = 0
 		for x in ['R', 'G', 'B']:
 			cmds.setAttr('{}.overrideColor{}'.format(curveShape, x), color[i])
-			i+=1
+			i += 1
 
 	return [node, curveShape]
 
@@ -72,6 +73,7 @@ def createControl(name='control', shape=WireType.circle, axis=None, scale=1, ind
 class Control(Node):
 	def __init__(self,
 	             name='rig',
+	             item=None,
 	             kind=Component.control,
 	             wire=WireType.circleRotate,
 	             axis=None,
@@ -87,6 +89,8 @@ class Control(Node):
 		              side=side,
 		              color=color
 		              )
+
+		self.item = item
 
 		# Null Groups
 		self.nullOrigin = None
@@ -162,6 +166,14 @@ class Control(Node):
 			self.exists = True
 		else:
 			raise NodeExistsError('Control already exists.')
+		return
+
+	def constrainItem(self):
+		if self.item:
+			constraint(self.offsetTransform, self.item, offset=True)
+		return
+
+	def connectItem(self):
 		return
 
 

@@ -5,6 +5,12 @@ from general import *
 from maya import cmds
 
 
+def constraint(*args, **kwargs):
+	kwargs['offset'] = kwargs.get('offset', False)
+	offset = kwargs['offset']
+	return [parentConstraint(args, offset=offset), scaleConstraint(args, offset=offset)]
+
+
 def parentConstraint(*args, **kwargs):
 	kwargs['offset'] = kwargs.get('offset', False)
 	offset = kwargs['offset']
@@ -38,6 +44,21 @@ def aimConstraint(*args, **kwargs):
 def poleVectorConstraint(*args, **kwargs):
 	kwargs['offset'] = kwargs.get('offset', False)
 	offset = kwargs['offset']
+	return
+
+
+def directConnectDefaults(*args, **kwargs):
+	if len(args) > 1:
+		offset = kwargs.get('offset', False)
+		translate = kwargs.get('translate', False)
+		rotate = kwargs.get('scale', False)
+		scale = kwargs.get('offset', False)
+		parent = args[0]
+
+		for arg in args:
+			pass
+	else:
+		raise ValueError('Must provide two nodes.')
 	return
 
 
