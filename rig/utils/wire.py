@@ -31,6 +31,17 @@ class WireType(object):
 	hip = 'hip'
 
 
+class WireColor(object):
+	blue = [0, 0, 1]
+	red = [1, 0, 0]
+	yellow = [1, 1, 0]
+	purple = [.2, 0, .5]
+	redPurple = [.5, 0, .5]
+	bluePurple = [.05, 0, .5]
+	lightBlue = [.5, 1, 1]
+	pink = [1, .5, 1]
+
+
 WirePoints = {
 	WireType.circle        : [],
 	WireType.square        : [],
@@ -741,4 +752,3 @@ def createWire(kind, axis=None, scale=1):
 
 	freezeTransform(curve)
 	return curve
-

@@ -11,6 +11,7 @@ from control import *
 from curve import *
 from error import *
 from general import *
+from ik import *
 from joint import *
 from mesh import *
 from naming import *

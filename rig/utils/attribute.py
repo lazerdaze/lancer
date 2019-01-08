@@ -4,23 +4,128 @@ from naming import *
 # Maya Modules
 from maya import cmds
 
+DataTypes = ['string',
+             'stringArray',
+             'matrix',
+             'reflectanceRGB',
+             'spectrumRGB',
+             'float2',
+             'float3',
+             'double2',
+             'double3',
+             'long2',
+             'long3',
+             'short2',
+             'short3',
+             'doubleArray',
+             'floatArray',
+             'Int32Array',
+             'vectorArray',
+             'nurbsCurve',
+             'nurbsSurface',
+             'mesh',
+             'lattice',
+             'pointArray',
+             ]
 
-def attributeExists(node, attribute):
-	return
+AttributeTypes = ['bool',
+                  'long',
+                  'short',
+                  'byte',
+                  'char',
+                  'enum',
+                  'float',
+                  'double',
+                  'doubleAngle',
+                  'doubleLinear',
+                  'compound',
+                  'message',
+                  'time',
+                  'fltMatrix',
+                  'reflectance',
+                  'spectrum',
+                  'float2',
+                  'float3',
+                  'double2',
+                  'double3',
+                  'long2',
+                  'long3',
+                  'short2',
+                  'short3'
+                  ]
 
 
-def addAttribute(node, attribute, kind=None, value=None, min=None, max=None):
+def addAttribute(node,
+                 attribute,
+                 kind=MayaAttrType.float,
+                 value=None,
+                 minValue=None,
+                 maxValue=None,
+                 keyable=True,
+                 channelBox=True,
+                 lock=False,
+                 destinationNode=None,
+                 destinationAttribute=None,
+                 ):
+	name = attributeName(node, attribute)
+
+	if not attributeExist(node, attribute):
+
+		# Create
+		if kind in DataTypes:
+			cmds.addAttr(node, longName=attribute, dataType=kind)
+
+		elif kind in AttributeTypes:
+			cmds.addAttr(node, longName=attribute, attributeType=kind, keyable=keyable)
+		else:
+			cmds.addAttr(node, longName=attribute)
+
+		# Set Keyable
+		try:
+			cmds.setAttr(name, channelBox=channelBox, keyable=keyable)
+		except:
+			pass
+
+		# Set Default Values
+		if value is not None:
+			if isinstance(value, (int, float)):
+				cmds.addAttr(name, edit=True, defaultValue=float(value))
+				cmds.setAttr(name, float(value))
+			elif isinstance(value, str):
+				cmds.setAttr(name, value, type=MayaAttrType.string)
+
+		if minValue:
+			cmds.addAttr(name, edit=True, minValue=float(minValue))
+
+		if maxValue:
+			cmds.addAttr(name, edit=True, maxValue=float(maxValue))
+
+		# Set Lock
+		if lock:
+			cmds.setAttr(name, lock=lock)
+
+		# Connect To Destination
+		if destinationNode and destinationAttribute:
+			destinationName = attributeName(destinationNode, destinationAttribute)
+
+			if attributeExist(destinationNode, destinationAttribute):
+				cmds.connectAttr(name, destinationName, force=True)
+			else:
+				raise AttributeError('Attribute "{}" does not exist.'.format(destinationName))
+	else:
+		raise AttributeError('Attribute "{}" already exists.'.format(name))
 	return
 
 
 def setAttribute(node, attribute, value):
 	name = attributeName(node, attribute)
 	kind = attributeType(node, attribute)
-	try:
+
+	if kind == MayaAttrType.string:
 		cmds.setAttr(name, value, type=kind)
-		return True
-	except ValueError:
-		return False
+	else:
+		cmds.setAttr(name, value)
+	return
 
 
 def getAttribute(node, attribute):
@@ -176,11 +281,19 @@ def getConnectedObj(node, attr):
 			return None
 
 
-def addIndexValue(node, var, *args):
-	if not cmds.attributeQuery('index', node=node, ex=True):
-		cmds.addAttr(node, ln='index', at='long', dv=var)
+def addIndexAttribute(node, value):
+	name = UserAttr.index
+	if not attributeExist(node, name):
+
+		addAttribute(node=node,
+		             attribute=name,
+		             kind=MayaAttrType.int,
+		             value=value,
+		             keyable=False,
+		             channelBox=False,
+		             )
 	else:
-		cmds.setAttr('{}.index'.format(node), var)
+		cmds.setAttr(attributeName(node, name), value)
 
 	return
 

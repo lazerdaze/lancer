@@ -1,6 +1,6 @@
 # Lancer Modules
-import rig.utils.joint
 from rig.utils import *
+from rig.piece import *
 from bodyBase import BASE
 
 # Maya Moudles
@@ -36,24 +36,24 @@ class ROOT(BASE):
 		self.hideGroupNodes([self.network] + self.fkGroup)
 
 	def getScale(self):
-		self.scale = int(rig.utils.joint.determineHeight(self.root) / 2)
+		self.scale = int(determineHeight(self.root) / 2)
 		return
 
 	def createControls(self):
 
-		ctl = rig.api.component.CONTROL(name='{}_ctl'.format(self.name),
-		                                typ='root',
-		                                scale=self.scale + 2,
-		                                axis=[0, 0, 0],
-		                                )
+		ctl = CONTROL(name='{}_ctl'.format(self.name),
+		              typ='root',
+		              scale=self.scale + 2,
+		              axis=[0, 0, 0],
+		              )
 
-		offset = rig.api.component.CONTROL(name='{}_offset_ctl'.format(self.name),
-		                                   typ='center',
-		                                   scale=self.scale,
-		                                   axis=[0, 0, 0],
-		                                   )
+		offset = CONTROL(name='{}_offset_ctl'.format(self.name),
+		                 typ='center',
+		                 scale=self.scale,
+		                 axis=[0, 0, 0],
+		                 )
 
-		rigging.presetWireColor([ctl.transform, offset.transform, ], typ=rigging.component.center)
+		presetWireColor([ctl.transform, offset.transform, ], typ=Position.center)
 		cmds.parent(offset.group, ctl.transform)
 		self.fkControl = [ctl.transform, offset.transform]
 		self.fkGroup = [ctl.group, offset.group]
@@ -66,15 +66,15 @@ class ROOT(BASE):
 		attrName = 'rootOffset'
 		parent = self.fkControl[0]
 
-		rootOffset = rig.api.component.CONTROL(name='{}_root_offset_ctl'.format(self.name),
-		                                       typ='center',
-		                                       scale=self.scale - 0.8,
-		                                       axis=[0, 0, 0],
-		                                       )
+		rootOffset = CONTROL(name='{}_root_offset_ctl'.format(self.name),
+		                     typ='center',
+		                     scale=self.scale - 0.8,
+		                     axis=[0, 0, 0],
+		                     )
 
-		rigging.presetWireColor([rootOffset.transform], typ=rigging.component.center)
+		presetWireColor([rootOffset.transform], typ=Position.center)
 		cmds.parent(rootOffset.group, self.fkControl[-1])
-		rigging.addBoolAttr(obj=parent, name=attrName)
+		addBoolAttr(parent, name=attrName)
 		cmds.connectAttr('{}.{}'.format(parent, attrName), '{}.v'.format(rootOffset.group))
 
 		if self.root:
@@ -86,7 +86,7 @@ class ROOT(BASE):
 
 	def setupDisplayAttr(self):
 		for attr in ['jointDisplay', 'controlDisplay']:
-			rigging.addBoolAttr(self.fkControl[0], attr)
+			addBoolAttr(self.fkControl[0], attr)
 			cmds.connectAttr('{}.{}'.format(self.fkControl[0], attr), '{}.{}'.format(self.network, attr))
 		return
 

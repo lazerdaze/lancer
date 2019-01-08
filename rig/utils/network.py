@@ -1,10 +1,60 @@
 # Lancer Modules
 from general import *
 from attribute import *
+from naming import *
 
 # Maya Modules
 from maya import cmds
 
+
+def createMonoRelationship(source, destination, sourceAttr=None, destinationAttr=None):
+	if sourceAttr and destinationAttr:
+		pass
+	else:
+		if '.' in source:
+			sourceResult = source.split('.')
+			source = sourceResult[0]
+			sourceAttr = sourceResult[1]
+		else:
+			sourceAttr = 'child'
+
+		if '.' in destination:
+			destinationResult = destination.split('.')
+			destination = destinationResult[0]
+			destinationAttr = destinationResult[1]
+		else:
+			destinationAttr = 'parent'
+
+	# Create Source Attribute
+	if not attributeExist(source, sourceAttr):
+		addAttribute(node=source, attribute=sourceAttr, kind=MayaAttrType.message)
+
+	# Create Destination Attribute
+	if not attributeExist(destination, destinationAttr):
+		addAttribute(node=destination, attribute=destinationAttr, kind=MayaAttrType.message)
+
+	# Make Connection
+	cmds.connectAttr(attributeName(source, sourceAttr),
+	                 attributeName(destination, destinationAttr),
+	                 force=True
+	                 )
+	cmds.connectAttr(attributeName(destination, destinationAttr),
+	                 attributeName(source, sourceAttr),
+	                 force=True
+	                 )
+	return
+
+
+def createPolyRelationship(*args, **kwargs):
+	source = kwargs.get('source', None)
+	sourceAttr = kwargs.get('sourceAttr', None)
+	destinationAttr = kwargs.get('destinationAttr', False)
+
+	for arg in args:
+		if isinstance(arg, (list, tuple, dict)):
+			pass
+
+	return
 
 
 def network(n='network', typ='', *args):

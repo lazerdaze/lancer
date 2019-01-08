@@ -1,15 +1,17 @@
 # Lancer Modules
 from rig.utils import *
+from rig.piece import *
 from bodyBase import BASE
 
-# Maya Moudles
+# Maya Modules
 from maya import cmds
+
 
 class HEAD(BASE):
 	def __init__(self,
 	             head,
 	             networkRoot=None,
-	             name=naming.component.head,
+	             name=Part.head,
 	             scale=1,
 	             attrControl=None,
 	             ):
@@ -17,7 +19,7 @@ class HEAD(BASE):
 		              objects=rigging.listCheck(head),
 		              networkRoot=networkRoot,
 		              name=name,
-		              side=naming.side.center,
+		              side=Position.center,
 		              scale=scale,
 		              attrControl=attrControl,
 		              )
@@ -44,13 +46,13 @@ class HEAD(BASE):
 		return
 
 	def createControls(self):
-		ctl = rig.api.component.CONTROL(name='{}_ctl'.format(self.name),
-		                                typ=control.component.lollipop,
-		                                scale=self.scale,
-		                                axis=[1, 0, -1],
-		                                )
+		ctl = CONTROL(name='{}_ctl'.format(self.name),
+		              typ=WireType.lollipop,
+		              scale=self.scale,
+		              axis=[1, 0, -1],
+		              )
 		rigging.snap(self.head, ctl.group, t=True, r=True)
-		rigging.presetWireColor(ctl.transform, typ=rigging.component.center)
+		rigging.presetWireColor(ctl.transform, typ=Position.center)
 		rigging.lockScale(ctl.transform)
 
 		self.fkControl = [ctl.transform]
@@ -58,11 +60,11 @@ class HEAD(BASE):
 		return
 
 	def createIK(self):
-		ctl = rig.api.component.CONTROL(name='{}_ik_ctl'.format(self.name),
-		                                typ=control.component.sphere,
-		                                scale=self.scale / 8,
-		                                axis=[0, 0, 0],
-		                                )
+		ctl = CONTROL(name='{}_ik_ctl'.format(self.name),
+		              typ=WireType.sphere,
+		              scale=self.scale / 8,
+		              axis=[0, 0, 0],
+		              )
 
 		rigging.snap(self.head, ctl.group, t=True)
 		distance = cmds.xform(self.head, q=True, ws=True, rp=True)[1]
@@ -72,7 +74,7 @@ class HEAD(BASE):
 		ikGrp = cmds.group(ikNull, name='{}_grp'.format(ikNull))
 		rigging.snap(self.head, ikGrp, t=True, r=True)
 		rigging.createAimVector(ctl.transform, ikNull, name='{}_aimVector'.format(self.name))
-		rigging.presetWireColor(ctl.transform, typ=rigging.component.ik)
+		rigging.presetWireColor(ctl.transform, typ=Component.ik)
 
 		self.ikControl = [ikNull, ctl.transform]
 		self.ikGroup = [ikGrp, ctl.group]
@@ -86,7 +88,7 @@ class HEAD(BASE):
 		return
 
 	def createFKIK(self):
-		attrName = naming.rig.fkik
+		attrName = Component.fkik
 		rigging.createFKIK(obj=self.head,
 		                   fk=self.fkControl[0],
 		                   ctl=self.fkControl[0],

@@ -1,5 +1,6 @@
 # Lancer Modules
 from attribute import *
+from general import *
 
 # Maya Modules
 from maya import cmds
@@ -51,18 +52,28 @@ def createNode(name, kind=Type.null):
 ########################################################################################################################
 #
 #
-#	Node Base Class
+#	Node Class
 #
 #
 ########################################################################################################################
 
 class Node(object):
-	def __init__(self, name, parent=None, kind=None, children=None, exists=False, index=0):
-		self.name = name
+	def __init__(self,
+	             name,
+	             parent=None,
+	             kind=None,
+	             children=None,
+	             exists=False,
+	             index=0,
+	             side=None,
+	             color=None,
+	             ):
+		self.name = longName(name, side[0].upper() if side else side, index, kind)
 		self.kind = kind
 		self.parent = parent
 		self.children = children if isinstance(children, list) else []
 		self.exists = exists
+		self.color = color
 
 		# Nodes
 		self.transform = None
@@ -144,6 +155,51 @@ class Node(object):
 		self.index = index
 		return
 
+	def move(self, *args, **kwargs):
+		if self.isValid():
+			worldSpace = kwargs.get('worldSpace', False)
+			x = kwargs.get('x', None)
+			y = kwargs.get('y', None)
+			z = kwargs.get('z', None)
+
+			if isinstance(args, list) or len(args) == 3:
+				cmds.xform(self.name, translation=args, worldSpace=worldSpace)
+			else:
+				if x is not None:
+					cmds.move(x, self.name, x=True, worldSpace=worldSpace)
+
+				if y is not None:
+					cmds.move(y, self.name, y=True, worldSpace=worldSpace)
+
+				if z is not None:
+					cmds.move(z, self.name, z=True, worldSpace=worldSpace)
+			self.populateAttributes()
+		return
+
+	def rotate(self, *args, **kwargs):
+		if self.isValid():
+			worldSpace = kwargs.get('worldSpace', False)
+			x = kwargs.get('x', None)
+			y = kwargs.get('y', None)
+			z = kwargs.get('z', None)
+
+			if isinstance(args, list) or len(args) == 3:
+				cmds.xform(self.name, rotatePivot=args, worldSpace=worldSpace)
+			else:
+				if x:
+					cmds.rotate(x, self.name, x=True, worldSpace=worldSpace)
+				if y:
+					cmds.rotate(y, self.name, y=True, worldSpace=worldSpace)
+				if z:
+					cmds.rotate(z, self.name, z=True, worldSpace=worldSpace)
+			self.populateAttributes()
+		return
+
+	def snapTo(self, node, translation=True, rotation=True):
+		snap(node, self.name, t=translation, r=rotation)
+		self.populateAttributes()
+		return
+
 	def isValid(self):
 		if self.name:
 			self.exists = nodeExists(self.name)
@@ -200,4 +256,53 @@ class Node(object):
 					childNode = Node(parent=self, name=child)
 					childNode.populateFromScene()
 					self.appendChild(childNode)
+		return
+
+
+########################################################################################################################
+#
+#
+#	Chain Class
+#
+#
+########################################################################################################################
+
+class Chain(object):
+	def __init__(self, children=None):
+		self.currentIndex = 0
+		self.children = children if isinstance(children, list) else []
+
+	def __str__(self):
+		return ''.join('{}, '.format(x) for x in self.children)
+
+	def __repr__(self):
+		return self.children
+
+	def __len__(self):
+		return len(self.children)
+
+	def __getitem__(self, item):
+		return self.children[item]
+
+	def __iter__(self):
+		self.currentIndex = 0
+		return self
+
+	def __next__(self):
+		if self.currentIndex > len(self.children) - 1:
+			raise StopIteration
+		else:
+			self.currentIndex += 1
+			return self.children[self.currentIndex - 1]
+
+	def next(self):
+		return self.__next__()
+
+	def append(self, joint):
+		self.children.append(joint)
+		return
+
+	def remove(self, joint):
+		if joint in self.children:
+			self.children.remove(joint)
 		return

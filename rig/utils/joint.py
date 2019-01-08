@@ -3,13 +3,141 @@ from general import *
 from attribute import *
 from node import *
 from naming import *
+from error import *
 
 # Python Modules
 import json
 
 # Maya Modules
-from maya import cmds, mel, cmds as cmds
+from maya import cmds, mel
 
+'''
+Notes:
+	- segment scale compensate should be turned off.
+	- default rotation order should be xyz.
+	- Spline IK solvers require X down the joint chain for Advanced Twist.
+
+	Unreal Engine:
+		- doens't care about the rotate orders
+		- don't use non-uniform scale between chains (only leaf joints)
+		- don't use negative scale
+		
+	Unity:
+		-doesn't support Rotate Axis (per-rotation)
+'''
+
+MAYAJOINTLABELS = ['None',
+                   'Root',
+                   'Hip',
+                   'Knee',
+                   'Foot',
+                   'Toe',
+                   'Spine',
+                   'Neck',
+                   'Head',
+                   'Collar',
+                   'Shoulder',
+                   'Elbow',
+                   'Hand',
+                   'Finger',
+                   'Thumb',
+                   'PropA',
+                   'PropB',
+                   'PropC',
+                   'Other',
+                   'Index Finger',
+                   'Middle Finger',
+                   'Ring Finger',
+                   'Pinky Finger',
+                   'Extra Finger'
+                   'Big Toe',
+                   'Index Toe',
+                   'Middle Toe',
+                   'Ring Toe',
+                   'Pinky Toe',
+                   'Foot Thumb',
+                   ]
+
+jointLabelGlobalList = ['None',
+                        'Root',
+                        'Spine',
+                        'Neck',
+                        'Head',
+                        'Collar',
+                        'Shoulder',
+                        'Elbow',
+                        'Hand',
+                        'Thumb',
+                        'Index Finger',
+                        'Middle Finger',
+                        'Ring Finger',
+                        'Pinky Finger',
+                        'Hip',
+                        'Knee',
+                        'Foot',
+                        'Toe',
+                        'Big Toe',
+                        'Index Toe',
+                        'Middle Toe',
+                        'Ring Toe',
+                        'Pinky Toe',
+                        'Other',
+                        'Bind',
+                        'Limbs'
+                        ]
+
+jointLabelLimbGlobalList = ['arms',
+                            'legs',
+                            'finger',
+                            'toe',
+                            ]
+
+
+class JointLabelSide(object):
+	center = 0
+	left = 1
+	right = 2
+	none = 3
+
+
+class JointLabelType(object):
+	none = 0
+	root = 1
+	hip = 2
+	knee = 3
+	foot = 4
+	toe = 5
+	spine = 6
+	neck = 7
+	head = 8
+	collar = 9
+	shoulder = 10
+	elbow = 11
+	hand = 12
+	finger = 13
+	thumb = 14
+	propA = 15
+	propB = 16
+	propC = 17
+	other = 18
+	indexFinger = 19
+	middleFinger = 20
+	ringFinger = 21
+	pinkyFinger = 22
+	extraFinger = 23
+	bigToe = 24
+	indexToe = 25
+	middleToe = 26
+	ringToe = 27
+	pinkyToe = 28
+	footThumb = 29
+
+
+class JointLabelOtherType(object):
+	bind = 'bind'
+	footPivot = 'footPivot'
+	cog = 'cog'
+	tail = 'tail'
 
 
 def zeroJointOrient(jnt, *args):
@@ -80,12 +208,10 @@ def createJoint(obj=None, n='joint_0', *args):
 	if obj:
 		snap(obj, jnt, t=True, r=True)
 		freezeTransform(jnt)
-
 	return jnt
 
 
 def orientJointChain(*args):
-	pass
 	return
 
 
@@ -653,71 +779,6 @@ def determineHeight(root):
 	return scale
 
 
-MAYAJOINTLABELS = ['None',
-                   'Root',
-                   'Hip',
-                   'Knee',
-                   'Foot',
-                   'Toe',
-                   'Spine',
-                   'Neck',
-                   'Head',
-                   'Collar',
-                   'Shoulder',
-                   'Elbow',
-                   'Hand',
-                   'Finger',
-                   'Thumb',
-                   'PropA',
-                   'PropB',
-                   'PropC',
-                   'Other',
-                   'Index Finger',
-                   'Middle Finger',
-                   'Ring Finger',
-                   'Pinky Finger',
-                   'Extra Finger'
-                   'Big Toe',
-                   'Index Toe',
-                   'Middle Toe',
-                   'Ring Toe',
-                   'Pinky Toe',
-                   'Foot Thumb',
-                   ]
-jointLabelGlobalList = ['None',
-                        'Root',
-                        'Spine',
-                        'Neck',
-                        'Head',
-                        'Collar',
-                        'Shoulder',
-                        'Elbow',
-                        'Hand',
-                        'Thumb',
-                        'Index Finger',
-                        'Middle Finger',
-                        'Ring Finger',
-                        'Pinky Finger',
-                        'Hip',
-                        'Knee',
-                        'Foot',
-                        'Toe',
-                        'Big Toe',
-                        'Index Toe',
-                        'Middle Toe',
-                        'Ring Toe',
-                        'Pinky Toe',
-                        'Other',
-                        'Bind',
-                        'Limbs'
-                        ]
-jointLabelLimbGlobalList = ['arms',
-                            'legs',
-                            'finger',
-                            'toe',
-                            ]
-
-
 def setJointLabel(joint, side=None, typ=None, otherType=None):
 	if typ == 'Bind':
 		otherType = typ
@@ -734,7 +795,56 @@ def setJointLabel(joint, side=None, typ=None, otherType=None):
 
 		else:
 			typeAttr = setEnumByString(joint, 'type', typ)
+	return
 
+
+def getJointLabelSide(joint):
+	return cmds.getAttr(attributeName(joint, MayaAttr.side), asString=True)
+
+
+def getJointLabelType(joint):
+	return cmds.getAttr(attributeName(joint, MayaAttr.type), asString=True)
+
+
+def getJointLabelOtherType(joint):
+	return cmds.getAttr(attributeName(joint, MayaAttr.otherType), asString=True)
+
+
+def setJointLabelSide(joint, side):
+	if isinstance(side, str):
+		side = side.lower()
+
+		if hasattr(JointLabelSide, side):
+			cmds.setAttr(attributeName(joint, MayaAttr.side), getattr(JointLabelSide, side))
+		else:
+			raise ValueError('Joint does not have side "{}".'.format(side))
+	elif isinstance(side, int):
+		cmds.setAttr(attributeName(joint, MayaAttr.side), side)
+	else:
+		raise TypeError('Side must be int or str.')
+	return
+
+
+def setJointLabelType(joint, kind):
+	if isinstance(kind, str):
+		if hasattr(JointLabelSide, kind):
+			cmds.setAttr(attributeName(joint, MayaAttr.type), getattr(JointLabelType, kind))
+		else:
+			raise ValueError('Joint does not have type "{}".'.format(kind))
+
+	elif isinstance(kind, int):
+		cmds.setAttr(attributeName(joint, MayaAttr.type), kind)
+	else:
+		raise TypeError('Type must be int or str.')
+	return
+
+
+def setJointLabelOtherType(joint, kind):
+	if isinstance(kind, str):
+		cmds.setAttr(attributeName(joint, MayaAttr.type), JointLabelType.other)
+		cmds.setAttr(attributeName(joint, MayaAttr.otherType), kind, type=MayaAttrType.string)
+	else:
+		raise TypeError('Type must be str.')
 	return
 
 
@@ -836,6 +946,7 @@ def getJointChainByLabel(joint, label):
 
 	return chain if chain else None
 
+
 def createJointChain(objects, name=Component.joint):
 	jointList = []
 	cmds.select(d=True)
@@ -864,6 +975,7 @@ def createJointChain(objects, name=Component.joint):
 
 	return jointList
 
+
 ########################################################################################################################
 #
 #
@@ -874,8 +986,89 @@ def createJointChain(objects, name=Component.joint):
 
 
 class Joint(Node):
-	def __int__(self, name='joint1'):
-		Node.__init__(self, name=name, kind=Component.joint)
+	def __init__(self,
+	             name='rig',
+	             radius=1,
+	             index=0,
+	             drawStyle=0,
+	             side=None,
+	             type=None,
+	             otherType=None,
+	             ):
+		Node.__init__(self,
+		              name=name,
+		              kind=Component.joint,
+		              index=index,
+		              side=side,
+		              )
+
+		# Maya Attributes
+		self.drawStyle = drawStyle
+		self.type = type if type else 'none'
+		self.otherType = otherType
+
+		self.jointOrientX = 0
+		self.jointOrientY = 0
+		self.jointOrientZ = 0
+
+		# Init
+		self.create(radius, index)
+
+	def create(self, radius, index):
+		if not self.isValid():
+			cmds.select(d=True)
+			self.transform = cmds.joint(name=self.name, radius=radius)
+
+			# Set Draw Style
+			cmds.setAttr(attributeName(self.name, MayaAttr.drawStyle), self.drawStyle)
+
+			# Set Segment Scale Compensate
+			cmds.setAttr(attributeName(self.name, MayaAttr.segmentScaleCompensate), 0)
+
+			# Set Type
+			if hasattr(JointLabelType, self.type):
+				cmds.setAttr(attributeName(self.name, MayaAttr.type), getattr(JointLabelType, self.type))
+
+			# Set Other Type
+			if self.otherType:
+				cmds.setAttr(attributeName(self.name, MayaAttr.type), self.otherType, type=MayaAttrType.string)
+
+			# Set Kind
+
+			# Set Index
+			addAttribute(node=self.name,
+			             attribute=UserAttr.index,
+			             kind=MayaAttrType.int,
+			             value=index,
+			             keyable=False,
+			             channelBox=False,
+			             lock=True,
+			             )
+
+		else:
+			raise NodeExistsError('Joint already exists.')
+		return
+
+	def zeroOrient(self):
+		for attr in [MayaAttr.jointOrientX,
+		             MayaAttr.jointOrientY,
+		             MayaAttr.jointOrientZ,
+		             ]:
+			self.setAttribute(attr, 0)
+		return
+
+
+########################################################################################################################
+#
+#
+#	Joint Chain Class
+#
+#
+########################################################################################################################
+
+class JointChain(Chain):
+	def __init__(self, children=None):
+		Chain.__init__(self, children=children)
 
 	def create(self):
 		return

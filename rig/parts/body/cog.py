@@ -1,10 +1,11 @@
 # Lancer Modules
-import rig.utils.joint
 from rig.utils import *
+from rig.piece import *
 from bodyBase import BASE
 
 # Maya Moudles
 from maya import cmds
+
 
 class COG(BASE):
 	def __init__(self,
@@ -39,30 +40,30 @@ class COG(BASE):
 		self.setupHierarchy()
 
 	def getScale(self):
-		self.scale = rig.utils.joint.determineHeight(self.cog) / 4 + .25
+		self.scale = determineHeight(self.cog) / 4 + .25
 		return
 
 	def createControls(self):
-		ctl = rig.api.component.CONTROL(name='{}_ctl'.format(self.name),
-		                                typ='center',
-		                                scale=self.scale,
-		                                axis=[0, 0, 0],
-		                                )
+		ctl = CONTROL(name='{}_ctl'.format(self.name),
+		              typ=Position.center,
+		              scale=self.scale,
+		              axis=[0, 0, 0],
+		              )
 		rigging.snap(self.cog, ctl.group, t=True, r=False)
-		rigging.presetWireColor(ctl.transform, typ=rigging.component.center)
+		rigging.presetWireColor(ctl.transform, typ=Position.center)
 		cmds.parentConstraint(ctl.transform, self.cog, mo=True)
 		self.fkControl = [ctl.transform]
 		self.fkGroup = [ctl.group]
 		return
 
 	def createHipControl(self):
-		ctl = rig.api.component.CONTROL(name='hip_ctl',
-		                                typ=control.component.hip,
-		                                scale=self.scale - .15,
-		                                axis=[0, 0, 0],
-		                                )
+		ctl = CONTROL(name='hip_ctl',
+		              typ=Part.hip,
+		              scale=self.scale - .15,
+		              axis=[0, 0, 0],
+		              )
 		rigging.snap(self.hip, ctl.group, t=True, r=False)
-		rigging.presetWireColor(ctl.transform, typ=rigging.component.center)
+		rigging.presetWireColor(ctl.transform, typ=Position.center)
 		cmds.parentConstraint(ctl.transform, self.hip, mo=True)
 		cmds.parent(ctl.group, self.fkControl[-1])
 		self.objects.append(self.hip)

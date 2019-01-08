@@ -1,4 +1,5 @@
 # Lancer Modules
+from node import *
 
 # Python Modules
 from math import *
@@ -40,6 +41,18 @@ def listCheck(var, *args):
 	if type(var) is str or type(var) is unicode:
 		var = [str(var)]
 	return var
+
+
+def flatList(*args, **kwargs):
+	root = kwargs.get('root', [])
+
+	for arg in args:
+		if isinstance(arg, (list, dict, tuple)):
+			for item in arg:
+				flatList(item, root=root)
+		else:
+			root.append(arg)
+	return root
 
 
 def freezeTransform(obj, t=True, r=True, s=True):
@@ -85,6 +98,32 @@ def createGroup(obj, n='grp'):
 	cmds.parent(obj, grp)
 
 	return grp
+
+
+def createNull(*args, **kwargs):
+	nulls = []
+
+	kwargs['node'] = kwargs.get('node', None)
+	node = kwargs['node']
+
+	for arg in args:
+		index = args.index(arg)
+		null = cmds.group(name=arg, empty=True)
+
+		if index > 0:
+			cmds.parent(null, args[index - 1])
+
+		nulls.append(null)
+
+	if len(nulls) > 0 and node:
+		snap(node, nulls[0], t=True, r=True)
+		parent = nodeParent(node)
+
+		if parent:
+			cmds.parent(nulls[0], parent)
+
+		cmds.parent(node, nulls[-1])
+	return nulls
 
 
 def getPositionSide(obj, *args):

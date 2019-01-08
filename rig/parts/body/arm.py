@@ -1,5 +1,6 @@
 # Lancer Modules
 from rig.utils import *
+from rig.piece import *
 from bodyBase import BASE
 from digit import DIGIT
 
@@ -60,21 +61,21 @@ class ARM(BASE):
 		return
 
 	def createCollar(self):
-		ctl = rig.api.component.CONTROL(name=longName(self.name,
-		                                              self.side[0],
-		                                              self.index,
-		                                              Component.fk,
-		                                              Part.collar.capitalize(),
-		                                              Component.control,
-		                                              ),
-		                                typ=WireType.dumbbell,
-		                                scale=self.scale,
-		                                axis=[1, 0, 0],
-		                                child=self.collar,
-		                                side=self.side,
-		                                label=Part.collar,
-		                                color=Component.fk,
-		                                )
+		ctl = CONTROL(name=longName(self.name,
+		                            self.side[0],
+		                            self.index,
+		                            Component.fk,
+		                            Part.collar.capitalize(),
+		                            Component.control,
+		                            ),
+		              typ=WireType.dumbbell,
+		              scale=self.scale,
+		              axis=[1, 0, 0],
+		              child=self.collar,
+		              side=self.side,
+		              label=Part.collar,
+		              color=Component.fk,
+		              )
 		rigging.lockScale(ctl.transform)
 		cmds.parentConstraint(ctl.transform, self.collar)
 

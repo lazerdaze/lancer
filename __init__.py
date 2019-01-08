@@ -5,6 +5,8 @@
 #
 #
 
+# Lancer Modules
+from refresh import refreshModules
 
 # Python Modules
 import os
@@ -23,9 +25,13 @@ SUBDIR = os.walk(DIRPATH)
 EXTERNALDIR = os.path.join(DIRPATH, 'external')
 EXTERNALPLUGINDIR = os.path.join(EXTERNALDIR, 'plugins')
 EXTERNALPLUGINS = False
-MAYAVERSION = int(cmds.about(v=True))
-MAYAPLUGINPATH = mel.eval('getenv "MAYA_PLUG_IN_PATH"')
 
+try:
+	MAYAVERSION = int(cmds.about(v=True))
+except TypeError:
+	MAYAVERSION = None
+
+MAYAPLUGINPATH = mel.eval('getenv "MAYA_PLUG_IN_PATH"')
 
 # Functions
 def splitall(path):
@@ -99,7 +105,6 @@ else:
 	pass
 	addToMayaPluginPath()
 	loadPlugins()
-
 
 if __name__ == '__main__':
 	print '\n\n\n{0} LANCER {0}\n\n\n'.format('-' * 50)

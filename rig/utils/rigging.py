@@ -68,9 +68,6 @@ class queryIK():
 		self.parent = par
 
 
-
-
-
 def createFKIK(obj, fk, ik, ctl, n='FKIK'):
 	# Add Attribute
 
@@ -109,12 +106,6 @@ def createFKIK(obj, fk, ik, ctl, n='FKIK'):
 	# Return
 
 	return [pcList, reList]
-
-
-
-
-
-
 
 
 class createFlexiPlane:
@@ -631,5 +622,3 @@ class getDefaultIKFootRollPositions:
 		cmds.parent(self.outter, self.parent)
 		zeroAttrs(self.outter)
 		cmds.setAttr('{}.tx'.format(self.outter), (distance / 3) * outterM)
-
-

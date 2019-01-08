@@ -24,7 +24,15 @@ class Component(object):
 	set = 'set'
 	joint = 'joint'
 	control = 'control'
+	fkControl = 'fk_{}'.format(control)
+	ikControl = 'ik_{}'.format(control)
+	masterControl = 'master_{}'.format(control)
+	detailControl = 'detail_{}'.format(control)
 	group = 'group'
+	offset = 'offset'
+	origin = 'origin'
+	position = 'position'
+	zero = 'zero'
 	network = 'network'
 	null = 'null'
 	aim = 'aim'
@@ -49,6 +57,57 @@ class Component(object):
 	ikPoleVector = 'ikPoleVector'
 	fkPoleVector = 'fkPoleVector'
 	aimVector = 'aimVector'
+
+
+class MayaAttr(object):
+	# Transforms
+	translate = 'translate'
+	translateX = 'translateX'
+	translateY = 'translateY'
+	translateZ = 'translateZ'
+
+	rotate = 'rotate'
+	rotateX = 'rotateX'
+	rotateY = 'rotateY'
+	rotateZ = 'rotateZ'
+
+	scale = 'scale'
+	scaleX = 'scaleX'
+	scaleY = 'scaleY'
+	scaleZ = 'scaleZ'
+
+	visibility = 'visibility'
+	rotateOrder = 'rotateOrder'
+
+	overrideEnabled = 'overrideEnabled'
+	overrideRGBColors = 'overrideRGBColors'
+	useObjectColor = 'useObjectColor'
+
+	# Joints
+	drawStyle = 'drawStyle'
+	side = 'side'
+	type = 'type'
+	otherType = 'otherType'
+	segmentScaleCompensate = 'segmentScaleCompensate'
+	jointOrientX = 'jointOrientX'
+	jointOrientY = 'jointOrientX'
+	jointOrientZ = 'jointOrientX'
+
+
+class MayaAttrType(object):
+	float = 'double'
+	int = 'long'
+	bool = 'bool'
+	enum = 'enum'
+	string = 'string'
+	vector = 'double3'
+	message = 'message'
+
+
+class UserAttr(object):
+	index = 'index'
+	offsetVisibility = 'offsetVisibility'
+	kind = 'kind'
 
 
 class Position(object):
@@ -132,7 +191,7 @@ AnimCurves = ['animCurveUL',
 def longName(*args):
 	var = ''
 	for arg in args:
-		if arg is not None:
+		if arg is not None and arg != '':
 			if not isinstance(arg, (list, dict)):
 				if var:
 					var += '_{}'.format(arg)

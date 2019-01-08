@@ -1,9 +1,11 @@
 # Lancer Modules
 from rig.utils import *
+from rig.piece import *
 from bodyBase import BASE
 
 # Maya Moudles
 from maya import cmds
+
 
 class SPINE(BASE):
 	def __init__(self,
@@ -74,7 +76,7 @@ class NECK(SPINE):
 	def __init__(self,
 	             objects,
 	             networkRoot=None,
-	             name=naming.component.neck,
+	             name=Part.neck,
 	             scale=1,
 	             attrControl=None,
 	             ):

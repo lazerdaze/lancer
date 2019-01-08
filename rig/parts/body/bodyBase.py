@@ -1,6 +1,6 @@
 # Lancer Modules
-import rig.utils.joint
 from rig.utils import *
+from rig.piece import *
 
 # Maya Moudles
 from maya import cmds
@@ -95,7 +95,7 @@ class BASE(object):
 		indexNum = 0
 		for obj in objects:
 			i = objects.index(obj)
-			children = rig.utils.joint.getBindJoint(obj)
+			children = getBindJoint(obj)
 
 			if children:
 				for child in children:
@@ -121,7 +121,7 @@ class BASE(object):
 					self.detailControl.append(ctl.transform)
 					self.detailGroup.append(ctl.group)
 
-					grandchildren = rig.utils.joint.getAllBindJoints(child)
+					grandchildren = getAllBindJoints(child)
 					if grandchildren:
 
 						for grandchild in grandchildren:
@@ -148,12 +148,12 @@ class BASE(object):
 		i = 0
 		indexNum = 0
 		for obj in objects:
-			children = rig.utils.joint.getBindJoint(obj)
+			children = getBindJoint(obj)
 
 			if children:
 				for child in children:
 
-					grandchildren = rig.utils.joint.getBindJoint(child)
+					grandchildren = getBindJoint(child)
 					if grandchildren:
 
 						for grandchild in grandchildren:
@@ -179,8 +179,8 @@ class BASE(object):
 		return
 
 	def createRibbonChain(self, start, mid, end):
-		upperObjects = rig.utils.joint.getBindJoint(start)
-		lowerObjects = rig.utils.joint.getBindJoint(mid)
+		upperObjects = getBindJoint(start)
+		lowerObjects = getBindJoint(mid)
 
 		if upperObjects and lowerObjects:
 			midObjects = lowerObjects[0]

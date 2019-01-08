@@ -110,12 +110,14 @@ def show(*args):
 	cmds.menuItem(l='Skin', subMenu=True, to=True)
 	rig.utils.skin.menu()
 	cmds.setParent('..', menu=True)
-	cmds.menuItem(l='Control', subMenu=True, to=True)
-	rig.utils.control.menu()
-	cmds.setParent('..', menu=True)
-	cmds.menuItem(l='Parts', subMenu=True, to=True)
-	rig.parts.menu()
-	cmds.setParent('..', menu=True)
+	# cmds.menuItem(l='Control', subMenu=True, to=True)
+	# rig.utils.control.menu()
+	# cmds.setParent('..', menu=True)
+
+
+	# cmds.menuItem(l='Parts', subMenu=True, to=True)
+	# rig.parts.menu()
+	# cmds.setParent('..', menu=True)
 
 	cmds.menuItem(l='Facial', subMenu=True, to=True)
 	rig.facePose.ui.menu()

@@ -1,5 +1,6 @@
 # Lancer Modules
 from rig.utils import *
+from rig.piece import *
 from bodyBase import BASE
 
 # Maya Moudles
@@ -13,7 +14,7 @@ class LEG(BASE):
 	             foot,
 	             toe=None,
 	             networkRoot=None,
-	             name=naming.component.leg,
+	             name=Part.leg,
 	             index=0,
 	             ):
 		BASE.__init__(self,
@@ -53,7 +54,7 @@ class LEG(BASE):
 		                      local=self.fkGroup[0],
 		                      )
 		self.createSet(self.fkControl + self.ikControl)
-		self.createNetwork(typ=naming.convention(self.name,
+		self.createNetwork(typ=longName(self.name,
 		                                         self.side.upper()[0],
 		                                         self.index,
 		                                         )
@@ -65,7 +66,7 @@ class LEG(BASE):
 		return
 
 	def setDefaultAttrValues(self):
-		cmds.setAttr('{}.{}'.format(self.attrControl, naming.rig.fkik), 1)
+		cmds.setAttr('{}.{}'.format(self.attrControl, Component.fkik), 1)
 		return
 
 	def resetRotations(self):
@@ -81,20 +82,20 @@ class LEG(BASE):
 		return
 
 	def createToe(self):
-		ctl = rig.api.component.CONTROL(name=naming.convention(self.name,
+		ctl = CONTROL(name=longName(self.name,
 		                                                       self.side[0],
 		                                                       self.index,
-		                                                       naming.rig.fk,
-		                                                       naming.component.toe.capitalize(),
-		                                                       naming.rig.ctl,
+		                                                       Component.fk,
+		                                                       Part.toe.capitalize(),
+		                                                       Component.control,
 		                                                       ),
-		                                typ=control.component.circleRotate,
+		                                typ=WireType.circleRotate,
 		                                scale=self.scale,
 		                                axis=[1, 0, 0],
 		                                child=self.toe,
 		                                side=self.side,
-		                                label=naming.component.collar,
-		                                color=rigging.component.fk,
+		                                label=Part.collar,
+		                                color=WireColor.blue,
 		                                )
 		rigging.lockScale(ctl.transform)
 
@@ -111,10 +112,10 @@ class LEG(BASE):
 		self.roll = rigging.createIKFootRollNulls(foot=self.foot,
 		                                          toe=self.toe,
 		                                          control=self.ikControl[-1],
-		                                          name=naming.convention(self.name,
+		                                          name=longName(self.name,
 		                                                              self.side[0],
 		                                                              self.index,
-		                                                              naming.rig.ik,
+		                                                              Component.ik,
 		                                                              'footRoll'),
 		                                          )
 
@@ -148,10 +149,10 @@ class LEG(BASE):
 			cmds.disconnectAttr('{}.constraintTranslate{}'.format(pc, axis), '{}.translate{}'.format(self.toe, axis))
 
 		pcAttr = cmds.parentConstraint(pc, q=True, wal=True)
-		cmds.connectAttr('{}.{}'.format(self.attrControl, naming.rig.fkik), '{}.{}'.format(pc, pcAttr[-1]), f=True)
+		cmds.connectAttr('{}.{}'.format(self.attrControl, Component.fkik), '{}.{}'.format(pc, pcAttr[-1]), f=True)
 
 		reverse = cmds.createNode('reverse', n='{}_fkik_re0'.format(self.toe))
-		cmds.connectAttr('{}.{}'.format(self.attrControl, naming.rig.fkik), '{}.inputX'.format(reverse), f=True)
+		cmds.connectAttr('{}.{}'.format(self.attrControl, Component.fkik), '{}.inputX'.format(reverse), f=True)
 		cmds.connectAttr('{}.outputX'.format(reverse), '{}.{}'.format(pc, pcAttr[0]), f=True)
 		cmds.connectAttr('{}.outputX'.format(reverse), '{}.v'.format(self.toeFKGroup), f=True)
 		return
