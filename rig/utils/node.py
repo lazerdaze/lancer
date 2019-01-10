@@ -1,6 +1,7 @@
 # Lancer Modules
 from attribute import *
 from general import *
+from naming import *
 
 # Maya Modules
 from maya import cmds
@@ -49,6 +50,32 @@ def createNode(name, kind=MayaNodeType.null):
 	return cmds.createNode(kind, name=name, skipSelect=True)
 
 
+def createNull(*args, **kwargs):
+	nulls = []
+
+	kwargs['node'] = kwargs.get('node', None)
+	node = kwargs['node']
+
+	for arg in args:
+		index = args.index(arg)
+		null = cmds.group(name=arg, empty=True)
+
+		if index > 0:
+			cmds.parent(null, args[index - 1])
+
+		nulls.append(null)
+
+	if len(nulls) > 0 and node:
+		snap(node, nulls[0], t=True, r=True)
+		parent = nodeParent(node)
+
+		if parent:
+			cmds.parent(nulls[0], parent)
+
+		cmds.parent(node, nulls[-1])
+	return nulls
+
+
 ########################################################################################################################
 #
 #
@@ -59,25 +86,26 @@ def createNode(name, kind=MayaNodeType.null):
 
 class Node(object):
 	def __init__(self,
-				 name,
-				 prefix=None,
-				 parent=None,
-				 kind=None,
-				 children=None,
-				 exists=False,
-				 sector=None,
-				 index=0,
-				 side=None,
-				 color=None,
-				 ):
+	             name,
+	             prefix=None,
+	             parent=None,
+	             kind=None,
+	             children=None,
+	             exists=False,
+	             sector=None,
+	             index=0,
+	             side=None,
+	             color=None,
+	             ):
 
 		self.name = longName(prefix,
-							 side[0].upper() if side else None,
-							 name,
-							 sector[0].upper() if sector else None,
-							 index,
-							 kind
-							 )
+		                     side[0].upper() if side else None,
+		                     name,
+		                     sector[0].upper() if sector else None,
+		                     index,
+		                     kind
+		                     )
+		self.prefix = prefix
 		self.kind = kind
 		self.parent = parent
 		self.children = children if isinstance(children, list) else []
@@ -108,10 +136,7 @@ class Node(object):
 		self.populateAttributes()
 
 	def __str__(self):
-		value = ''
-		for x in sorted(vars(self).iterkeys()):
-			value += '{}:\t{}\n'.format(x, vars(self)[x])
-		return value
+		return self.name
 
 	def __repr__(self):
 		return self.name
@@ -121,6 +146,20 @@ class Node(object):
 
 	def setName(self, name):
 		self.name = cmds.rename(self.name, name)
+		return
+
+	def addKind(self, kind):
+		if self.isValid():
+			addAttribute(node=self.name,
+			             attribute=UserAttr.kind,
+			             kind=MayaAttrType.string,
+			             value=kind,
+			             keyable=False,
+			             channelBox=False,
+			             lock=True,
+			             )
+		else:
+			raise RuntimeError('Add Kind: Node "{}" is not a valid object.'.format(self.name))
 		return
 
 	def getKind(self):
@@ -159,6 +198,20 @@ class Node(object):
 
 	def getExists(self):
 		return self.exists
+
+	def addIndex(self, index):
+		if self.isValid():
+			addAttribute(node=self.name,
+			             attribute=UserAttr.index,
+			             kind=MayaAttrType.int,
+			             value=index,
+			             keyable=False,
+			             channelBox=False,
+			             lock=True,
+			             )
+		else:
+			raise RuntimeError('Add Index: Node "{}" is not a valid object.'.format(self.name))
+		return
 
 	def getIndex(self):
 		return self.index
@@ -226,18 +279,20 @@ class Node(object):
 		return getattr(self, attribute)
 
 	def setAttribute(self, attribute, value):
-		if isinstance(attribute, str):
-			if hasattr(self, attribute):
-				if self.isAttributeLocked(attribute):
-					raise AttributeError('Attribute "{}" is locked.'.format(attribute))
+		if self.isValid():
+			if isinstance(attribute, str):
+				if hasattr(self, attribute):
+					if self.isAttributeLocked(attribute):
+						raise AttributeError('Attribute "{}" is locked.'.format(attribute))
+					else:
+						if getattr(self, attribute) != value:
+							setattr(self, attribute, value)
+						setAttribute(self.name, attribute, value)
 				else:
-					setattr(self, attribute, value)
-					setAttribute(self.name, attribute, value)
+					raise AttributeError('Attribute "{}" does not exist.'.format(attribute))
+				return
 			else:
-				raise AttributeError('Attribute "{}" does not exist.'.format(attribute))
-			return
-		else:
-			raise TypeError('Attribute must be str.')
+				raise TypeError('Attribute must be str.')
 
 	def populateAttributes(self):
 		exceptions = ['message', 'TdataCompound']
@@ -270,51 +325,3 @@ class Node(object):
 					self.appendChild(childNode)
 		return
 
-
-########################################################################################################################
-#
-#
-#	Chain Class
-#
-#
-########################################################################################################################
-
-class Chain(object):
-	def __init__(self, children=None):
-		self.currentIndex = 0
-		self.children = children if isinstance(children, list) else []
-
-	def __str__(self):
-		return ''.join('{}, '.format(x) for x in self.children)
-
-	def __repr__(self):
-		return self.children
-
-	def __len__(self):
-		return len(self.children)
-
-	def __getitem__(self, item):
-		return self.children[item]
-
-	def __iter__(self):
-		self.currentIndex = 0
-		return self
-
-	def __next__(self):
-		if self.currentIndex > len(self.children) - 1:
-			raise StopIteration
-		else:
-			self.currentIndex += 1
-			return self.children[self.currentIndex - 1]
-
-	def next(self):
-		return self.__next__()
-
-	def append(self, joint):
-		self.children.append(joint)
-		return
-
-	def remove(self, joint):
-		if joint in self.children:
-			self.children.remove(joint)
-		return

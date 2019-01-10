@@ -1,5 +1,5 @@
 # Lancer Modules
-from node import *
+from naming import *
 
 # Python Modules
 from math import *
@@ -98,32 +98,6 @@ def createGroup(obj, n='grp'):
 	cmds.parent(obj, grp)
 
 	return grp
-
-
-def createNull(*args, **kwargs):
-	nulls = []
-
-	kwargs['node'] = kwargs.get('node', None)
-	node = kwargs['node']
-
-	for arg in args:
-		index = args.index(arg)
-		null = cmds.group(name=arg, empty=True)
-
-		if index > 0:
-			cmds.parent(null, args[index - 1])
-
-		nulls.append(null)
-
-	if len(nulls) > 0 and node:
-		snap(node, nulls[0], t=True, r=True)
-		parent = nodeParent(node)
-
-		if parent:
-			cmds.parent(nulls[0], parent)
-
-		cmds.parent(node, nulls[-1])
-	return nulls
 
 
 def getPositionSide(obj, *args):

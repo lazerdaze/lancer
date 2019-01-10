@@ -7,19 +7,25 @@ Naming Conventions:
 	- "componentSideType"
 	- Camel Case
 
-	- "_hrc"
-	- Hierarchy
+	- "_hierarchy" | "_hrc"
 	- No transform values
 
+	- "_position" | "_pos"
+	- Initial position of an Object / has transform values
+
 	- "_buffer"
-	- Original Position of an Object
+	-
 
 	- "_srt"
 	- Scaling Rotation Translation
 
-
-	"arm_L_finger_A_0_fk_control"
+	- "arm_L_finger_A_0_fkControl"
+	- [Prefix][Side][Name][Sector][Index][type]
 '''
+
+CHARACTERSTR = 'abcdefghijklmnopqrstuvwxyz'
+NUMBERSTR = '0123456789'
+SPECIALSTR = '_'
 
 
 class MayaNodeType(object):
@@ -53,7 +59,7 @@ class Component(object):
 	leaf = '{}_leaf'.format(joint)
 
 	control = 'control'
-	fkControl = 'fk_{}'.format(control)
+	fkControl = 'fk_{}'.format(control.capitalize())
 	ikControl = 'ik_{}'.format(control)
 	masterControl = 'master_{}'.format(control)
 	detailControl = 'detail_{}'.format(control)
@@ -61,6 +67,7 @@ class Component(object):
 	offset = 'offset'
 	origin = 'origin'
 	position = 'position'
+	connection = 'connection'
 	zero = 'zero'
 	network = 'network'
 	null = 'null'
@@ -137,6 +144,7 @@ class UserAttr(object):
 	index = 'index'
 	offsetVisibility = 'offsetVisibility'
 	kind = 'kind'
+	sector = 'sector'
 
 
 class Position(object):
@@ -211,10 +219,10 @@ class Part(object):
 
 
 AnimCurves = ['animCurveUL',
-			  'animCurveUU',
-			  'animCurveUA',
-			  'animCurveUT'
-			  ]
+              'animCurveUU',
+              'animCurveUA',
+              'animCurveUT'
+              ]
 
 
 def longName(*args):
@@ -238,7 +246,7 @@ def longName(*args):
 def attributeName(*args):
 	var = ''
 	for arg in args:
-		if arg[0] in '0123456789':
+		if arg[0] in NUMBERSTR:
 			raise TypeError('Argument must start with a letter.')
 		else:
 			if var:
@@ -248,8 +256,48 @@ def attributeName(*args):
 	return var
 
 
-def camelName(*args):
-	return
+def camelCase(*args, **kwargs):
+	start = kwargs.get('start', True)
+
+	var = ''
+	i = 0
+	for arg in args:
+		if isinstance(arg, (list, dict, tuple)):
+			start = True if i == 0 else False
+			for item in arg:
+				var += camelCase(item, start=start)
+				start = False
+		else:
+			if start:
+				var += str(arg).strip().lower()
+				start = False
+			else:
+				var += str(arg).strip().title()
+		i += 1
+	return var
+
+
+def splitCamelCase(string):
+	root = []
+
+	if isinstance(string, str):
+		stringList = string.split('_')
+
+		for x in stringList:
+			newStr = ''
+			for char in x:
+				if char != ' ':
+					if char in CHARACTERSTR.lower():
+						newStr += char
+					elif char in CHARACTERSTR.upper():
+						root.append(newStr)
+						newStr = char.lower()
+					else:
+						newStr += char
+			root.append(newStr.strip())
+	else:
+		raise TypeError('Must provide a str.')
+	return root
 
 
 def removeJointStr(obj, *args):

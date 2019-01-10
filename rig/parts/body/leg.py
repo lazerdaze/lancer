@@ -128,7 +128,7 @@ class LEG(BASE):
 			cmds.setAttr('{}.t{}'.format(self.ikGroup[-1], axis), lock=False)
 
 		rigging.snap(self.roll.wire, self.ikGroup[-1], t=True)
-		rigging.lockAttributes(self.ikGroup[-1])
+		rigging.lockKeyableAttributes(self.ikGroup[-1])
 
 		cmds.parent(self.roll.wire, self.ikGroup[-1])
 		rigging.freezeTransform(self.roll.wire)

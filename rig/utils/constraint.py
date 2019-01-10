@@ -48,35 +48,6 @@ def poleVectorConstraint(*args, **kwargs):
 	offset = kwargs['offset']
 	return
 
-def directConnectDefaults(*args, **kwargs):
-	if len(args) > 1:
-		offset = kwargs.get('offset', False)
-		translate = kwargs.get('translate', False)
-		rotate = kwargs.get('rotate', False)
-		scale = kwargs.get('scale', False)
-		parent = args[0]
-
-		attributes = {
-			MayaAttr.translate: translate,
-			MayaAttr.rotate: rotate,
-			MayaAttr.scale: scale,
-		}
-
-		for arg in args:
-			if arg != parent:
-				for attr in attributes:
-					if attributes[attr]:
-						for axis in ['x', 'y', 'z']:
-							connectAttr = '{}{}'.format(attr, axis.upper())
-
-							if not attributeLocked(parent, connectAttr) and not attributeLocked(arg, connectAttr):
-								cmds.connectAttr(attributeName(parent, connectAttr),
-												 attributeName(arg, connectAttr)
-												 )
-	else:
-		raise ValueError('Must provide two nodes.')
-	return
-
 
 def localWorldConstraint(obj, local, world, n='localWorld', t=False, r=True):
 	name = '{}_{}'.format(obj, n)
@@ -128,11 +99,11 @@ def setOnMotionPath(selected, curve, name='motionPath', uValue=0, *args):
 	mp = cmds.createNode('motionPath', n='{}_mp'.format(name))
 
 	mpAttr = {
-		'follow': 1,
+		'follow'      : 1,
 		'fractionMode': 0,
-		'worldUpType': 3,
-		'frontAxis': 2,
-		'upAxis': 1,
+		'worldUpType' : 3,
+		'frontAxis'   : 2,
+		'upAxis'      : 1,
 	}
 	for attr in mpAttr:
 		cmds.setAttr('{}.{}'.format(mp, attr), mpAttr[attr])
@@ -183,7 +154,7 @@ def createAimVectorHelper(start, end, name='poleVector_helper'):
 	# Create Curve
 	curve = cmds.curve(n=name, d=1, p=[[0, 0, 0], [0, 0, 0]])
 	curveShape = cmds.rename(cmds.listRelatives(curve, shapes=True)[0],
-							 '{}Shape'.format(name))
+	                         '{}Shape'.format(name))
 	cmds.parent(curveShape, end, r=True, s=True)
 	cmds.delete(curve)
 
@@ -208,15 +179,15 @@ def createPoleVector(joint, ctl, ik, name='ik_poleVector'):
 
 def createAimVector(par, child, name='aimVector', aimVector=[0, 0, 1]):
 	aim = cmds.aimConstraint(par,
-							 child,
-							 name='{}_constraint0'.format(name),
-							 mo=True,
-							 aimVector=aimVector,
-							 upVector=[0, 1, 0],
-							 worldUpType='objectrotation',
-							 worldUpVector=[0, 1, 0],
-							 worldUpObject=par,
-							 )
+	                         child,
+	                         name='{}_constraint0'.format(name),
+	                         mo=True,
+	                         aimVector=aimVector,
+	                         upVector=[0, 1, 0],
+	                         worldUpType='objectrotation',
+	                         worldUpVector=[0, 1, 0],
+	                         worldUpObject=par,
+	                         )
 
 	shape = createAimVectorHelper(child, par, name='{}_helper'.format(name))
 

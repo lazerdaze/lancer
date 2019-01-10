@@ -6,12 +6,12 @@
 #
 
 from attribute import *
+from chain import *
 from constraint import *
 from control import *
 from curve import *
 from error import *
 from general import *
-from ik import *
 from joint import *
 from mesh import *
 from naming import *
@@ -23,4 +23,3 @@ from skeleton import *
 from skin import *
 from validate import *
 from wire import *
-

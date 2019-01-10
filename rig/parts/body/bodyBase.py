@@ -330,7 +330,7 @@ class BASE(object):
 		self.attrControl = ctl.transform
 		self.attrGroup = ctl.group
 		cmds.parent(self.attrGroup, obj)
-		rigging.lockAttributes(self.attrControl, hide=True)
+		rigging.lockKeyableAttributes(self.attrControl, hide=True)
 		return
 
 	def createFKIKChain(self, objects):

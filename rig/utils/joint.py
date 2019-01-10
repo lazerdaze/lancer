@@ -1,15 +1,16 @@
 # Lancer Modules
 from general import *
-from attribute import *
 from node import *
 from naming import *
 from error import *
+from attribute import *
 
 # Python Modules
 import json
 
 # Maya Modules
 from maya import cmds, mel
+from rig.utils.chain import Chain
 
 '''
 Notes:
@@ -91,6 +92,12 @@ jointLabelLimbGlobalList = ['arms',
                             'finger',
                             'toe',
                             ]
+
+
+class JointDrawStyle(object):
+	bone = 0
+	box = 1
+	none = 2
 
 
 class JointLabelSide(object):
@@ -989,9 +996,9 @@ class Joint(Node):
 	def __init__(self,
 	             name='rig',
 	             radius=1,
-	             index=0,
-				 sector=None,
-	             drawStyle=0,
+	             index=None,
+	             sector=None,
+	             drawStyle=JointDrawStyle.bone,
 	             side=None,
 	             type=None,
 	             otherType=None,
@@ -999,14 +1006,15 @@ class Joint(Node):
 		Node.__init__(self,
 		              name=name,
 		              kind=Component.joint,
-					  sector=sector,
+		              sector=sector,
 		              index=index,
 		              side=side,
 		              )
 
 		# Maya Attributes
+		self.radius = radius
 		self.drawStyle = drawStyle
-		self.type = type if type else 'none'
+		self.type = type
 		self.otherType = otherType
 
 		self.jointOrientX = 0
@@ -1014,49 +1022,109 @@ class Joint(Node):
 		self.jointOrientZ = 0
 
 		# Init
-		self.create(radius, index)
+		self.create()
 
-	def create(self, radius, index):
+	def disableSegmentScale(self):
+		self.setAttribute(attribute=MayaAttr.segmentScaleCompensate, value=0)
+		return
+
+	def setDrawStyle(self, drawStyle):
+		if isinstance(drawStyle, str):
+			if hasattr(JointDrawStyle, drawStyle):
+				drawStyle = getattr(JointDrawStyle, drawStyle)
+			else:
+				raise ValueError('Draw style "{}" not valid.'.format(drawStyle))
+
+		if isinstance(drawStyle, (int, float)):
+			self.setAttribute(attribute=MayaAttr.drawStyle, value=drawStyle)
+		else:
+			raise ValueError('Draw style "{}" not valid.'.format(drawStyle))
+		return
+
+	def setSide(self, side):
+		if side is None:
+			side = JointLabelSide.none
+
+		elif isinstance(side, str):
+			if hasattr(JointLabelSide, side):
+				side = getattr(JointLabelSide, side)
+			else:
+				raise ValueError('Side "{}" not valid.'.format(side))
+
+		if isinstance(side, (int, float)):
+			self.setAttribute(attribute=MayaAttr.side, value=side)
+		else:
+			raise ValueError('Side "{}" not valid.'.format(side))
+		return
+
+	def setType(self, type):
+		if type is None:
+			type = JointLabelType.none
+
+		elif isinstance(type, str):
+			if hasattr(JointLabelType, type):
+				type = getattr(JointLabelType, type)
+			else:
+				raise ValueError('Type "{}" not valid.'.format(type))
+
+		if isinstance(type, (int, float)):
+			self.setAttribute(attribute=MayaAttr.type, value=type)
+		else:
+			raise ValueError('Type "{}" not valid.'.format(type))
+		return
+
+	def setOtherType(self, otherType):
+		if isinstance(otherType, str):
+			self.setAttribute(attribute=MayaAttr.otherType, value=otherType)
+		else:
+			raise ValueError('Other type "{}" not valid. Must be str.'.format(type))
+		return
+
+	def setKind(self, kind):
+		if isinstance(kind, str):
+			self.setAttribute(attribute=UserAttr.kind, value=kind)
+		else:
+			raise ValueError('Kind must be str.'.format(type))
+		return
+
+	def setIndex(self, index):
+		if isinstance(index, int):
+			self.setAttribute(attribute=UserAttr.index, value=index)
+		else:
+			raise ValueError('Index must be int.')
+		return
+
+	def create(self):
 		if not self.isValid():
+
+			# Create Node
 			cmds.select(d=True)
-			self.transform = cmds.joint(name=self.name, radius=radius)
+			self.transform = cmds.joint(name=self.name, radius=self.radius)
 
 			# Set Draw Style
-			cmds.setAttr(attributeName(self.name, MayaAttr.drawStyle), self.drawStyle)
+			self.setDrawStyle(self.drawStyle)
 
 			# Set Segment Scale Compensate
-			cmds.setAttr(attributeName(self.name, MayaAttr.segmentScaleCompensate), 0)
+			self.disableSegmentScale()
+
+			# Set Side
+			self.setSide(self.side)
 
 			# Set Type
-			if hasattr(JointLabelType, self.type):
-				cmds.setAttr(attributeName(self.name, MayaAttr.type), getattr(JointLabelType, self.type))
+			self.setType(self.type)
 
 			# Set Other Type
-			if self.otherType:
-				cmds.setAttr(attributeName(self.name, MayaAttr.type), self.otherType, type=MayaAttrType.string)
+			self.setOtherType(self.otherType)
 
-			# Set Kind
-			addAttribute(node=self.name,
-						 attribute=UserAttr.kind,
-						 kind=MayaAttrType.string,
-						 value=self.kind,
-						 keyable=False,
-						 channelBox=False,
-						 lock=True,
-						 )
+			# Add Kind
+			self.addKind(self.kind)
 
-			# Set Index
-			addAttribute(node=self.name,
-			             attribute=UserAttr.index,
-			             kind=MayaAttrType.int,
-			             value=index,
-			             keyable=False,
-			             channelBox=False,
-			             lock=True,
-			             )
+			# Add Index
+			self.addIndex(self.index)
 
 		else:
-			raise NodeExistsError('Joint already exists.')
+			# raise NodeExistsError('Joint already exists.')
+			self.populateAttributes()
 		return
 
 	def zeroOrient(self):
@@ -1065,20 +1133,4 @@ class Joint(Node):
 		             MayaAttr.jointOrientZ,
 		             ]:
 			self.setAttribute(attr, 0)
-		return
-
-
-########################################################################################################################
-#
-#
-#	Joint Chain Class
-#
-#
-########################################################################################################################
-
-class JointChain(Chain):
-	def __init__(self, children=None):
-		Chain.__init__(self, children=children)
-
-	def create(self):
 		return

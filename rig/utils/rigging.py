@@ -1,3 +1,11 @@
+'''
+Notes:
+	- "Math is fun solving triangles"
+		- Law of Cosines
+
+	- There's six elements to a triangle (3 sides / 3 amgles).
+'''
+
 # Lancer
 from naming import *
 from control import *
@@ -9,16 +17,17 @@ from joint import *
 import maya.cmds as cmds
 
 
-# Python Modules
+def createTriangleSolver(*args, **kwargs):
+	'''
 
-
-#########################################################################################################################
-#																														#
-#																														#
-#	UTILITIES																											#
-#																														#
-#																														#
-#########################################################################################################################
+	chain start (locator)
+	chain end (locator)
+	distance (distanceBetween)
+	aim (angleBetween)
+	sides (addDoubleLinear)
+	chain buffer
+	'''
+	return
 
 
 class queryIK():
@@ -294,7 +303,7 @@ class createFlexiPlane:
 		cmds.parent(extrasGrp, follicleGrp, masterGrp)
 
 		for x in [follicleGrp, clusterGrp, extrasGrp, plane]:
-			lockAttributes(x)
+			lockKeyableAttributes(x)
 
 		setVisibility(globalGrp)
 		lockScale(globalGrp)

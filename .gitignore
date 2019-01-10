@@ -11,6 +11,7 @@ test_data
 extras
 test
 temp
+.mayaSwatches
 BigTimelineWindow.py
 maya_to_keyframe_mp.py
 timeline_markers.py

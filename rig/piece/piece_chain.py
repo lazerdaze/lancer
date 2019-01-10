@@ -75,7 +75,7 @@ class CHAIN(object):
 
 	def lockGroups(self):
 		for grp in self.group:
-			lockAttributes(grp, hide=True)
+			lockKeyableAttributes(grp, hide=True)
 
 	def lockCtlScale(self):
 		for ctl in self.control:
@@ -128,7 +128,7 @@ class FKCHAIN(CHAIN):
 			i = self.control.index(ctl)
 			grp = createGroup(ctl, n=longName(ctl, attrName, Component.group))
 			cmds.connectAttr('{}.{}[{}]'.format(self.parent, attrName, i), '{}.tx'.format(grp))
-			lockAttributes(grp, hide=True)
+			lockKeyableAttributes(grp, hide=True)
 			stretchGroup.append(grp)
 
 		self.stretchGroup = stretchGroup
@@ -241,7 +241,7 @@ class IKCHAIN(CHAIN):
 			cmds.connectAttr('{}.{}[{}]'.format(self.parent, attrName, i), '{}.input1'.format(add), f=True)
 			cmds.setAttr('{}.input2'.format(add), origPos)
 			cmds.connectAttr('{}.output'.format(add), '{}.tx'.format(grp))
-			lockAttributes(grp, hide=True)
+			lockKeyableAttributes(grp, hide=True)
 			stretchGroup.append(grp)
 
 		self.stretchGroup = stretchGroup

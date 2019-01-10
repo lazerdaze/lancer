@@ -33,21 +33,16 @@ MAYAPLUGINPATH = mel.eval('getenv "MAYA_PLUG_IN_PATH"')
 
 
 # Functions
-def refreshModules(userPath=None):
-	if userPath is None:
-		userPath = os.path.dirname(__file__)
-	userPath = userPath.lower()
-
+def refreshModules():
 	toDelete = []
 	for key, module in sys.modules.iteritems():
-
 		try:
 			moduleFilePath = inspect.getfile(module).lower()
 
 			if moduleFilePath == __file__.lower():
 				continue
 
-			if moduleFilePath.startswith(userPath):
+			if moduleFilePath.startswith(DIRPATH.lower()):
 				print "Removing {}".format(key)
 				toDelete.append(key)
 		except:
@@ -56,6 +51,13 @@ def refreshModules(userPath=None):
 	for module in toDelete:
 		del (sys.modules[module])
 
+
+def reloadModules():
+	for x in sys.modules.values():
+		print x
+	return
+
+reloadModules()
 
 def splitall(path):
 	allparts = []
@@ -129,16 +131,15 @@ else:
 	addToMayaPluginPath()
 	loadPlugins()
 
+
 if __name__ == '__main__':
-	print '\n\n\n{0} LANCER {0}\n\n\n'.format('-' * 50)
+	print '{0}LANCER START{0}'.format('-' * 50)
 	print 'Operating System: {}'.format(OSPLATFORM)
 	print 'Directory Path: {}'.format(DIRPATH)
 	print 'External Tools Path: {}'.format(EXTERNALDIR)
-	print ''
 	print 'Maya Version: {}'.format(MAYAVERSION)
 	print 'Maya Plugins Loaded: {}'.format(EXTERNALPLUGINS)
-	print ''
-	print 'Lancer Sub Directories'
-	for x in SUBDIR:
-		print x
-	print '\n\n\n{}\n\n\n'.format('-' * 111)
+	# print 'Lancer Sub Directories'
+	# for x in SUBDIR:
+	# 	print x
+	print '{0}LANCER END--{0}'.format('-' * 50)
