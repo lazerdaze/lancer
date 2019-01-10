@@ -28,70 +28,70 @@ Notes:
 '''
 
 MAYAJOINTLABELS = ['None',
-                   'Root',
-                   'Hip',
-                   'Knee',
-                   'Foot',
-                   'Toe',
-                   'Spine',
-                   'Neck',
-                   'Head',
-                   'Collar',
-                   'Shoulder',
-                   'Elbow',
-                   'Hand',
-                   'Finger',
-                   'Thumb',
-                   'PropA',
-                   'PropB',
-                   'PropC',
-                   'Other',
-                   'Index Finger',
-                   'Middle Finger',
-                   'Ring Finger',
-                   'Pinky Finger',
-                   'Extra Finger'
-                   'Big Toe',
-                   'Index Toe',
-                   'Middle Toe',
-                   'Ring Toe',
-                   'Pinky Toe',
-                   'Foot Thumb',
-                   ]
+				   'Root',
+				   'Hip',
+				   'Knee',
+				   'Foot',
+				   'Toe',
+				   'Spine',
+				   'Neck',
+				   'Head',
+				   'Collar',
+				   'Shoulder',
+				   'Elbow',
+				   'Hand',
+				   'Finger',
+				   'Thumb',
+				   'PropA',
+				   'PropB',
+				   'PropC',
+				   'Other',
+				   'Index Finger',
+				   'Middle Finger',
+				   'Ring Finger',
+				   'Pinky Finger',
+				   'Extra Finger'
+				   'Big Toe',
+				   'Index Toe',
+				   'Middle Toe',
+				   'Ring Toe',
+				   'Pinky Toe',
+				   'Foot Thumb',
+				   ]
 
 jointLabelGlobalList = ['None',
-                        'Root',
-                        'Spine',
-                        'Neck',
-                        'Head',
-                        'Collar',
-                        'Shoulder',
-                        'Elbow',
-                        'Hand',
-                        'Thumb',
-                        'Index Finger',
-                        'Middle Finger',
-                        'Ring Finger',
-                        'Pinky Finger',
-                        'Hip',
-                        'Knee',
-                        'Foot',
-                        'Toe',
-                        'Big Toe',
-                        'Index Toe',
-                        'Middle Toe',
-                        'Ring Toe',
-                        'Pinky Toe',
-                        'Other',
-                        'Bind',
-                        'Limbs'
-                        ]
+						'Root',
+						'Spine',
+						'Neck',
+						'Head',
+						'Collar',
+						'Shoulder',
+						'Elbow',
+						'Hand',
+						'Thumb',
+						'Index Finger',
+						'Middle Finger',
+						'Ring Finger',
+						'Pinky Finger',
+						'Hip',
+						'Knee',
+						'Foot',
+						'Toe',
+						'Big Toe',
+						'Index Toe',
+						'Middle Toe',
+						'Ring Toe',
+						'Pinky Toe',
+						'Other',
+						'Bind',
+						'Limbs'
+						]
 
 jointLabelLimbGlobalList = ['arms',
-                            'legs',
-                            'finger',
-                            'toe',
-                            ]
+							'legs',
+							'finger',
+							'toe',
+							]
 
 
 class JointDrawStyle(object):
@@ -465,15 +465,15 @@ class jointLabel():
 
 			if x != 'None':
 				self.masterDict[x] = {
-					'None'  : noneList, 'Left': sortJointHierarchy(leftList),
+					'None': noneList, 'Left': sortJointHierarchy(leftList),
 					'Center': sortJointHierarchy(centerList),
-					'Right' : sortJointHierarchy(rightList, )
+					'Right': sortJointHierarchy(rightList, )
 				}
 			else:
 				self.masterDict[x] = {
-					'None'  : noneList, 'Left': leftList,
+					'None': noneList, 'Left': leftList,
 					'Center': centerList,
-					'Right' : rightList
+					'Right': rightList
 				}
 
 	def isDebug(self):
@@ -488,7 +488,7 @@ class jointLabel():
 
 				if cmds.objectType(obj, isType='joint'):
 					if self.masterList[index - 1] in ['COG', 'Shoulder Bind', 'Elbow Bind', 'Hand Bind', 'Hip Bind',
-					                                  'Knee Bind', 'Foot Bind']:
+													  'Knee Bind', 'Foot Bind']:
 						setEnumByString(obj, 'type', 'Other')
 						cmds.setAttr('{}.otherType'.format(obj), self.masterList[index - 1], type='string')
 					else:
@@ -621,7 +621,7 @@ def getSkeletonTree(root, tree={}):
 	if children:
 		for child in children:
 			tree[child] = {
-				'children'  : getSkeletonTree(child, {}),
+				'children': getSkeletonTree(child, {}),
 				'attributes': getJointAttributes(child),
 			}
 
@@ -689,12 +689,12 @@ def createBindPosePrompt(*args):
 			return
 		else:
 			result = cmds.promptDialog(
-					title='Create Joint Pose'.format(root),
-					message='Enter Name:',
-					button=['OK', 'Cancel'],
-					defaultButton='OK',
-					cancelButton='Cancel',
-					dismissString='Cancel')
+				title='Create Joint Pose'.format(root),
+				message='Enter Name:',
+				button=['OK', 'Cancel'],
+				defaultButton='OK',
+				cancelButton='Cancel',
+				dismissString='Cancel')
 
 			if result == 'OK':
 				name = cmds.promptDialog(query=True, text=True)
@@ -710,7 +710,7 @@ def restoreBindPoseUI(poseList):
 	cmds.columnLayout(adj=True)
 	textVar = cmds.textScrollList(append=poseList)
 	cmds.button(l='Select',
-	            c=lambda x: cmds.layoutDialog(dismiss=str(cmds.textScrollList(textVar, q=True, si=True)[0])))
+				c=lambda x: cmds.layoutDialog(dismiss=str(cmds.textScrollList(textVar, q=True, si=True)[0])))
 	cmds.setParent('..')
 	return
 
@@ -994,41 +994,76 @@ def createJointChain(objects, name=Component.joint):
 
 class Joint(Node):
 	def __init__(self,
-	             name='rig',
-	             radius=1,
-	             index=None,
-	             sector=None,
-	             drawStyle=JointDrawStyle.bone,
-	             side=None,
-	             type=None,
-	             otherType=None,
-	             ):
+				 name='rig',
+				 prefix=None,
+				 radius=1,
+				 index=None,
+				 sector=None,
+				 drawStyle=JointDrawStyle.bone,
+				 side=None,
+				 type=None,
+				 otherType=None,
+				 ):
 		Node.__init__(self,
-		              name=name,
-		              kind=Component.joint,
-		              sector=sector,
-		              index=index,
-		              side=side,
-		              )
+					  prefix=prefix,
+					  name=name,
+					  kind=Component.joint,
+					  sector=sector,
+					  index=index,
+					  side=side,
+					  )
 
 		# Maya Attributes
-		self.radius = radius
-		self.drawStyle = drawStyle
-		self.type = type
-		self.otherType = otherType
-
 		self.jointOrientX = 0
 		self.jointOrientY = 0
 		self.jointOrientZ = 0
 
 		# Init
-		self.create()
+		if not self.isValid():
+			# Create Node
+			cmds.select(d=True)
+			self.transform = cmds.joint(name=self.name, radius=radius)
+
+			self.radius = radius
+			self.drawStyle = drawStyle
+			self.type = type
+			self.otherType = otherType
+
+			# Set Segment Scale Compensate
+			self.disableSegmentScale()
+
+			# Add Kind
+			self.addKind(self.kind)
+
+			# Add Index
+			self.addIndex(self.index)
+
+		else:
+			raise NodeExistsError('Joint already exists.')
 
 	def disableSegmentScale(self):
 		self.setAttribute(attribute=MayaAttr.segmentScaleCompensate, value=0)
 		return
 
-	def setDrawStyle(self, drawStyle):
+	@property
+	def radius(self):
+		return self.radius
+
+	@radius.setter
+	def radius(self, radius):
+		if isinstance(radius, (int, float)):
+			self.setAttribute(attribute=MayaAttr.radius, value=radius)
+		else:
+			raise TypeError('Radius must be numeric value.')
+
+		return
+
+	@property
+	def drawStyle(self):
+		return self.drawStyle
+
+	@drawStyle.setter
+	def drawStyle(self, drawStyle):
 		if isinstance(drawStyle, str):
 			if hasattr(JointDrawStyle, drawStyle):
 				drawStyle = getattr(JointDrawStyle, drawStyle)
@@ -1041,7 +1076,12 @@ class Joint(Node):
 			raise ValueError('Draw style "{}" not valid.'.format(drawStyle))
 		return
 
-	def setSide(self, side):
+	@property
+	def side(self):
+		return self.side
+
+	@side.setter
+	def side(self, side):
 		if side is None:
 			side = JointLabelSide.none
 
@@ -1057,7 +1097,12 @@ class Joint(Node):
 			raise ValueError('Side "{}" not valid.'.format(side))
 		return
 
-	def setType(self, type):
+	@property
+	def type(self):
+		return self.type
+
+	@type.setter
+	def type(self, type):
 		if type is None:
 			type = JointLabelType.none
 
@@ -1073,64 +1118,45 @@ class Joint(Node):
 			raise ValueError('Type "{}" not valid.'.format(type))
 		return
 
-	def setOtherType(self, otherType):
+	@property
+	def otherType(self):
+		return self.otherType
+
+	@otherType.setter
+	def otherType(self, otherType):
 		if isinstance(otherType, str):
 			self.setAttribute(attribute=MayaAttr.otherType, value=otherType)
 		else:
 			raise ValueError('Other type "{}" not valid. Must be str.'.format(type))
 		return
 
-	def setKind(self, kind):
+	@property
+	def kind(self):
+		return self.kind
+
+	@kind.setter
+	def kind(self, kind):
 		if isinstance(kind, str):
 			self.setAttribute(attribute=UserAttr.kind, value=kind)
 		else:
 			raise ValueError('Kind must be str.'.format(type))
 		return
 
-	def setIndex(self, index):
+	@property
+	def index(self):
+		return self.index
+
+	@index.setter
+	def index(self, index):
 		if isinstance(index, int):
 			self.setAttribute(attribute=UserAttr.index, value=index)
 		else:
 			raise ValueError('Index must be int.')
-		return
-
-	def create(self):
-		if not self.isValid():
-
-			# Create Node
-			cmds.select(d=True)
-			self.transform = cmds.joint(name=self.name, radius=self.radius)
-
-			# Set Draw Style
-			self.setDrawStyle(self.drawStyle)
-
-			# Set Segment Scale Compensate
-			self.disableSegmentScale()
-
-			# Set Side
-			self.setSide(self.side)
-
-			# Set Type
-			self.setType(self.type)
-
-			# Set Other Type
-			self.setOtherType(self.otherType)
-
-			# Add Kind
-			self.addKind(self.kind)
-
-			# Add Index
-			self.addIndex(self.index)
-
-		else:
-			# raise NodeExistsError('Joint already exists.')
-			self.populateAttributes()
-		return
 
 	def zeroOrient(self):
 		for attr in [MayaAttr.jointOrientX,
-		             MayaAttr.jointOrientY,
-		             MayaAttr.jointOrientZ,
-		             ]:
+					 MayaAttr.jointOrientY,
+					 MayaAttr.jointOrientZ,
+					 ]:
 			self.setAttribute(attr, 0)
 		return

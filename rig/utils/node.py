@@ -86,25 +86,25 @@ def createNull(*args, **kwargs):
 
 class Node(object):
 	def __init__(self,
-	             name,
-	             prefix=None,
-	             parent=None,
-	             kind=None,
-	             children=None,
-	             exists=False,
-	             sector=None,
-	             index=0,
-	             side=None,
-	             color=None,
-	             ):
+				 name,
+				 prefix=None,
+				 parent=None,
+				 kind=None,
+				 children=None,
+				 exists=False,
+				 sector=None,
+				 index=0,
+				 side=None,
+				 color=None,
+				 ):
 
 		self.name = longName(prefix,
-		                     side[0].upper() if side else None,
-		                     name,
-		                     sector[0].upper() if sector else None,
-		                     index,
-		                     kind
-		                     )
+							 side[0].upper() if side else None,
+							 name,
+							 sector[0].upper() if sector else None,
+							 index,
+							 kind
+							 )
 		self.prefix = prefix
 		self.kind = kind
 		self.parent = parent
@@ -141,46 +141,9 @@ class Node(object):
 	def __repr__(self):
 		return self.name
 
-	def getName(self):
-		return self.name
-
 	def setName(self, name):
-		self.name = cmds.rename(self.name, name)
-		return
-
-	def addKind(self, kind):
 		if self.isValid():
-			addAttribute(node=self.name,
-			             attribute=UserAttr.kind,
-			             kind=MayaAttrType.string,
-			             value=kind,
-			             keyable=False,
-			             channelBox=False,
-			             lock=True,
-			             )
-		else:
-			raise RuntimeError('Add Kind: Node "{}" is not a valid object.'.format(self.name))
-		return
-
-	def getKind(self):
-		return self.kind
-
-	def setKind(self, kind):
-		self.kind = kind
-		return
-
-	def getParent(self):
-		return self.parent
-
-	def setParent(self, parent):
-		self.parent = parent
-		return
-
-	def getChildren(self):
-		return self.children
-
-	def setChildren(self, children):
-		self.children = children
+			self.name = cmds.rename(self.name, name)
 		return
 
 	def appendChild(self, child):
@@ -192,32 +155,32 @@ class Node(object):
 			self.children.remove(child)
 		return
 
-	def setExists(self, exists):
-		self.exists = exists
+	def addKind(self, kind):
+		if self.isValid():
+			addAttribute(node=self.name,
+						 attribute=UserAttr.kind,
+						 kind=MayaAttrType.string,
+						 value=kind,
+						 keyable=False,
+						 channelBox=False,
+						 lock=True,
+						 )
+		else:
+			raise RuntimeError('Add Kind: Node "{}" is not a valid object.'.format(self.name))
 		return
-
-	def getExists(self):
-		return self.exists
 
 	def addIndex(self, index):
 		if self.isValid():
 			addAttribute(node=self.name,
-			             attribute=UserAttr.index,
-			             kind=MayaAttrType.int,
-			             value=index,
-			             keyable=False,
-			             channelBox=False,
-			             lock=True,
-			             )
+						 attribute=UserAttr.index,
+						 kind=MayaAttrType.int,
+						 value=index,
+						 keyable=False,
+						 channelBox=False,
+						 lock=True,
+						 )
 		else:
 			raise RuntimeError('Add Index: Node "{}" is not a valid object.'.format(self.name))
-		return
-
-	def getIndex(self):
-		return self.index
-
-	def setIndex(self, index):
-		self.index = index
 		return
 
 	def move(self, *args, **kwargs):
@@ -324,4 +287,3 @@ class Node(object):
 					childNode.populateFromScene()
 					self.appendChild(childNode)
 		return
-

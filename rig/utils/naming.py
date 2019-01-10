@@ -59,10 +59,10 @@ class Component(object):
 	leaf = '{}_leaf'.format(joint)
 
 	control = 'control'
-	fkControl = 'fk_{}'.format(control.capitalize())
-	ikControl = 'ik_{}'.format(control)
-	masterControl = 'master_{}'.format(control)
-	detailControl = 'detail_{}'.format(control)
+	fkControl = 'fk{}'.format(control.capitalize())
+	ikControl = 'ik{}'.format(control.capitalize())
+	master = 'master'
+	detailControl = 'detail{}'.format(control.capitalize())
 	group = 'group'
 	offset = 'offset'
 	origin = 'origin'
@@ -120,6 +120,7 @@ class MayaAttr(object):
 	useObjectColor = 'useObjectColor'
 
 	# Joints
+	radius = 'radius'
 	drawStyle = 'drawStyle'
 	side = 'side'
 	type = 'type'
@@ -219,10 +220,10 @@ class Part(object):
 
 
 AnimCurves = ['animCurveUL',
-              'animCurveUU',
-              'animCurveUA',
-              'animCurveUT'
-              ]
+			  'animCurveUU',
+			  'animCurveUA',
+			  'animCurveUT'
+			  ]
 
 
 def longName(*args):
@@ -337,5 +338,76 @@ def niceString(var, *args):
 			else:
 				newVar = ''.join([newVar, v])
 		i += 1
-
 	return newVar
+
+
+class NameConvention(object):
+	def __init__(self, string):
+		'''
+		:param str string: Initial string to split apart into attributes.
+		:Example:
+
+		"arm_L_shoulder_A_0_control"
+		'''
+
+		self.prefix = None
+		self.side = None
+		self.name = None
+		self.index = None
+		self.sector = None
+		self.type = None
+		self.longName = string
+
+		self.query(string)
+
+	def __str__(self):
+		return self.longName
+
+	def __repr__(self):
+		return self.longName
+
+	def query(self, string):
+		if isinstance(string, str):
+			stringList = string.split('_')
+
+			if len(stringList) == 1:
+				self.name = string
+			elif len(stringList) == 2:
+				self.prefix, self.type = stringList
+				self.name = self.prefix
+			elif len(stringList) == 6:
+				self.prefix, self.side, self.name, self.sector, self.index, self.type = stringList
+			else:
+				self.prefix = stringList[0]
+				self.name = self.prefix
+				self.type = stringList[-1] if len(stringList[-1]) > 1 else None
+
+				unsorted = []
+
+				for i in range(1, len(stringList) - 1):
+					x = stringList[i]
+
+					# Get Side
+					if i == 1:
+						if len(x) == 1:
+							if x.lower() in 'lrmc':
+								self.side = x
+						else:
+							if x.lower() in ['left', 'right', 'center', 'middle']:
+								self.side = x
+
+					# Get Name
+					else:
+						try:
+							self.index = int(x)
+						except ValueError:
+							if len(x) == 1:
+								self.sector = x
+							else:
+								unsorted.append(x)
+
+				self.name = longName(unsorted)
+
+		else:
+			raise TypeError('Must provide str.')
+		return

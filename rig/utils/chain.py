@@ -118,17 +118,17 @@ class ControlChain(Chain):
 	def createMasterControl(self):
 		lastChild = self.children[-1]
 		self.masterControl = Control(prefix=self.prefix,
-		                             name=self.name,
-		                             item=None,
-		                             kind=Component.masterControl,
-		                             wire=WireType.lollipop,
-		                             axis=[0, 1, 1],
-		                             scale=self.scale,
-		                             index=self.index,
-		                             side=self.side,
-		                             sector=self.sector,
-		                             color=WireColor.purple,
-		                             )
+									 name=self.name,
+									 item=None,
+									 kind=Component.master,
+									 wire=WireType.lollipop,
+									 axis=[0, 1, 1],
+									 scale=self.scale,
+									 index=self.index,
+									 side=self.side,
+									 sector=self.sector,
+									 color=WireColor.purple,
+									 )
 
 		self.masterControl.snapTo(lastChild, translation=True, rotation=True)
 		lockKeyableAttributes(self.masterControl.transform, hide=True)
