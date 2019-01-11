@@ -1,6 +1,5 @@
 # Lancer Modules
 from naming import *
-from node import *
 
 # Maya Modules
 from maya import cmds
@@ -73,22 +72,28 @@ def addAttribute(node,
 	if not attributeExist(node, attribute):
 
 		# Create
-		if kind in DataTypes:
-			cmds.addAttr(node, longName=attribute, dataType=kind)
-
-		elif kind in AttributeTypes:
-			cmds.addAttr(node, longName=attribute, attributeType=kind, keyable=keyable)
+		if kind == MayaAttrType.enum:
+			if isinstance(value, (str, list, dict, tuple)):
+				cmds.addAttr(node, longName=attribute, attributeType=kind, enumName=enumName(value))
+			else:
+				raise ValueError('No default enum values specified.')
 		else:
-			cmds.addAttr(node, longName=attribute)
+			if kind in DataTypes:
+				cmds.addAttr(node, longName=attribute, dataType=kind)
+
+			elif kind in AttributeTypes:
+				cmds.addAttr(node, longName=attribute, attributeType=kind, keyable=keyable)
+			else:
+				cmds.addAttr(node, longName=attribute)
 
 		# Set Keyable
 		try:
 			cmds.setAttr(name, channelBox=channelBox, keyable=keyable)
-		except:
+		except RuntimeError:
 			pass
 
 		# Set Default Values
-		if value is not None:
+		if value is not None and kind != MayaAttrType.enum:
 			if isinstance(value, (int, float)):
 				cmds.addAttr(name, edit=True, defaultValue=float(value))
 				cmds.setAttr(name, float(value))
@@ -118,20 +123,33 @@ def addAttribute(node,
 	return
 
 
-def setAttribute(node, attribute, value):
+def setAttribute(node, attribute, value, lock=None, force=False):
 	name = attributeName(node, attribute)
 	kind = attributeType(node, attribute)
+	isLocked = attributeLocked(node, attribute)
+	isConnected = attributeConnected(node, attribute)
 
-	if kind == MayaAttrType.string:
-		cmds.setAttr(name, value, type=kind)
+	if isLocked and not force:
+		raise AttributeError('Attribute "{}" is currently locked. Use "force=True" parameter to bypass.'.format(name))
+	elif isConnected:
+		raise AttributeError('Attribute "{}" has incoming connections.'.format(name))
 	else:
-		cmds.setAttr(name, value)
+		if isLocked and force:
+			cmds.setAttr(name, lock=False)
+
+		if kind == MayaAttrType.string:
+			cmds.setAttr(name, value, type=kind)
+		else:
+			cmds.setAttr(name, value)
+
+		if isLocked or lock:
+			cmds.setAttr(name, lock=True)
 	return
 
 
 def getAttribute(node, attribute):
 	name = attributeName(node, attribute)
-	return
+	return cmds.getAttr(name)
 
 
 def attributeType(node, attribute):
@@ -179,9 +197,9 @@ def connectAttribute(*args, **kwargs):
 
 				# Offset
 				if offset:
-					offsetNode = createNode(name=longName(source, Component.offset, 1),
-					                        kind=MayaNodeType.addDoubleLinear
-					                        )
+					offsetNode = cmds.createNode(MayaNodeType.addDoubleLinear,
+					                             name=longName(source, Component.offset, 0),
+					                             )
 
 					sourceValue = cmds.getAttr(sourceName)
 					destinationValue = cmds.getAttr(destinationName)

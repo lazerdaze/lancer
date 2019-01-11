@@ -1,10 +1,10 @@
 # Lancer Modules
 from wire import *
-from error import *
 from network import *
 from constraint import *
 from joint import *
 from naming import *
+from node import *
 
 # Maya Modules
 from maya import cmds
@@ -24,7 +24,7 @@ def createControl(name='control', shape=WireType.circle, axis=None, scale=1, col
 	# Curve Shape
 	curve = createWire(kind=shape, axis=axis)
 	curveShape = cmds.rename(cmds.listRelatives(curve, shapes=True)[0],
-							 '{}Shape'.format(name))
+	                         '{}Shape'.format(name))
 
 	# Set Scale
 	for axis in ['x', 'y', 'z']:
@@ -39,11 +39,11 @@ def createControl(name='control', shape=WireType.circle, axis=None, scale=1, col
 	# Add Kind Attribute
 	if kind:
 		addAttribute(node=node,
-					 attribute=UserAttr.kind,
-					 kind=MayaAttrType.string,
-					 value=kind,
-					 lock=True,
-					 )
+		             attribute=UserAttr.kind,
+		             kind=MayaAttrType.string,
+		             value=kind,
+		             lock=True,
+		             )
 
 	# Color
 	if color and isinstance(color, list):
@@ -70,19 +70,19 @@ def createControl(name='control', shape=WireType.circle, axis=None, scale=1, col
 
 class Control(Node):
 	def __init__(self,
-				 prefix='rig',
-				 name=None,
-				 item=None,
-				 kind=Component.control,
-				 wire=WireType.circleRotate,
-				 axis=None,
-				 scale=1,
-				 index=None,
-				 side=None,
-				 sector=None,
-				 color=WireColor.blue,
-				 offset=False,
-				 ):
+	             prefix='rig',
+	             name=None,
+	             item=None,
+	             wire=WireType.circleRotate,
+	             axis=None,
+	             scale=1.0,
+	             index=None,
+	             side=None,
+	             sector=None,
+	             color=WireColor.blue,
+	             offset=False,
+	             kind=Component.control,
+	             ):
 		'''
 		Base Control class to be used in all parts classes.
 		Created as a joint with nurbs shape node and default attributes.
@@ -102,14 +102,14 @@ class Control(Node):
 		'''
 
 		Node.__init__(self,
-					  name=name,
-					  prefix=prefix,
-					  kind=kind,
-					  index=index,
-					  side=side,
-					  sector=sector,
-					  color=color,
-					  )
+		              name=name,
+		              prefix=prefix,
+		              kind=kind,
+		              index=index,
+		              side=side,
+		              sector=sector,
+		              color=color,
+		              )
 
 		self.item = item
 
@@ -124,102 +124,117 @@ class Control(Node):
 		self.offsetShape = None
 
 		# Init
-		self.create(wire, axis, scale, index, sector, color, offset)
+		self._create(wire, axis, scale, side, index, sector, kind, color, offset)
 
-	def create(self, wire, axis, scale, index, sector, color, offset):
+	def _create(self, wire, axis, scale, side, index, sector, kind, color, offset):
 		if not self.isValid():
-
 			# Main Control
-			result = createControl(name=self.name,
-								   shape=wire,
-								   axis=axis,
-								   scale=scale,
-								   color=color,
-								   )
-			self.transform = result[0]
-			self.shape = result[1]
-
-			# Add Index Attribute
-			if index is not None:
-				addIndexAttribute(self.transform, index)
-
-			# Add Sector
-			if sector is not None:
-				addAttribute(self.transform,
-							 attribute=UserAttr.sector,
-							 kind=MayaAttrType.string,
-							 value=sector,
-							 )
-
-			# Add Side
-			if self.side is not None:
-				setAttribute(self.transform, attribute=MayaAttr.side, value=getattr(JointLabelSide, self.side))
-			else:
-				setAttribute(self.transform, attribute=MayaAttr.side, value=JointLabelSide.none)
+			result = createControl(name=self.longName,
+			                       shape=wire,
+			                       axis=axis,
+			                       scale=scale,
+			                       color=color,
+			                       )
+			self.transform, self.shape = result
 
 			# Offset Control
 			if offset:
+				offsetName = self.longName.replace('_{}'.format(Component.control),
+				                                   '_{}'.format(Component.offsetControl)
+				                                   )
 				resultOffset = createControl(
-					name=self.name.replace(Component.control, longName(Component.offset, Component.control)),
-					shape=wire,
-					axis=axis,
-					scale=scale * .75,
-					color=color,
+						name=offsetName,
+						shape=wire,
+						axis=axis,
+						scale=scale * .90,
+						color=color,
+						kind=Component.offsetControl
 				)
 
-				self.offsetTransform = resultOffset[0]
-				self.offsetShape = resultOffset[1]
+				self.offsetTransform, self.offsetShape = resultOffset
 
 				# Add Offset Index Attribute
 				if index is not None:
 					addAttribute(self.offsetTransform,
-								 attribute=UserAttr.index,
-								 kind=MayaAttrType.int,
-								 value=index,
-								 )
+					             attribute=UserAttr.index,
+					             kind=MayaAttrType.int,
+					             value=index,
+					             lock=True,
+					             )
 
-				# Add Offset Sector
+				# Add Offset Sector Attribute
 				if sector is not None:
 					addAttribute(self.offsetTransform,
-								 attribute=UserAttr.sector,
-								 kind=MayaAttrType.string,
-								 value=sector,
-								 )
+					             attribute=UserAttr.sector,
+					             kind=MayaAttrType.string,
+					             value=sector,
+					             lock=True,
+					             )
 
-				# Connect Controls
+				# Set Offset Side Attributes
+				sideValue = JointLabelSide.none
+				if hasattr(JointLabelSide, side):
+					sideValue = getattr(JointLabelSide, side)
+
+				setAttribute(self.offsetTransform,
+				             attribute=MayaAttr.side,
+				             value=sideValue
+				             )
+
+				# Connect Offset Controls
 				cmds.parent(self.offsetTransform, self.transform)
 
 				attribute = UserAttr.offsetVisibility
 
 				addAttribute(node=self.transform,
-							 attribute=attribute,
-							 kind=MayaAttrType.bool,
-							 keyable=False,
-							 channelBox=True,
-							 destinationNode=self.offsetTransform,
-							 destinationAttribute=MayaAttr.visibility,
-							 )
+				             attribute=attribute,
+				             kind=MayaAttrType.bool,
+				             keyable=False,
+				             channelBox=True,
+				             destinationNode=self.offsetTransform,
+				             destinationAttribute=MayaAttr.visibility,
+				             )
 
 				createMonoRelationship(source=self.transform,
-									   destination=self.offsetTransform,
-									   sourceAttr=Component.offset,
-									   destinationAttr=Component.parent,
-									   )
+				                       destination=self.offsetTransform,
+				                       sourceAttr=Component.offset,
+				                       destinationAttr=Component.parent,
+				                       )
 
 			# Create Nulls
-			nulls = createNull(longName(self.name, Component.position),
-							   longName(self.name, Component.connection),
-							   longName(self.name, Component.zero),
-							   node=self.transform,
-							   )
+			nulls = createNull(longName(self.longName, Component.position),
+			                   longName(self.longName, Component.connection),
+			                   longName(self.longName, Component.zero),
+			                   child=self.transform,
+			                   )
 
-			self.nullPosition = nulls[0]
-			self.nullConnection = nulls[1]
-			self.nullZero = nulls[2]
-
+			self.nullPosition, self.nullConnection, self.nullZero = nulls
+			self.side = side
+			self.index = index
+			self.sector = sector
+			self.kind = kind
 			self.exists = True
-		else:
-			raise NodeExistsError('Control already exists.')
+		return
+
+	def updateName(self):
+		Node.updateName(self)
+
+		self.nullPosition = cmds.rename(self.nullPosition,
+		                                longName(self.longName, Component.position)
+		                                )
+		self.nullConnection = cmds.rename(self.nullConnection,
+		                                  longName(self.longName, Component.connection)
+		                                  )
+		self.nullZero = cmds.rename(self.nullZero,
+		                            longName(self.longName, Component.zero)
+		                            )
+
+		if self.offsetTransform:
+			self.offsetTransform = cmds.rename(self.offsetTransform,
+			                                   self.longName.replace('_{}'.format(self.longName.split('_')[-1]),
+			                                                         '_{}'.format(
+					                                                         Component.offsetControl)
+			                                                         ))
 		return
 
 	def constrainItem(self):
@@ -247,26 +262,26 @@ class Control(Node):
 
 class MasterControl(Control):
 	def __init__(self,
-				 prefix='rig',
-				 name=None,
-				 scale=1,
-				 index=None,
-				 side=None,
-				 sector=None,
-				 ):
+	             prefix='rig',
+	             name=None,
+	             scale=1,
+	             index=None,
+	             side=None,
+	             sector=None,
+	             ):
 		Control.__init__(self,
-						 prefix=prefix,
-						 name=name,
-						 kind=Component.master,
-						 wire=WireType.lollipop,
-						 axis=[0, 1, 1],
-						 scale=scale,
-						 index=index,
-						 side=side,
-						 sector=sector,
-						 color=WireColor.purple,
-						 offset=False,
-						 )
+		                 prefix=prefix,
+		                 name=name,
+		                 kind=Component.master,
+		                 wire=WireType.lollipop,
+		                 axis=[0, 1, 1],
+		                 scale=scale,
+		                 index=index,
+		                 side=side,
+		                 sector=sector,
+		                 color=WireColor.purple,
+		                 offset=False,
+		                 )
 
 	def masterAttributes(self):
 		return

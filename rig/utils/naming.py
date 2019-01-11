@@ -63,6 +63,7 @@ class Component(object):
 	ikControl = 'ik{}'.format(control.capitalize())
 	master = 'master'
 	detailControl = 'detail{}'.format(control.capitalize())
+	offsetControl = 'offset{}'.format(control.capitalize())
 	group = 'group'
 	offset = 'offset'
 	origin = 'origin'
@@ -127,8 +128,8 @@ class MayaAttr(object):
 	otherType = 'otherType'
 	segmentScaleCompensate = 'segmentScaleCompensate'
 	jointOrientX = 'jointOrientX'
-	jointOrientY = 'jointOrientX'
-	jointOrientZ = 'jointOrientX'
+	jointOrientY = 'jointOrientY'
+	jointOrientZ = 'jointOrientZ'
 
 
 class MayaAttrType(object):
@@ -219,11 +220,64 @@ class Part(object):
 	extension = 'extension'
 
 
+class JointDrawStyle(object):
+	bone = 0
+	box = 1
+	none = 2
+
+
+class JointLabelSide(object):
+	center = 0
+	left = 1
+	right = 2
+	none = 3
+
+
+class JointLabelType(object):
+	none = 0
+	root = 1
+	hip = 2
+	knee = 3
+	foot = 4
+	toe = 5
+	spine = 6
+	neck = 7
+	head = 8
+	collar = 9
+	shoulder = 10
+	elbow = 11
+	hand = 12
+	finger = 13
+	thumb = 14
+	propA = 15
+	propB = 16
+	propC = 17
+	other = 18
+	indexFinger = 19
+	middleFinger = 20
+	ringFinger = 21
+	pinkyFinger = 22
+	extraFinger = 23
+	bigToe = 24
+	indexToe = 25
+	middleToe = 26
+	ringToe = 27
+	pinkyToe = 28
+	footThumb = 29
+
+
+class JointLabelOtherType(object):
+	bind = 'bind'
+	footPivot = 'footPivot'
+	cog = 'cog'
+	tail = 'tail'
+
+
 AnimCurves = ['animCurveUL',
-			  'animCurveUU',
-			  'animCurveUA',
-			  'animCurveUT'
-			  ]
+              'animCurveUU',
+              'animCurveUA',
+              'animCurveUT'
+              ]
 
 
 def longName(*args):
@@ -341,6 +395,20 @@ def niceString(var, *args):
 	return newVar
 
 
+def enumName(*args, **kwargs):
+	index = kwargs.get('index', 0)
+	result = ''
+	for arg in args:
+		if isinstance(arg, (list, dict, tuple)):
+			for item in arg:
+				result += enumName(item, index=index)
+				index += 1
+		else:
+			result += '{}={}:'.format(arg, index)
+			index += 1
+	return result
+
+
 class NameConvention(object):
 	def __init__(self, string):
 		'''
@@ -355,7 +423,7 @@ class NameConvention(object):
 		self.name = None
 		self.index = None
 		self.sector = None
-		self.type = None
+		self.kind = None
 		self.longName = string
 
 		self.query(string)
@@ -373,14 +441,14 @@ class NameConvention(object):
 			if len(stringList) == 1:
 				self.name = string
 			elif len(stringList) == 2:
-				self.prefix, self.type = stringList
+				self.prefix, self.kind = stringList
 				self.name = self.prefix
 			elif len(stringList) == 6:
-				self.prefix, self.side, self.name, self.sector, self.index, self.type = stringList
+				self.prefix, self.side, self.name, self.sector, self.index, self.kind = stringList
 			else:
 				self.prefix = stringList[0]
 				self.name = self.prefix
-				self.type = stringList[-1] if len(stringList[-1]) > 1 else None
+				self.kind = stringList[-1] if len(stringList[-1]) > 1 else None
 
 				unsorted = []
 

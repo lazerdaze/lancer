@@ -51,14 +51,6 @@ def refreshModules():
 	for module in toDelete:
 		del (sys.modules[module])
 
-
-def reloadModules():
-	for x in sys.modules.values():
-		print x
-	return
-
-reloadModules()
-
 def splitall(path):
 	allparts = []
 	while 1:

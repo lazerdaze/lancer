@@ -1,7 +1,5 @@
 # Lancer Modules
-from general import *
 from node import *
-from naming import *
 from error import *
 from attribute import *
 
@@ -10,7 +8,8 @@ import json
 
 # Maya Modules
 from maya import cmds, mel
-from rig.utils.chain import Chain
+
+from rig.utils import JointDrawStyle, JointLabelSide, JointLabelType
 
 '''
 Notes:
@@ -28,123 +27,70 @@ Notes:
 '''
 
 MAYAJOINTLABELS = ['None',
-				   'Root',
-				   'Hip',
-				   'Knee',
-				   'Foot',
-				   'Toe',
-				   'Spine',
-				   'Neck',
-				   'Head',
-				   'Collar',
-				   'Shoulder',
-				   'Elbow',
-				   'Hand',
-				   'Finger',
-				   'Thumb',
-				   'PropA',
-				   'PropB',
-				   'PropC',
-				   'Other',
-				   'Index Finger',
-				   'Middle Finger',
-				   'Ring Finger',
-				   'Pinky Finger',
-				   'Extra Finger'
-				   'Big Toe',
-				   'Index Toe',
-				   'Middle Toe',
-				   'Ring Toe',
-				   'Pinky Toe',
-				   'Foot Thumb',
-				   ]
+                   'Root',
+                   'Hip',
+                   'Knee',
+                   'Foot',
+                   'Toe',
+                   'Spine',
+                   'Neck',
+                   'Head',
+                   'Collar',
+                   'Shoulder',
+                   'Elbow',
+                   'Hand',
+                   'Finger',
+                   'Thumb',
+                   'PropA',
+                   'PropB',
+                   'PropC',
+                   'Other',
+                   'Index Finger',
+                   'Middle Finger',
+                   'Ring Finger',
+                   'Pinky Finger',
+                   'Extra Finger'
+                   'Big Toe',
+                   'Index Toe',
+                   'Middle Toe',
+                   'Ring Toe',
+                   'Pinky Toe',
+                   'Foot Thumb',
+                   ]
 
 jointLabelGlobalList = ['None',
-						'Root',
-						'Spine',
-						'Neck',
-						'Head',
-						'Collar',
-						'Shoulder',
-						'Elbow',
-						'Hand',
-						'Thumb',
-						'Index Finger',
-						'Middle Finger',
-						'Ring Finger',
-						'Pinky Finger',
-						'Hip',
-						'Knee',
-						'Foot',
-						'Toe',
-						'Big Toe',
-						'Index Toe',
-						'Middle Toe',
-						'Ring Toe',
-						'Pinky Toe',
-						'Other',
-						'Bind',
-						'Limbs'
-						]
+                        'Root',
+                        'Spine',
+                        'Neck',
+                        'Head',
+                        'Collar',
+                        'Shoulder',
+                        'Elbow',
+                        'Hand',
+                        'Thumb',
+                        'Index Finger',
+                        'Middle Finger',
+                        'Ring Finger',
+                        'Pinky Finger',
+                        'Hip',
+                        'Knee',
+                        'Foot',
+                        'Toe',
+                        'Big Toe',
+                        'Index Toe',
+                        'Middle Toe',
+                        'Ring Toe',
+                        'Pinky Toe',
+                        'Other',
+                        'Bind',
+                        'Limbs'
+                        ]
 
 jointLabelLimbGlobalList = ['arms',
-							'legs',
-							'finger',
-							'toe',
-							]
-
-
-class JointDrawStyle(object):
-	bone = 0
-	box = 1
-	none = 2
-
-
-class JointLabelSide(object):
-	center = 0
-	left = 1
-	right = 2
-	none = 3
-
-
-class JointLabelType(object):
-	none = 0
-	root = 1
-	hip = 2
-	knee = 3
-	foot = 4
-	toe = 5
-	spine = 6
-	neck = 7
-	head = 8
-	collar = 9
-	shoulder = 10
-	elbow = 11
-	hand = 12
-	finger = 13
-	thumb = 14
-	propA = 15
-	propB = 16
-	propC = 17
-	other = 18
-	indexFinger = 19
-	middleFinger = 20
-	ringFinger = 21
-	pinkyFinger = 22
-	extraFinger = 23
-	bigToe = 24
-	indexToe = 25
-	middleToe = 26
-	ringToe = 27
-	pinkyToe = 28
-	footThumb = 29
-
-
-class JointLabelOtherType(object):
-	bind = 'bind'
-	footPivot = 'footPivot'
-	cog = 'cog'
-	tail = 'tail'
+                            'legs',
+                            'finger',
+                            'toe',
+                            ]
 
 
 def zeroJointOrient(jnt, *args):
@@ -465,15 +411,15 @@ class jointLabel():
 
 			if x != 'None':
 				self.masterDict[x] = {
-					'None': noneList, 'Left': sortJointHierarchy(leftList),
+					'None'  : noneList, 'Left': sortJointHierarchy(leftList),
 					'Center': sortJointHierarchy(centerList),
-					'Right': sortJointHierarchy(rightList, )
+					'Right' : sortJointHierarchy(rightList, )
 				}
 			else:
 				self.masterDict[x] = {
-					'None': noneList, 'Left': leftList,
+					'None'  : noneList, 'Left': leftList,
 					'Center': centerList,
-					'Right': rightList
+					'Right' : rightList
 				}
 
 	def isDebug(self):
@@ -488,7 +434,7 @@ class jointLabel():
 
 				if cmds.objectType(obj, isType='joint'):
 					if self.masterList[index - 1] in ['COG', 'Shoulder Bind', 'Elbow Bind', 'Hand Bind', 'Hip Bind',
-													  'Knee Bind', 'Foot Bind']:
+					                                  'Knee Bind', 'Foot Bind']:
 						setEnumByString(obj, 'type', 'Other')
 						cmds.setAttr('{}.otherType'.format(obj), self.masterList[index - 1], type='string')
 					else:
@@ -621,7 +567,7 @@ def getSkeletonTree(root, tree={}):
 	if children:
 		for child in children:
 			tree[child] = {
-				'children': getSkeletonTree(child, {}),
+				'children'  : getSkeletonTree(child, {}),
 				'attributes': getJointAttributes(child),
 			}
 
@@ -689,12 +635,12 @@ def createBindPosePrompt(*args):
 			return
 		else:
 			result = cmds.promptDialog(
-				title='Create Joint Pose'.format(root),
-				message='Enter Name:',
-				button=['OK', 'Cancel'],
-				defaultButton='OK',
-				cancelButton='Cancel',
-				dismissString='Cancel')
+					title='Create Joint Pose'.format(root),
+					message='Enter Name:',
+					button=['OK', 'Cancel'],
+					defaultButton='OK',
+					cancelButton='Cancel',
+					dismissString='Cancel')
 
 			if result == 'OK':
 				name = cmds.promptDialog(query=True, text=True)
@@ -710,7 +656,7 @@ def restoreBindPoseUI(poseList):
 	cmds.columnLayout(adj=True)
 	textVar = cmds.textScrollList(append=poseList)
 	cmds.button(l='Select',
-				c=lambda x: cmds.layoutDialog(dismiss=str(cmds.textScrollList(textVar, q=True, si=True)[0])))
+	            c=lambda x: cmds.layoutDialog(dismiss=str(cmds.textScrollList(textVar, q=True, si=True)[0])))
 	cmds.setParent('..')
 	return
 
@@ -994,169 +940,246 @@ def createJointChain(objects, name=Component.joint):
 
 class Joint(Node):
 	def __init__(self,
-				 name='rig',
-				 prefix=None,
-				 radius=1,
-				 index=None,
-				 sector=None,
-				 drawStyle=JointDrawStyle.bone,
-				 side=None,
-				 type=None,
-				 otherType=None,
-				 ):
+	             name='rig',
+	             prefix=None,
+	             side=None,
+	             sector=None,
+	             index=None,
+	             radius=1.0,
+	             drawStyle=JointDrawStyle.bone,
+	             type=None,
+	             otherType=None,
+	             ):
+		'''
+		Base Joint class to be used in all parts classes.
+
+		:param str name:        Name of Node.
+		:param str prefix:      Prefix name of the control
+		:param str side:        Side of the controls origin.
+		:param int index:       Used to determined rig priority.
+		:param str sector:      Sector of control. Possible Sectors: "A", "B", "C"
+		:param float radius:    Joint radius scale.
+		:param enum drawStyle:  Joint draw style visibility.
+		:param enum type:       Label type.
+		:param str otherType:   Label other type.
+		'''
+
 		Node.__init__(self,
-					  prefix=prefix,
-					  name=name,
-					  kind=Component.joint,
-					  sector=sector,
-					  index=index,
-					  side=side,
-					  )
+		              prefix=prefix,
+		              side=side,
+		              name=name,
+		              sector=sector,
+		              index=index,
+		              kind=Component.joint,
+		              )
 
-		# Maya Attributes
-		self.jointOrientX = 0
-		self.jointOrientY = 0
-		self.jointOrientZ = 0
 
-		# Init
+		# Custom Attributes
+		self.forwardAxis = None
+		self.upAxis = None
+
+		# Create Node
 		if not self.isValid():
-			# Create Node
 			cmds.select(d=True)
-			self.transform = cmds.joint(name=self.name, radius=radius)
+			self.transform = cmds.joint(name=self.longName)
 
+			# Set Segment Scale Compensate
+			self.disableSegmentScale()
+
+			# Set Attributes
+			self.side = side
 			self.radius = radius
 			self.drawStyle = drawStyle
 			self.type = type
 			self.otherType = otherType
 
-			# Set Segment Scale Compensate
-			self.disableSegmentScale()
 
-			# Add Kind
-			self.addKind(self.kind)
-
-			# Add Index
-			self.addIndex(self.index)
-
+	#
+	# Joint Orient Properties
+	#
+	@property
+	def jointOrient(self):
+		if self.isValid():
+			return [self.jointOrientX, self.jointOrientY, self.jointOrientZ]
 		else:
-			raise NodeExistsError('Joint already exists.')
+			return [0.0, 0.0, 0.0]
 
-	def disableSegmentScale(self):
-		self.setAttribute(attribute=MayaAttr.segmentScaleCompensate, value=0)
+	@jointOrient.setter
+	def jointOrient(self, *args):
+		if self.isValid():
+			if len(args) == 1:
+				if isinstance(args[0], (list, dict, tuple)) and len(args[0]) == 3:
+					self.jointOrientX = args[0][0]
+					self.jointOrientY = args[0][1]
+					self.jointOrientZ = args[0][2]
+				else:
+					raise ValueError('Must provide "XYZ" values in a list, dict, or tuple.')
+			elif len(args) == 3:
+				self.jointOrientX = args[0]
+				self.jointOrientY = args[1]
+				self.jointOrientZ = args[2]
+			else:
+				raise ValueError('Must provide 3 values for "XYZ".')
+		else:
+			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
 
 	@property
+	def jointOrientX(self):
+		if self.isValid():
+			return cmds.getAttr(attributeName(self.longName, MayaAttr.jointOrientX))
+		else:
+			return 0.0
+
+	@jointOrientX.setter
+	def jointOrientX(self, value):
+		if self.isValid():
+			setAttribute(self.longName, attribute=MayaAttr.jointOrientX, value=value, force=True)
+		else:
+			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
+		return
+
+	@property
+	def jointOrientY(self):
+		if self.isValid():
+			return cmds.getAttr(attributeName(self.longName, MayaAttr.jointOrientY))
+		else:
+			return 0.0
+
+	@jointOrientY.setter
+	def jointOrientY(self, value):
+		if self.isValid():
+			setAttribute(self.longName, attribute=MayaAttr.jointOrientY, value=value, force=True)
+		else:
+			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
+		return
+
+	@property
+	def jointOrientZ(self):
+		if self.isValid():
+			return cmds.getAttr(attributeName(self.longName, MayaAttr.jointOrientZ))
+		else:
+			return 0.0
+
+	@jointOrientZ.setter
+	def jointOrientZ(self, value):
+		if self.isValid():
+			setAttribute(self.longName, attribute=MayaAttr.jointOrientZ, value=value, force=True)
+		else:
+			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
+		return
+
+	#
+	# Custom Properties
+	#
+	@property
 	def radius(self):
-		return self.radius
+		if self.isValid():
+			return cmds.getAttr(attributeName(self.longName, MayaAttr.radius))
+		else:
+			return 1.0
 
 	@radius.setter
 	def radius(self, radius):
-		if isinstance(radius, (int, float)):
-			self.setAttribute(attribute=MayaAttr.radius, value=radius)
+		if self.isValid():
+			if isinstance(radius, (int, float)):
+				setAttribute(self.longName, attribute=MayaAttr.radius, value=radius)
+			else:
+				raise TypeError('Radius must be numeric value.')
 		else:
-			raise TypeError('Radius must be numeric value.')
-
+			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
 
 	@property
 	def drawStyle(self):
-		return self.drawStyle
+		if self.isValid():
+			return cmds.getAttr(attributeName(self.longName, MayaAttr.drawStyle), asString=True)
+		else:
+			return None
 
 	@drawStyle.setter
 	def drawStyle(self, drawStyle):
-		if isinstance(drawStyle, str):
-			if hasattr(JointDrawStyle, drawStyle):
-				drawStyle = getattr(JointDrawStyle, drawStyle)
+		if self.isValid():
+			if isinstance(drawStyle, str):
+				if hasattr(JointDrawStyle, drawStyle):
+					value = getattr(JointDrawStyle, drawStyle)
+				else:
+					raise ValueError('Draw style "{}" not valid.'.format(drawStyle))
+
+			elif isinstance(drawStyle, (int, float)):
+				value = drawStyle
+
+			elif drawStyle is None:
+				value = ''
+
 			else:
-				raise ValueError('Draw style "{}" not valid.'.format(drawStyle))
+				raise ValueError('Draw style "{}" not valid type: {}'.format(drawStyle, type(drawStyle)))
 
-		if isinstance(drawStyle, (int, float)):
-			self.setAttribute(attribute=MayaAttr.drawStyle, value=drawStyle)
+			setAttribute(self.longName, attribute=MayaAttr.drawStyle, value=value, force=True)
 		else:
-			raise ValueError('Draw style "{}" not valid.'.format(drawStyle))
-		return
+			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 
-	@property
-	def side(self):
-		return self.side
-
-	@side.setter
-	def side(self, side):
-		if side is None:
-			side = JointLabelSide.none
-
-		elif isinstance(side, str):
-			if hasattr(JointLabelSide, side):
-				side = getattr(JointLabelSide, side)
-			else:
-				raise ValueError('Side "{}" not valid.'.format(side))
-
-		if isinstance(side, (int, float)):
-			self.setAttribute(attribute=MayaAttr.side, value=side)
-		else:
-			raise ValueError('Side "{}" not valid.'.format(side))
 		return
 
 	@property
 	def type(self):
-		return self.type
+		if self.isValid():
+			return cmds.getAttr(attributeName(self.longName, MayaAttr.type), asString=True)
+		else:
+			return None
 
 	@type.setter
-	def type(self, type):
-		if type is None:
-			type = JointLabelType.none
+	def type(self, typeValue):
+		if self.isValid():
+			if isinstance(typeValue, str):
+				if hasattr(JointLabelType, typeValue):
+					value = getattr(JointLabelType, typeValue)
+				else:
+					raise ValueError('Type "{}" not valid.'.format(typeValue))
 
-		elif isinstance(type, str):
-			if hasattr(JointLabelType, type):
-				type = getattr(JointLabelType, type)
+			elif isinstance(typeValue, (int, float)):
+				value = typeValue
+
+			elif typeValue is None:
+				value = JointLabelType.none
 			else:
-				raise ValueError('Type "{}" not valid.'.format(type))
+				raise ValueError('Type "{}" not valid type: {}'.format(typeValue, type(typeValue)))
 
-		if isinstance(type, (int, float)):
-			self.setAttribute(attribute=MayaAttr.type, value=type)
+			setAttribute(self.longName, attribute=MayaAttr.type, value=value, force=True)
 		else:
-			raise ValueError('Type "{}" not valid.'.format(type))
+			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
 
 	@property
 	def otherType(self):
-		return self.otherType
+		if self.isValid():
+			return cmds.getAttr(attributeName(self.longName, MayaAttr.otherType))
+		else:
+			return None
 
 	@otherType.setter
 	def otherType(self, otherType):
-		if isinstance(otherType, str):
-			self.setAttribute(attribute=MayaAttr.otherType, value=otherType)
+		if self.isValid():
+			if isinstance(otherType, str):
+				value = otherType
+				self.type = JointLabelType.other
+			elif otherType is None:
+				value = ''
+			else:
+				raise ValueError('Other type "{}" not valid. Must be str or None.'.format(otherType))
+
+			setAttribute(self.longName, attribute=MayaAttr.otherType, value=value, force=True)
 		else:
-			raise ValueError('Other type "{}" not valid. Must be str.'.format(type))
+			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
 
-	@property
-	def kind(self):
-		return self.kind
-
-	@kind.setter
-	def kind(self, kind):
-		if isinstance(kind, str):
-			self.setAttribute(attribute=UserAttr.kind, value=kind)
-		else:
-			raise ValueError('Kind must be str.'.format(type))
+	#
+	# Methods
+	#
+	def disableSegmentScale(self):
+		setAttribute(self.longName, attribute=MayaAttr.segmentScaleCompensate, value=0, force=True)
 		return
 
-	@property
-	def index(self):
-		return self.index
-
-	@index.setter
-	def index(self, index):
-		if isinstance(index, int):
-			self.setAttribute(attribute=UserAttr.index, value=index)
-		else:
-			raise ValueError('Index must be int.')
-
-	def zeroOrient(self):
-		for attr in [MayaAttr.jointOrientX,
-					 MayaAttr.jointOrientY,
-					 MayaAttr.jointOrientZ,
-					 ]:
-			self.setAttribute(attr, 0)
+	def zeroJointOrient(self):
+		self.jointOrient = [0.0, 0.0, 0.0]
 		return
