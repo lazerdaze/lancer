@@ -10,7 +10,7 @@ from chain import *
 from constraint import *
 from control import *
 from curve import *
-from error import *
+from customerror import *
 from general import *
 from joint import *
 from mesh import *

@@ -1,6 +1,7 @@
 # Lancer Modules
+from naming import *
 from node import *
-from error import *
+from customerror import *
 from attribute import *
 
 # Python Modules
@@ -8,8 +9,6 @@ import json
 
 # Maya Modules
 from maya import cmds, mel
-
-from rig.utils import JointDrawStyle, JointLabelSide, JointLabelType
 
 '''
 Notes:
@@ -973,13 +972,12 @@ class Joint(Node):
 		              kind=Component.joint,
 		              )
 
-
 		# Custom Attributes
 		self.forwardAxis = None
 		self.upAxis = None
 
 		# Create Node
-		if not self.isValid():
+		if not nodeExists(name) and not self.isValid():
 			cmds.select(d=True)
 			self.transform = cmds.joint(name=self.longName)
 
@@ -992,7 +990,7 @@ class Joint(Node):
 			self.drawStyle = drawStyle
 			self.type = type
 			self.otherType = otherType
-
+			self.canUpdateName = True
 
 	#
 	# Joint Orient Properties

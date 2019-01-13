@@ -2,7 +2,7 @@
 from attribute import *
 from general import *
 from naming import *
-from error import *
+from customerror import *
 
 # Maya Modules
 from maya import cmds
@@ -85,7 +85,7 @@ def createNull(*args, **kwargs):
 
 class Node(object):
 	def __init__(self,
-	             name,
+	             name='rigNode',
 	             prefix=None,
 	             parent=None,
 	             children=None,
@@ -93,7 +93,7 @@ class Node(object):
 	             side=None,
 	             index=None,
 	             sector=None,
-	             kind=None,
+	             kind=Component.transform,
 	             ):
 
 		'''
@@ -112,9 +112,11 @@ class Node(object):
 
 		self._name = name
 		self._prefix = prefix
-		self.parent = parent
-		self.children = children if isinstance(children, list) else []
+		self._parent = parent
+		self._children = children if isinstance(children, list) else []
+		self._descendants = []
 		self.exists = False
+		self.canUpdateName = False
 		self.color = color
 
 		# Nodes
@@ -127,7 +129,8 @@ class Node(object):
 		self._index = index
 		self._kind = kind
 
-		if self.isValid():
+		if nodeExists(name):
+			self._kind = None
 			self.longName = name
 
 	def __str__(self):
@@ -136,10 +139,23 @@ class Node(object):
 	def __repr__(self):
 		return self.longName
 
-	#
-	# Name Properties
-	#
+	def create(self, *args, **kwargs):
+		if not self.isValid():
+			self.transform = cmds.group(name=self.longName, empty=True)
+			if self._side:
+				self.side = self._side
+			if self._index:
+				self.index = self._index
+			if self._sector:
+				self.sector = self._sector
+			if self._kind:
+				self.kind = self._kind
+		else:
+			raise NodeExistsError('Node "{}" already exists.'.format(self.longName))
 
+	####################################################################################################################
+	# Name Properties
+	####################################################################################################################
 	@property
 	def name(self):
 		return self._name
@@ -182,9 +198,9 @@ class Node(object):
 			self._kind = nc.kind
 		return
 
-	#
+	####################################################################################################################
 	# Translate Properties
-	#
+	####################################################################################################################
 	@property
 	def translate(self):
 		if self.isValid():
@@ -258,9 +274,9 @@ class Node(object):
 			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
 
-	#
+	####################################################################################################################
 	# Rotate Properties
-	#
+	####################################################################################################################
 	@property
 	def rotate(self):
 		if self.isValid():
@@ -333,9 +349,9 @@ class Node(object):
 			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
 
-	#
+	####################################################################################################################
 	# Scale Properties
-	#
+	####################################################################################################################
 	@property
 	def scale(self):
 		if self.isValid():
@@ -351,6 +367,10 @@ class Node(object):
 					self.scaleX = args[0][0]
 					self.scaleY = args[0][1]
 					self.scaleZ = args[0][2]
+				elif isinstance(args[0], (int, float)):
+					self.scaleX = args[0]
+					self.scaleY = args[0]
+					self.scaleZ = args[0]
 				else:
 					raise ValueError('Must provide "XYZ" values in a list, dict, or tuple.')
 			elif len(args) == 3:
@@ -408,9 +428,9 @@ class Node(object):
 			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
 
-	#
+	####################################################################################################################
 	# Visibility Properties
-	#
+	####################################################################################################################
 	@property
 	def visibility(self):
 		if self.isValid():
@@ -426,9 +446,9 @@ class Node(object):
 			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
 
-	#
+	####################################################################################################################
 	# Custom Properties
-	#
+	####################################################################################################################
 	def updateName(self):
 		if self.transform:
 			self.transform = cmds.rename(self.transform, self.longName)
@@ -469,7 +489,8 @@ class Node(object):
 			else:
 				raise ValueError('Invalid side type provided: {}'.format(type(side)))
 
-			self.updateName()
+			if self.canUpdateName:
+				self.updateName()
 			setAttribute(self.longName, attribute=MayaAttr.side, value=value)
 		else:
 			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
@@ -482,25 +503,28 @@ class Node(object):
 	@sector.setter
 	def sector(self, sector):
 		if self.isValid():
-			if not isinstance(sector, str):
-				raise ValueError('Sector must be str.'.format(sector))
+			if sector is None:
+				return
+			elif isinstance(sector, str):
+				value = sector
 			else:
-				if not attributeExist(self.longName, UserAttr.sector):
-					addAttribute(node=self.longName,
-					             attribute=UserAttr.sector,
-					             kind=MayaAttrType.string,
-					             value=sector,
-					             keyable=False,
-					             channelBox=False,
-					             lock=True,
-					             )
-					self._sector = sector
-					self.updateName()
-					return
-				else:
-					setAttribute(self.longName, attribute=UserAttr.sector, value=sector, force=True)
-					self._sector = sector
-					self.updateName()
+				value = str(sector)
+
+			if not attributeExist(self.longName, UserAttr.sector):
+				addAttribute(node=self.longName,
+				             attribute=UserAttr.sector,
+				             kind=MayaAttrType.string,
+				             value=value,
+				             keyable=False,
+				             channelBox=False,
+				             lock=True,
+				             )
+			else:
+				setAttribute(self.longName, attribute=UserAttr.sector, value=value, force=True)
+
+			self._sector = sector
+			if self.canUpdateName:
+				self.updateName()
 		else:
 			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
@@ -512,25 +536,28 @@ class Node(object):
 	@index.setter
 	def index(self, index):
 		if self.isValid():
-			if not isinstance(index, int):
-				raise ValueError('Index must be int.'.format(index))
+			if index is None:
+				return
+			elif not isinstance(index, (int, float)):
+				raise ValueError('Index must be a numeric value.'.format(index))
 			else:
+				value = int(index)
 				if not attributeExist(self.longName, UserAttr.index):
 					addAttribute(node=self.longName,
 					             attribute=UserAttr.index,
 					             kind=MayaAttrType.int,
-					             value=index,
+					             value=value,
 					             minValue=0,
 					             keyable=False,
 					             channelBox=False,
 					             lock=True,
 					             )
-					self._index = index
-					self.updateName()
-					return
+
 				else:
-					setAttribute(self.longName, attribute=UserAttr.index, value=index, force=True)
-					self._index = index
+					setAttribute(self.longName, attribute=UserAttr.index, value=value, force=True)
+
+				self._index = int(index)
+				if self.canUpdateName:
 					self.updateName()
 		else:
 			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
@@ -543,41 +570,48 @@ class Node(object):
 	@kind.setter
 	def kind(self, kind):
 		if self.isValid():
-			if not isinstance(kind, str):
-				raise ValueError('Kind must be str.')
+			if kind is None:
+				value = ''
+			elif isinstance(kind, str):
+				value = kind
 			else:
-				if not attributeExist(self.longName, UserAttr.kind):
-					addAttribute(node=self.longName,
-					             attribute=UserAttr.kind,
-					             kind=MayaAttrType.string,
-					             value=kind,
-					             keyable=False,
-					             channelBox=False,
-					             lock=True,
-					             )
-					self._kind = kind
-					self.updateName()
-					return
-				else:
-					setAttribute(self.longName, attribute=UserAttr.kind, value=kind, force=True)
-					self._kind = kind
-					self.updateName()
+				value = str(kind)
+
+			if not attributeExist(self.longName, UserAttr.kind):
+				addAttribute(node=self.longName,
+				             attribute=UserAttr.kind,
+				             kind=MayaAttrType.string,
+				             value=value,
+				             keyable=False,
+				             channelBox=False,
+				             lock=True,
+				             )
+			else:
+				setAttribute(self.longName, attribute=UserAttr.kind, value=value, force=True)
+
+			self._kind = kind
+			if self.canUpdateName:
+				self.updateName()
 		else:
 			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
 
-	#
-	# Methods
-	#
+
+	####################################################################################################################
+	# Children Methods
+	####################################################################################################################
 	def append(self, child):
-		self.children.append(child)
+		self._children.append(child)
 		return
 
 	def remove(self, child):
-		if child in self.children:
-			self.children.remove(child)
+		if child in self._children:
+			self._children.remove(child)
 		return
 
+	####################################################################################################################
+	# Methods
+	####################################################################################################################
 	def move(self, *args, **kwargs):
 		if self.isValid():
 			worldSpace = kwargs.get('worldSpace', False)
@@ -585,8 +619,8 @@ class Node(object):
 			y = kwargs.get('y', None)
 			z = kwargs.get('z', None)
 
-			if isinstance(args, list) or len(args) == 3:
-				cmds.xform(self.longName, translation=args, worldSpace=worldSpace)
+			if isinstance(args[0], list) or len(args[0]) == 3:
+				cmds.xform(self.longName, translation=args[0], worldSpace=worldSpace)
 			else:
 				if x is not None:
 					cmds.move(x, self.longName, x=True, worldSpace=worldSpace)
@@ -605,8 +639,8 @@ class Node(object):
 			y = kwargs.get('y', None)
 			z = kwargs.get('z', None)
 
-			if isinstance(args, list) or len(args) == 3:
-				cmds.xform(self.longName, rotatePivot=args, worldSpace=worldSpace)
+			if isinstance(args[0], list) or len(args[0]) == 3:
+				cmds.xform(self.longName, rotatePivot=args[0], worldSpace=worldSpace)
 			else:
 				if x:
 					cmds.rotate(x, self.longName, x=True, worldSpace=worldSpace)
@@ -679,45 +713,3 @@ class Node(object):
 					childNode.populateFromScene()
 					self.append(childNode)
 		return
-
-
-########################################################################################################################
-#
-#
-#	Transform Class
-#
-#
-########################################################################################################################
-
-class Transform(Node):
-	def __init__(self,
-	             name='rig',
-	             prefix=None,
-	             parent=None,
-	             children=None,
-	             side=None,
-	             index=None,
-	             sector=None,
-	             kind=Component.transform,
-	             ):
-		Node.__init__(self,
-		              name=name,
-		              prefix=prefix,
-		              parent=parent,
-		              children=children,
-		              side=side,
-		              index=index,
-		              sector=sector,
-		              kind=kind,
-		              )
-
-		if not self.isValid():
-			self.transform = cmds.group(name=self.longName, empty=True)
-			if side:
-				self.side = side
-			if index:
-				self.index = index
-			if sector:
-				self.sector = sector
-			if kind:
-				self.kind = kind

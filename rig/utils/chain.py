@@ -1,8 +1,10 @@
 # Lancer Modules
-from control import Control
 from naming import *
 from wire import *
 from attribute import *
+from node import *
+from joint import *
+from control import *
 
 # Maya Modules
 from maya import cmds
@@ -10,6 +12,19 @@ from maya import cmds
 '''
 Chain Class represents a list of objects.
 '''
+
+
+def jointChain(*args, **kwargs):
+	children = kwargs.get('children', [])
+
+	for arg in args:
+		if isinstance(arg, (list, dict, tuple)):
+			for item in arg:
+				jointChain(item, children=children)
+		elif isinstance(arg, str):
+			if cmds.nodeType(arg) == 'joint':
+				children.append(Joint(name=arg))
+	return children
 
 
 ########################################################################################################################
@@ -23,7 +38,17 @@ Chain Class represents a list of objects.
 class Chain(object):
 	def __init__(self, children=None):
 		self.currentIndex = 0
-		self.children = children if isinstance(children, list) else []
+
+		if isinstance(children, list):
+			self.children = children
+		elif isinstance(children, (dict, tuple)):
+			self.children = [x for x in children]
+		elif isinstance(children, str):
+			self.children = [children]
+		elif children is None:
+			self.children = []
+		else:
+			raise TypeError('Must pass iter or str.')
 
 	def __str__(self):
 		return self.children
@@ -51,27 +76,14 @@ class Chain(object):
 	def next(self):
 		return self.__next__()
 
-	def append(self, joint):
-		self.children.append(joint)
+	def append(self, child):
+		self.children.append(child)
 		return
 
 	def remove(self, joint):
 		if joint in self.children:
 			self.children.remove(joint)
 		return
-
-
-########################################################################################################################
-#
-#
-#	Joint Chain Class
-#
-#
-########################################################################################################################
-
-class JointChain(Chain):
-	def __init__(self, children):
-		Chain.__init__(self, children=children)
 
 
 ########################################################################################################################
@@ -85,15 +97,15 @@ class JointChain(Chain):
 class ControlChain(Chain):
 	def __init__(self,
 	             children,
-	             prefix='rig',
-	             name=None,
+	             prefix=None,
+	             name='rig',
 	             axis=None,
 	             scale=1,
 	             index=None,
 	             side=None,
 	             sector=None,
 	             ):
-		Chain.__init__(self, children=children)
+		Chain.__init__(self, children=jointChain(children))
 
 		self.name = name
 		self.prefix = prefix
@@ -104,32 +116,27 @@ class ControlChain(Chain):
 		self.sector = sector
 
 		self.control = []
-		self.masterControl = None
+		self.master = None
 
-		if self.children:
-			self.createMasterControl()
-
-	# for child in self.children:
-	# 	self.create(child)
+		self.createMasterControl()
 
 	def create(self, item):
 		return
 
 	def createMasterControl(self):
 		lastChild = self.children[-1]
-		self.masterControl = Control(prefix=self.prefix,
-									 name=self.name,
-									 item=None,
-									 kind=Component.master,
-									 wire=WireType.lollipop,
-									 axis=[0, 1, 1],
-									 scale=self.scale,
-									 index=self.index,
-									 side=self.side,
-									 sector=self.sector,
-									 color=WireColor.purple,
-									 )
+		self.master = Control(prefix=self.prefix,
+		                      name=self.name,
+		                      kind=Component.master,
+		                      wire=WireType.lollipop,
+		                      axis=[0, 1, 1],
+		                      scale=self.scale,
+		                      index=self.index,
+		                      side=self.side,
+		                      sector=self.sector,
+		                      color=WireColor.purple,
+		                      )
 
-		self.masterControl.snapTo(lastChild, translation=True, rotation=True)
-		lockKeyableAttributes(self.masterControl.transform, hide=True)
+		self.master.snapTo(lastChild, translation=True, rotation=True)
+		lockKeyableAttributes(self.master.transform, hide=True)
 		return

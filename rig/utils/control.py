@@ -70,8 +70,8 @@ def createControl(name='control', shape=WireType.circle, axis=None, scale=1, col
 
 class Control(Node):
 	def __init__(self,
-	             prefix='rig',
-	             name=None,
+	             name='rig',
+	             prefix=None,
 	             item=None,
 	             wire=WireType.circleRotate,
 	             axis=None,
@@ -124,9 +124,14 @@ class Control(Node):
 		self.offsetShape = None
 
 		# Init
-		self._create(wire, axis, scale, side, index, sector, kind, color, offset)
+		if nodeExists(name):
+			self._kind = None
+			self.longName = name
+		else:
+			self.create(wire, axis, scale, color, offset)
+			self.canUpdateName = True
 
-	def _create(self, wire, axis, scale, side, index, sector, kind, color, offset):
+	def create(self, wire, axis, scale, color, offset):
 		if not self.isValid():
 			# Main Control
 			result = createControl(name=self.longName,
@@ -152,34 +157,6 @@ class Control(Node):
 				)
 
 				self.offsetTransform, self.offsetShape = resultOffset
-
-				# Add Offset Index Attribute
-				if index is not None:
-					addAttribute(self.offsetTransform,
-					             attribute=UserAttr.index,
-					             kind=MayaAttrType.int,
-					             value=index,
-					             lock=True,
-					             )
-
-				# Add Offset Sector Attribute
-				if sector is not None:
-					addAttribute(self.offsetTransform,
-					             attribute=UserAttr.sector,
-					             kind=MayaAttrType.string,
-					             value=sector,
-					             lock=True,
-					             )
-
-				# Set Offset Side Attributes
-				sideValue = JointLabelSide.none
-				if hasattr(JointLabelSide, side):
-					sideValue = getattr(JointLabelSide, side)
-
-				setAttribute(self.offsetTransform,
-				             attribute=MayaAttr.side,
-				             value=sideValue
-				             )
 
 				# Connect Offset Controls
 				cmds.parent(self.offsetTransform, self.transform)
@@ -209,11 +186,11 @@ class Control(Node):
 			                   )
 
 			self.nullPosition, self.nullConnection, self.nullZero = nulls
-			self.side = side
-			self.index = index
-			self.sector = sector
-			self.kind = kind
-			self.exists = True
+
+			self.side = self._side
+			self.index = self._index
+			self.sector = self._sector
+			self.kind = self._kind
 		return
 
 	def updateName(self):
