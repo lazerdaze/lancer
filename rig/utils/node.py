@@ -2,7 +2,7 @@
 from attribute import *
 from general import *
 from naming import *
-from customerror import *
+from customError import *
 
 # Maya Modules
 from maya import cmds

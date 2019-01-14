@@ -1,7 +1,7 @@
 # Lancer Modules
 from naming import *
 from node import *
-from customerror import *
+from customError import *
 from attribute import *
 
 # Python Modules
@@ -936,7 +936,7 @@ def createJointChain(objects, name=Component.joint):
 #
 ########################################################################################################################
 
-
+#TODO: disconnectAttr root_C_0_joint.scale leg_C_hip_0_joint.inverseScale;
 class Joint(Node):
 	def __init__(self,
 	             name='rig',
@@ -991,6 +991,9 @@ class Joint(Node):
 			self.type = type
 			self.otherType = otherType
 			self.canUpdateName = True
+		else:
+			self.disableSegmentScale()
+
 
 	#
 	# Joint Orient Properties

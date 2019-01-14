@@ -56,11 +56,11 @@ class Component(object):
 	fkik = 'fkik'
 	set = 'set'
 	joint = 'joint'
-	leaf = '{}_leaf'.format(joint)
+	leaf = 'leaf{}'.format(joint.capitalize())
 
 	control = 'control'
-	fkControl = 'fk{}'.format(control.capitalize())
-	ikControl = 'ik{}'.format(control.capitalize())
+	fkControl = 'FK{}'.format(control.capitalize())
+	ikControl = 'IK{}'.format(control.capitalize())
 	master = 'master'
 	detailControl = 'detail{}'.format(control.capitalize())
 	offsetControl = 'offset{}'.format(control.capitalize())

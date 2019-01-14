@@ -27,6 +27,19 @@ def jointChain(*args, **kwargs):
 	return children
 
 
+def jointLeafChain(*args, **kwargs):
+	children = kwargs.get('children', [])
+
+	for arg in args:
+		if isinstance(arg, (list, dict, tuple)):
+			for item in arg:
+				jointLeafChain(item, children=children)
+		elif isinstance(arg, str):
+			if cmds.nodeType(arg) == 'joint':
+				children.append(cmds.listRelatives(arg, children=True, type='joint'))
+	return children
+
+
 ########################################################################################################################
 #
 #
