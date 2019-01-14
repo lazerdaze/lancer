@@ -4,6 +4,7 @@
 *.ui
 *.qrc
 *.ai
+misc
 legacy_eixml.py
 eixml.py
 studiolibrary
