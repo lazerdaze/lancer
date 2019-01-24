@@ -1,5 +1,6 @@
 # Lancer Modules
 from naming import *
+from general import *
 from wire import *
 from attribute import *
 from node import *
@@ -38,6 +39,38 @@ def jointLeafChain(*args, **kwargs):
 			if cmds.nodeType(arg) == 'joint':
 				children.append(cmds.listRelatives(arg, children=True, type='joint'))
 	return children
+
+
+def downAxisDecorator(func):
+	def wrapper(*args, **kwargs):
+		return maxOccurrance(func(*args, **kwargs))
+
+	return wrapper
+
+
+def jointDownAxis(joint):
+	axis = ['x', 'y', 'z']
+	translate = cmds.xform(joint, query=True, translation=True)
+	maxValue = max(translate)
+	return axis[translate.index(maxValue)]
+
+
+@downAxisDecorator
+def jointChainDownAxis(*args, **kwargs):
+	axis = ['x', 'y', 'z']
+	result = kwargs.get('result', [])
+
+	for arg in args:
+		if isinstance(arg, (list, dict, tuple)):
+			for item in arg:
+				jointChainDownAxis(item, result=result)
+		else:
+			if cmds.nodeType(arg) == 'joint':
+				children = cmds.listRelatives(arg, children=True, type='joint')
+				if children:
+					for child in children:
+						result.append(jointDownAxis(child))
+	return result
 
 
 ########################################################################################################################

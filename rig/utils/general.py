@@ -202,6 +202,7 @@ def moveRotatePivot(parent, child):
 		cmds.xform(child, ws=True, rp=pos)
 	return
 
+
 def getLocalVecToWorldSpace(node, vec=om.MVector.kXaxisVector):
 	matrix = om.MGlobal.getSelectionListByName(node).getDagPath(0).inclusiveMatrix()
 	vec = (vec * matrix).normal()
@@ -263,3 +264,46 @@ def createDistanceNode(start, end, n='distanceBetween1', *args):
 	distance = cmds.getAttr('{}.distance'.format(node))
 
 	return [node, distance]
+
+
+def maxOccurrance(items):
+	data = []
+	if not isinstance(items, (tuple, list)):
+		raise TypeError('Argument must be iter object.')
+
+	for item in items:
+		index = items.index(item)
+		try:
+			data[index] += 1
+			data.append(0)
+		except IndexError:
+			data.append(1)
+
+	comparison = []
+
+	for index in range(len(data)):
+		valueList = []
+		indexValue = data[index]
+
+		for other in range(len(data)):
+			otherValue = data[other]
+
+			if index == other:
+				valueList.append('self')
+			else:
+				if indexValue == otherValue:
+					valueList.append('equal')
+				elif indexValue > otherValue:
+					valueList.append('greater')
+				elif indexValue < otherValue:
+					valueList.append('less')
+		comparison.append(valueList)
+
+	comparisonResult = None
+
+	for compare in comparison:
+		if 'less' not in compare:
+			if 'equal' not in compare:
+				comparisonResult = comparison.index(compare)
+
+	return items[comparisonResult] if comparisonResult is not None else items[0]

@@ -11,7 +11,7 @@ class TestCase(unittest.TestCase):
     # all tests have been run
     files_created = []
 
-    # Keep track of which plugins were loaded so we can unload them after all tests have been run
+    # Keep track of which plugins.py were loaded so we can unload them after all tests have been run
     plugins_loaded = set()
 
     @classmethod
@@ -31,7 +31,7 @@ class TestCase(unittest.TestCase):
 
     @classmethod
     def unload_plugins(cls):
-        # Unload any plugins that this test case loaded
+        # Unload any plugins.py that this test case loaded
         for plugin in cls.plugins_loaded:
             cmds.unloadPlugin(plugin)
         cls.plugins_loaded = []
