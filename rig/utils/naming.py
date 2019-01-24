@@ -163,6 +163,7 @@ class Position(object):
 
 class Part(object):
 	# Root
+	rig = 'rig'
 	root = 'root'
 	cog = 'cog'
 

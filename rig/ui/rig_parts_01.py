@@ -1,13 +1,3 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'rig_parts_01.ui',
-# licensing of 'rig_parts_01.ui' applies.
-#
-# Created: Wed Jan 23 21:17:38 2019
-#      by: pyside2-uic  running on PySide2 5.11.0a1.dev1528378291
-#
-# WARNING! All changes made in this file will be lost!
-
 from PySide2 import QtCore, QtGui, QtWidgets
 
 class Ui_MainWindow(object):
