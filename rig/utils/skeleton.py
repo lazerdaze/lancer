@@ -1,8 +1,10 @@
 # Lancer Modules
-import library.xfer as xfer
 from general import *
+from naming import *
 from attribute import *
 from joint import *
+from library import xfer
+from library.axml import Axml
 
 # Maya Modules
 import maya.cmds as cmds
@@ -259,18 +261,18 @@ def createSkeletonNetwork(root=None, name='skeletonNetwork'):
 			for side, sideList in attributeData.items():
 				if sideList:
 					attrName = '{}{}{}'.format(attribute[0].lower(),
-					                           attribute.replace(' ', '').strip(attribute[0]),
-					                           side
-					                           )
+											   attribute.replace(' ', '').strip(attribute[0]),
+											   side
+											   )
 					cmds.addAttr(skeletonNetwork, ln=attrName, dt='string', m=True)
 					for obj in sideList:
 						i = sideList.index(obj)
 						if not cmds.attributeQuery('skeletonNetwork', node=obj, ex=True):
 							cmds.addAttr(obj, ln='skeletonNetwork', at='message')
 						cmds.connectAttr('{}.{}[{}]'.format(skeletonNetwork,
-						                                    attrName,
-						                                    i),
-						                 '{}.skeletonNetwork'.format(obj))
+															attrName,
+															i),
+										 '{}.skeletonNetwork'.format(obj))
 
 	return skeletonNetwork
 
@@ -484,42 +486,117 @@ def loadHIKPlugin():
 	return isLoaded
 
 
+def createHIKCharacter(name='Character'):
+	characterNode = cmds.createNode('HIKCharacterNode', n=name)
+	propertyNode = cmds.createNode('HIKProperty2State', n='{}Properties'.format(name))
+	cmds.connectAttr('{}.message'.format(propertyNode), '{}.propertyState'.format(characterNode))
+	return [characterNode, propertyNode]
+
+
 def addCharacterAttr(selected):
 	cmds.addAttr(selected, ln='character', at='message')
 	return
 
 
+########################################################################################################################
+#
+#
+#	Character Class
+#
+#
+########################################################################################################################
+
+
+CHARACTER_JOINT_HANDLER = [
+	'translateX',
+	'translateY',
+	'translateZ',
+	'jointOrientY',
+	'jointOrientX',
+	'jointOrientZ',
+	'rotateX',
+	'rotateY',
+	'rotateZ',
+	'scaleX',
+	'scaleY',
+	'scaleZ',
+	'radius',
+	'type',
+	'side',
+	'otherType',
+]
+
+
 # TODO: Run Validator On Hierarchy: If there's warnings then skeleton is invalid.
-class Character(object):
-	def __init__(self, name='Skeleton_HIK', root=None):
+class Character(Axml):
+	def __init__(self, name='Character', root=None, filepath=None):
+		'''
+		<character>
+        	<Spine name="spine_C_0_joint"/>
+        		<Neck name="neck_C_0_joint"/>
+		</character>
 
-		self.name = name
-		self.root = root
-		self.characterNode = None
-		self.propertyNode = None
 
-		if not loadHIKPlugin():
-			return
+		:param name:
+		:param root:
+		:param filepath:
+		'''
+		Axml.__init__(self, filepath=filepath)
 
-		if not nodeExists(self.name):
-			self.createNodes()
+		self._name = name
+		self.skeletonRoot = root
+
+	def __repr__(self):
+		return self._name
+
+	@property
+	def name(self):
+		return self._name
+
+	@name.setter
+	def name(self, name):
+		if nodeExists(name):
+			raise NodeExistsError('Character "{}" already exists.'.format(name))
+		else:
+			cmds.rename(self._name, name)
+			self._name = name
+		return
 
 	def isValid(self):
-		return True
+		if not self.skeletonRoot:
+			return False
+		else:
+			if nodeExists(self.skeletonRoot) and nodeType(self.skeletonRoot) == Component.joint:
+				return True
+		return False
 
-	def createNodes(self):
-		self.characterNode = cmds.createNode('HIKCharacterNode', n=self.name)
-		self.propertyNode = cmds.createNode('HIKProperty2State', n='{}Properties'.format(self.name))
-		cmds.connectAttr('{}.message'.format(self.propertyNode), '{}.propertyState'.format(self.characterNode))
-		return
+	def buildTree(self, debug=False):
+		if not self.isValid():
+			raise RuntimeError('No valid Skeleton Root provided.')
+		else:
+			self.root = Component.character
+			self.recursiveBuildJointTree(self.skeletonRoot)
 
-	def __str__(self):
-		return self.name
+			if debug:
+				print self
+			return
 
-	def read(self):
-		return
+	def recursiveBuildJointTree(self, joint, **kwargs):
+		parent = kwargs.get('parent', self.root)
 
-	def write(self):
+		# Create Element
+		node = Joint(name=joint)
+		element = self.createElement(parent=parent, name=Component.joint)
+
+		# Add Attributes
+		for attr in CHARACTER_JOINT_HANDLER:
+			if hasattr(node, attr):
+				self.addAttr(element=element, name=attr, value=getattr(node, attr))
+
+		# Get Children and Loop
+		for child in node.children:
+			self.recursiveBuildJointTree(joint=child, parent=element)
+
 		return
 
 
@@ -585,10 +662,10 @@ def importTemplateLegacy(*args):
 
 def importTemplate(debug=False, *args):
 	filepath = xfer.mayaFileBrowse(label='Import Skeleton Template',
-	                               fileMode=1,
-	                               okCaption='Import',
-	                               fileFilter="*.json",
-	                               )
+								   fileMode=1,
+								   okCaption='Import',
+								   fileFilter="*.json",
+								   )
 
 	if filepath:
 		importer = xfer.Import(filepath, isDebug=False)
@@ -622,14 +699,14 @@ def importTemplate(debug=False, *args):
 def buildSkeletonTree(root, tree={}):
 	tree[root] = {
 		'attributes': getJointAttributes(root),
-		'children'  : {},
+		'children': {},
 	}
 
 	children = getJointChildren(root)
 	if children:
 		for child in children:
 			tree[root]['children'][child] = {
-				'children'  : getSkeletonTree(child, {}),
+				'children': getSkeletonTree(child, {}),
 				'attributes': getJointAttributes(child),
 			}
 	return tree
@@ -656,10 +733,10 @@ def exportTemplate(debug=False, *args):
 					return
 				else:
 					filepath = xfer.mayaFileBrowse(label='Export Skeleton Template',
-					                               fileMode=0,
-					                               okCaption='Export',
-					                               fileFilter="*.json",
-					                               )
+												   fileMode=0,
+												   okCaption='Export',
+												   fileFilter="*.json",
+												   )
 
 					if filepath:
 						xfer.Export(filepath, data=data, isDebug=False)

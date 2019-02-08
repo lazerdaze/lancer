@@ -1109,6 +1109,11 @@ class Joint(Node):
 			self.otherType = otherType
 			self.canUpdateName = True
 
+	@property
+	def children(self):
+		result = cmds.listRelatives(self.longName, c=True, type='joint')
+		return result if isinstance(result, list) else []
+
 	#
 	# Joint Orient Properties
 	#
