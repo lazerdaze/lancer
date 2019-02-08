@@ -40,7 +40,7 @@ def scaleConstraint(*args, **kwargs):
 def aimConstraint(*args, **kwargs):
 	kwargs['offset'] = kwargs.get('offset', False)
 	offset = kwargs['offset']
-	return
+	return cmds.aimConstraint(args, mo=offset)
 
 
 def poleVectorConstraint(*args, **kwargs):

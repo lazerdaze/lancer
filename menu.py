@@ -9,9 +9,11 @@
 import lancer
 import channelBox.ui
 import channelBox.tweenKey
+import rig
 import rig.parts
 import rig.legacy.ui
 import rig.utils.skeleton
+import rig.utils.joint
 import rig.utils.skin
 import rig.utils.control
 import rig.auto
@@ -54,10 +56,14 @@ def channelBoxUI(*args):
 	return
 
 
-def refresh(*args):
+def refreshLancer(*args):
 	import lancer.menu
 	reload(lancer.menu)
 	lancer.menu.show()
+
+	import refresh
+	refresh.resetSessionForScript()
+	print 'Lancer successfully reloaded.',
 	return
 
 
@@ -100,16 +106,20 @@ def show(*args):
 
 	ui = cmds.menu(name, label='Lancer', parent='MayaWindow', tearOff=True)
 	cmds.menuItem(d=True, l='UI')
-	cmds.menuItem(l='Refresh', c=refresh)
+	cmds.menuItem(l='Refresh', c=refreshLancer)
 	cmds.menuItem(label='Channel Box +', c=channelBoxUI)
 	cmds.menuItem(d=True, l='Rigging')
 	cmds.menuItem(label='Rig Tools', c=rigUI)
-	cmds.menuItem(l='Skeleton', subMenu=True, to=True)
-	rig.utils.skeleton.menu()
-	cmds.setParent('..', menu=True)
-	cmds.menuItem(l='Skin', subMenu=True, to=True)
-	rig.utils.skin.menu()
-	cmds.setParent('..', menu=True)
+	rig.menuItems()
+	# cmds.menuItem(l='Joint', subMenu=True, to=True)
+	# rig.utils.joint.menu()
+	# cmds.setParent('..', menu=True)
+	# cmds.menuItem(l='Skeleton', subMenu=True, to=True)
+	# rig.utils.skeleton.menu()
+	# cmds.setParent('..', menu=True)
+	# cmds.menuItem(l='Skin', subMenu=True, to=True)
+	# rig.utils.skin.menu()
+	# cmds.setParent('..', menu=True)
 	# cmds.menuItem(l='Control', subMenu=True, to=True)
 	# rig.utils.control.menu()
 	# cmds.setParent('..', menu=True)

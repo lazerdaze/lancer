@@ -1,5 +1,7 @@
 # Lancer Modules
 import library.xfer as xfer
+from general import *
+from attribute import *
 from joint import *
 
 # Maya Modules
@@ -21,6 +23,12 @@ HIK Notes:
 	- Max Arm / Leg Roll Joints: 5
 	- Max Spine Joints: 10
 	- Max Neck Joints: 10
+	
+- Selection:
+	- Relationship (fastest)
+	- Kind 
+	- Name (slowest)
+	
 """
 
 ########################################################################################################################
@@ -33,6 +41,66 @@ HIK Notes:
 
 
 DIRPATH = os.path.dirname(os.path.abspath(__file__))
+
+
+########################################################################################################################
+#
+#
+#	Selection
+#
+#
+########################################################################################################################
+
+def getSkeletonChildren(root, kind=None):
+	return
+
+
+def getSkeletonBindJointsOnSelected(kind='bind', *args, **kwargs):
+	selected = getSelected()
+
+	result = []
+
+	if selected:
+		cmds.select(d=True)
+
+		for item in selected:
+			print item
+			query = getSkeletonBindJoints(item, kind)
+			if query:
+				result += query
+		if result:
+			cmds.select(result)
+
+	return result if result else None
+
+
+def getSkeletonBindJoints(root, kind='bind'):
+	if nodeType(root) != 'joint':
+		raise NodeTypeError('Must provide a root joint.')
+
+	result = []
+
+	# By Connection
+	if attributeExist(root, kind):
+		result += cmds.listConnections(attributeName(root, kind))
+
+	# By Type | Name
+	children = getAllJointChildren(root)
+	if children:
+		for child in children:
+
+			if getJointLabelOtherType(child).lower() == kind or kind in child:
+				if kind != 'joint':
+					if child not in result:
+						result.append(child)
+
+			# By Kind
+			elif attributeExist(child, 'kind'):
+				if getAttribute(child, 'kind').lower() == kind:
+					if child not in result:
+						result.append(child)
+
+	return result if result else None
 
 
 ########################################################################################################################
@@ -325,9 +393,77 @@ def mirrorSelectedSkeleton(joint):
 #
 #
 ########################################################################################################################
+'''
+HIK Definition File: XML
+
+Notes:
+	- Joints have character message attribute -> character node
+	- Value is joint in scene
+	- Key is HIK Definition
+	- When connections are made - HIK updates the joint labels (only while using UI?)
+
+<config_root>
+    <match_list>
+        <item value="joint" key="Reference"/>
+        <item value="" key="Hips"/>
+        <item value="" key="Spine"/>
+        <item value="" key="Head"/>
+        <item value="" key="Neck"/>
+    </match_list>
+</config_root>
+'''
 
 
-def loadHIKPlugin(plugin='mayaHIK.mll'):
+class HIKPart(object):
+	cog = 'Reference'
+	hip = 'Hips'
+	spine = 'Spine'
+	neck = 'Neck'
+	head = 'Head'
+
+	leftCollar = 'LeftShoulder'
+	leftArm = 'LeftArm'
+	leftFoot = 'LeftFoot'
+	leftToe = 'LeftToeBase'
+	leftElbow = 'LeftForeArm'
+	leftHand = 'LeftHand'
+	leftThumb = 'LeftHandThumb'
+
+	leftIndexFingerBase = 'LeftInHandIndex'
+	leftIndexFinger = 'LeftHandIndex'
+	leftMiddleFingerBase = 'LeftInHandMiddle'
+	leftMiddleFinger = 'LeftHandMiddle'
+	leftRingFingerBase = 'LeftInHandRing'
+	leftRingFinger = 'LeftHandRing'
+	leftPinkyFingerBase = 'LeftInHandPinky'
+	leftPinkyFinger = 'LeftHandPinky'
+
+	leftLeg = 'LeftLeg'
+	leftHip = 'LeftUpLeg'
+
+	rightCollar = 'RightShoulder'
+	rightArm = 'RightArm'
+	rightFoot = 'RightFoot'
+	rightToe = 'RightToeBase'
+	rightElbow = 'RightForeArm'
+	rightHand = 'RightHand'
+	rightThumb = 'RightHandThumb'
+
+	rightIndexFingerBase = 'RightInHandIndex'
+	rightIndexFinger = 'RightHandIndex'
+	rightMiddleFingerBase = 'RightInHandMiddle'
+	rightMiddleFinger = 'RightHandMiddle'
+	rightRingFingerBase = 'RightInHandRing'
+	rightRingFinger = 'RightHandRing'
+	rightPinkyFingerBase = 'RightInHandPinky'
+	rightPinkyFinger = 'RightHandPinky'
+
+	rightLeg = 'RightLeg'
+	rightHip = 'RightUpLeg'
+
+
+def loadHIKPlugin():
+	plugin = 'mayaHIK.mll'
 	isLoaded = cmds.pluginInfo(plugin, q=True, l=True)
 	isAutoLoaded = cmds.pluginInfo(plugin, q=True, a=True)
 
@@ -337,28 +473,15 @@ def loadHIKPlugin(plugin='mayaHIK.mll'):
 			isLoaded = True
 			print 'Plugin "{}" was loaded successfully.'.format(plugin)
 		except:
-			print 'Unable to load plugin "{}".'.format(plugin)
-
-	# else:
-	#	print 'Plugin "{}" is already loaded.'.format(plugin)
+			raise PluginError('Unable to load plugin "{}".'.format(plugin))
 
 	if isLoaded:
 		if not isAutoLoaded:
 			try:
 				cmds.pluginInfo(plugin, e=True, a=True)
 			except:
-				print 'Unable to set plugin "{}" to auto load.'.format(plugin)
-	#	else:
-	#		print 'Plugin "{}" is already set to auto load.'.format(plugin)
-	return
-
-
-def createHIKCharacter(name='Character0'):
-	loadHIKPlugin()
-	characterNode = cmds.createNode('HIKCharacterNode', n=name)
-	propertyNode = cmds.createNode('HIKProperty2State', n='{}Properties'.format(name))
-	cmds.connectAttr('{}.message'.format(propertyNode), '{}.propertyState'.format(characterNode))
-	return [characterNode, propertyNode]
+				cmds.warning('Unable to set plugin "{}" to auto load.'.format(plugin))
+	return isLoaded
 
 
 def addCharacterAttr(selected):
@@ -366,8 +489,38 @@ def addCharacterAttr(selected):
 	return
 
 
-def defineCharacter():
-	return
+# TODO: Run Validator On Hierarchy: If there's warnings then skeleton is invalid.
+class Character(object):
+	def __init__(self, name='Skeleton_HIK', root=None):
+
+		self.name = name
+		self.root = root
+		self.characterNode = None
+		self.propertyNode = None
+
+		if not loadHIKPlugin():
+			return
+
+		if not nodeExists(self.name):
+			self.createNodes()
+
+	def isValid(self):
+		return True
+
+	def createNodes(self):
+		self.characterNode = cmds.createNode('HIKCharacterNode', n=self.name)
+		self.propertyNode = cmds.createNode('HIKProperty2State', n='{}Properties'.format(self.name))
+		cmds.connectAttr('{}.message'.format(self.propertyNode), '{}.propertyState'.format(self.characterNode))
+		return
+
+	def __str__(self):
+		return self.name
+
+	def read(self):
+		return
+
+	def write(self):
+		return
 
 
 ########################################################################################################################
@@ -467,9 +620,10 @@ def importTemplate(debug=False, *args):
 
 
 def buildSkeletonTree(root, tree={}):
-	tree[root] = {'attributes': getJointAttributes(root),
-	              'children': {},
-	              }
+	tree[root] = {
+		'attributes': getJointAttributes(root),
+		'children'  : {},
+	}
 
 	children = getJointChildren(root)
 	if children:
@@ -481,6 +635,7 @@ def buildSkeletonTree(root, tree={}):
 	return tree
 
 
+# FIXME: Doesn't work properly. Need to update with Recursive solution.
 def exportTemplate(debug=False, *args):
 	selected = getSelected()
 	if selected:
@@ -511,37 +666,3 @@ def exportTemplate(debug=False, *args):
 					else:
 						print 'Skeleton Template Export: Canceled.',
 			return
-
-
-########################################################################################################################
-#
-#
-#	MENU
-#
-#
-########################################################################################################################
-
-
-def menu():
-	cmds.menuItem(l='Select Joint Hierarchy', c=selectJointHierarchy)
-	cmds.menuItem(l='Select Bind Joints', c=selectAllBindJoints)
-	cmds.menuItem(l='Select Non-Bind Joints', c=selectAllNonBindJoints)
-	cmds.menuItem(d=True)
-	cmds.menuItem(l='Remove Segment Scale', c=setSegmentScaleCompensate)
-	cmds.menuItem(d=True, l='Joint Labels')
-	cmds.menuItem(l='Create Skeleton Network From Labels', c=createSkeletonNetwork)
-	cmds.menuItem(d=True, l='Joint Pose')
-	cmds.menuItem(l='Restore Joint Pose', c=restoreBindPosePrompt)
-	cmds.menuItem(l='Create Joint Pose', c=createBindPosePrompt)
-	cmds.menuItem(l='Template', d=True)
-	cmds.menuItem(l='Import Template', c=importTemplate)
-	cmds.menuItem(l='Export Template', c=exportTemplate)
-	# cmds.menuItem(d=True)
-	# cmds.menuItem(l='Import Biped (Simple)', c=importTemplate)
-	# cmds.menuItem(l='Import Biped (Advanced)', c=importTemplate, enable=False)
-	# cmds.menuItem(l='Import Quadruped (Simple)', c=importTemplate)
-	# cmds.menuItem(l='Import Quadruped (Advanced)', c=importTemplate, enable=False)
-	cmds.menuItem(d=True, l='Template Only')
-	cmds.menuItem(l='Mirror Skeleton Positions', c=mirrorSelectedSkeleton)
-	cmds.menuItem(l='Force T-Pose', c=forceTPoseOnSelected)
-	return

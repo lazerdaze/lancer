@@ -20,3 +20,7 @@ class ConnectionError(CustomError):
 
 class ConstraintError(CustomError):
 	pass
+
+
+class PluginError(CustomError):
+	pass

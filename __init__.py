@@ -31,26 +31,6 @@ except TypeError:
 
 MAYAPLUGINPATH = mel.eval('getenv "MAYA_PLUG_IN_PATH"')
 
-
-# Functions
-def refreshModules():
-	toDelete = []
-	for key, module in sys.modules.iteritems():
-		try:
-			moduleFilePath = inspect.getfile(module).lower()
-
-			if moduleFilePath == __file__.lower():
-				continue
-
-			if moduleFilePath.startswith(DIRPATH.lower()):
-				print "Removing {}".format(key)
-				toDelete.append(key)
-		except:
-			pass
-
-	for module in toDelete:
-		del (sys.modules[module])
-
 def splitall(path):
 	allparts = []
 	while 1:

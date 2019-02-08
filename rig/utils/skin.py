@@ -33,7 +33,7 @@ def getJointRootFromSkin(skin):
 	influences = getSkinClusterInfluences(skin)
 	for inf in influences:
 		if cmds.objectType(inf) == 'joint':
-			query = skeleton.getJointRoot(inf)
+			query = getJointRoot(inf)
 			if query:
 				root = query
 				break

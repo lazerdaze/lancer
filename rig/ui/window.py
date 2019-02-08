@@ -16,6 +16,69 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
+# Maya Modules
+from maya import cmds, mel, OpenMayaUI
+from shiboken2 import wrapInstance
+
+
+########################################################################################################################
+#
+#
+#	UTILITIES
+#
+#
+########################################################################################################################
+
+
+def getMayaWindow():
+	mayaPtr = OpenMayaUI.MQtUtil.mainWindow()
+	mayaWindow = wrapInstance(long(mayaPtr), QWidget)
+	return mayaWindow
+
+
+########################################################################################################################
+#
+#
+#	Joint TreeView
+#
+#
+########################################################################################################################
+
+
+class JointItemDelegate(QItemDelegate):
+	def __init__(self, *args, **kwargs):
+		QItemDelegate.__init__(self, *args, **kwargs)
+
+
+class JointItem(object):
+	def __init__(self):
+		pass
+
+
+class JointModel(QAbstractItemModel):
+	def __init__(self, *args, **kwargs):
+		QAbstractItemModel.__init__(self, *args, **kwargs)
+
+
+class JointTreeViewContextMenu(QMenu):
+	def __init__(self, *args, **kwargs):
+		QMenu.__init__(self, *args, **kwargs)
+		pass
+
+
+class JointTreeView(QTreeView):
+	def __init__(self, *args, **kwargs):
+		QTreeView.__init__(self, *args, **kwargs)
+
+
+########################################################################################################################
+#
+#
+#	GroupBox
+#
+#
+########################################################################################################################
+
 
 class OptionsGroupBox(QGroupBox):
 	def __init__(self, *args, **kwargs):
@@ -32,7 +95,7 @@ class OptionsGroupBox(QGroupBox):
 		layout.addLayout(prefixLayout)
 
 		self.prefixLabel = QLabel()
-		self.prefixLabel.setText('Prefix')
+		self.prefixLabel.setText('Type')
 		self.prefixLabel.setMinimumSize(QSize(60, 0))
 		prefixLayout.addWidget(self.prefixLabel)
 
@@ -309,7 +372,7 @@ class JointGroupBox(QGroupBox):
 		extrasLayout.addWidget(self.leafJointsCheckbox)
 
 		# Treeview
-		self.treeView = QTreeView()
+		self.treeView = JointTreeView()
 		layout.addWidget(self.treeView)
 
 	@property
@@ -325,12 +388,10 @@ class JointGroupBox(QGroupBox):
 		return self.leafJointsCheckbox.isChecked()
 
 
-
 class Window(QMainWindow):
 	def __init__(self, *args, **kwargs):
 		QMainWindow.__init__(self, *args, **kwargs)
 
-		self.setWindowTitle('Window')
 		self.resize(312, 695)
 		self.centralwidget = QWidget(self)
 		self.setCentralWidget(self.centralwidget)
@@ -364,21 +425,54 @@ class Window(QMainWindow):
 		self.verticalLayout_3.addWidget(self.jointWidget)
 
 		# Create Button
-		self.pushButton = QPushButton(self.centralwidget)
-		self.verticalLayout.addWidget(self.pushButton)
+		self.createButton = QPushButton()
+		self.createButton.setText('Create')
+		self.verticalLayout.addWidget(self.createButton)
 
+		# Signals Slots
+		self.createButton.clicked.connect(self.callback)
 
 	def callback(self):
+		# Global
+		prefix = self.optionsWidget.prefix
+		side = self.optionsWidget.side
+		twist = self.optionsWidget.twist
+		stretch = self.optionsWidget.stretch
+
+		# IK
+		ik = self.ikWidget.enabled
+		ikSolver = self.ikWidget.solver
+
+		# Local World
+		localWorld = self.localWorldWidget.enabled
+		localParent = self.localWorldWidget.local
+		worldParent = self.localWorldWidget.world
+
+		if localWorld:
+			if not localParent:
+				raise ValueError('Must specify a local transform node.')
+			else:
+				if not utils.nodeExists(localParent):
+					raise utils.NodeExistsError('Node "{}" does not exist.'.format(localParent))
+			if not worldParent:
+				raise ValueError('Must specify a world transform node.')
+			else:
+				if not utils.nodeExists(worldParent):
+					raise utils.NodeExistsError('Node "{}" does not exist.'.format(worldParent))
+
+		# Joints
+		upAxis = self.jointWidget.upAxis
+		downAxis = self.jointWidget.downAxis
+		leafJoints = self.jointWidget.leafJoints
 		return
 
 
-def show():
-	app = QApplication(sys.argv)
-	MainWindow = Window()
-	MainWindow.show()
-	sys.exit(app.exec_())
-	return
+def show(name='lancer_rig_windowUI', title='Lancer Rig', *args, **kwargs):
+	if cmds.window(name, exists=True):
+		cmds.deleteUI(name, wnd=True)
 
-
-if __name__ == '__main__':
-	show()
+	window = Window(getMayaWindow())
+	window.setObjectName(name)
+	window.setWindowTitle(title)
+	window.show()
+	return window

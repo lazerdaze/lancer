@@ -17,18 +17,22 @@ import maya.api.OpenMaya as om
 #
 ########################################################################################################################
 
-
-def selected():
-	return cmds.ls(sl=True)
-
-
-def getSelected(*args):
+def getSelected(*args, **kwargs):
 	selected = cmds.ls(sl=True)
-
 	if not selected:
-		cmds.warning('Nothing selected.')
-
+		raise RuntimeError('Nothing selected.')
 	return selected
+
+
+def onSelected(func):
+	if not callable(func):
+		raise RuntimeError('Must provide function')
+
+	def wrapper(*args, **kwargs):
+		for item in getSelected():
+			func(item, **kwargs)
+
+	return wrapper
 
 
 def getChild(root, typ='joint', *args):
@@ -63,6 +67,11 @@ def freezeTransform(obj, t=True, r=True, s=True):
 	if s:
 		cmds.makeIdentity(obj, apply=True, s=True)
 	return
+
+
+@onSelected
+def freezeTransformSelected(item, *args, **kwargs):
+	return freezeTransform(item)
 
 
 def forwardAxis(obj, axis=[0, 0, 0], *args):

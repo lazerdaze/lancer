@@ -85,7 +85,7 @@ def createNull(*args, **kwargs):
 
 class Node(object):
 	def __init__(self,
-	             name='rigNode',
+	             name,
 	             prefix=None,
 	             parent=None,
 	             children=None,
@@ -110,11 +110,20 @@ class Node(object):
 		:param str kind:            Label of the control to determine rig type.
 		'''
 
+		# Name
 		self._name = name
 		self._prefix = prefix
 		self._parent = parent
 		self._children = children if isinstance(children, list) else []
 		self._descendants = []
+
+		# Custom Maya Attributes
+		self._side = side
+		self._sector = sector
+		self._index = index
+		self._kind = kind
+
+		# Attributes
 		self.exists = False
 		self.canUpdateName = False
 		self.color = color
@@ -123,14 +132,9 @@ class Node(object):
 		self.transform = None
 		self.shape = None
 
-		# Custom Maya Attributes
-		self._side = side
-		self._sector = sector
-		self._index = index
-		self._kind = kind
-
 		if nodeExists(name):
 			self._kind = None
+			self.exists = True
 			self.longName = name
 
 	def __str__(self):
@@ -178,17 +182,22 @@ class Node(object):
 
 	@property
 	def longName(self):
-		return longName(self._prefix,
-		                self._side[0].upper() if self.side else None,
-		                self._name,
-		                self._sector,
-		                self._index,
-		                self._kind,
-		                )
+		if self.exists:
+			return self._name
+		else:
+			return longName(self._prefix,
+			                self._side[0].upper() if self.side else None,
+			                self._name,
+			                self._sector,
+			                self._index,
+			                self._kind,
+			                )
 
 	@longName.setter
 	def longName(self, name):
-		if self.isValid():
+		if self.exists:
+			self._name = name
+		else:
 			nc = NameConvention(name)
 			self._prefix = nc.prefix
 			self._name = nc.name
@@ -196,6 +205,7 @@ class Node(object):
 			self._sector = nc.sector
 			self._index = nc.index
 			self._kind = nc.kind
+		self.updateName()
 		return
 
 	####################################################################################################################
@@ -655,11 +665,7 @@ class Node(object):
 		return
 
 	def isValid(self):
-		if self.longName:
-			self.exists = nodeExists(self.longName)
-			return self.exists
-		self.exists = False
-		return self.exists
+		return nodeExists(self.longName)
 
 	def isAttributeLocked(self, attribute):
 		return attributeLocked(self.longName, attribute)

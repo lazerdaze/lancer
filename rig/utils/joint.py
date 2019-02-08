@@ -1,8 +1,10 @@
 # Lancer Modules
+from general import *
 from naming import *
 from node import *
 from customError import *
 from attribute import *
+from constraint import *
 
 # Python Modules
 import json
@@ -92,13 +94,18 @@ jointLabelLimbGlobalList = ['arms',
                             ]
 
 
-def zeroJointOrient(jnt, *args):
+def zeroJointOrient(joint, *args, **kwargs):
+	if nodeType(joint) != 'joint':
+		raise TypeError('Must provide a joint.')
+
 	for axis in ['x', 'y', 'z']:
-		try:
-			cmds.setAttr('{}.jointOrient{}'.format(jnt, axis.upper()), 0)
-		except:
-			pass
+		setAttribute(node=joint, attribute='jointOrient{}'.format(axis.upper()), value=0, force=True)
 	return
+
+
+@onSelected
+def zeroJointOrientSelected(item, *args, **kwargs):
+	return zeroJointOrient(item)
 
 
 class estimateBoundsByJoint:
@@ -153,6 +160,8 @@ class estimateBoundsByJoint:
 		return str(self.__dict__)
 
 
+# TODO: Create Joint on selection
+# TODO: Add Parent, Skeleton, Kind, Children Attributes | Side, Type, OtherType arguments
 def createJoint(obj=None, n='joint_0', *args):
 	cmds.select(d=True)
 	jnt = cmds.joint(n=n)
@@ -161,6 +170,16 @@ def createJoint(obj=None, n='joint_0', *args):
 		snap(obj, jnt, t=True, r=True)
 		freezeTransform(jnt)
 	return jnt
+
+
+# TODO: Add OtherType 'bind'
+def createBindJoint(*args, **kwargs):
+	return
+
+
+# TODO: Add OtherType 'leaf'
+def createLeafJoint(*args, **kwargs):
+	return
 
 
 def orientJointChain(*args):
@@ -451,18 +470,6 @@ class jointLabel():
 		return [typ, side]
 
 
-def onSelected(function):
-	def wrapper(*args):
-		selected = getSelected()
-		if selected:
-			for obj in selected:
-				return function(obj)
-		else:
-			return None
-
-	return wrapper
-
-
 def getJointRoot(joint, child=None):
 	parent = cmds.listRelatives(joint, parent=True)
 	if parent:
@@ -496,11 +503,14 @@ def getAllBindJoints(root):
 def selectJointHierarchy(*args):
 	allJoints = []
 	selected = getSelected()
-	if selected:
-		for joint in selected:
-			joints = getAllJointChildren(joint) + [joint]
-			for jnt in joints:
-				allJoints.append(jnt)
+
+	for joint in selected:
+		allJoints.append(joint)
+		children = getAllJointChildren(joint)
+		if children:
+			for child in children:
+				if child not in allJoints:
+					allJoints.append(child)
 	cmds.select(allJoints)
 	return allJoints
 
@@ -530,14 +540,8 @@ def selectAllNonBindJoints(joint):
 
 
 @onSelected
-def setSegmentScaleCompensate(joint):
-	root = getJointRoot(joint)
-	children = getAllJointChildren(root)
-	joints = [root] + children if children else []
-	for joint in joints:
-		cmds.setAttr('{}.segmentScaleCompensate'.format(joint), 0)
-	cmds.select(joints)
-	return joints
+def removeSegmentScaleSelected(joint, *args, **kwargs):
+	return removeJointSegmentScale(joint)
 
 
 def getJointAttributes(joint):
@@ -928,6 +932,119 @@ def createJointChain(objects, name=Component.joint):
 	return jointList
 
 
+def removeJointSegmentScale(joint):
+	if nodeType(joint) != 'joint':
+		raise TypeError('Must provide a joint.')
+
+	setAttribute(joint, 'segmentScaleCompensate', 0)
+
+	destination = '{}.inverseScale'.format(joint)
+	if cmds.connectionInfo(destination, isDestination=True):
+		source = cmds.connectionInfo('{}.inverseScale'.format(joint), sourceFromDestination=True)
+		cmds.disconnectAttr(source, destination)
+		return True
+	return False
+
+
+def repositionMiddleJoint(*args, **kwargs):
+	if len(args) != 3:
+		raise ValueError('Must provide 3 objects')
+	else:
+		cmds.delete(cmds.pointConstraint(args))
+	return
+
+
+def repositionMiddleJointSelected(*args, **kwargs):
+	selected = getSelected()
+	repositionMiddleJoint(selected[0], selected[1], selected[2])
+	return
+
+
+def mirrorJoint(joint, *args, **kwargs):
+	if nodeType(joint) != 'joint':
+		raise TypeError('Must Provide a joint.')
+
+	# Query Joint Name
+	source = None
+	destination = None
+
+	data = {
+		'left': 'right',
+		'Left': 'Right',
+		'_l_' : '_r_',
+		'_L_' : '_R_',
+	}
+
+	for x in data:
+		if x in joint:
+			source = x
+			destination = data[x]
+			break
+		elif data[x] in joint:
+			source = data[x]
+			destination = x
+			break
+
+	# Run Mirror Function
+	if source and destination:
+		mirrored = cmds.mirrorJoint(joint, mirrorYZ=True, mirrorBehavior=True, searchReplace=[source, destination])
+	else:
+		mirrored = cmds.mirrorJoint(joint, mirrorYZ=True, mirrorBehavior=True)
+
+	# Get and Set Side Joint Label
+	sourceSide = getJointLabelSide(joint).lower()
+	destinationSide = None
+
+	if sourceSide == 'left':
+		destinationSide = JointLabelSide.right
+	elif sourceSide == 'right':
+		destinationSide = JointLabelSide.left
+
+	if destinationSide:
+		for item in mirrored:
+			setJointLabelSide(item, destinationSide)
+	return mirrored
+
+
+@onSelected
+def mirrorJointSelected(joint, *args, **kwargs):
+	return mirrorJoint(joint)
+
+
+def aimAtObject(*args, **kwargs):
+	if len(args) != 2:
+		raise ValueError('Must provide 2 objects.')
+	else:
+		parent = args[0]
+		child = args[1]
+
+		reparent = False
+
+		if child == nodeParent(parent):
+			cmds.parent(parent, world=True)
+			reparent = True
+
+		cmds.delete(aimConstraint(parent,
+		                          child,
+		                          aimVector=[1, 0, 0],
+		                          upVector=[0, 1, 0],
+		                          worldUpType='vector',
+		                          worldUpVector=[0, 1, 0]
+		                          )
+		            )
+		freezeTransform(args[1])
+
+		if reparent:
+			cmds.parent(parent, child)
+	return
+
+
+def aimAtSelected(*args, **kwargs):
+	selected = getSelected()
+	aimAtObject(selected[0], selected[1])
+	return
+
+
 ########################################################################################################################
 #
 #
@@ -936,7 +1053,7 @@ def createJointChain(objects, name=Component.joint):
 #
 ########################################################################################################################
 
-#TODO: disconnectAttr root_C_0_joint.scale leg_C_hip_0_joint.inverseScale;
+# TODO: disconnectAttr root_C_0_joint.scale leg_C_hip_0_joint.inverseScale;
 class Joint(Node):
 	def __init__(self,
 	             name='rig',
@@ -991,9 +1108,6 @@ class Joint(Node):
 			self.type = type
 			self.otherType = otherType
 			self.canUpdateName = True
-		else:
-			self.disableSegmentScale()
-
 
 	#
 	# Joint Orient Properties
@@ -1123,9 +1237,38 @@ class Joint(Node):
 		return
 
 	@property
+	def sideLabel(self):
+		if self.isValid():
+			return cmds.getAttr(attributeName(self.longName, MayaAttr.side), asString=True).lower()
+		else:
+			return None
+
+	@sideLabel.setter
+	def sideLabel(self, sideValue):
+		if self.isValid():
+			if isinstance(sideValue, str):
+				if hasattr(JointLabelSide, sideValue):
+					value = getattr(JointLabelSide, sideValue)
+				else:
+					raise ValueError('Side "{}" not valid.'.format(sideValue))
+
+			elif isinstance(sideValue, (int, float)):
+				value = sideValue
+
+			elif sideValue is None:
+				value = JointLabelType.none
+			else:
+				raise ValueError('Side "{}" not valid type: {}'.format(sideValue, type(sideValue)))
+
+			setAttribute(self.longName, attribute=MayaAttr.side, value=value, force=True)
+		else:
+			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
+		return
+
+	@property
 	def type(self):
 		if self.isValid():
-			return cmds.getAttr(attributeName(self.longName, MayaAttr.type), asString=True)
+			return cmds.getAttr(attributeName(self.longName, MayaAttr.type), asString=True).lower()
 		else:
 			return None
 

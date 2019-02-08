@@ -4,6 +4,7 @@
 *.ui
 *.qrc
 *.ai
+*.psd
 misc
 legacy_eixml.py
 eixml.py
