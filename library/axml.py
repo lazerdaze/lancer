@@ -126,16 +126,20 @@ class Axml(object):
 			if not self.filepath:
 				raise RuntimeError('No filepath specified.')
 			else:
-				filepath = self.filepath
+				pass
+		else:
+			self.filepath = filepath
 
 		if not root:
-			if not self._root:
+			if self._root is None:
 				raise RuntimeError('No Root Element provided specified.')
 			else:
-				root = self._root
+				pass
+		else:
+			self._root = root
 
-		with open(filepath, 'w') as writeFile:
-			writeFile.write(self.prettyXML(root))
+		with open(self.filepath, 'w') as writeFile:
+			writeFile.write(self.prettyXML(self._root))
 		writeFile.close()
 		return
 
@@ -144,21 +148,23 @@ class Axml(object):
 			if not self.filepath:
 				raise RuntimeError('No filepath specified.')
 			else:
-				filepath = self.filepath
+				pass
+		else:
+			self.filepath = filepath
 
-		with open(filepath, 'r') as readFile:
-			self._root = etree.parse(filepath).getroot()
+		with open(self.filepath, 'r') as readFile:
+			self._root = etree.parse(self.filepath).getroot()
 		readFile.close()
 		return self._root
 
 	def convertStrToList(self, string):
 		value = str(string).replace('[', '').replace(']', '').replace("u'", '').replace("'", '').replace('"', '').split(
-			',')
+				',')
 		return [x.strip() for x in value]
 
 	def convertStrToTuple(self, string):
 		value = str(string).replace('(', '').replace(')', '').replace("u'", '').replace("'", '').replace('"', '').split(
-			',')
+				',')
 		return [x.strip() for x in value]
 
 	def convertStrToDict(self, string):
@@ -188,37 +194,54 @@ class Axml(object):
 		return
 
 	def getAttr(self, element, attribute):
-		characters = 'abcdefghijklmnopqrstuvwxyz'
-		numbers = '1234567890'
-
-		value = element.getAttribute(attribute)
-
-		if value.lower()[0] in characters:
-			if ',' in value:
-				return self.convertStrToList(value)
-			else:
-				return str(value)
-
-		elif '[' in value:
-			return self.convertStrToList(value)
-
-		elif '(' in value:
-			return self.convertStrToTuple(value)
-
-		elif '{' in value:
-			return self.convertStrToDict(value)
-
-		elif value.lower()[0] in numbers:
-			if '.' in value:
-				return float(value)
-			else:
-				return int(value)
-
+		if attribute not in element.attrib:
+			return None
 		else:
-			return value
+			value = element.attrib[attribute]
+
+			try:
+				result = float(value)
+				return result
+			except ValueError:
+				pass
+
+			try:
+				result = int(value)
+				return result
+			except ValueError:
+				pass
+
+			if '[' in value and ']' in value or ',' in value:
+				try:
+					result = self.convertStrToList(value)
+					return result
+				except RuntimeError:
+					pass
+
+			if '(' in value and ')' in value:
+				try:
+					result = self.convertStrToTuple(value)
+					return result
+				except RuntimeError:
+					pass
+
+			if '{' in value and '}' in value:
+				try:
+					result = self.convertStrToList(value)
+					return result
+				except RuntimeError:
+					pass
+
+			return str(value)
 
 	def prettyXML(self, root):
 		return minidom.parseString(etree.tostring(root)).toprettyxml()
 
 	def findAll(self, element, tag):
 		return element.findall(tag)
+
+	def getAllDescendents(self, element):
+		return list(element.iter())
+
+	def getChildren(self, element):
+		return element.getchildren()

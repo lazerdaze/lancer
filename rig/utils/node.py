@@ -4,12 +4,31 @@ from general import *
 from naming import *
 from customError import *
 
+# Python Modules
+import re
+
 # Maya Modules
 from maya import cmds
 
 
 def nodeExists(node):
 	return cmds.objExists(node)
+
+
+def replacementNodeName(name):
+	query = re.search(r'\d+$', name)
+
+	if query is not None:
+		replace = query.group()
+		index = int(replace)
+
+		while nodeExists(name.replace(replace, str(index))):
+			index += 1
+
+		return name.replace(replace, str(index))
+	else:
+		return '{}1'.format(name)
+
 
 
 def nodeParent(node):
@@ -85,7 +104,7 @@ def createNull(*args, **kwargs):
 
 class Node(object):
 	def __init__(self,
-	             name,
+	             name='rigNode',
 	             prefix=None,
 	             parent=None,
 	             children=None,
@@ -93,7 +112,7 @@ class Node(object):
 	             side=None,
 	             index=None,
 	             sector=None,
-	             kind=Component.transform,
+	             kind=None,
 	             ):
 
 		'''
@@ -133,7 +152,6 @@ class Node(object):
 		self.shape = None
 
 		if nodeExists(name):
-			self._kind = None
 			self.exists = True
 			self.longName = name
 
@@ -146,14 +164,8 @@ class Node(object):
 	def create(self, *args, **kwargs):
 		if not self.isValid():
 			self.transform = cmds.group(name=self.longName, empty=True)
-			if self._side:
-				self.side = self._side
-			if self._index:
-				self.index = self._index
-			if self._sector:
-				self.sector = self._sector
-			if self._kind:
-				self.kind = self._kind
+			self.exists = True
+			self.canUpdateName = True
 		else:
 			raise NodeExistsError('Node "{}" already exists.'.format(self.longName))
 
@@ -186,7 +198,7 @@ class Node(object):
 			return self._name
 		else:
 			return longName(self._prefix,
-			                self._side[0].upper() if self.side else None,
+			                self._side[0].upper() if self._side else None,
 			                self._name,
 			                self._sector,
 			                self._index,
@@ -466,7 +478,10 @@ class Node(object):
 
 	@property
 	def side(self):
-		return self._side
+		if attributeExist(self.longName, MayaAttr.side):
+			return cmds.getAttr(attributeName(self.longName, MayaAttr.side), asString=True).lower()
+		else:
+			return self._side
 
 	@side.setter
 	def side(self, side):
@@ -575,7 +590,10 @@ class Node(object):
 
 	@property
 	def kind(self):
-		return self._kind
+		if attributeExist(self.longName, UserAttr.kind):
+			return getAttribute(self.longName, UserAttr.kind)
+		else:
+			return self._kind
 
 	@kind.setter
 	def kind(self, kind):
@@ -606,6 +624,21 @@ class Node(object):
 			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
 
+	####################################################################################################################
+	# Hiearchy
+	####################################################################################################################
+	@property
+	def parent(self):
+		if self.isValid():
+			return nodeParent(self.longName)
+		else:
+			return self._parent
+
+	@parent.setter
+	def parent(self, parent):
+		self._parent = parent
+		cmds.parent(self.longName, self._parent)
+		return
 
 	####################################################################################################################
 	# Children Methods

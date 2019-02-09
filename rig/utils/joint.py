@@ -1056,7 +1056,7 @@ def aimAtSelected(*args, **kwargs):
 # TODO: disconnectAttr root_C_0_joint.scale leg_C_hip_0_joint.inverseScale;
 class Joint(Node):
 	def __init__(self,
-	             name='rig',
+	             name='rigJoint',
 	             prefix=None,
 	             side=None,
 	             sector=None,
@@ -1065,6 +1065,7 @@ class Joint(Node):
 	             drawStyle=JointDrawStyle.bone,
 	             type=None,
 	             otherType=None,
+	             kind=None,
 	             ):
 		'''
 		Base Joint class to be used in all parts classes.
@@ -1086,28 +1087,64 @@ class Joint(Node):
 		              name=name,
 		              sector=sector,
 		              index=index,
-		              kind=Component.joint,
+		              kind=kind,
 		              )
 
 		# Custom Attributes
 		self.forwardAxis = None
 		self.upAxis = None
 
-		# Create Node
-		if not nodeExists(name) and not self.isValid():
+		if not nodeExists(self.longName):
+			self.create(radius, drawStyle, type, otherType, kind)
+
+	def create(self,
+	           radius=1.0,
+	           drawStyle=JointDrawStyle.bone,
+	           type=None,
+	           otherType=None,
+	           kind=None,
+	           *args, **kwargs):
+
+		if not self.isValid():
 			cmds.select(d=True)
 			self.transform = cmds.joint(name=self.longName)
-
-			# Set Segment Scale Compensate
-			self.disableSegmentScale()
-
-			# Set Attributes
-			self.side = side
-			self.radius = radius
-			self.drawStyle = drawStyle
-			self.type = type
-			self.otherType = otherType
+			self.exists = True
 			self.canUpdateName = True
+			self.radius = radius
+			self.drawStyle=drawStyle
+			self.type=type
+			self.otherType=otherType
+			self.kind=kind
+			self.disableSegmentScale()
+		else:
+			raise NodeExistsError('Joint "{}" already exists.'.format(self.longName))
+
+	@property
+	def definition(self):
+		if self.otherType in ['bind', 'leaf']:
+			if self.side == 'none':
+				return camelCase(self.otherType)
+			else:
+				return camelCase(self.side, self.otherType)
+		else:
+			if self.side == 'center':
+				if self.type == 'other':
+					return camelCase(self.otherType)
+				else:
+					return camelCase(self.type)
+			elif self.side in ['left', 'right']:
+				if self.type == 'other':
+					return camelCase(self.side, self.otherType)
+				else:
+					return camelCase(self.side, self.type)
+			else:
+				if self.type == 'other':
+					if self.otherType:
+						return camelCase(self.otherType)
+				else:
+					return camelCase(self.type)
+
+		return 'joint'
 
 	@property
 	def children(self):
@@ -1242,14 +1279,14 @@ class Joint(Node):
 		return
 
 	@property
-	def sideLabel(self):
+	def side(self):
 		if self.isValid():
 			return cmds.getAttr(attributeName(self.longName, MayaAttr.side), asString=True).lower()
 		else:
 			return None
 
-	@sideLabel.setter
-	def sideLabel(self, sideValue):
+	@side.setter
+	def side(self, sideValue):
 		if self.isValid():
 			if isinstance(sideValue, str):
 				if hasattr(JointLabelSide, sideValue):
@@ -1326,7 +1363,8 @@ class Joint(Node):
 	# Methods
 	#
 	def disableSegmentScale(self):
-		setAttribute(self.longName, attribute=MayaAttr.segmentScaleCompensate, value=0, force=True)
+		if self.isValid():
+			removeJointSegmentScale(self.longName)
 		return
 
 	def zeroJointOrient(self):

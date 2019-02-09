@@ -20,18 +20,35 @@ import maya.api.OpenMaya as om
 def getSelected(*args, **kwargs):
 	selected = cmds.ls(sl=True)
 	if not selected:
-		raise RuntimeError('Nothing selected.')
+		raise ValueError('Nothing selected.')
 	return selected
+
+
+def getSingleSelected(*args, **kwargs):
+	selected = getSelected()
+
+	if len(selected) != 1:
+		raise ValueError('Must provide only one selection.')
+	else:
+		return selected[0]
 
 
 def onSelected(func):
 	if not callable(func):
-		raise RuntimeError('Must provide function')
+		raise TypeError('Must provide function')
 
 	def wrapper(*args, **kwargs):
 		for item in getSelected():
 			func(item, **kwargs)
+	return wrapper
 
+
+def onSingleSelected(func):
+	if not callable(func):
+		raise TypeError('Must provide function')
+
+	def wrapper(*args, **kwargs):
+		func(getSingleSelected(), **kwargs)
 	return wrapper
 
 

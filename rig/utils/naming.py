@@ -318,6 +318,9 @@ def camelCase(*args, **kwargs):
 	var = ''
 	i = 0
 	for arg in args:
+		if ' ' in arg:
+			arg = [x.strip() for x in arg.split(' ')]
+
 		if isinstance(arg, (list, dict, tuple)):
 			start = True if i == 0 else False
 			for item in arg:
@@ -480,3 +483,5 @@ class NameConvention(object):
 		else:
 			raise TypeError('Must provide str.')
 		return
+
+

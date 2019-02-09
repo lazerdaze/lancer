@@ -5,8 +5,11 @@
 #
 #
 
-# Lancer
+# Lancer Modules
 from utils import *
+
+# Python Modules
+from functools import partial
 
 # Maya Modules
 from maya import cmds
@@ -40,6 +43,13 @@ from maya import cmds
 '''
 
 
+# TODO: Select Joints By Side
+# TODO: Mirror Selection
+# TODO: Skeleton Validator UI: If there's critical warnings then skeleton is invalid (missing body part).
+# TODO: Retargeter (Custom HIK?)
+# FIXME: Mirror Skeleton Pose
+# FIXME: Select non-bind joints
+
 def jointMenuItems():
 	cmds.menuItem(d=True, l='Create')
 	cmds.menuItem(l='Create Joint', c=createJoint)
@@ -57,27 +67,24 @@ def jointMenuItems():
 	return
 
 
-# TODO: Select Joints By Side
-# TODO: Mirror Selection
 def skeletonMenuItems():
 	cmds.menuItem(l='Select Skeleton Hierarchy', c=selectJointHierarchy)
-	cmds.menuItem(l='Select Non-Bind Joints', c=lambda *x: getSkeletonBindJointsOnSelected('joint'))
-	cmds.menuItem(l='Select Bind Joints', c=lambda *x: getSkeletonBindJointsOnSelected('bind'))
-	cmds.menuItem(l='Select Leaf Joints', c=lambda *x: getSkeletonBindJointsOnSelected('leaf'))
+	#cmds.menuItem(l='Select Non-Bind Joints', c=partial(getSkeletonBindJointsOnSelected, 'joint'))
+	cmds.menuItem(l='Select Bind Joints', c=partial(getSkeletonBindJointsOnSelected, 'bind'))
+	cmds.menuItem(l='Select Leaf Joints', c=partial(getSkeletonBindJointsOnSelected, 'leaf'))
+
 	cmds.menuItem(d=True, l='Relationships')
-	cmds.menuItem(l='Create Skeleton Network From Labels', c=createSkeletonNetwork)
+	cmds.menuItem(l='Biped Definitions From Labels', c=skeletonSetupCallback)
+
 	cmds.menuItem(d=True, l='Bind Pose')
 	cmds.menuItem(l='Restore Bind Pose', c=restoreBindPosePrompt)
 	cmds.menuItem(l='Create Bind Pose', c=createBindPosePrompt)
+
 	cmds.menuItem(l='Template', d=True)
 	cmds.menuItem(l='Validate Skeleton', c=validateSkeletonOnSelected)
-	cmds.menuItem(l='Import Template', c=importTemplate)
-	cmds.menuItem(l='Export Template', c=exportTemplate)
-	# cmds.menuItem(d=True)
-	# cmds.menuItem(l='Import Biped (Simple)', c=importTemplate)
-	# cmds.menuItem(l='Import Biped (Advanced)', c=importTemplate, enable=False)
-	# cmds.menuItem(l='Import Quadruped (Simple)', c=importTemplate)
-	# cmds.menuItem(l='Import Quadruped (Advanced)', c=importTemplate, enable=False)
+	cmds.menuItem(l='Import Template', c=importSkeletonCallback)
+	cmds.menuItem(l='Export Skeleton', c=exportSkeletonCallback)
+
 	cmds.menuItem(d=True, l='Template Only')
 	cmds.menuItem(l='Mirror Skeleton Positions', c=mirrorSelectedSkeleton)
 	cmds.menuItem(l='Force T-Pose', c=forceTPoseOnSelected)

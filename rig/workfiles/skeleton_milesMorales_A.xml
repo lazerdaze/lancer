@@ -1,0 +1,311 @@
+<?xml version="1.0" ?>
+<skeleton kind="biped">
+	<root name="root_C_joint" side="center" type="root">
+		<cog jointOrientX="90.0" jointOrientZ="90.0" name="cog_C_joint" otherType="cog" side="center" translateY="102.171" translateZ="-0.066" type="other">
+			<spine name="spine_C_0_joint" side="center" translateX="6.741" type="spine">
+				<centerBind name="spine_C_0_bind_0_joint" otherType="bind" side="center" type="other">
+					<centerLeaf name="spine_C_0_bind_0_leaf_0_joint" otherType="leaf" side="center" translateX="-0.699" translateY="7.037" translateZ="-0.013" type="other"/>
+					<leftLeaf name="spine_C_0_bind_0_leaf_1_joint" otherType="leaf" side="left" translateY="0.016" translateZ="8.529" type="other"/>
+					<centerLeaf name="spine_C_0_bind_0_leaf_2_joint" otherType="leaf" side="center" translateX="0.741" translateY="-5.539" translateZ="0.012" type="other"/>
+					<rightLeaf name="spine_C_0_bind_0_leaf_3_joint" otherType="leaf" side="right" translateY="0.016" translateZ="-8.529" type="other"/>
+				</centerBind>
+				<spine jointOrientZ="-5.043" name="spine_C_1_joint" side="center" translateX="10.76" type="spine">
+					<centerBind name="spine_C_1_bind_0_joint" otherType="bind" side="center" translateX="0.094" type="other">
+						<centerLeaf name="spine_C_1_bind_0_leaf_0_joint" otherType="leaf" side="center" translateY="7.544" translateZ="-0.009" type="other"/>
+						<leftLeaf name="spine_C_1_bind_0_leaf_1_joint" otherType="leaf" side="left" translateX="-0.048" translateZ="8.653" type="other"/>
+						<centerLeaf name="spine_C_1_bind_0_leaf_2_joint" otherType="leaf" side="center" translateY="-5.495" translateZ="0.009" type="other"/>
+						<rightLeaf name="spine_C_1_bind_0_leaf_3_joint" otherType="leaf" side="right" translateX="-0.045" translateZ="-7.778" type="other"/>
+					</centerBind>
+					<spine jointOrientZ="3.643" name="spine_C_2_joint" side="center" translateX="10.937" type="spine">
+						<centerBind name="spine_C_2_bind_0_joint" otherType="bind" side="center" translateX="-0.133" translateY="0.029" type="other">
+							<centerLeaf name="spine_C_2_bind_0_leaf_0_joint" otherType="leaf" side="center" translateY="9.739" type="other"/>
+							<leftLeaf name="spine_C_2_bind_0_leaf_1_joint" otherType="leaf" side="left" translateX="-1.645" translateY="-0.041" translateZ="10.849" type="other"/>
+							<centerLeaf name="spine_C_2_bind_0_leaf_2_joint" otherType="leaf" side="center" translateX="0.082" translateY="-8.759" type="other"/>
+							<rightLeaf jointOrientZ="180.0" name="spine_C_2_bind_0_leaf_3_joint" otherType="leaf" side="right" translateX="-1.645" translateY="-0.041" translateZ="-10.849" type="other"/>
+						</centerBind>
+						<neck jointOrientZ="27.815" name="neck_C_0_joint" side="center" translateX="16.952" type="neck">
+							<centerBind name="neck_C_0_bind_0_joint" otherType="bind" side="center" translateX="0.094" type="other">
+								<centerLeaf name="neck_C_0_bind_0_leaf_0_joint" otherType="leaf" side="center" translateX="1.108" translateY="6.066" type="other"/>
+								<centerLeaf name="neck_C_0_bind_0_leaf_1_joint" otherType="leaf" side="center" translateX="-2.393" translateY="-5.031" type="other"/>
+							</centerBind>
+							<head name="head_C_0_joint" side="center" translateX="11.433" type="head">
+								<centerBind name="head_C_0_bind_0_joint" otherType="bind" side="center" translateX="0.047" type="other"/>
+							</head>
+						</neck>
+						<leftCollar jointOrientX="90.0" jointOrientY="-88.756" jointOrientZ="-178.557" name="collar_L_joint" side="left" translateX="11.903" translateY="-0.038" translateZ="1.856" type="collar">
+							<leftBind name="collar_L_bind_0_joint" otherType="bind" side="left" translateX="0.045" type="other">
+								<leftLeaf jointOrientX="1.347" jointOrientY="16.876" jointOrientZ="14.787" name="collar_L_bind_0_leaf_0_joint" otherType="leaf" side="left" translateX="-0.489" translateY="1.504" translateZ="6.229" type="other"/>
+								<leftLeaf name="collar_L_bind_0_leaf_1_joint" otherType="leaf" side="left" translateX="7.963" translateY="-5.799" translateZ="8.224" type="other"/>
+								<leftLeaf jointOrientX="1.347" jointOrientY="16.876" jointOrientZ="14.787" name="collar_L_bind_0_leaf_2_joint" otherType="leaf" side="left" translateX="8.681" translateY="3.924" translateZ="3.352" type="other"/>
+								<leftLeaf name="collar_L_bind_0_leaf_3_joint" otherType="leaf" side="left" translateX="5.994" translateY="2.604" translateZ="-6.551" type="other"/>
+								<leftLeaf name="collar_L_bind_0_leaf_4_joint" otherType="leaf" side="left" translateX="5.321" translateY="-4.89" translateZ="-8.525" type="other"/>
+							</leftBind>
+							<leftShoulder jointOrientX="-0.185" jointOrientY="2.777" jointOrientZ="-43.55" name="shoulder_L_joint" side="left" translateX="12.131" type="shoulder">
+								<leftBind name="shoulder_L_bind_0_joint" otherType="bind" side="left" translateX="0.065" type="other">
+									<leftLeaf name="shoulder_L_bind_0_leaf_0_joint" otherType="leaf" side="left" translateY="0.558" translateZ="5.282" type="other"/>
+									<leftLeaf name="shoulder_L_bind_0_leaf_1_joint" otherType="leaf" side="left" translateY="5.417" type="other"/>
+									<leftLeaf name="shoulder_L_bind_0_leaf_2_joint" otherType="leaf" side="left" translateX="0.072" translateY="1.156" translateZ="-5.359" type="other"/>
+								</leftBind>
+								<leftBind name="shoulder_L_bind_1_joint" otherType="bind" side="left" translateX="5.663" type="other"/>
+								<leftBind name="shoulder_L_bind_2_joint" otherType="bind" side="left" translateX="11.262" type="other"/>
+								<leftBind name="shoulder_L_bind_3_joint" otherType="bind" side="left" translateX="16.86" type="other">
+									<leftLeaf name="shoulder_L_bind_3_leaf_0_joint" otherType="leaf" side="left" translateZ="4.117" type="other"/>
+								</leftBind>
+								<leftElbow jointOrientY="-5.063" name="elbow_L_joint" side="left" translateX="22.319" type="elbow">
+									<leftBind jointOrientX="-0.892" name="elbow_L_bind_0_joint" otherType="bind" side="left" translateX="0.14" type="other">
+										<leftLeaf name="elbow_L_bind_0_leaf_0_joint" otherType="leaf" side="left" translateX="0.656" translateY="-0.053" translateZ="2.631" type="other"/>
+										<leftLeaf name="elbow_L_bind_0_leaf_1_joint" otherType="leaf" side="left" translateX="-0.14" translateY="-0.053" translateZ="-2.517" type="other"/>
+									</leftBind>
+									<leftBind name="elbow_L_bind_1_joint" otherType="bind" side="left" translateX="5.449" type="other">
+										<leftLeaf name="elbow_L_bind_1_leaf_0_joint" otherType="leaf" side="left" translateY="0.042" translateZ="3.431" type="other"/>
+									</leftBind>
+									<leftBind name="elbow_L_bind_2_joint" otherType="bind" side="left" translateX="10.758" type="other"/>
+									<leftBind name="elbow_L_bind_3_joint" otherType="bind" side="left" translateX="16.067" type="other"/>
+									<leftHand name="hand_L_joint" side="left" translateX="21.376" type="hand">
+										<leftBind name="hand_L_bind_0_joint" otherType="bind" side="left" type="other">
+											<leftLeaf name="hand_L_bind_0_leaf_0_joint" otherType="leaf" side="left" translateY="-1.358" translateZ="0.041" type="other"/>
+											<leftLeaf name="hand_L_bind_0_leaf_1_joint" otherType="leaf" side="left" translateY="1.413" translateZ="-0.03" type="other"/>
+										</leftBind>
+										<leftThumb jointOrientX="112.209" jointOrientY="-75.341" jointOrientZ="-59.561" name="thumb_L_0_joint" side="left" translateX="3.315" translateY="-1.509" translateZ="2.043" type="thumb">
+											<leftBind name="thumb_L_0_bind_0_joint" otherType="bind" side="left" translateX="0.038" type="other"/>
+											<leftThumb jointOrientZ="-51.223" name="thumb_L_1_joint" side="left" translateX="2.295" type="thumb">
+												<leftBind name="thumb_L_1_bind_0_joint" otherType="bind" side="left" translateX="0.04" type="other"/>
+												<leftThumb name="thumb_L_2_joint" side="left" translateX="4.183" type="thumb">
+													<leftBind name="thumb_L_2_bind_0_joint" otherType="bind" side="left" translateX="0.057" type="other"/>
+												</leftThumb>
+											</leftThumb>
+										</leftThumb>
+										<leftIndexFinger jointOrientX="2.717" jointOrientY="-15.709" jointOrientZ="-0.176" name="finger_L_0_joint" side="left" translateX="2.362" translateY="0.021" translateZ="1.198" type="index finger">
+											<leftIndexFinger jointOrientZ="-4.379" name="finger_L_0_knuckle_0_joint" side="left" translateX="7.817" type="index finger">
+												<leftBind name="finger_L_0_knuckle_0_bind_0_joint" otherType="bind" side="left" type="other"/>
+												<leftIndexFinger name="finger_L_0_knuckle_1_joint" side="left" translateX="3.998" type="index finger">
+													<leftBind name="finger_L_0_knuckle_1_bind_0_joint" otherType="bind" side="left" translateX="0.025" type="other"/>
+													<leftIndexFinger name="finger_L_0_knuckle_2_joint" side="left" translateX="3.387" type="index finger">
+														<leftBind name="finger_L_0_knuckle_2_bind_0_joint" otherType="bind" side="left" translateX="0.07" type="other"/>
+													</leftIndexFinger>
+												</leftIndexFinger>
+											</leftIndexFinger>
+											<leftBind name="finger_L_0_bind_0_joint" otherType="bind" side="left" type="other"/>
+										</leftIndexFinger>
+										<leftMiddleFinger jointOrientY="-2.044" name="finger_L_1_joint" side="left" translateX="2.503" translateY="0.282" translateZ="0.62" type="middle finger">
+											<leftMiddleFinger jointOrientZ="-5.243" name="finger_L_1_knuckle_0_joint" side="left" translateX="7.436" type="middle finger">
+												<leftBind name="finger_L_1_knuckle_0_bind_joint" otherType="bind" side="left" type="other"/>
+												<leftMiddleFinger name="finger_L_1_knuckle_1_joint" side="left" translateX="4.448" type="middle finger">
+													<leftBind name="finger_L_1_knuckle_1_bind_0_joint" otherType="bind" side="left" type="other"/>
+													<leftMiddleFinger name="finger_L_1_knuckle_2_joint" side="left" translateX="3.651" translateZ="-0.001" type="middle finger">
+														<leftBind name="finger_L_1_knuckle_2_bind_0_joint" otherType="bind" side="left" type="other"/>
+													</leftMiddleFinger>
+												</leftMiddleFinger>
+											</leftMiddleFinger>
+											<leftBind name="finger_L_1_bind_0_joint" otherType="bind" side="left" type="other"/>
+										</leftMiddleFinger>
+										<leftRingFinger jointOrientY="10.399" name="finger_L_2_joint" side="left" translateX="2.389" translateY="0.06" translateZ="-0.172" type="ring finger">
+											<leftRingFinger jointOrientZ="-2.865" name="finger_L_2_knuckle_0_joint" side="left" translateX="7.354" type="ring finger">
+												<leftRingFinger jointOrientZ="-1.362" name="finger_L_2_knuckle_1_joint" side="left" translateX="4.579" type="ring finger">
+													<leftRingFinger name="finger_L_2_knuckle_2_joint" side="left" translateX="3.164" type="ring finger">
+														<leftBind name="finger_L_2_knuckle_2_bind_0_joint" otherType="bind" side="left" type="other"/>
+													</leftRingFinger>
+													<leftBind name="finger_L_2_knuckle_1_bind_0_joint" otherType="bind" side="left" type="other"/>
+												</leftRingFinger>
+												<leftBind jointOrientZ="-1.362" name="finger_L_2_knuckle_0_bind_0_joint" otherType="bind" side="left" type="other"/>
+											</leftRingFinger>
+											<leftBind name="finger_L_2_bind_0_joint" otherType="bind" side="left" type="other"/>
+										</leftRingFinger>
+										<leftPinkyFinger jointOrientX="-3.984" jointOrientY="22.384" jointOrientZ="-0.08" name="finger_L_3_joint" side="left" translateX="2.36" translateY="-0.022" translateZ="-0.963" type="pinky finger">
+											<leftPinkyFinger jointOrientZ="-1.496" name="finger_L_3_knuckle_0_joint" side="left" translateX="6.806" type="pinky finger">
+												<leftPinkyFinger jointOrientZ="-3.471" name="finger_L_3_knuckle_1_joint" side="left" translateX="3.823" type="pinky finger">
+													<leftPinkyFinger name="finger_L_3_knuckle_2_joint" side="left" translateX="2.284" type="pinky finger">
+														<leftBind name="finger_L_3_knuckle_2_bind_0_joint" otherType="bind" side="left" type="other"/>
+													</leftPinkyFinger>
+													<leftBind name="finger_L_3_knuckle_1_bind_0_joint" otherType="bind" side="left" type="other"/>
+												</leftPinkyFinger>
+												<leftBind jointOrientZ="-3.471" name="finger_L_3_knuckle_0_bind_0_joint" otherType="bind" side="left" type="other"/>
+											</leftPinkyFinger>
+											<leftBind name="finger_L_3_bind_0_joint" otherType="bind" side="left" type="other"/>
+										</leftPinkyFinger>
+									</leftHand>
+								</leftElbow>
+							</leftShoulder>
+						</leftCollar>
+						<rightCollar jointOrientX="90.0" jointOrientY="-88.757" jointOrientZ="1.443" name="collar_R_joint" side="right" translateX="11.903" translateY="-0.038" translateZ="-1.856" type="collar">
+							<rightBind name="collar_R_bind_0_joint" otherType="bind" side="right" translateX="-0.045" type="other">
+								<rightLeaf jointOrientX="1.347" jointOrientY="16.876" jointOrientZ="14.787" name="collar_R_bind_0_leaf_0_joint" otherType="leaf" side="right" translateX="0.489" translateY="-1.504" translateZ="-6.229" type="other"/>
+								<rightLeaf name="collar_R_bind_0_leaf_1_joint" otherType="leaf" side="right" translateX="-7.963" translateY="5.799" translateZ="-8.224" type="other"/>
+								<rightLeaf jointOrientX="1.347" jointOrientY="16.876" jointOrientZ="14.787" name="collar_R_bind_0_leaf_2_joint" otherType="leaf" side="right" translateX="-8.681" translateY="-3.924" translateZ="-3.352" type="other"/>
+								<rightLeaf name="collar_R_bind_0_leaf_3_joint" otherType="leaf" side="right" translateX="-5.994" translateY="-2.604" translateZ="6.551" type="other"/>
+								<rightLeaf name="collar_R_bind_0_leaf_4_joint" otherType="leaf" side="right" translateX="-5.321" translateY="4.89" translateZ="8.525" type="other"/>
+							</rightBind>
+							<rightShoulder jointOrientX="-0.185" jointOrientY="2.777" jointOrientZ="-43.55" name="shoulder_R_joint" side="right" translateX="-12.131" translateY="0.001" type="shoulder">
+								<rightBind name="shoulder_R_bind_0_joint" otherType="bind" side="right" translateX="-0.064" type="other">
+									<rightLeaf name="shoulder_R_bind_0_leaf_0_joint" otherType="leaf" side="right" translateY="-0.557" translateZ="-5.282" type="other"/>
+									<rightLeaf name="shoulder_R_bind_0_leaf_1_joint" otherType="leaf" side="right" translateY="-5.416" type="other"/>
+									<rightLeaf name="shoulder_R_bind_0_leaf_2_joint" otherType="leaf" side="right" translateX="-0.072" translateY="-1.156" translateZ="5.359" type="other"/>
+								</rightBind>
+								<rightBind name="shoulder_R_bind_1_joint" otherType="bind" side="right" translateX="-5.663" type="other"/>
+								<rightBind name="shoulder_R_bind_2_joint" otherType="bind" side="right" translateX="-11.261" translateY="-0.001" type="other"/>
+								<rightBind name="shoulder_R_bind_3_joint" otherType="bind" side="right" translateX="-16.86" type="other">
+									<rightLeaf name="shoulder_R_bind_3_leaf_0_joint" otherType="leaf" side="right" translateZ="-4.117" type="other"/>
+								</rightBind>
+								<rightElbow jointOrientY="-5.063" name="elbow_R_joint" side="right" translateX="-22.319" translateY="-0.001" type="elbow">
+									<rightBind jointOrientX="-0.892" name="elbow_R_bind_0_joint" otherType="bind" side="right" translateX="-0.14" type="other">
+										<rightLeaf name="elbow_R_bind_0_leaf_0_joint" otherType="leaf" side="right" translateX="-0.656" translateY="0.053" translateZ="-2.631" type="other"/>
+										<rightLeaf name="elbow_R_bind_0_leaf_1_joint" otherType="leaf" side="right" translateX="0.14" translateY="0.052" translateZ="2.517" type="other"/>
+									</rightBind>
+									<rightBind name="elbow_R_bind_1_joint" otherType="bind" side="right" translateX="-5.449" type="other">
+										<rightLeaf name="elbow_R_bind_1_leaf_0_joint" otherType="leaf" side="right" translateY="-0.042" translateZ="-3.431" type="other"/>
+									</rightBind>
+									<rightBind name="elbow_R_bind_2_joint" otherType="bind" side="right" translateX="-10.758" type="other"/>
+									<rightBind name="elbow_R_bind_3_joint" otherType="bind" side="right" translateX="-16.067" type="other"/>
+									<rightHand name="hand_R_joint" side="right" translateX="-21.376" type="hand">
+										<rightBind name="hand_R_bind_0_joint" otherType="bind" side="right" type="other">
+											<rightLeaf name="hand_R_bind_0_leaf_0_joint" otherType="leaf" side="right" translateY="1.358" translateZ="-0.041" type="other"/>
+											<rightLeaf name="hand_R_bind_0_leaf_1_joint" otherType="leaf" side="right" translateY="-1.413" translateZ="0.03" type="other"/>
+										</rightBind>
+										<rightThumb jointOrientX="112.209" jointOrientY="-75.341" jointOrientZ="-59.561" name="thumb_R_0_joint" side="right" translateX="-3.315" translateY="1.509" translateZ="-2.043" type="thumb">
+											<rightBind name="thumb_R_0_bind_0_joint" otherType="bind" side="right" translateX="-0.038" type="other"/>
+											<rightThumb jointOrientZ="-51.223" name="thumb_R_1_joint" side="right" translateX="-2.295" translateY="-0.001" type="thumb">
+												<rightBind name="thumb_R_1_bind_0_joint" otherType="bind" side="right" translateX="-0.04" type="other"/>
+												<rightThumb name="thumb_R_2_joint" side="right" translateX="-4.184" type="thumb">
+													<rightBind name="thumb_R_2_bind_0_joint" otherType="bind" side="right" translateX="-0.057" type="other"/>
+												</rightThumb>
+											</rightThumb>
+										</rightThumb>
+										<rightIndexFinger jointOrientX="2.717" jointOrientY="-15.709" jointOrientZ="-0.176" name="finger_R_0_joint" side="right" translateX="-2.362" translateY="-0.021" translateZ="-1.198" type="index finger">
+											<rightIndexFinger jointOrientZ="-4.379" name="finger_R_0_knuckle_0_joint" side="right" translateX="-7.817" type="index finger">
+												<rightBind name="finger_R_0_knuckle_0_bind_0_joint" otherType="bind" side="right" type="other"/>
+												<rightIndexFinger name="finger_R_0_knuckle_1_joint" side="right" translateX="-3.998" type="index finger">
+													<rightBind name="finger_R_0_knuckle_1_bind_0_joint" otherType="bind" side="right" translateX="-0.025" type="other"/>
+													<rightIndexFinger name="finger_R_0_knuckle_2_joint" side="right" translateX="-3.387" type="index finger">
+														<rightBind name="finger_R_0_knuckle_2_bind_0_joint" otherType="bind" side="right" translateX="-0.07" type="other"/>
+													</rightIndexFinger>
+												</rightIndexFinger>
+											</rightIndexFinger>
+											<rightBind name="finger_R_0_bind_0_joint" otherType="bind" side="right" type="other"/>
+										</rightIndexFinger>
+										<rightMiddleFinger jointOrientY="-2.044" name="finger_R_1_joint" side="right" translateX="-2.503" translateY="-0.282" translateZ="-0.62" type="middle finger">
+											<rightMiddleFinger jointOrientZ="-5.243" name="finger_R_1_knuckle_0_joint" side="right" translateX="-7.437" type="middle finger">
+												<rightBind name="finger_R_1_knuckle_0_bind_joint" otherType="bind" side="right" type="other"/>
+												<rightMiddleFinger name="finger_R_1_knuckle_1_joint" side="right" translateX="-4.448" type="middle finger">
+													<rightBind name="finger_R_1_knuckle_1_bind_0_joint" otherType="bind" side="right" type="other"/>
+													<rightMiddleFinger name="finger_R_1_knuckle_2_joint" side="right" translateX="-3.651" translateZ="0.001" type="middle finger">
+														<rightBind name="finger_R_1_knuckle_2_bind_0_joint" otherType="bind" side="right" type="other"/>
+													</rightMiddleFinger>
+												</rightMiddleFinger>
+											</rightMiddleFinger>
+											<rightBind name="finger_R_1_bind_0_joint" otherType="bind" side="right" type="other"/>
+										</rightMiddleFinger>
+										<rightRingFinger jointOrientY="10.399" name="finger_R_2_joint" side="right" translateX="-2.389" translateY="-0.06" translateZ="0.172" type="ring finger">
+											<rightRingFinger jointOrientZ="-2.865" name="finger_R_2_knuckle_0_joint" side="right" translateX="-7.354" type="ring finger">
+												<rightRingFinger jointOrientZ="-1.362" name="finger_R_2_knuckle_1_joint" side="right" translateX="-4.578" type="ring finger">
+													<rightRingFinger name="finger_R_2_knuckle_2_joint" side="right" translateX="-3.164" type="ring finger">
+														<rightBind name="finger_R_2_knuckle_2_bind_0_joint" otherType="bind" side="right" type="other"/>
+													</rightRingFinger>
+													<rightBind name="finger_R_2_knuckle_1_bind_0_joint" otherType="bind" side="right" type="other"/>
+												</rightRingFinger>
+												<rightBind jointOrientZ="-1.362" name="finger_R_2_knuckle_0_bind_0_joint" otherType="bind" side="right" type="other"/>
+											</rightRingFinger>
+											<rightBind name="finger_R_2_bind_0_joint" otherType="bind" side="right" type="other"/>
+										</rightRingFinger>
+										<rightPinkyFinger jointOrientX="-3.984" jointOrientY="22.384" jointOrientZ="-0.08" name="finger_R_3_joint" side="right" translateX="-2.36" translateY="0.022" translateZ="0.963" type="pinky finger">
+											<rightPinkyFinger jointOrientZ="-1.496" name="finger_R_3_knuckle_0_joint" side="right" translateX="-6.806" translateY="0.001" type="pinky finger">
+												<rightPinkyFinger jointOrientZ="-3.471" name="finger_R_3_knuckle_1_joint" side="right" translateX="-3.823" type="pinky finger">
+													<rightPinkyFinger name="finger_R_3_knuckle_2_joint" side="right" translateX="-2.283" type="pinky finger">
+														<rightBind name="finger_R_3_knuckle_2_bind_0_joint" otherType="bind" side="right" type="other"/>
+													</rightPinkyFinger>
+													<rightBind name="finger_R_3_knuckle_1_bind_0_joint" otherType="bind" side="right" type="other"/>
+												</rightPinkyFinger>
+												<rightBind jointOrientZ="-3.471" name="finger_R_3_knuckle_0_bind_0_joint" otherType="bind" side="right" type="other"/>
+											</rightPinkyFinger>
+											<rightBind name="finger_R_3_bind_0_joint" otherType="bind" side="right" type="other"/>
+										</rightPinkyFinger>
+									</rightHand>
+								</rightElbow>
+							</rightShoulder>
+						</rightCollar>
+					</spine>
+				</spine>
+			</spine>
+			<hip name="hip_C_joint" side="center" translateX="6.271" type="hip">
+				<leftHip jointOrientX="89.932" jointOrientY="-2.413" jointOrientZ="-178.375" name="hip_L_joint" side="left" translateX="-6.52" translateY="0.192" translateZ="5.232" type="hip">
+					<leftKnee jointOrientY="3.136" name="knee_L_joint" side="left" translateX="44.417" type="knee">
+						<leftFoot jointOrientY="-68.019" name="foot_L_joint" side="left" translateX="46.55" type="foot">
+							<leftBind name="foot_L_bind_0_joint" otherType="bind" side="left" translateX="-0.13" translateZ="-0.049" type="other">
+								<leftLeaf name="foot_L_bind_0_leaf_0_joint" otherType="leaf" side="left" translateX="3.859" translateZ="2.02" type="other"/>
+								<leftLeaf name="foot_L_bind_0_leaf_1_joint" otherType="leaf" side="left" translateX="-2.263" translateZ="-1.154" type="other"/>
+							</leftBind>
+							<leftHeel name="heel_L_joint" otherType="heel" side="left" translateX="0.981" translateY="-0.768" translateZ="-10.659" type="other">
+								<leftBind name="heel_L_bind_0_joint" otherType="bind" side="left" translateX="0.083" type="other"/>
+							</leftHeel>
+							<leftToe name="toe_L_joint" side="left" translateX="19.643" type="toe">
+								<leftBind name="toe_L_bind_0_joint" otherType="bind" side="left" translateX="0.047" translateY="-0.004" translateZ="-0.093" type="other">
+									<leftLeaf name="toe_L_bind_0_leaf_1_joint" otherType="leaf" side="left" translateX="-1.681" translateY="4.597" translateZ="-2.597" type="other"/>
+									<leftLeaf name="toe_L_bind_0_leaf_0_joint" otherType="leaf" side="left" translateX="5.229" translateY="-0.013" translateZ="1.439" type="other"/>
+									<leftLeaf name="toe_L_bind_0_leaf_2_joint" otherType="leaf" side="left" translateX="-0.668" translateY="-4.823" translateZ="-1.254" type="other"/>
+								</leftBind>
+							</leftToe>
+						</leftFoot>
+						<leftBind name="knee_L_bind_0_joint" otherType="bind" side="left" translateX="0.099" type="other">
+							<leftLeaf name="knee_L_bind_0_leaf_0_joint" otherType="leaf" side="left" translateX="0.594" translateY="-0.019" translateZ="3.499" type="other"/>
+							<leftLeaf name="knee_L_bind_0_leaf_1_joint" otherType="leaf" side="left" translateX="-1.169" translateY="0.044" translateZ="-3.747" type="other"/>
+						</leftBind>
+						<leftBind name="knee_L_bind_1_joint" otherType="bind" side="left" translateX="11.711" type="other">
+							<leftLeaf name="knee_L_bind_1_leaf_0_joint" otherType="leaf" side="left" translateZ="-7.778" type="other"/>
+						</leftBind>
+						<leftBind name="knee_L_bind_2_joint" otherType="bind" side="left" translateX="23.323" type="other"/>
+						<leftBind name="knee_L_bind_3_joint" otherType="bind" side="left" translateX="34.936" type="other"/>
+					</leftKnee>
+					<leftBind name="hip_L_bind_0_joint" otherType="bind" side="left" translateX="0.094" type="other">
+						<leftLeaf name="hip_L_bind_0_leaf_0_joint" otherType="leaf" side="left" translateZ="5.002" type="other"/>
+						<leftLeaf name="hip_L_bind_0_leaf_1_joint" otherType="leaf" side="left" translateX="0.005" translateY="4.099" type="other"/>
+						<leftLeaf name="hip_L_bind_0_leaf_2_joint" otherType="leaf" side="left" translateZ="-8.007" type="other"/>
+					</leftBind>
+					<leftBind name="hip_L_bind_1_joint" otherType="bind" side="left" translateX="11.2" type="other"/>
+					<leftBind name="hip_L_bind_2_joint" otherType="bind" side="left" translateX="22.305" type="other"/>
+					<leftBind name="hip_L_bind_3_joint" otherType="bind" side="left" translateX="33.411" type="other">
+						<leftLeaf name="hip_L_bind_3_leaf_0_joint" otherType="leaf" side="left" translateX="-0.035" translateZ="-3.265" type="other"/>
+					</leftBind>
+				</leftHip>
+				<rightHip jointOrientX="89.932" jointOrientY="-2.413" jointOrientZ="1.625" name="hip_R_joint" side="right" translateX="-6.52" translateY="0.192" translateZ="-5.232" type="hip">
+					<rightKnee jointOrientY="3.136" name="knee_R_joint" side="right" translateX="-44.417" type="knee">
+						<rightFoot jointOrientY="-68.019" name="foot_R_joint" side="right" translateX="-46.55" type="foot">
+							<rightBind name="foot_R_bind_0_joint" otherType="bind" side="right" translateX="0.13" translateZ="0.049" type="other">
+								<rightLeaf name="foot_R_bind_0_leaf_0_joint" otherType="leaf" side="right" translateX="-3.859" translateZ="-2.02" type="other"/>
+								<rightLeaf name="foot_R_bind_0_leaf_1_joint" otherType="leaf" side="right" translateX="2.263" translateZ="1.154" type="other"/>
+							</rightBind>
+							<rightHeel name="heel_R_joint" otherType="heel" side="right" translateX="-0.981" translateY="0.768" translateZ="10.659" type="other">
+								<rightBind name="heel_R_bind_0_joint" otherType="bind" side="right" translateX="-0.083" type="other"/>
+							</rightHeel>
+							<rightToe name="toe_R_joint" side="right" translateX="-19.643" type="toe">
+								<rightBind name="toe_R_bind_0_joint" otherType="bind" side="right" translateX="-0.047" translateY="0.004" translateZ="0.093" type="other">
+									<rightLeaf name="toe_R_bind_0_leaf_1_joint" otherType="leaf" side="right" translateX="1.681" translateY="-4.597" translateZ="2.597" type="other"/>
+									<rightLeaf name="toe_R_bind_0_leaf_0_joint" otherType="leaf" side="right" translateX="-5.229" translateY="0.013" translateZ="-1.439" type="other"/>
+									<rightLeaf name="toe_R_bind_0_leaf_2_joint" otherType="leaf" side="right" translateX="0.668" translateY="4.823" translateZ="1.254" type="other"/>
+								</rightBind>
+							</rightToe>
+						</rightFoot>
+						<rightBind name="knee_R_bind_0_joint" otherType="bind" side="right" translateX="-0.099" type="other">
+							<rightLeaf name="knee_R_bind_0_leaf_0_joint" otherType="leaf" side="right" translateX="-0.594" translateY="0.019" translateZ="-3.499" type="other"/>
+							<rightLeaf name="knee_R_bind_0_leaf_1_joint" otherType="leaf" side="right" translateX="1.169" translateY="-0.044" translateZ="3.747" type="other"/>
+						</rightBind>
+						<rightBind name="knee_R_bind_1_joint" otherType="bind" side="right" translateX="-11.711" type="other">
+							<rightLeaf name="knee_R_bind_1_leaf_0_joint" otherType="leaf" side="right" translateZ="7.778" type="other"/>
+						</rightBind>
+						<rightBind name="knee_R_bind_2_joint" otherType="bind" side="right" translateX="-23.323" type="other"/>
+						<rightBind name="knee_R_bind_3_joint" otherType="bind" side="right" translateX="-34.937" type="other"/>
+					</rightKnee>
+					<rightBind name="hip_R_bind_0_joint" otherType="bind" side="right" translateX="-0.094" type="other">
+						<rightLeaf name="hip_R_bind_0_leaf_0_joint" otherType="leaf" side="right" translateX="0.001" translateZ="-5.002" type="other"/>
+						<rightLeaf name="hip_R_bind_0_leaf_1_joint" otherType="leaf" side="right" translateX="-0.005" translateY="-4.099" type="other"/>
+						<rightLeaf name="hip_R_bind_0_leaf_2_joint" otherType="leaf" side="right" translateZ="8.007" type="other"/>
+					</rightBind>
+					<rightBind name="hip_R_bind_1_joint" otherType="bind" side="right" translateX="-11.2" type="other"/>
+					<rightBind name="hip_R_bind_2_joint" otherType="bind" side="right" translateX="-22.305" type="other"/>
+					<rightBind name="hip_R_bind_3_joint" otherType="bind" side="right" translateX="-33.411" type="other">
+						<rightLeaf name="hip_R_bind_3_leaf_0_joint" otherType="leaf" side="right" translateX="0.035" translateZ="3.265" type="other"/>
+					</rightBind>
+				</rightHip>
+			</hip>
+			<centerBind name="cog_C_bind_0_joint" otherType="bind" side="center" translateX="-4.217" type="other"/>
+		</cog>
+	</root>
+</skeleton>

@@ -160,6 +160,13 @@ def attributeLocked(node, attribute):
 	return cmds.getAttr(attributeName(node, attribute), lock=True)
 
 
+def disconnectAttribute(attribute):
+	if cmds.connectionInfo(attribute, isDestination=True):
+		source = cmds.connectionInfo(attribute, sourceFromDestination=True)
+		cmds.disconnectAttr(source, attribute)
+	return
+
+
 def connectAttribute(*args, **kwargs):
 	# Get Keywords
 	offset = kwargs.get('offset', False)
@@ -193,6 +200,9 @@ def connectAttribute(*args, **kwargs):
 			sourceName = attributeName(source, sourceAttr)
 			destinationName = attributeName(destination, destinationAttr)
 
+			# Disconnect
+			disconnectAttribute(destinationName)
+
 			if attributeExist(source, sourceAttr) and attributeExist(destination, destinationAttr):
 
 				# Offset
@@ -207,7 +217,7 @@ def connectAttribute(*args, **kwargs):
 					cmds.setAttr(attributeName(offsetNode, 'input2'), destinationValue - sourceValue)
 
 					# Connect Offset
-					cmds.connectAttr(sourceName, attributeName(offsetNode, 'input1'))
+					cmds.connectAttr(sourceName, attributeName(offsetNode, 'input1'), force=True)
 					sourceName = attributeName(offsetNode, 'output')
 
 				cmds.connectAttr(sourceName, destinationName, force=True)
