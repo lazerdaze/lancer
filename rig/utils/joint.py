@@ -1053,7 +1053,6 @@ def aimAtSelected(*args, **kwargs):
 #
 ########################################################################################################################
 
-# TODO: disconnectAttr root_C_0_joint.scale leg_C_hip_0_joint.inverseScale;
 class Joint(Node):
 	def __init__(self,
 	             name='rigJoint',

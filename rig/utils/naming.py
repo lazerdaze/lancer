@@ -314,8 +314,9 @@ def attributeName(*args):
 
 def camelCase(*args, **kwargs):
 	start = kwargs.get('start', True)
+	capitalize = kwargs.get('capitalize', True)
 
-	var = ''
+	result = ''
 	i = 0
 	for arg in args:
 		if ' ' in arg:
@@ -324,16 +325,19 @@ def camelCase(*args, **kwargs):
 		if isinstance(arg, (list, dict, tuple)):
 			start = True if i == 0 else False
 			for item in arg:
-				var += camelCase(item, start=start)
+				result += camelCase(item, start=start)
 				start = False
 		else:
 			if start:
-				var += str(arg).strip().lower()
+				if capitalize:
+					result += str(arg).strip().capitalize()
+				else:
+					result += str(arg).strip().lower()
 				start = False
 			else:
-				var += str(arg).strip().title()
+				result += str(arg).strip().title()
 		i += 1
-	return var
+	return result
 
 
 def splitCamelCase(string):
@@ -483,5 +487,3 @@ class NameConvention(object):
 		else:
 			raise TypeError('Must provide str.')
 		return
-
-

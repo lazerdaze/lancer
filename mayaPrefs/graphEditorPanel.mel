@@ -2217,21 +2217,21 @@ global proc graphEditorCreateEditorsToolbarOptions( string $whichPanel )
 
     // Get DopeSheet and Trax from Graph Editor
     iconTextButton
-        -i1 "getDopeSheet.png"                  // TODO: FIX
+        -i1 "getDopeSheet.png"                  
         -width $iconSize -height $iconSize
         -command ( "replaceEditor dopeSheetPanel1 DopeSheetEditor" )
         -annotation (uiRes("m_graphEditorPanel.kGetDopeSheetIconAnnot"))
         getDopeSheetButton;
 
     iconTextButton
-        -i1 "getTrax.png"                       // TODO: FIX
+        -i1 "getTrax.png"                       
         -width $iconSize -height $iconSize
         -command ( "replaceEditor clipEditorPanel1 CharacterAnimationEditor" )
         -annotation (uiRes("m_graphEditorPanel.kGetTraxIconAnnot"))
         getTraxButton;
 
     iconTextButton
-        -i1 "getCTE.png"                        // TODO: FIX
+        -i1 "getCTE.png"                        
         -width $iconSize -height $iconSize
         -command ( "replaceEditor timeEditorPanel1 TimeEditorWindow" )
         -annotation (uiRes("m_graphEditorPanel.kGetCTEIconAnnot"))
