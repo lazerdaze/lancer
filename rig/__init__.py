@@ -7,6 +7,8 @@
 
 # Lancer Modules
 from utils import *
+import auto
+
 
 # Python Modules
 from functools import partial
@@ -68,13 +70,11 @@ def jointMenuItems():
 
 
 def skeletonMenuItems():
-	cmds.menuItem(l='Select Skeleton Hierarchy', c=selectJointHierarchy)
+	cmds.menuItem(d=True, l='Selection')
+	cmds.menuItem(l='Select Joint Hierarchy', c=selectJointHierarchy)
 	#cmds.menuItem(l='Select Non-Bind Joints', c=partial(getSkeletonBindJointsOnSelected, 'joint'))
 	cmds.menuItem(l='Select Bind Joints', c=partial(getSkeletonBindJointsOnSelected, 'bind'))
 	cmds.menuItem(l='Select Leaf Joints', c=partial(getSkeletonBindJointsOnSelected, 'leaf'))
-
-	cmds.menuItem(d=True, l='Relationships')
-	cmds.menuItem(l='Biped Definitions From Labels', c=skeletonSetupCallback)
 
 	cmds.menuItem(d=True, l='Bind Pose')
 	cmds.menuItem(l='Restore Bind Pose', c=restoreBindPosePrompt)
@@ -82,18 +82,29 @@ def skeletonMenuItems():
 
 	cmds.menuItem(l='Template', d=True)
 	cmds.menuItem(l='Validate Skeleton', c=validateSkeletonOnSelected)
+	cmds.menuItem(l='Create Template From Labels', c=skeletonSetupCallback)
 	cmds.menuItem(l='Import Template', c=importSkeletonCallback)
 	cmds.menuItem(l='Export Skeleton', c=exportSkeletonCallback)
 
-	cmds.menuItem(d=True, l='Template Only')
+	# TODO: Update. Does not work with current setup
+	cmds.menuItem(d=True, l='Template Tools')
 	cmds.menuItem(l='Mirror Skeleton Positions', c=mirrorSelectedSkeleton)
 	cmds.menuItem(l='Force T-Pose', c=forceTPoseOnSelected)
+
+	cmds.menuItem(d=True, l='Auto Rig')
+	autoMenuItems()
 	return
 
 
 def skinMenuItems():
 	cmds.menuItem(l='Import Skin Weights', c=importSkinWeights)
 	cmds.menuItem(l='Export Skin Weights', c=exportSkinWeights)
+	return
+
+
+def autoMenuItems():
+	cmds.menuItem(l='Rig From Labels')
+	cmds.menuItem(l='Rig From Definitions', c=auto.autoRigDefinitionsCallback)
 	return
 
 

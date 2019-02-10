@@ -67,13 +67,15 @@ def makeNurbsCurve(objects, n='curve_#', d=1, *args):
 
 
 def presetWireColor(selected, typ):
+	color = [0, 0, 1]
+
 	if typ == Component.fk:
 		color = [0, 0, 1]
 
 	elif typ == Component.ik:
 		color = [1, 0, 0]
 
-	elif typ == Component.center:
+	elif typ == Position.center:
 		color = [1, 1, 0]
 
 	elif typ == Component.attr:
@@ -82,7 +84,7 @@ def presetWireColor(selected, typ):
 	elif typ == Component.detail:
 		color = [0, .5, 0]
 
-	overrideColor(selected, color=color, )
+	overrideColor(selected, color=color)
 	return
 
 

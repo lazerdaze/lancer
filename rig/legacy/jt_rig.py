@@ -1768,7 +1768,6 @@ def addIndexValue(obj, var, *args):
 		cmds.addAttr(obj, ln='index', at='long', dv=var)
 	else:
 		cmds.setAttr('{}.index'.format(obj), var)
-
 	return
 
 

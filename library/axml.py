@@ -65,7 +65,7 @@ class Axml(object):
 		self._handlers = {}
 
 	def __str__(self):
-		return str(self.prettyXML(self._root)) if self._root else ''
+		return str(self.prettyXML(self._root)) if self._root is not None else ''
 
 	@property
 	def root(self):

@@ -8,10 +8,10 @@ from maya import cmds
 
 class LEG(BASE):
 	def __init__(self,
-	             side,
-	             hip,
-	             knee,
-	             foot,
+	             side=None,
+	             hip=None,
+	             knee=None,
+	             foot=None,
 	             toe=None,
 	             networkRoot=None,
 	             name=Part.leg,

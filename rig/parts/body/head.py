@@ -9,7 +9,7 @@ from maya import cmds
 
 class HEAD(BASE):
 	def __init__(self,
-	             head,
+	             head=None,
 	             networkRoot=None,
 	             name=Part.head,
 	             scale=1,
@@ -25,6 +25,8 @@ class HEAD(BASE):
 		              )
 
 		self.head = head
+
+	def create(self):
 		self.getScale()
 		self.createControls()
 		self.createIK()

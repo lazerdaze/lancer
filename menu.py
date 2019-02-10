@@ -111,30 +111,9 @@ def show(*args):
 	cmds.menuItem(d=True, l='Rigging')
 	cmds.menuItem(label='Rig Tools', c=rigUI)
 	rig.menuItems()
-	# cmds.menuItem(l='Joint', subMenu=True, to=True)
-	# rig.utils.joint.menu()
-	# cmds.setParent('..', menu=True)
-	# cmds.menuItem(l='Skeleton', subMenu=True, to=True)
-	# rig.utils.skeleton.menu()
-	# cmds.setParent('..', menu=True)
-	# cmds.menuItem(l='Skin', subMenu=True, to=True)
-	# rig.utils.skin.menu()
-	# cmds.setParent('..', menu=True)
-	# cmds.menuItem(l='Control', subMenu=True, to=True)
-	# rig.utils.control.menu()
-	# cmds.setParent('..', menu=True)
-
-
-	# cmds.menuItem(l='Parts', subMenu=True, to=True)
-	# rig.parts.menu()
-	# cmds.setParent('..', menu=True)
 
 	cmds.menuItem(l='Facial', subMenu=True, to=True)
 	rig.facePose.ui.menu()
-	cmds.setParent('..', menu=True)
-
-	cmds.menuItem(l='Auto', subMenu=True, to=True)
-	rig.auto.menu()
 	cmds.setParent('..', menu=True)
 
 	cmds.menuItem(d=True, l='Animation')

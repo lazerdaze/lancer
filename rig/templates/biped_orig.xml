@@ -1,0 +1,18 @@
+<biped>
+    <COG cog="cog" hip="hip">
+    </COG>
+    <SPINE objects="spine">
+    </SPINE>
+    <NECK objects="neck">
+    </NECK>
+    <HEAD head="head">
+    </HEAD>
+    <LEFTARM collar="leftCollar" shoulder="leftShoulder" elbow="leftElbow" hand="leftHand">
+    </LEFTARM>
+    <LEFTLEG hip="leftHip" knee="leftKnee" foot="leftFoot">
+    </LEFTLEG>
+    <RIGHTARM collar="rightCollar" shoulder="rightShoulder" elbow="rightElbow" hand="rightHand">
+    </RIGHTARM>
+    <RIGHTLEG hip="rightHip" knee="rightKnee" foot="rightFoot">
+    </RIGHTLEG>
+</biped>

@@ -1,0 +1,39 @@
+{
+  "COG": {
+    "cog": "cog",
+    "hip": "hip"
+  },
+  "SPINE": {
+    "objects": "spine"
+  },
+  "NECK": {
+    "objects": "neck"
+  },
+  "HEAD": {
+    "head": "head"
+  },
+  "LEFTARM": {
+    "collar": "leftCollar",
+    "shoulder": "leftShoulder",
+    "elbow": "leftElbow",
+    "hand": "leftHand"
+  },
+  "RIGHTARM": {
+    "collar": "rightCollar",
+    "shoulder": "rightShoulder",
+    "elbow": "rightElbow",
+    "hand": "rightHand"
+  },
+  "LEFTLEG": {
+    "hip": "leftHip",
+    "knee": "leftKnee",
+    "foot": "leftFoot",
+    "toe": "leftToe"
+  },
+  "RIGHTLEG": {
+    "hip": "rightHip",
+    "knee": "rightKnee",
+    "foot": "rightFoot",
+    "toe": "rightToe"
+  }
+}

@@ -10,10 +10,10 @@ from maya import cmds
 
 class ARM(BASE):
 	def __init__(self,
-	             side,
-	             shoulder,
-	             elbow,
-	             hand,
+	             side=None,
+	             shoulder=None,
+	             elbow=None,
+	             hand=None,
 	             collar=None,
 	             networkRoot=None,
 	             name=Part.arm,

@@ -387,20 +387,21 @@ def addSideAttr(node):
 	return
 
 
-def getConnectedObj(node, attr):
-	name = '{}.{}'.format(node, attr)
+def getConnectedNode(node, attribute):
+	name = '{}.{}'.format(node, attribute)
 
 	if cmds.connectionInfo(name, id=True):
-		query = cmds.listConnections(cmds.connectionInfo(name, ged=True))[0]
-		return query
+		query = cmds.listConnections(cmds.connectionInfo(name, ged=True))
+		if query is None:
+			return query
+		else:
+			return query[0] if len(query) == 1 else query
 	else:
 		query = cmds.listConnections(name)
-		if query:
-			query = query[0]
+		if query is None:
 			return query
-
 		else:
-			return None
+			return query[0] if len(query) == 1 else query
 
 
 def addIndexAttribute(node, value):
@@ -418,6 +419,7 @@ def addIndexAttribute(node, value):
 		cmds.setAttr(attributeName(node, name), value)
 
 	return
+
 
 
 ########################################################################################################################

@@ -9,7 +9,7 @@ from maya import cmds
 
 class COG(BASE):
 	def __init__(self,
-	             cog,
+	             cog=None,
 	             hip=None,
 	             networkRoot=None,
 	             name='cog',
@@ -21,10 +21,11 @@ class COG(BASE):
 		              side='Center',
 		              scale=scale,
 		              )
-
 		self.cog = cog
 		self.hip = hip
-		self.objects = [cog]
+
+	def create(self):
+		self.objects = [self.cog]
 
 		self.getScale()
 		self.createControls()

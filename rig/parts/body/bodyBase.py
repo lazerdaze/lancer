@@ -303,17 +303,13 @@ class BASE(object):
 		return
 
 	def createAttrControl(self, obj):
+		axis = None
+
 		if self.side == 'Left':
 			axis = [1, -1, 0]
 		elif self.side == 'Right':
 			axis = [1, 1, 0]
-		'''
-		if self.name == 'leg':
-			if self.side == 'Left':
-				axis = [1, 0, 1]
-			elif self.side == 'Right':
-				axis = [1, 0, -1]
-		'''
+
 		ctl = ATTRCONTROL(name=longName(self.name,
 		                                self.side.upper()[0],
 		                                self.index,
@@ -461,7 +457,7 @@ class BASE(object):
 				else:
 					i = 0
 
-				rigging.addIndexValue(obj, i)
+				addIndexAttribute(obj, i)
 				networkAttr = '{}.{}[{}]'.format(network, name, i)
 		else:
 			cmds.addAttr(network, ln=name, at='message')
@@ -498,7 +494,7 @@ class BASE(object):
 				cmds.addAttr(obj, ln=attrName, at='message')
 
 			cmds.connectAttr('{}.{}[{}]'.format(network, name, i), '{}.{}'.format(obj, attrName), f=True)
-			rigging.addIndexValue(obj, i)
+			addIndexAttribute(obj, i)
 			i += 1
 		return
 
@@ -526,11 +522,11 @@ class BASE(object):
 			cog = self.getConnected(cogNetwork, 'fkControl', 0) if cogNetwork else None
 
 			if cog:
-				rigging.createLocalWorld(obj=obj,
-				                         local=local,
-				                         world=cog,
-				                         n=attrName,
-				                         )
+				localWorldConstraint(obj=obj,
+				                     local=local,
+				                     world=cog,
+				                     n=attrName,
+				                     )
 		return
 
 	def parentToRootControl(self, obj):

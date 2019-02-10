@@ -20,8 +20,9 @@ class ROOT(BASE):
 		              )
 		self.root = root
 
+	def create(self):
 		if self.root:
-			self.objects = [root]
+			self.objects = [self.root]
 			self.getScale()
 
 		self.createControls()

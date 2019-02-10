@@ -237,7 +237,6 @@ def sortJointHierarchy(joints):
 			if parent and parent in joints:
 				parentI = joints.index(parent) + 1
 				joints[i], joints[parentI] = joints[parentI], joints[i]
-
 	return joints
 
 
@@ -291,7 +290,7 @@ def handJointHierarchy(root, *args):
 
 class queryJoint():
 	def __init__(self, jnt):
-		skinCluster = getConnectedObj(jnt, 'objectColorRGB')
+		skinCluster = getConnectedNode(jnt, 'objectColorRGB')
 		verts = []
 
 		if skinCluster:
@@ -1045,6 +1044,8 @@ def aimAtSelected(*args, **kwargs):
 	return
 
 
+
+
 ########################################################################################################################
 #
 #
@@ -1110,10 +1111,10 @@ class Joint(Node):
 			self.exists = True
 			self.canUpdateName = True
 			self.radius = radius
-			self.drawStyle=drawStyle
-			self.type=type
-			self.otherType=otherType
-			self.kind=kind
+			self.drawStyle = drawStyle
+			self.type = type
+			self.otherType = otherType
+			self.kind = kind
 			self.disableSegmentScale()
 		else:
 			raise NodeExistsError('Joint "{}" already exists.'.format(self.longName))

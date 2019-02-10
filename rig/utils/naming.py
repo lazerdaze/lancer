@@ -56,7 +56,7 @@ class Component(object):
 	fkik = 'fkik'
 	set = 'set'
 	joint = 'joint'
-	leaf = 'leaf{}'.format(joint.capitalize())
+	leaf = 'leaf'
 
 	control = 'control'
 	fkControl = 'FK{}'.format(control.capitalize())
@@ -158,7 +158,7 @@ class Position(object):
 	bottom = 'bottom'
 	corner = 'corner'
 	inner = 'inner'
-	outter = 'outter'
+	outer = 'outer'
 
 
 class Part(object):

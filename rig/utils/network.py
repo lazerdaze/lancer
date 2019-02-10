@@ -190,7 +190,7 @@ def connectToRoot(obj, *args):
 	if root:
 		if not cmds.attributeQuery('characterNetwork', node=obj, ex=True):
 			cmds.addAttr(obj, ln='characterNetwork', at='message')
-		if not getConnectedObj(obj, 'characterNetwork'):
+		if not getConnectedNode(obj, 'characterNetwork'):
 			cmds.connectAttr('{}.children'.format(root), '{}.characterNetwork'.format(obj), f=True)
 	return
 

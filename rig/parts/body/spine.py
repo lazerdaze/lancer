@@ -9,7 +9,7 @@ from maya import cmds
 
 class SPINE(BASE):
 	def __init__(self,
-	             objects,
+	             objects=None,
 	             networkRoot=None,
 	             name='spine',
 	             scale=1,
@@ -24,6 +24,7 @@ class SPINE(BASE):
 		              attrControl=attrControl,
 		              )
 
+	def create(self):
 		self.getScale()
 		self.createFKChain(self.objects)
 		self.constrainSpine()
@@ -74,7 +75,7 @@ class SPINE(BASE):
 
 class NECK(SPINE):
 	def __init__(self,
-	             objects,
+	             objects=None,
 	             networkRoot=None,
 	             name=Part.neck,
 	             scale=1,

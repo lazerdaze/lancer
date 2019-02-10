@@ -5,6 +5,7 @@ from attribute import *
 from joint import *
 from library import xfer
 from library.axml import Axml
+from rig.templates import Templates
 
 # Maya Modules
 import maya.cmds as cmds
@@ -221,7 +222,47 @@ BIPED_TO_HIK = {
 class SkeletonDefinition(object):
 	def __init__(self):
 		self.__dict__.update(
-				{SkeletonType.biped: [x for x in vars(Biped_Definition).iterkeys() if not x.startswith('__')]})
+				{
+					SkeletonType.biped: {
+						"COG"     : {
+							"cog": "cog",
+							"hip": "hip"
+						},
+						"SPINE"   : {
+							"objects": "spine"
+						},
+						"NECK"    : {
+							"objects": "neck"
+						},
+						"HEAD"    : {
+							"head": "head"
+						},
+						"LEFTARM" : {
+							"collar"  : "leftCollar",
+							"shoulder": "leftShoulder",
+							"elbow"   : "leftElbow",
+							"hand"    : "leftHand"
+						},
+						"RIGHTARM": {
+							"collar"  : "rightCollar",
+							"shoulder": "rightShoulder",
+							"elbow"   : "rightElbow",
+							"hand"    : "rightHand"
+						},
+						"LEFTLEG" : {
+							"hip" : "leftHip",
+							"knee": "leftKnee",
+							"foot": "leftFoot",
+							"toe" : "leftToe"
+						},
+						"RIGHTLEG": {
+							"hip" : "rightHip",
+							"knee": "rightKnee",
+							"foot": "rightFoot",
+							"toe" : "rightToe"
+						}
+					}
+				})
 
 	def __getitem__(self, key):
 		return self.__dict__[key]
@@ -706,7 +747,7 @@ class Skeleton(Axml):
 	def validate(self):
 		return
 
-	def buildXMLTree(self, debug=False):
+	def buildXMLTree(self):
 		if not self.isValid():
 			raise RuntimeError('No valid Skeleton Root provided.')
 		else:
@@ -748,13 +789,14 @@ class Skeleton(Axml):
 			self.recursiveHierarchyToXML(joint=child, parent=element)
 		return
 
-	#TODO: Break this method into chucks and update the import process (importing is currently a bit slow.)
+	# TODO: Break this method into chucks and update the import process (importing is currently a bit slow.)
 	def setupSkeletonRoot(self):
 		if not self.skeletonRoot or nodeType(self.skeletonRoot) != 'joint':
 			raise RuntimeError('No valid Skeleton Root provided.')
 		elif not nodeExists(self.skeletonRoot):
 			raise RuntimeError('Skeleton Root does not exist.')
 		else:
+			# TODO: Replace SkeletonDefinition() with Templates()
 			dataBase = SkeletonDefinition()
 
 			if not self.kind:
@@ -765,16 +807,16 @@ class Skeleton(Axml):
 				dataBase = dataBase[self.kind]
 
 				# Add Attributes To Root
-				if not attributeExist(self.skeletonRoot, 'skeletonKind'):
+				if not attributeExist(self.skeletonRoot, 'skeletonTemplate'):
 					addAttribute(node=self.skeletonRoot,
-					             attribute='skeletonKind',
+					             attribute='skeletonTemplate',
 					             kind=MayaAttrType.string,
 					             value=self.kind,
 					             lock=True,
 					             )
 				else:
 					setAttribute(node=self.skeletonRoot,
-					             attribute='skeletonKind',
+					             attribute='skeletonTemplate',
 					             value=self.kind,
 					             lock=True,
 					             force=True,
@@ -917,7 +959,6 @@ def exportSkeletonCallback(debug=False, *args, **kwargs):
 
 
 def importSkeletonCallback(debug=False, *args, **kwargs):
-
 	filepath = xfer.mayaFileBrowse(label='Import Skeleton Template',
 	                               fileMode=1,
 	                               okCaption='Import',
