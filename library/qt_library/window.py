@@ -1,5 +1,6 @@
 # Lancer Modules
 from utils import *
+from layout import *
 
 # Python Modules
 import sys
@@ -12,11 +13,12 @@ from PySide2.QtWidgets import *
 
 @standaloneMayaWrapper
 class Window(QMainWindow):
-	def __init__(self, parent=None, name='QTWindowUI', title='Qt WIndow', *args, **kwargs):
-		QMainWindow.__init__(self, parent=parent, *args, **kwargs)
+	def __init__(self, parent=None, name='QTWindowUI', title='Qt Window', *args, **kwargs):
+		QMainWindow.__init__(self, parent, *args, **kwargs)
 
 		self.setObjectName(name)
 		self.setWindowTitle(title)
+		self.setCentralWidget(VerticalFrame())
 
 	def closeEvent(self, event):
 		QMainWindow.closeEvent(self, event)

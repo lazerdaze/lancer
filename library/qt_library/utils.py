@@ -58,13 +58,13 @@ def standaloneMayaWrapper(window):
 
 		if mayaRunning():
 			mayaWindowExists(name)
-			ui = window(parent=mayaWindowQt(), **kwargs)
+			ui = window(parent=mayaWindowWrapInstance(), **kwargs)
 			ui.show()
 			return
 
 		else:
 			app = QApplication(sys.argv)
-			ui = window(**kwargs)
+			ui = window(*args, **kwargs)
 			ui.show()
 			sys.exit(app.exec_())
 
