@@ -64,6 +64,7 @@ class Component(object):
 	master = 'master'
 	detailControl = 'detail{}'.format(control.capitalize())
 	offsetControl = 'offset{}'.format(control.capitalize())
+	leafControl = 'leaf{}'.format(control.capitalize())
 	group = 'group'
 	offset = 'offset'
 	origin = 'origin'
@@ -417,7 +418,7 @@ def enumName(*args, **kwargs):
 	return result
 
 
-class NameConvention(object):
+class TokenizeLongName(object):
 	def __init__(self, string):
 		'''
 		:param str string: Initial string to split apart into attributes.

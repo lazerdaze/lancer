@@ -6,20 +6,143 @@ from rig.piece import *
 from maya import cmds
 
 
+class BaseObject(object):
+	def __init__(self,
+				 objects=None,
+				 name='controlRig',
+				 prefix=None,
+				 parent=None,
+				 children=None,
+				 color=None,
+				 side=None,
+				 index=None,
+				 sector=None,
+				 kind=None,
+				 scale=1.0,
+				 ):
+
+		self.objects = objects
+		self.name = name
+		self.prefix = prefix
+		self.parent = parent
+		self.children = children if isinstance(children, (list, dict, tuple)) else []
+		self.side = side
+		self.sector = sector
+		self.index = index
+		self.kind = kind
+		self.color = color
+		self.scale = scale
+
+		self.master = None
+
+	def __str__(self):
+		return self.longName
+
+	def __repr__(self):
+		return self.longName
+
+	@property
+	def longName(self):
+		return longName(self.prefix,
+						self.side[0].upper() if self.side else None,
+						self.name,
+						self.sector,
+						self.index,
+						self.kind,
+						)
+
+	def createMasterControl(self, item=None, scale=1.0):
+		if self.master:
+			raise NodeExistsError('Master Control was already created.')
+		else:
+			axis = None
+
+			if self.side == Position.left:
+				axis = [1, -1, 0]
+			elif self.side == Position.right:
+				axis = [1, 1, 0]
+
+			self.master = Control(name=self.name,
+								  prefix=self.prefix,
+								  wire=WireType.lollipop,
+								  index=self.index,
+								  sector=self.sector,
+								  color=WireColor.purple,
+								  kind=Component.master,
+								  scale=scale,
+								  side=self.side,
+								  axis=axis,
+								  )
+
+			if item:
+				self.master.snapTo(item)
+				self.master.parentTo(item)
+			lockKeyableAttributes(self.master.transform, hide=True)
+		return
+
+	def createFKControl(self, scale=1.0):
+		return Control(name=self.name,
+					   prefix=self.prefix,
+					   wire=WireType.circleRotate,
+					   index=self.index,
+					   sector=self.sector,
+					   color=WireColor.blue,
+					   kind=Component.fkControl,
+					   scale=scale,
+					   side=self.side,
+					   )
+
+	def createIKControl(self, scale=1.0):
+		return Control(name=self.name,
+					   prefix=self.prefix,
+					   wire=WireType.sphere,
+					   index=self.index,
+					   sector=self.sector,
+					   color=WireColor.red,
+					   kind=Component.ikControl,
+					   scale=scale,
+					   side=self.side,
+					   )
+
+	def createDetailControl(self, scale=1.0):
+		return Control(name=self.name,
+					   prefix=self.prefix,
+					   wire=WireType.doubleLollipop,
+					   index=self.index,
+					   sector=self.sector,
+					   color=WireColor.lightBlue,
+					   kind=Component.detailControl,
+					   scale=scale * 1.5,
+					   side=self.side,
+					   )
+
+	def createLeafControl(self, scale=1.0):
+		return Control(name=self.name,
+					   prefix=self.prefix,
+					   wire=WireType.diamond,
+					   index=self.index,
+					   sector=self.sector,
+					   color=WireColor.pink,
+					   kind=Component.leafControl,
+					   scale=scale * 2.0,
+					   side=self.side,
+					   )
+
+
 class BASE(object):
 	def __init__(self,
-	             objects=None,
-	             name=Component.base,
-	             fkName=None,
-	             ikName=None,
-	             scale=1,
-	             axis=None,
-	             side=None,
-	             index=0,
-	             networkRoot=None,
-	             networkParent=None,
-	             attrControl=None,
-	             ):
+				 objects=None,
+				 name=Component.base,
+				 fkName=None,
+				 ikName=None,
+				 scale=1,
+				 axis=None,
+				 side=None,
+				 index=0,
+				 networkRoot=None,
+				 networkParent=None,
+				 attrControl=None,
+				 ):
 		""""
 		:param start:
 		:param mid:
@@ -34,7 +157,7 @@ class BASE(object):
 		:param networkRoot:
 		"""
 
-		self.objects = rigging.listCheck(objects)
+		self.objects = listCheck(objects)
 		self.name = name
 		self.fkName = fkName if fkName else longName(name, Component.fk)
 		self.ikName = ikName if ikName else longName(name, Component.ik)
@@ -81,7 +204,7 @@ class BASE(object):
 	def createParent(self, name, child=None):
 		self.parent = cmds.group(n='{}_{}'.format(self.name, name), em=True)
 		if child:
-			rigging.snap(child, self.parent, t=True, r=True)
+			snap(child, self.parent, t=True, r=True)
 		return
 
 	def parentToObjectParent(self, child, obj):
@@ -91,7 +214,7 @@ class BASE(object):
 		return
 
 	def createDetailChain(self, objects):
-		objects = rigging.listCheck(objects)
+		objects = listCheck(objects)
 		indexNum = 0
 		for obj in objects:
 			i = objects.index(obj)
@@ -100,18 +223,18 @@ class BASE(object):
 			if children:
 				for child in children:
 					ctl = DETAILCONTROL(name=longName(self.name,
-					                                  self.side.upper()[0],
-					                                  self.index,
-					                                  Component.detail,
-					                                  indexNum,
-					                                  Component.control
-					                                  ),
-					                    scale=self.scale,
-					                    parent=None,
-					                    child=child,
-					                    index=i,
-					                    axis=self.axis,
-					                    )
+													  self.side.upper()[0],
+													  self.index,
+													  Component.detail,
+													  indexNum,
+													  Component.control
+													  ),
+										scale=self.scale,
+										parent=None,
+										child=child,
+										index=i,
+										axis=self.axis,
+										)
 					indexNum += 1
 					cmds.parent(ctl.group, obj)
 					cmds.parentConstraint(ctl.transform, child, mo=True)
@@ -126,14 +249,14 @@ class BASE(object):
 
 						for grandchild in grandchildren:
 							gctl = GRANDCHILDCONTROL(name=longName(grandchild,
-							                                       Component.control
-							                                       ),
-							                         scale=cmds.getAttr('{}.radius'.format(grandchild)),
-							                         parent=None,
-							                         child=grandchild,
-							                         index=i,
-							                         axis=self.axis,
-							                         )
+																   Component.control
+																   ),
+													 scale=cmds.getAttr('{}.radius'.format(grandchild)),
+													 parent=None,
+													 child=grandchild,
+													 index=i,
+													 axis=self.axis,
+													 )
 							indexNum += 1
 							cmds.parent(gctl.group, child)
 							cmds.parentConstraint(gctl.transform, grandchild, mo=True)
@@ -144,7 +267,7 @@ class BASE(object):
 		return
 
 	def createGrandchildren(self, objects):
-		objects = rigging.listCheck(objects)
+		objects = listCheck(objects)
 		i = 0
 		indexNum = 0
 		for obj in objects:
@@ -158,14 +281,14 @@ class BASE(object):
 
 						for grandchild in grandchildren:
 							ctl = GRANDCHILDCONTROL(name=longName(grandchild,
-							                                      Component.control
-							                                      ),
-							                        scale=cmds.getAttr('{}.radius'.format(grandchild)),
-							                        parent=None,
-							                        child=grandchild,
-							                        index=i,
-							                        axis=self.axis,
-							                        )
+																  Component.control
+																  ),
+													scale=cmds.getAttr('{}.radius'.format(grandchild)),
+													parent=None,
+													child=grandchild,
+													index=i,
+													axis=self.axis,
+													)
 
 							cmds.parent(ctl.group, child)
 							cmds.parentConstraint(ctl.transform, grandchild, mo=True)
@@ -187,21 +310,21 @@ class BASE(object):
 			lowerObjects.remove(lowerObjects[0])
 
 			ribbon = RIBBONLIMB(name=longName(self.name,
-			                                  self.side[0].upper(),
-			                                  self.index,
-			                                  Component.ribbon,
-			                                  ),
-			                    start=start,
-			                    mid=mid,
-			                    end=end,
-			                    upperObjects=upperObjects,
-			                    lowerObjects=lowerObjects,
-			                    midObject=midObjects,
-			                    side=self.side,
-			                    scale=self.scale / 1.2,
-			                    )
+											  self.side[0].upper(),
+											  self.index,
+											  Component.ribbon,
+											  ),
+								start=start,
+								mid=mid,
+								end=end,
+								upperObjects=upperObjects,
+								lowerObjects=lowerObjects,
+								midObject=midObjects,
+								side=self.side,
+								scale=self.scale / 1.2,
+								)
 
-			self.detailObjects = self.detailObjects + upperObjects + lowerObjects + rigging.listCheck(midObjects)
+			self.detailObjects = self.detailObjects + upperObjects + lowerObjects + listCheck(midObjects)
 			self.detailControl = self.detailControl + ribbon.detailControl
 			self.detailGroup = self.detailGroup + ribbon.detailGroup
 
@@ -215,23 +338,23 @@ class BASE(object):
 
 				for attr in attrName:
 					cmds.connectAttr('{}.{}'.format(self.attrControl, attr),
-					                 '{}.{}'.format(ribbon.upperFlexiPlane.parent, attr))
+									 '{}.{}'.format(ribbon.upperFlexiPlane.parent, attr))
 					cmds.connectAttr('{}.{}'.format(self.attrControl, attr),
-					                 '{}.{}'.format(ribbon.lowerFlexiPlane.parent, attr))
+									 '{}.{}'.format(ribbon.lowerFlexiPlane.parent, attr))
 
 		return
 
 	def createTwistChain(self, start, mid, end):
 		chain = TWISTCHAIN(start=start,
-		                   mid=mid,
-		                   end=end,
-		                   scale=self.scale,
-		                   axis=self.axis,
-		                   name=longName(self.name,
-		                                 self.side.upper()[0],
-		                                 self.index,
-		                                 Component.aux,
-		                                 ))
+						   mid=mid,
+						   end=end,
+						   scale=self.scale,
+						   axis=self.axis,
+						   name=longName(self.name,
+										 self.side.upper()[0],
+										 self.index,
+										 Component.aux,
+										 ))
 		self.detailObjects = chain.objects
 		self.detailControl = chain.control
 		self.detailGroup = chain.group
@@ -243,22 +366,22 @@ class BASE(object):
 
 			for attr in attrName:
 				cmds.connectAttr('{}.{}'.format(self.attrControl, attr),
-				                 '{}.{}'.format(chain.upperTwist.parent, attr))
+								 '{}.{}'.format(chain.upperTwist.parent, attr))
 
 		return
 
 	def createFKChain(self, objects):
 		name = longName(self.name,
-		                self.side.upper()[0],
-		                self.index,
-		                Component.fk,
-		                )
+						self.side.upper()[0],
+						self.index,
+						Component.fk,
+						)
 		fk = FKCHAIN(objects,
-		             name=name,
-		             scale=self.scale,
-		             axis=self.axis,
-		             side=self.side,
-		             )
+					 name=name,
+					 scale=self.scale,
+					 axis=self.axis,
+					 side=self.side,
+					 )
 		self.parentToObjectParent(objects[0], fk.parent)
 		self.fkControl = fk.control
 		self.fkGroup = fk.group
@@ -267,16 +390,16 @@ class BASE(object):
 
 	def createIKChain(self, objects):
 		name = longName(self.name,
-		                self.side.upper()[0],
-		                self.index,
-		                Component.ik,
-		                )
+						self.side.upper()[0],
+						self.index,
+						Component.ik,
+						)
 		ik = IKCHAIN(objects,
-		             name=name,
-		             scale=self.scale,
-		             axis=self.axis,
-		             side=self.side,
-		             )
+					 name=name,
+					 scale=self.scale,
+					 axis=self.axis,
+					 side=self.side,
+					 )
 
 		self.parentToObjectParent(objects[0], ik.parent)
 		self.ikJoint = ik.joint
@@ -290,14 +413,14 @@ class BASE(object):
 
 	def createFKPoleVector(self):
 		fkPoleVector = cmds.group(n=longName(self.name,
-		                                     self.side.upper()[0],
-		                                     self.index,
-		                                     Component.fk,
-		                                     Component.poleVector,
-		                                     Component.null,
-		                                     ),
-		                          em=True)
-		rigging.snap(self.ikControl[1], fkPoleVector, t=True, r=True)
+											 self.side.upper()[0],
+											 self.index,
+											 Component.fk,
+											 Component.poleVector,
+											 Component.null,
+											 ),
+								  em=True)
+		snap(self.ikControl[1], fkPoleVector, t=True, r=True)
 		cmds.parent(fkPoleVector, self.fkControl[1])
 		self.fkPoleVector = fkPoleVector
 		return
@@ -311,22 +434,22 @@ class BASE(object):
 			axis = [1, 1, 0]
 
 		ctl = ATTRCONTROL(name=longName(self.name,
-		                                self.side.upper()[0],
-		                                self.index,
-		                                Component.attr,
-		                                Component.control,
-		                                ),
-		                  child=obj,
-		                  scale=self.scale + .25,
-		                  side=self.side,
-		                  label='None',
-		                  axis=axis,
-		                  )
+										self.side.upper()[0],
+										self.index,
+										Component.attr,
+										Component.control,
+										),
+						  child=obj,
+						  scale=self.scale + .25,
+						  side=self.side,
+						  label='None',
+						  axis=axis,
+						  )
 
 		self.attrControl = ctl.transform
 		self.attrGroup = ctl.group
 		cmds.parent(self.attrGroup, obj)
-		rigging.lockKeyableAttributes(self.attrControl, hide=True)
+		lockKeyableAttributes(self.attrControl, hide=True)
 		return
 
 	def createFKIKChain(self, objects):
@@ -341,12 +464,12 @@ class BASE(object):
 
 	def createFKIKConnections(self, ctl, name=Component.fkik):
 		# Constraints
-		fkik = rigging.createFKIK(obj=self.objects,
-		                          fk=self.fkControl,
-		                          ik=self.ikJoint,
-		                          ctl=ctl,
-		                          n=name,
-		                          )
+		fkik = createFKIK(obj=self.objects,
+						  fk=self.fkControl,
+						  ik=self.ikJoint,
+						  ctl=ctl,
+						  n=name,
+						  )
 
 		# Visibility
 		for grp in self.fkGroup:
@@ -370,26 +493,26 @@ class BASE(object):
 		for i in range(1, 3, 1):
 			if self.side == 'Right':
 				cmds.connectAttr('{}.{}'.format(ctl, attrName),
-				                 '{}.input1{}'.format(mult, axis[i]))
+								 '{}.input1{}'.format(mult, axis[i]))
 
 				cmds.connectAttr('{}.output{}'.format(mult, axis[i]),
-				                 '{}.{}[{}]'.format(self.ikParent, attrName, i))
+								 '{}.{}[{}]'.format(self.ikParent, attrName, i))
 				cmds.connectAttr('{}.output{}'.format(mult, axis[i]),
-				                 '{}.{}[{}]'.format(self.fkParent, attrName, i))
+								 '{}.{}[{}]'.format(self.fkParent, attrName, i))
 			else:
 				cmds.connectAttr('{}.{}'.format(ctl, attrName),
-				                 '{}.{}[{}]'.format(self.fkParent, attrName, i))
+								 '{}.{}[{}]'.format(self.fkParent, attrName, i))
 				cmds.connectAttr('{}.{}'.format(ctl, attrName),
-				                 '{}.{}[{}]'.format(self.ikParent, attrName, i))
+								 '{}.{}[{}]'.format(self.ikParent, attrName, i))
 
 		return
 
 	def createNetwork(self, typ):
 		name = longName(self.name,
-		                self.side.upper()[0],
-		                self.index,
-		                Component.network,
-		                )
+						self.side.upper()[0],
+						self.index,
+						Component.network,
+						)
 
 		self.network = cmds.createNode('network', n=name)
 		self.addDefaultNetworkAttributes(typ)
@@ -407,25 +530,25 @@ class BASE(object):
 	def addDefaultNetworkAttributes(self, typ):
 		node = self.network
 		cmds.addAttr(node, ln='type', dt='string')
-		rigging.addSideAttr(node)
+		addSideAttr(node)
 		cmds.addAttr(node, ln='index', at='long')
 		cmds.setAttr('{}.type'.format(node), typ, type='string', lock=True)
 		cmds.setAttr('{}.index'.format(node), self.index)
-		rigging.setEnumByString(node, 'side', self.side)
+		setEnumByString(node, 'side', self.side)
 		cmds.addAttr(node, ln='children', dt='string')
-		rigging.addBoolAttr(node, 'jointDisplay')
-		rigging.addBoolAttr(node, 'controlDisplay')
+		addBoolAttr(node, 'jointDisplay')
+		addBoolAttr(node, 'controlDisplay')
 		return
 
 	def createSet(self, objects):
 		name = longName(self.name,
-		                self.side.upper()[0],
-		                self.index,
-		                Component.set,
-		                )
+						self.side.upper()[0],
+						self.index,
+						Component.set,
+						)
 
 		cmds.select(d=True)
-		objects = rigging.listCheck(objects)
+		objects = listCheck(objects)
 		self.set = cmds.sets(objects, name=name)
 
 		if self.networkRoot:
@@ -436,9 +559,9 @@ class BASE(object):
 		return
 
 	def hideObjectsAttributes(self, objects):
-		objects = rigging.listCheck(objects)
+		objects = listCheck(objects)
 		for obj in objects:
-			rigging.hideAttributes(obj)
+			hideAttributes(obj)
 		return
 
 	def connectToNetwork(self, obj, network, name):
@@ -474,7 +597,7 @@ class BASE(object):
 		return
 
 	def multiConnectToNetwork(self, objects, network, name):
-		objects = rigging.listCheck(objects)
+		objects = listCheck(objects)
 		attrName = 'rigNetwork'
 
 		if not cmds.attributeQuery(name, node=network, ex=True):
@@ -523,10 +646,10 @@ class BASE(object):
 
 			if cog:
 				localWorldConstraint(obj=obj,
-				                     local=local,
-				                     world=cog,
-				                     n=attrName,
-				                     )
+									 local=local,
+									 world=cog,
+									 n=attrName,
+									 )
 		return
 
 	def parentToRootControl(self, obj):
@@ -586,7 +709,7 @@ class BASE(object):
 		if self.detailControl:
 			attrName = 'detailControlDisplay'
 			self.multiConnectToNetwork(self.detailControl, self.network, 'detailControl')
-			rigging.addBoolAttr(self.network, attrName)
+			addBoolAttr(self.network, attrName)
 
 			for detail in self.detailGroup:
 				cmds.connectAttr('{}.{}'.format(self.network, attrName), '{}.v'.format(detail))
@@ -613,7 +736,7 @@ class BASE(object):
 			attrName = Component.detailControlDisplay
 
 			if not cmds.attributeQuery(attrName, node=self.attrControl, ex=True):
-				rigging.addBoolAttr(self.attrControl, attrName)
+				addBoolAttr(self.attrControl, attrName)
 			cmds.connectAttr('{}.{}'.format(self.attrControl, attrName), '{}.{}'.format(self.network, attrName))
 
 		# Attr To Network FKIK
@@ -626,5 +749,5 @@ class BASE(object):
 		if self.attrControl:
 			cmds.addAttr(self.network, ln=Component.fkik, min=0, max=1, dv=0)
 			cmds.connectAttr('{}.{}'.format(self.attrControl, Component.fkik),
-			                 '{}.{}'.format(self.network, Component.fkik))
+							 '{}.{}'.format(self.network, Component.fkik))
 		return

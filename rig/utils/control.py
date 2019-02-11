@@ -124,12 +124,9 @@ class Control(Node):
 		self.offsetShape = None
 
 		# Init
-		if nodeExists(name):
-			self._kind = None
-			self.longName = name
-		else:
+		if not nodeExists(name):
 			self.create(wire, axis, scale, color, offset)
-			self.canUpdateName = True
+
 
 	def create(self, wire, axis, scale, color, offset):
 		if not self.isValid():
@@ -191,6 +188,7 @@ class Control(Node):
 			self.index = self._index
 			self.sector = self._sector
 			self.kind = self._kind
+			self.canUpdateName = True
 		return
 
 	def updateName(self):
@@ -228,37 +226,8 @@ class Control(Node):
 		snap(node, self.nullPosition, t=translation, r=rotation)
 		return
 
-
-########################################################################################################################
-#
-#
-#	Master Control Class
-#
-#
-########################################################################################################################
-
-class MasterControl(Control):
-	def __init__(self,
-	             prefix='rig',
-	             name=None,
-	             scale=1,
-	             index=None,
-	             side=None,
-	             sector=None,
-	             ):
-		Control.__init__(self,
-		                 prefix=prefix,
-		                 name=name,
-		                 kind=Component.master,
-		                 wire=WireType.lollipop,
-		                 axis=[0, 1, 1],
-		                 scale=scale,
-		                 index=index,
-		                 side=side,
-		                 sector=sector,
-		                 color=WireColor.purple,
-		                 offset=False,
-		                 )
-
-	def masterAttributes(self):
+	def parentTo(self, node):
+		cmds.parent(self.nullPosition, node)
 		return
+
+

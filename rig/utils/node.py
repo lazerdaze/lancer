@@ -210,7 +210,7 @@ class Node(object):
 		if self.exists:
 			self._name = name
 		else:
-			nc = NameConvention(name)
+			nc = TokenizeLongName(name)
 			self._prefix = nc.prefix
 			self._name = nc.name
 			self._side = nc.side
