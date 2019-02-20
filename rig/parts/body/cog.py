@@ -1,30 +1,29 @@
 # Lancer Modules
 from rig.utils import *
 from rig.piece import *
-from bodyBase import BASE
+from rigBase import RIGBASE
 
 # Maya Moudles
 from maya import cmds
 
 
-class COG(BASE):
+class COG(RIGBASE):
 	def __init__(self,
-	             cog=None,
+	             cog,
 	             hip=None,
 	             networkRoot=None,
 	             name='cog',
 	             scale=1,
 	             ):
-		BASE.__init__(self,
-		              networkRoot=networkRoot,
-		              name=name,
-		              side='Center',
-		              scale=scale,
-		              )
+		RIGBASE.__init__(self,
+		                 networkRoot=networkRoot,
+		                 name=name,
+		                 side='Center',
+		                 scale=scale,
+		                 )
 		self.cog = cog
 		self.hip = hip
 
-	def create(self):
 		self.objects = [self.cog]
 
 		self.getScale()

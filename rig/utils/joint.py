@@ -876,7 +876,7 @@ def getBindJoint(joint):
 		for child in children:
 			if cmds.objectType(child) == 'joint':
 				label = getJointLabel(child)[1]
-				if label == 'Bind':
+				if label == JointLabelOtherType.bind:
 					bindDict[child] = getDistance(joint, child)
 
 	for key, value in sorted(bindDict.iteritems(), key=lambda (k, v): (v, k)):
@@ -1023,13 +1023,13 @@ def aimAtObject(*args, **kwargs):
 			cmds.parent(parent, world=True)
 			reparent = True
 
-		cmds.delete(aimConstraint(parent,
-		                          child,
-		                          aimVector=[1, 0, 0],
-		                          upVector=[0, 1, 0],
-		                          worldUpType='vector',
-		                          worldUpVector=[0, 1, 0]
-		                          )
+		cmds.delete(cmds.aimConstraint(parent,
+		                               child,
+		                               aimVector=[1, 0, 0],
+		                               upVector=[0, 1, 0],
+		                               worldUpType='none',
+		                               worldUpVector=[0, 1, 0],
+		                               )
 		            )
 		freezeTransform(args[1])
 
@@ -1042,8 +1042,6 @@ def aimAtSelected(*args, **kwargs):
 	selected = getSelected()
 	aimAtObject(selected[0], selected[1])
 	return
-
-
 
 
 ########################################################################################################################
@@ -1094,8 +1092,8 @@ class Joint(Node):
 		self.forwardAxis = None
 		self.upAxis = None
 
-		if not nodeExists(self.longName):
-			self.create(radius, drawStyle, type, otherType, kind)
+		if not self.exists:
+			self.create(radius, drawStyle, type, otherType, kind, side)
 
 	def create(self,
 	           radius=1.0,
@@ -1103,21 +1101,24 @@ class Joint(Node):
 	           type=None,
 	           otherType=None,
 	           kind=None,
+	           side=None,
 	           *args, **kwargs):
 
-		if not self.isValid():
-			cmds.select(d=True)
-			self.transform = cmds.joint(name=self.longName)
-			self.exists = True
-			self.canUpdateName = True
-			self.radius = radius
-			self.drawStyle = drawStyle
-			self.type = type
-			self.otherType = otherType
-			self.kind = kind
-			self.disableSegmentScale()
-		else:
-			raise NodeExistsError('Joint "{}" already exists.'.format(self.longName))
+		name = self.longName
+
+		if nodeExists(self.longName):
+			name = replacementNodeName(self.longName)
+
+		cmds.select(d=True)
+		self.transform = cmds.joint(name=name)
+		self.radius = radius
+		self.drawStyle = drawStyle
+		self.type = type
+		self.otherType = otherType
+		self.kind = kind
+		self.side = side
+		self.canUpdateName = True
+		self.disableSegmentScale()
 
 	@property
 	def definition(self):

@@ -1,38 +1,37 @@
 # Lancer Modules
 from rig.utils import *
 from rig.piece import *
-from bodyBase import BASE
+from rigBase import RIGBASE
 
 # Maya Modules
 from maya import cmds
 
 
-class HEAD(BASE):
+class HEAD(RIGBASE):
 	def __init__(self,
-	             head=None,
+	             head,
 	             networkRoot=None,
 	             name=Part.head,
 	             scale=1,
-	             attrControl=None,
+	             master=None,
 	             ):
-		BASE.__init__(self,
-		              objects=rigging.listCheck(head),
-		              networkRoot=networkRoot,
-		              name=name,
-		              side=Position.center,
-		              scale=scale,
-		              attrControl=attrControl,
-		              )
+		RIGBASE.__init__(self,
+		                 items=rigging.listCheck(head),
+		                 networkRoot=networkRoot,
+		                 name=name,
+		                 side=Position.center,
+		                 scale=scale,
+		                 master=master,
+		                 )
 
 		self.head = head
 
-	def create(self):
 		self.getScale()
 		self.createControls()
 		self.createIK()
 		self.setupHierarchy()
 		self.createFKIK()
-		self.createDetailChain(self.objects)
+		self.createDetailChain(self.items)
 
 		self.createLocalWorld(obj=self.fkControl[0],
 		                      local=self.fkGroup[0],
@@ -91,11 +90,11 @@ class HEAD(BASE):
 
 	def createFKIK(self):
 		attrName = Component.fkik
-		rigging.createFKIK(obj=self.head,
-		                   fk=self.fkControl[0],
-		                   ctl=self.fkControl[0],
-		                   ik=self.ikControl[0],
-		                   n=attrName,
+		rigging.createFKIK(items=self.head,
+		                   fkControls=self.fkControl[0],
+		                   master=self.fkControl[0],
+		                   ikControls=self.ikControl[0],
+		                   attrName=attrName,
 		                   )
 
 		cmds.connectAttr('{}.{}'.format(self.fkControl[0], attrName), '{}.v'.format(self.ikGroup[1]))

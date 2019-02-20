@@ -30,7 +30,6 @@ def replacementNodeName(name):
 		return '{}1'.format(name)
 
 
-
 def nodeParent(node):
 	parent = cmds.listRelatives(node, parent=True)
 	return parent[0] if parent else None
@@ -133,7 +132,7 @@ class Node(object):
 		self._name = name
 		self._prefix = prefix
 		self._parent = parent
-		self._children = children if isinstance(children, list) else []
+		self._children = children
 		self._descendants = []
 
 		# Custom Maya Attributes
@@ -153,7 +152,8 @@ class Node(object):
 
 		if nodeExists(name):
 			self.exists = True
-			self.longName = name
+			self.transform = name
+			self.shape = nodeShapes(name)
 
 	def __str__(self):
 		return self.longName
@@ -164,7 +164,6 @@ class Node(object):
 	def create(self, *args, **kwargs):
 		if not self.isValid():
 			self.transform = cmds.group(name=self.longName, empty=True)
-			self.exists = True
 			self.canUpdateName = True
 		else:
 			raise NodeExistsError('Node "{}" already exists.'.format(self.longName))
@@ -179,7 +178,8 @@ class Node(object):
 	@name.setter
 	def name(self, name):
 		self._name = name
-		self.updateName()
+		# if self.canUpdateName:
+		#	self.updateName()
 		return
 
 	@property
@@ -189,7 +189,6 @@ class Node(object):
 	@prefix.setter
 	def prefix(self, prefix):
 		self._prefix = prefix
-		self.updateName()
 		return
 
 	@property
@@ -206,18 +205,13 @@ class Node(object):
 			                )
 
 	@longName.setter
-	def longName(self, name):
-		if self.exists:
-			self._name = name
-		else:
-			nc = TokenizeLongName(name)
-			self._prefix = nc.prefix
-			self._name = nc.name
-			self._side = nc.side
-			self._sector = nc.sector
-			self._index = nc.index
-			self._kind = nc.kind
-		self.updateName()
+	def longName(self, prefix=None, side=None, name=None, sector=None, index=None, kind=None):
+		self._prefix = prefix
+		self._side = side
+		self._name = name
+		self._sector = sector
+		self._index = index
+		self._kind = kind
 		return
 
 	####################################################################################################################
@@ -514,8 +508,8 @@ class Node(object):
 			else:
 				raise ValueError('Invalid side type provided: {}'.format(type(side)))
 
-			if self.canUpdateName:
-				self.updateName()
+			# if self.canUpdateName:
+			# 	self.updateName()
 			setAttribute(self.longName, attribute=MayaAttr.side, value=value)
 		else:
 			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
@@ -548,8 +542,8 @@ class Node(object):
 				setAttribute(self.longName, attribute=UserAttr.sector, value=value, force=True)
 
 			self._sector = sector
-			if self.canUpdateName:
-				self.updateName()
+		# if self.canUpdateName:
+		# 	self.updateName()
 		else:
 			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
@@ -582,8 +576,8 @@ class Node(object):
 					setAttribute(self.longName, attribute=UserAttr.index, value=value, force=True)
 
 				self._index = int(index)
-				if self.canUpdateName:
-					self.updateName()
+			# if self.canUpdateName:
+			# 	self.updateName()
 		else:
 			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
@@ -618,14 +612,14 @@ class Node(object):
 				setAttribute(self.longName, attribute=UserAttr.kind, value=value, force=True)
 
 			self._kind = kind
-			if self.canUpdateName:
-				self.updateName()
+		# if self.canUpdateName:
+		# 	self.updateName()
 		else:
 			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
 
 	####################################################################################################################
-	# Hiearchy
+	# Hierarchy
 	####################################################################################################################
 	@property
 	def parent(self):
@@ -694,7 +688,13 @@ class Node(object):
 		return
 
 	def snapTo(self, node, translation=True, rotation=True):
-		snap(node, self.longName, t=translation, r=rotation)
+		if self.isValid():
+			snap(node, self.longName, t=translation, r=rotation)
+		return
+
+	def freezeTransforms(self):
+		if self.isValid():
+			freezeTransform(self.longName, True, True, True)
 		return
 
 	def isValid(self):

@@ -66,6 +66,7 @@ def addAttribute(node,
                  lock=False,
                  destinationNode=None,
                  destinationAttribute=None,
+                 array=False,
                  ):
 	name = attributeName(node, attribute)
 
@@ -74,17 +75,17 @@ def addAttribute(node,
 		# Create
 		if kind == MayaAttrType.enum:
 			if isinstance(value, (str, list, dict, tuple)):
-				cmds.addAttr(node, longName=attribute, attributeType=kind, enumName=enumName(value))
+				cmds.addAttr(node, longName=attribute, attributeType=kind, enumName=enumName(value), m=array)
 			else:
 				raise ValueError('No default enum values specified.')
 		else:
 			if kind in DataTypes:
-				cmds.addAttr(node, longName=attribute, dataType=kind)
+				cmds.addAttr(node, longName=attribute, dataType=kind, m=array)
 
 			elif kind in AttributeTypes:
-				cmds.addAttr(node, longName=attribute, attributeType=kind, keyable=keyable)
+				cmds.addAttr(node, longName=attribute, attributeType=kind, keyable=keyable, m=array)
 			else:
-				cmds.addAttr(node, longName=attribute)
+				cmds.addAttr(node, longName=attribute, m=array)
 
 		# Set Keyable
 		try:
@@ -100,10 +101,10 @@ def addAttribute(node,
 			elif isinstance(value, str):
 				cmds.setAttr(name, value, type=MayaAttrType.string)
 
-		if minValue:
+		if minValue is not None:
 			cmds.addAttr(name, edit=True, minValue=float(minValue))
 
-		if maxValue:
+		if maxValue is not None:
 			cmds.addAttr(name, edit=True, maxValue=float(maxValue))
 
 		# Set Lock
@@ -269,7 +270,10 @@ def connectDefaultAttributes(*args, **kwargs):
 
 def getKeyableAttributes(node):
 	result = cmds.listAttr(node, k=True)
-	result = [x for x in result if attributeType(node, x) not in ['string']]
+	try:
+		result = [x for x in result if attributeType(node, x) not in ['string']]
+	except TypeError:
+		return []
 	return result if result else []
 
 
@@ -375,10 +379,18 @@ def addBoolAttr(node, name):
 def setEnumByString(node, attr, value):
 	enumString = cmds.attributeQuery(attr, node=node, listEnum=1)[0]
 	enumList = enumString.split(':')
-	index = enumList.index(str(value))
+	try:
+		index = enumList.index(str(value))
+	except ValueError:
+		try:
+			index = enumList.index(str(value).capitalize())
+		except ValueError:
+			return False
+	else:
+		return False
 	attribute = '{}.{}'.format(node, attr)
 	cmds.setAttr(attribute, index)
-	return attribute
+	return True
 
 
 def addSideAttr(node):
@@ -391,13 +403,13 @@ def getConnectedNode(node, attribute):
 	name = '{}.{}'.format(node, attribute)
 
 	if cmds.connectionInfo(name, id=True):
-		query = cmds.listConnections(cmds.connectionInfo(name, ged=True))
+		query = cmds.listConnections(cmds.connectionInfo(name, ged=True), skipConversionNodes=True)
 		if query is None:
 			return query
 		else:
 			return query[0] if len(query) == 1 else query
 	else:
-		query = cmds.listConnections(name)
+		query = cmds.listConnections(name, skipConversionNodes=True)
 		if query is None:
 			return query
 		else:

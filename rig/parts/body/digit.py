@@ -1,30 +1,30 @@
 # Lancer Modules
 from rig.utils import *
-from bodyBase import BASE
+from rigBase import RIGBASE
 
 # Maya Modules
 from maya import cmds
 
 
-class DIGIT(BASE):
+class DIGIT(RIGBASE):
 	def __init__(self,
-	             objects,
+	             items,
 	             side=None,
 	             networkRoot=None,
 	             name=Part.digit,
 	             index=0,
 	             ):
-		BASE.__init__(self,
-		              objects=objects,
-		              networkRoot=networkRoot,
-		              name=name,
-		              side=side,
-		              index=index,
-		              )
+		RIGBASE.__init__(self,
+		                 items=items,
+		                 networkRoot=networkRoot,
+		                 name=name,
+		                 side=side,
+		                 index=index,
+		                 )
 
 		self.getScale()
-		self.createFKChain(self.objects)
-		self.createDetailChain(self.objects)
+		self.createFKChain(self.items)
+		self.createDetailChain(self.items)
 		self.setupHierarchy()
 
 		self.createNetwork(typ=longName(self.name,
@@ -36,11 +36,11 @@ class DIGIT(BASE):
 		self.createNetworkConnections()
 
 	def getScale(self):
-		self.scale = rigging.getDistance(self.objects[0], self.objects[1]) / 2
+		self.scale = rigging.getDistance(self.items[0], self.items[1]) / 2
 		return
 
 	def setupHierarchy(self):
-		for obj in self.objects:
-			i = self.objects.index(obj)
+		for obj in self.items:
+			i = self.items.index(obj)
 			cmds.parentConstraint(self.fkControl[i], obj, mo=True)
 		return

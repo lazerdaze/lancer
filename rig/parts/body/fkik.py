@@ -1,22 +1,22 @@
 # Lancer Modules
 from rig.utils import *
-from bodyBase import BASE
+from rigBase import RIGBASE
 
 # Maya Moudles
 from maya import cmds
 
-class FKIK(BASE):
+class FKIK(RIGBASE):
 	def __init__(self,
 	             start,
 	             mid,
 	             end,
 	             name='fkik',
 	             ):
-		BASE.__init__(self,
-		              objects=[start, mid, end],
-		              name=name,
-		              )
+		RIGBASE.__init__(self,
+		                 items=[start, mid, end],
+		                 name=name,
+		                 )
 
-		self.createFKIKChain(self.objects)
+		self.createFKIKChain(self.items)
 		self.createNetwork(typ='fkik')
 		self.createNetworkConnections()

@@ -17,7 +17,8 @@ import rig.utils.joint
 import rig.utils.skin
 import rig.utils.control
 import rig.auto
-import rig.facePose.ui
+import rig.poseSDK.ui
+import rig.menu
 import anim.stickyFeet
 import anim.refPlayer.ui
 import anim.refman
@@ -110,10 +111,10 @@ def show(*args):
 	cmds.menuItem(label='Channel Box +', c=channelBoxUI)
 	cmds.menuItem(d=True, l='Rigging')
 	cmds.menuItem(label='Rig Tools', c=rigUI)
-	rig.menuItems()
+	rig.menu.menuItems()
 
 	cmds.menuItem(l='Facial', subMenu=True, to=True)
-	rig.facePose.ui.menu()
+	rig.poseSDK.ui.menu()
 	cmds.setParent('..', menu=True)
 
 	cmds.menuItem(d=True, l='Animation')

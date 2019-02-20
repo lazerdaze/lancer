@@ -40,6 +40,7 @@ def onSelected(func):
 	def wrapper(*args, **kwargs):
 		for item in getSelected():
 			func(item, **kwargs)
+
 	return wrapper
 
 
@@ -49,6 +50,7 @@ def onSingleSelected(func):
 
 	def wrapper(*args, **kwargs):
 		func(getSingleSelected(), **kwargs)
+
 	return wrapper
 
 
@@ -58,10 +60,24 @@ def getChild(root, typ='joint', *args):
 		return child[0]
 
 
-def listCheck(var, *args):
-	if type(var) is str or type(var) is unicode:
-		var = [str(var)]
-	return var
+def listCheck(var, *args, **kwargs):
+	if isinstance(var, (str, unicode, int, float)):
+		return [var]
+	elif isinstance(var, (tuple, dict)):
+		return [x for x in var]
+	elif isinstance(var, list):
+		return var
+	return []
+
+
+def isObject(query, kind=None, *args, **kwargs):
+	if kind is None:
+		return isinstance(query, object)
+	else:
+		if isinstance(query, object):
+			if kind == query.__class__.__name__:
+				return True
+	return False
 
 
 def flatList(*args, **kwargs):
@@ -101,27 +117,27 @@ def forwardAxis(obj, axis=[0, 0, 0], *args):
 	return
 
 
-def snap(par, child, t=False, r=False):
-	parPosition = cmds.xform(par, q=True, ws=True, rp=True)
-	parRotation = cmds.xform(par, q=True, ws=True, ro=True)
+def snap(source, destination, t=False, r=False):
+	parPosition = cmds.xform(source, q=True, ws=True, rp=True)
+	parRotation = cmds.xform(source, q=True, ws=True, ro=True)
 
 	if t:
-		cmds.xform(child, t=parPosition, ws=True)
+		cmds.xform(destination, t=parPosition, ws=True)
 	if r:
-		cmds.xform(child, ro=parRotation, ws=True)
+		cmds.xform(destination, ro=parRotation, ws=True)
 	return
 
 
-def createGroup(obj, n='grp'):
-	grp = cmds.group(n=n, em=True)
-	snap(obj, grp, t=True, r=True)
-	par = cmds.listRelatives(obj, parent=True)
+def createGroup(node, name='grp'):
+	grp = cmds.group(n=name, em=True)
+	snap(node, grp, t=True, r=True)
+	par = cmds.listRelatives(node, parent=True)
 
 	if par:
 		par = par[0]
 		cmds.parent(grp, par)
 
-	cmds.parent(obj, grp)
+	cmds.parent(node, grp)
 
 	return grp
 

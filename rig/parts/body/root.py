@@ -1,26 +1,25 @@
 # Lancer Modules
 from rig.utils import *
 from rig.piece import *
-from bodyBase import BASE
+from rigBase import RIGBASE
 
 # Maya Moudles
 from maya import cmds
 
 
-class ROOT(BASE):
+class ROOT(RIGBASE):
 	def __init__(self,
-	             root=None,
+	             root,
 	             name='character',
 	             scale=1,
 	             ):
-		BASE.__init__(self,
-		              name=name,
-		              side='Center',
-		              scale=scale,
-		              )
+		RIGBASE.__init__(self,
+		                 name=name,
+		                 side='Center',
+		                 scale=scale,
+		                 )
 		self.root = root
 
-	def create(self):
 		if self.root:
 			self.objects = [self.root]
 			self.getScale()

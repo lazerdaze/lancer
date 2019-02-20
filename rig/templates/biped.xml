@@ -1,18 +1,115 @@
-<biped>
-    <COG cog="cog" hip="hip">
-    </COG>
-    <SPINE objects="spine">
-    </SPINE>
-    <NECK objects="neck">
-    </NECK>
-    <HEAD head="head">
-    </HEAD>
-    <LEFTARM collar="leftCollar" shoulder="leftShoulder" elbow="leftElbow" hand="leftHand">
-    </LEFTARM>
-    <LEFTLEG hip="leftHip" knee="leftKnee" foot="leftFoot">
-    </LEFTLEG>
-    <RIGHTARM collar="rightCollar" shoulder="rightShoulder" elbow="rightElbow" hand="rightHand">
-    </RIGHTARM>
-    <RIGHTLEG hip="rightHip" knee="rightKnee" foot="rightFoot">
-    </RIGHTLEG>
-</biped>
+<template name="biped">
+    <definition>
+        <root type="other" otherType="root" side="center"/>
+        <cog type="cog" otherType="" side="center"/>
+        <hip type="hip" otherType="" side="center"/>
+        <spine type="spine" otherType="" side="center"/>
+        <neck type="neck" otherType="" side="center"/>
+        <head type="head" otherType="" side="center"/>
+
+        <leftCollar type="collar" otherType="" side="left"/>
+        <leftShoulder type="shoulder" otherType="" side="left"/>
+        <leftElbow type="elbow" otherType="" side="left"/>
+        <leftHand type="hand" otherType="" side="left"/>
+
+        <rightCollar type="collar" otherType="" side="right"/>
+        <rightShoulder type="shoulder" otherType="" side="right"/>
+        <rightElbow type="elbow" otherType="" side="right"/>
+        <rightHand type="hand" otherType="" side="right"/>
+
+        <leftThumb type="thumb" otherType="" side="left"/>
+        <leftIndexFinger type="indexFinger" otherType="" side="left"/>
+        <leftMiddleFinger type="middleFinger" otherType="" side="left"/>
+        <leftRingFinger type="ringFinger" otherType="" side="left"/>
+        <leftPinkyFinger type="pinkyFinger" otherType="" side="left"/>
+
+        <rightThumb type="thumb" otherType="" side="right"/>
+        <rightIndexFinger type="indexFinger" otherType="" side="right"/>
+        <rightMiddleFinger type="middleFinger" otherType="" side="right"/>
+        <rightRingFinger type="ringFinger" otherType="" side="right"/>
+        <rightPinkyFinger type="pinkyFinger" otherType="" side="right"/>
+
+        <leftHip type="hip" otherType="" side="left"/>
+        <leftKnee type="knee" otherType="" side="left"/>
+        <leftFoot type="foot" otherType="" side="left"/>
+        <leftToe type="toe" otherType="" side="left"/>
+
+        <rightHip type="hip" otherType="" side="right"/>
+        <rightKnee type="knee" otherType="" side="right"/>
+        <rightFoot type="foot" otherType="" side="right"/>
+        <rightToe type="toe" otherType="" side="right"/>
+
+        <leftBigToe type="bigToe" otherType="" side="left"/>
+        <leftIndexToe type="indexToe" otherType="" side="left"/>
+        <leftMiddleToe type="middleToe" otherType="" side="left"/>
+        <leftRingToe type="ringToe" otherType="" side="left"/>
+        <leftPinkyToe type="pinkyToe" otherType="" side="left"/>
+
+        <rightBigToe type="bigToe" otherType="" side="right"/>
+        <rightIndexToe type="indexToe" otherType="" side="right"/>
+        <rightMiddleToe type="middleToe" otherType="" side="right"/>
+        <rightRingToe type="ringToe" otherType="" side="right"/>
+        <rightPinkyToe type="pinkyToe" otherType="" side="right"/>
+    </definition>
+
+    <rig>
+        <COG cog="cog" hip="hip"/>
+        <SPINE objects="spine"/>
+        <NECK objects="neck"/>
+        <HEAD head="head"/>
+        <LEFTARM collar="leftCollar" shoulder="leftShoulder" elbow="leftElbow" hand="leftHand"/>
+        <RIGHTARM collar="rightCollar" shoulder="rightShoulder" elbow="rightElbow" hand="rightHand"/>
+        <LEFTLEG hip="leftHip" knee="leftKnee" foot="leftFoot" toe="leftToe"/>
+        <RIGHTLEG hip="rightHip" knee="rightKnee" foot="rightFoot" toe="rightToe"/>
+    </rig>
+
+    <hik>
+        <Reference definition="root"/>
+        <Hips definition="cog"/>
+        <Spine definition="spine" index="True"/>
+        <Neck definition="neck" index="True"/>
+        <Head definition="head"/>
+        
+        <LeftShoulder definition="leftCollar"/>
+        <LeftArm definition="leftShoulder"/>
+        <LeftForeArm definition="leftElbow"/>
+        <LeftHand definition="leftHand"/>
+        
+        <RightShoulder definition="rightCollar"/>
+        <RightArm definition="rightShoulder"/>
+        <RightForeArm definition="rightElbow"/>
+        <RightHand definition="rightHand"/>
+        
+        <LeftUpLeg definition="leftHip"/>
+        <LeftLeg definition="leftKnee"/>
+        <LeftFoot definition="leftFoot"/>
+        <LeftToeBase definition="leftToe"/>
+        
+        <RightUpLeg definition="rightHip"/>
+        <RightLeg definition="rightKnee"/>
+        <RightFoot definition="rightFoot"/>
+        <RightToeBase definition="rightToe"/>
+        
+        <LeftHandThumb definition="leftThumb" index="True"/>
+        <LeftHandIndex definition="leftIndexFinger" index="True" />
+        <LeftHandMiddle definition="leftMiddleFinger" index="True"/>
+        <LeftHandRing definition="leftRingFinger" index="True"/>
+        <LeftHandPinky definition="leftPinkyFinger" index="True"/>
+        
+        <RightHandThumb definition="rightThumb" index="True"/>
+        <RightHandIndex definition="rightIndexFinger" index="True"/>
+        <RightHandMiddle definition="rightMiddleFinger" index="True"/>
+        <RightHandRing definition="rightRingFinger" index="True"/>
+        <RightHandPinky definition="rightPinkyFinger" index="True"/>
+        
+        <LeftFootThumb definition="" key="leftThumb" index="True"/>
+        <LeftFootMiddle definition="" key="leftMiddle" index="True"/>
+        <LeftFootRing definition="" key="leftRing" index="True"/>/>
+        <LeftFootPinky definition="" key="leftPinky" index="True"/>/>
+        
+        <RightFootThumb definition="" key="rightThumb" index="True"/>/>
+        <RightFootMiddle definition="" key="rightMiddle" index="True"/>/>
+        <RightFootRing definition="" key="rightRing" index="True"/>/>
+        <RightFootPinky definition="" key="rightPinky" index="True"/>/>
+    </hik>
+</template>

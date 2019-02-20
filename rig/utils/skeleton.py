@@ -343,6 +343,103 @@ def getSkeletonBindJoints(root, kind='bind'):
 	return result if result else None
 
 
+def getImmediateBindJoints(root, kind='bind', *args, **kwargs):
+	'''
+	By Connection: / Fast / Reliable
+	By Label: Fast / Reliable
+	By Name: Fast / Unreliable
+
+	Result = sort by distance to root
+
+	:param root:
+	:param kind:
+	:return:
+	'''
+
+	kind = kind.lower()
+
+	if nodeType(root) != 'joint':
+		raise NodeTypeError('Must provide a root joint.')
+
+	result = []
+	children = getJointChildren(root)
+
+	distanceDict = {}
+
+	# Connection
+	if attributeExist(root, kind):
+		conn = cmds.listConnections(attributeName(root, kind))
+
+		if conn:
+			for con in conn:
+				if con in children:
+					result.append(con)
+	else:
+		# Label
+		for child in children:
+			if str(getAttribute(child, 'otherType')).lower() == kind:
+				if child not in result:
+					result.append(child)
+			else:
+				# Name
+				query = [x.lower() for x in child.split('_')]
+
+				if kind in query:
+					if kind == 'bind' and 'leaf' in query:
+						pass
+					else:
+						if child not in result:
+							result.append(child)
+
+	# Sort By Distance
+	for item in result:
+		distanceDict[getDistance(root, item)] = item
+
+	return [distanceDict[x] for x in sorted(distanceDict)]
+
+
+def getImmediateLeafJoints(root, kind='leaf', *args, **kwargs):
+	kind = kind.lower()
+
+	if nodeType(root) != 'joint':
+		raise NodeTypeError('Must provide a root joint.')
+
+	result = []
+
+	# By Bind Joints:
+	for joint in getImmediateBindJoints(root):
+		rel = getAllJointChildren(joint)
+
+		if rel:
+			for child in rel:
+				# By Label
+				if str(getAttribute(child, 'otherType')).lower() == kind:
+					if child not in result:
+						result.append(child)
+				else:
+					# Name
+					query = [x.lower() for x in child.split('_')]
+
+					if kind in query:
+						if child not in result:
+							result.append(child)
+	return result
+
+
+def immediateBindJointsCallback(bind=True, leaf=False, *args, **kwargs):
+	selected = getSelected()
+	result = []
+
+	for item in selected:
+		if bind:
+			result += getImmediateBindJoints(item)
+		if leaf:
+			result += getImmediateLeafJoints(item)
+
+	cmds.select(result)
+	return result
+
+
 ########################################################################################################################
 #
 #
@@ -931,6 +1028,7 @@ class Skeleton(Axml):
 		return
 
 
+# FIXME: This breaks. Need to subclass Template
 def skeletonSetupCallback(kind=SkeletonType.biped, *args, **kwargs):
 	selected = getSingleSelected()
 	skeleton = Skeleton(root=selected)
