@@ -211,7 +211,7 @@ def validateSkeleton(root, *args, **kwargs):
 									debug = True
 
 							# Joint Orient
-							value = joint.jointOrient
+							value = [0.0 if 'e-' in str(x) else x for x in joint.jointOrient]
 							zeroCount = 3 - value.count(0.0)
 
 							if zeroCount >= 2:
@@ -243,7 +243,7 @@ def validateSkeleton(root, *args, **kwargs):
 							log.debug('{} : is missing OtherType Label'.format(joint))
 							debug = True
 
-					if joint.sideLabel == 'none':
+					if joint.side == 'none':
 						log.debug('{} : is missing Side Label'.format(joint))
 						debug = True
 

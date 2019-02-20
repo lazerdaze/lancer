@@ -1,5 +1,7 @@
 # Lancer Modules
 from library import xfer
+from general import *
+from joint import *
 from rigging import *
 from skeleton import *
 
@@ -72,7 +74,7 @@ def removeSkinCluster(mesh):
 
 
 def bindSkinToSkeleton(mesh, root):
-	joints = skeleton.getAllJointChildren(root)
+	joints = getAllJointChildren(root)
 	joints.append(root)
 	cmds.select(joints)
 	cmds.select(mesh, add=True)
@@ -302,7 +304,7 @@ class Import:
 			self.skinData = self.data[transform]['skinCluster']
 
 			self.skeletonRoot = self.data[transform]['skeletonRoot']
-			self.skeletonJoints = skeleton.getAllJointChildren(self.skeletonRoot)
+			self.skeletonJoints = getAllJointChildren(self.skeletonRoot)
 
 			if self.skeletonJoints:
 				if self.skeletonRoot not in self.skeletonJoints:
@@ -478,7 +480,7 @@ class Export:
 
 
 def exportSkinWeights(debug=False, *args):
-	selected = rigging.getSelected()
+	selected = getSelected()
 
 	if selected:
 		if len(selected) > 1:

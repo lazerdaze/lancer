@@ -1,249 +1,306 @@
 # Lancer Modules
 from rig.utils import *
 
-# Maya Modules
-from maya import cmds
 
-
-class CONTROL(object):
+class CONTROL(Control):
 	def __init__(self,
-	             name=Component.control,
-	             typ='circle',
-	             scale=1,
-	             axis=None,
-	             translate=False,
-	             rotate=False,
-	             child=None,
+	             name=Component.rig,
 	             parent=None,
-	             index=0,
+	             prefix=None,
+	             item=None,
+	             wireType=WireType.circleRotate,
+	             axis=None,
+	             scale=1.0,
+	             index=None,
 	             side=None,
-	             label=None,
-	             color=None,
+	             sector=None,
+	             color=WireColor.blue,
+	             offset=False,
+	             kind=None,
 	             ):
-		"""
-		Base Control class to be used in all parts classes.
-		Created as a joint with nurbs shape node and default attributes.
+		Control.__init__(self,
+		                 name=name,
+		                 parent=parent,
+		                 prefix=prefix,
+		                 item=item,
+		                 wire=wireType,
+		                 axis=axis,
+		                 scale=scale,
+		                 index=index,
+		                 side=side,
+		                 sector=sector,
+		                 color=color,
+		                 offset=offset,
+		                 kind=camelCase(kind, Component.control, capitalize=False),
+		                 )
 
-		:param name:        Name of the control.
-		:param typ:         Preset wire type.
-		:param scale:       Scale of control. Default is 1.
-		:param axis:        Forward axis of the control.
-		:param translate:   Snap the position of the control to the child.
-		:param rotate:      Snap the rotation of the control to the child.
-		:param child:       Object that is parented to the control.
-		:param parent:      Object that the control is parented to.
-		:param index:       Used to determined rig priority.
-		:param side:        Side of the controls origin.
-		:param label:       Label of the control to determine rig type.
-		:param color:       Color of control.
-		"""
+		self.setDefaults()
 
-		self.name = name
-		self.typ = typ
-		self.scale = scale
-		self.axis = axis if axis else [1, 0, 0]
-		self.translate = translate
-		self.rotate = rotate
-		self.child = child
-		self.parent = parent
-		self.index = index
-		self.side = side
-		self.label = label
-		self.color = color
+	def setDefaults(self):
+		for item in [self.transform, self.offsetTransform]:
+			if item:
+				for attr in [Component.parent,
+				             Component.rig,
+				             ]:
+					if not attributeExist(item, attr):
+						addAttribute(node=item, attribute=attr, kind=MayaAttrType.message)
 
-		self.transform = None
-		self.shape = None
-		self.group = None
-
-		self.create()
-
-	def create(self):
-		ctl = createControl(name=self.name,
-		                    shape=self.typ,
-		                    axis=self.axis,
-		                    scale=self.scale,
-		                    )
-		self.transform = ctl[0]
-		self.shape = ctl[1]
-		self.setAttributes(self.transform)
-		self.setLabel()
-		self.setColor()
-		self.createGroup()
-		return
-
-	def setAttributes(self, selected):
-		for attr in [Component.character,
-		             Component.skeletonNetwork,
-		             Component.rigNetwork,
-		             Component.rigNetworkRoot,
-		             ]:
-			cmds.addAttr(selected, ln=attr, at='message')
-
-		cmds.addAttr(selected, ln=Component.index, at='long', dv=self.index)
-		return
-
-	def setColor(self):
-		if type(self.color) is str:
-			presetWireColor(self.transform, self.color)
-		if type(self.color) is list:
-			overrideColor(listCheck(self.transform), color=self.color)
-		return
-
-	def createGroup(self):
-		self.group = cmds.group(name=longName(self.transform, Component.group), em=True)
-		cmds.parent(self.transform, self.group)
-		if self.child:
-			snap(self.child, self.group, t=True, r=True)
-		self.setAttributes(self.group)
-		return
-
-	def setLabel(self):
-		if self.label:
-			if ' ' in self.label:
-				newStr = ''
-				var = self.label.split(' ')
-
-				for x in var:
-					i = var.index(x)
-					if i == 0:
-						space = ''
-					else:
-						space = ' '
-					newStr += '{}{}'.format(space, str(x).capitalize())
-
-				self.label = newStr
-			else:
-				self.label = self.label.capitalize()
-
-		if self.side and self.label:
-			setJointLabel(self.transform, side=self.side.capitalize(), typ=self.label)
-		elif self.side and not self.label:
-			setJointLabel(self.transform, side=self.side.capitalize(), typ='None')
-		elif self.label and not self.side:
-			setJointLabel(self.transform, side='Center', typ=self.label)
+				for attr in [Component.children]:
+					if not attributeExist(item, attr):
+						addAttribute(node=item, attribute=attr, kind=MayaAttrType.string, lock=True)
 		return
 
 
 class FKCONTROL(CONTROL):
 	def __init__(self,
-	             name='fk_control',
-	             scale=1,
-	             child=None,
+	             name=Component.rig,
 	             parent=None,
-	             index=0,
-	             side=None,
-	             label=None,
+	             prefix=None,
+	             item=None,
+	             wireType=WireType.circleRotate,
 	             axis=None,
+	             scale=1.0,
+	             index=None,
+	             side=None,
+	             sector=None,
+	             color=None,
 	             ):
+
+		if color is None:
+			if side == Position.left:
+				color = WireColor.blue
+			elif side == Position.right:
+				color = WireColor.red
+			elif side == Position.center:
+				color = WireColor.yellow
+			else:
+				color = WireColor.blue
+
 		CONTROL.__init__(self,
 		                 name=name,
-		                 typ=WireType.circleRotate,
-		                 scale=scale,
-		                 child=child,
 		                 parent=parent,
+		                 prefix=prefix,
+		                 item=item,
+		                 wireType=wireType,
+		                 axis=axis,
+		                 scale=scale,
 		                 index=index,
 		                 side=side,
-		                 label=label,
-		                 color=Component.fk,
-		                 axis=axis,
+		                 sector=sector,
+		                 offset=True,
+		                 kind=Component.fk,
+		                 color=color,
 		                 )
 
 
 class IKCONTROL(CONTROL):
 	def __init__(self,
-	             name='ik_control',
-	             scale=1,
-	             child=None,
+	             name=Component.rig,
 	             parent=None,
-	             index=0,
-	             side=None,
-	             label=None,
+	             prefix=None,
+	             item=None,
+	             wireType=WireType.sphere,
 	             axis=None,
+	             scale=1.0,
+	             index=None,
+	             side=None,
+	             sector=None,
+	             color=None,
 	             ):
+
+		if color is None:
+			if side == Position.left:
+				color = WireColor.cyan
+			elif side == Position.right:
+				color = WireColor.magenta
+			elif side == Position.center:
+				color = WireColor.green
+			else:
+				color = WireColor.red
+
 		CONTROL.__init__(self,
 		                 name=name,
-		                 typ=WireType.sphere,
-		                 scale=scale,
-		                 child=child,
 		                 parent=parent,
+		                 prefix=prefix,
+		                 item=item,
+		                 wireType=wireType,
+		                 axis=axis,
+		                 scale=scale,
 		                 index=index,
 		                 side=side,
-		                 label=label,
-		                 color=Component.ik,
-		                 axis=axis,
+		                 sector=sector,
+		                 color=color,
+		                 offset=True,
+		                 kind=Component.ik,
 		                 )
 
 
-class ATTRCONTROL(CONTROL):
+class MASTERCONTROL(CONTROL):
 	def __init__(self,
-	             name='attr_control',
-	             scale=1,
-	             child=None,
+	             name=Component.rig,
 	             parent=None,
-	             index=0,
-	             side=None,
-	             label=None,
+	             prefix=None,
+	             item=None,
+	             wireType=WireType.master,
 	             axis=None,
+	             scale=1.0,
+	             index=None,
+	             side=None,
+	             sector=None,
 	             ):
 		CONTROL.__init__(self,
 		                 name=name,
-		                 typ=WireType.lollipop,
-		                 scale=scale,
-		                 child=child,
 		                 parent=parent,
+		                 prefix=prefix,
+		                 item=item,
+		                 wireType=wireType,
+		                 axis=axis,
+		                 scale=scale,
 		                 index=index,
 		                 side=side,
-		                 label=label,
-		                 color=Component.attr,
-		                 axis=axis,
+		                 sector=sector,
+		                 color=WireColor.purple,
+		                 kind=Component.master,
 		                 )
 
+	def setDefaults(self):
+		CONTROL.setDefaults(self)
 
-class DETAILCONTROL(CONTROL):
+		item = self.transform
+		lockKeyableAttributes(item, hide=True)
+
+		for attr in [Component.joint,
+		             Component.bind,
+		             Component.leaf,
+		             ]:
+
+			if not attributeExist(item, attr):
+				addAttribute(node=item, attribute=attr, kind=MayaAttrType.string, lock=True)
+
+		for attr in [Component.fkControl,
+		             Component.ikControl,
+		             Component.ikJoint,
+		             Component.bindControl,
+		             Component.leafControl,
+		             ]:
+
+			if not attributeExist(item, attr):
+				addAttribute(node=item, attribute=attr, kind=MayaAttrType.string, array=True)
+
+		for attr in [Component.bindTwist,
+		             Component.fkStretch,
+		             Component.ikStretch,
+		             Component.bindStretch,
+		             Component.bindSns,
+		             ]:
+
+			if not attributeExist(item, attr):
+				addAttribute(node=item, attribute=attr, kind=MayaAttrType.float, array=True,
+				             keyable=False)
+
+		for attr in [Component.fkik,
+		             Component.fkLocalWorld,
+		             Component.ikLocalWorld,
+		             Component.twistAuto,
+		             Component.twist,
+		             Component.stretchAuto,
+		             Component.stretch,
+		             Component.snsAuto,
+		             Component.sns,
+		             ]:
+
+			if not attributeExist(item, attr):
+				minValue = None
+				maxValue = None
+				defaultValue = None
+
+				if 'local' in attr.lower():
+					minValue = 0
+					maxValue = 1
+					defaultValue = 0
+
+				elif 'auto' in attr.lower():
+					minValue = 0
+					maxValue = 1
+					defaultValue = 1
+
+				elif Component.fkik == attr:
+					minValue = 0
+					maxValue = 1
+					defaultValue = 0
+
+				addAttribute(node=item, attribute=attr, kind=MayaAttrType.float, minValue=minValue, maxValue=maxValue,
+				             value=defaultValue, channelBox=False, keyable=True)
+
+		for attr in [Component.mirror,
+		             Component.fkPoleVector,
+		             Component.ikPoleVector,
+		             Component.ikHandle,
+		             Component.set,
+		             ]:
+
+			if not attributeExist(item, attr):
+				addAttribute(node=item, attribute=attr, kind=MayaAttrType.message)
+
+		for attr in [Component.jointDisplay, Component.controlDisplay, Component.detailControlDisplay]:
+			if not attributeExist(item, attr):
+				addAttribute(node=item, attribute=attr, kind=MayaAttrType.bool, channelBox=True, keyable=False)
+		return
+
+
+class BINDCONTROL(CONTROL):
 	def __init__(self,
-	             name='detail_control',
-	             scale=1,
-	             child=None,
+	             name=Component.rig,
 	             parent=None,
-	             index=0,
-	             side=None,
-	             label=None,
+	             prefix=None,
+	             item=None,
+	             wireType=WireType.doubleLollipop,
 	             axis=None,
+	             scale=1.0,
+	             index=None,
+	             side=None,
+	             sector=None,
 	             ):
 		CONTROL.__init__(self,
 		                 name=name,
-		                 typ=WireType.doubleLollipop,
+		                 parent=parent,
+		                 prefix=prefix,
+		                 item=item,
+		                 wireType=wireType,
+		                 axis=axis,
 		                 scale=scale * 1.5,
-		                 child=child,
-		                 parent=parent,
 		                 index=index,
 		                 side=side,
-		                 label=label,
+		                 sector=sector,
 		                 color=[.5, 1, 1],
-		                 axis=axis,
+		                 kind=Component.bind,
 		                 )
 
 
-class GRANDCHILDCONTROL(CONTROL):
+class LEAFCONTROL(CONTROL):
 	def __init__(self,
-	             name='grandChild_control',
-	             scale=1,
-	             child=None,
+	             name=Component.rig,
 	             parent=None,
-	             index=0,
-	             side=None,
-	             label=None,
+	             prefix=None,
+	             item=None,
+	             wireType=WireType.diamond,
 	             axis=None,
+	             scale=1.0,
+	             index=None,
+	             side=None,
+	             sector=None,
 	             ):
 		CONTROL.__init__(self,
 		                 name=name,
-		                 typ=WireType.diamond,
-		                 scale=scale * 2,
-		                 child=child,
 		                 parent=parent,
+		                 prefix=prefix,
+		                 item=item,
+		                 wireType=wireType,
+		                 axis=axis,
+		                 scale=scale,
 		                 index=index,
 		                 side=side,
-		                 label=label,
+		                 sector=sector,
 		                 color=[.5, 1, 1],
-		                 axis=axis,
+		                 kind=Component.leaf,
 		                 )

@@ -1,30 +1,30 @@
 # Lancer Modules
 from rig.utils import *
 from rig.piece import *
-from bodyBase import BASE
+from rigBase import RIGBASE
 from digit import DIGIT
 
 # Maya Moudles
 from maya import cmds
 
 
-class ARM(BASE):
+class ARM(RIGBASE):
 	def __init__(self,
-	             side=None,
-	             shoulder=None,
-	             elbow=None,
-	             hand=None,
+	             side,
+	             shoulder,
+	             elbow,
+	             hand,
 	             collar=None,
 	             networkRoot=None,
 	             name=Part.arm,
 	             index=0,
 	             ):
-		BASE.__init__(self,
-		              networkRoot=networkRoot,
-		              name=name,
-		              side=side,
-		              index=index,
-		              )
+		RIGBASE.__init__(self,
+		                 networkRoot=networkRoot,
+		                 name=name,
+		                 side=side,
+		                 index=index,
+		                 )
 
 		self.collar = collar
 		self.collarFKControl = None
@@ -39,14 +39,18 @@ class ARM(BASE):
 
 		self.getScale()
 		self.createFKIKChain(self.objects)
-		self.createTwistChain(self.shoulder, self.elbow, self.hand)
+
+
+		#self.createTwistChain(self.shoulder, self.elbow, self.hand)
 
 		if self.collar:
 			self.createDetailChain(self.collar)
 			self.createCollar()
 
 		self.createGrandchildren([self.shoulder, self.elbow, self.hand])
-		self.createHand()
+
+		# FIXME: HAND Class
+		#self.createHand()
 		self.createLocalWorld(obj=self.fkControl[0],
 		                      local=self.fkGroup[0],
 		                      )
@@ -104,11 +108,10 @@ class ARM(BASE):
 
 		if self.collarFKControl:
 			self.connectToNetwork(self.collarFKControl, self.network, 'collarFkControl')
-
 		return
 
 
-class HAND(BASE):
+class HAND(RIGBASE):
 	def __init__(self,
 	             hand,
 	             side,
@@ -116,13 +119,13 @@ class HAND(BASE):
 	             name=Part.hand,
 	             index=0,
 	             ):
-		BASE.__init__(self,
-		              objects=rigging.listCheck(hand),
-		              networkRoot=networkRoot,
-		              name=name,
-		              side=side,
-		              index=index,
-		              )
+		RIGBASE.__init__(self,
+		                 items=rigging.listCheck(hand),
+		                 networkRoot=networkRoot,
+		                 name=name,
+		                 side=side,
+		                 index=index,
+		                 )
 
 		self.hand = hand
 		self.finger = []
@@ -141,7 +144,7 @@ class HAND(BASE):
 		i = 0
 		for child in children:
 			joints = getJointOrder(child)
-			finger = DIGIT(objects=joints,
+			finger = DIGIT(items=joints,
 			               name=Part.finger,
 			               side=self.side,
 			               networkRoot=self.networkRoot,
@@ -153,3 +156,13 @@ class HAND(BASE):
 
 	def updateNetwork(self):
 		return
+
+
+class LEFTARM(ARM):
+	def __init__(self, *args, **kwargs):
+		ARM.__init__(self, side=Position.left, *args, **kwargs)
+
+
+class RIGHTARM(ARM):
+	def __init__(self, *args, **kwargs):
+		ARM.__init__(self, side=Position.right, *args, **kwargs)

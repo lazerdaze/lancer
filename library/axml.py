@@ -57,7 +57,7 @@ from xml.dom import minidom
 from xml.etree import ElementTree as etree
 
 class Axml(object):
-	def __init__(self, filepath=None):
+	def __init__(self, filepath=None, *args, **kwargs):
 
 		self.filepath = filepath
 		self._root = None

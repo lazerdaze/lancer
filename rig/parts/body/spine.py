@@ -1,36 +1,36 @@
 # Lancer Modules
 from rig.utils import *
 from rig.piece import *
-from bodyBase import BASE
+from rigBase import RIGBASE
 
 # Maya Moudles
 from maya import cmds
 
 
-class SPINE(BASE):
+class SPINE(RIGBASE):
 	def __init__(self,
-	             objects=None,
+	             items,
 	             networkRoot=None,
 	             name='spine',
 	             scale=1,
-	             attrControl=None,
+	             master=None,
 	             ):
-		BASE.__init__(self,
-		              objects=objects,
-		              networkRoot=networkRoot,
-		              name=name,
-		              side='Center',
-		              scale=scale,
-		              attrControl=attrControl,
-		              )
+		RIGBASE.__init__(self,
+		                 items=items,
+		                 networkRoot=networkRoot,
+		                 name=name,
+		                 side='Center',
+		                 scale=scale,
+		                 master=master,
+		                 axis=[1, 1, 0],
+		                 )
 
-	def create(self):
 		self.getScale()
-		self.createFKChain(self.objects)
+		self.createFKChain(self.items)
 		self.constrainSpine()
-		self.createParent(name='rig_grp'.format(self.name), child=self.objects[0])
+		self.createParent(name='rig_grp'.format(self.name), child=self.items[0])
 		self.setupHierarchy()
-		self.createDetailChain(self.objects)
+		self.createDetailChain(self.items)
 		self.overrideColor()
 
 		self.createSet(self.fkControl)
@@ -38,22 +38,22 @@ class SPINE(BASE):
 		self.createNetworkConnections()
 
 	def getScale(self):
-		if len(self.objects) > 1:
-			start = self.objects[0]
-			end = self.objects[1]
+		if len(self.items) > 1:
+			start = self.items[0]
+			end = self.items[1]
 			distance = rigging.getDistance(start, end)
 			self.scale = distance * 1.5
 		return
 
 	def constrainSpine(self):
-		for obj in self.objects:
-			i = self.objects.index(obj)
+		for obj in self.items:
+			i = self.items.index(obj)
 			cmds.parentConstraint(self.fkControl[i], obj, mo=True)
 
 	def setupHierarchy(self):
 		cmds.parent(self.fkParent, self.parent)
 
-		parent = cmds.listRelatives(self.objects[0], parent=True)
+		parent = cmds.listRelatives(self.items[0], parent=True)
 		parent = parent[0] if parent else None
 		if parent:
 			cmds.parent(self.parent, parent)
@@ -75,18 +75,18 @@ class SPINE(BASE):
 
 class NECK(SPINE):
 	def __init__(self,
-	             objects=None,
+	             items,
 	             networkRoot=None,
 	             name=Part.neck,
 	             scale=1,
-	             attrControl=None,
+	             master=None,
 	             ):
 		SPINE.__init__(self,
-		               objects=objects,
+		               items=items,
 		               networkRoot=networkRoot,
 		               name=name,
 		               scale=scale,
-		               attrControl=attrControl,
+		               master=master,
 		               )
 
 		self.createLocalWorld(obj=self.fkControl[0],
@@ -95,10 +95,10 @@ class NECK(SPINE):
 
 	def getScale(self):
 		distanceList = []
-		children = cmds.listRelatives(self.objects[0], children=True)
+		children = cmds.listRelatives(self.items[0], children=True)
 		if children:
 			for child in children:
-				start = self.objects[0]
+				start = self.items[0]
 				end = child
 				distanceList.append(rigging.getDistance(start, end))
 
