@@ -1,102 +1,205 @@
 # Lancer Modules
 from rig.utils import *
-from rig.piece import *
-from bodyBase import BASE
+from rig.parts.baseRig import BASERIG
 
 # Maya Modules
 from maya import cmds
 
 
-class HEAD(BASE):
+class NECK(BASERIG):
 	def __init__(self,
-	             head=None,
-	             networkRoot=None,
-	             name=Part.head,
-	             scale=1,
-	             attrControl=None,
+	             items,
+	             parent=None
 	             ):
-		BASE.__init__(self,
-		              objects=rigging.listCheck(head),
-		              networkRoot=networkRoot,
-		              name=name,
-		              side=Position.center,
-		              scale=scale,
-		              attrControl=attrControl,
-		              )
+		BASERIG.__init__(self,
+		                 prefix=Part.neck,
+		                 side=Position.center,
+		                 kind=Part.neck,
+		                 items=items,
+		                 parent=parent,
+		                 axis=[1, 1, 0]
+		                 )
 
-		self.head = head
+		self.create()
 
 	def create(self):
-		self.getScale()
-		self.createControls()
-		self.createIK()
-		self.setupHierarchy()
-		self.createFKIK()
-		self.createDetailChain(self.objects)
+		# Scale
+		self.scale = self.scaleByDistance(self.items) * 2.0
 
-		self.createLocalWorld(obj=self.fkControl[0],
-		                      local=self.fkGroup[0],
-		                      )
-		self.createSet([self.fkControl[0], self.ikControl[1]])
-		self.createNetwork(typ=self.name)
-		self.createNetworkConnections()
-		self.parentToRootControl(self.ikGroup[1])
+		# Top Node
+		self.topNode = self.createTopNode(self.items)
 
-	def getScale(self):
-		height = cmds.xform(self.head, q=True, ws=True, rp=True)[1]
-		self.scale = height / 6
+		# Rig Joints
+		self.joint = self.createJointChain(self.items, hierarchy=True)
+
+		# Bind Controls
+		self.createBindChain(self.items)
+
+		# Parent
+		if self.parent:
+			if isinstance(self.parent, object):
+				self.rigControl = getattr(self.parent, 'cogControl')
+			else:
+				self.rigControl = self.parent
+		else:
+			self.rigControl = self.topNode
+
+		# Controls
+		self.createFKChain(self.items)
+		# self.createSplineFKIK(self.items)  # TODO: SPLINE IK
+		self.constrainChain(self.fkControl, self.joint)
+		self.constrainChain(self.joint, self.items)
+
+		# Hierarchy
+		cmds.parent(self.fkTopNode, self.joint[0], self.topNode)
+		if self.parent:
+			if isinstance(self.parent, object):
+				cmds.parent(self.topNode, self.parent.cogControl.offsetTransform)
+
+		# Cleanup
+		self.set = self.createSet(self.allAnimationControls)
+		self.finalize()
 		return
 
-	def createControls(self):
-		ctl = CONTROL(name='{}_ctl'.format(self.name),
-		              typ=WireType.lollipop,
-		              scale=self.scale,
-		              axis=[1, 0, -1],
-		              )
-		rigging.snap(self.head, ctl.group, t=True, r=True)
-		rigging.presetWireColor(ctl.transform, typ=Position.center)
-		rigging.lockScale(ctl.transform)
 
-		self.fkControl = [ctl.transform]
-		self.fkGroup = [ctl.group]
+class HEAD(BASERIG):
+	def __init__(self,
+	             head,
+	             neck=None,
+	             parent=None,
+	             spine=None,
+	             root=None,
+	             ):
+		items = []
+
+		if neck:
+			if isinstance(neck, (list, tuple, dict)):
+				for x in neck:
+					items.append(x)
+
+		items.append(head)
+
+		BASERIG.__init__(self,
+		                 prefix=Part.head,
+		                 side=Position.center,
+		                 kind=Part.head,
+		                 items=items,
+		                 parent=parent,
+		                 axis=[1, 1, 0],
+		                 root=root,
+		                 )
+
+		# Items
+		self.headItem = head
+		self.neckItems = neck
+
+		# Parent
+		self.spine = spine
+
+		# Controls
+		self.fkHeadControl = None
+		self.ikHeadControl = None
+
+		# Init
+		self.create()
+
+	def create(self):
+		# Top Node
+		self.topNode = self.createTopNode(self.items)
+
+		# Joints
+		self.joint = self.createJointChain(self.items)
+		cmds.parent(self.joint[0], self.topNode)
+		self.constrainChain(self.joint, self.items)
+
+		# Neck
+		if self.neckItems:
+			self.createNeck()
+
+		# Head
+		self.createHead()
+
+		self.set = self.createSet(self.allAnimationControls)
+		self.finalize()
+
+	def createHead(self):
+		# Scale
+		distance = distanceFromOrigin(self.headItem)
+		self.scale = distance
+
+		# Rig Control / FK Control
+		self.rigControl = CONTROL(prefix=self.prefix,
+		                          side=self.side,
+		                          item=self.headItem,
+		                          wireType=WireType.master,
+		                          axis=[0, 0, 1],
+		                          scale=self.scale * .2,
+		                          color=WireColor.purple,
+		                          kind=Component.rig,
+		                          )
+
+		self.rigControl.snapTo(self.headItem, True, False)
+		self.rigControl.parentTo(self.topNode)
+
+		# FK Pole Vector
+		self.fkPoleVector = cmds.group(n=longName(self.longName, Component.fkPoleVector), em=True)
+		snap(self.headItem, self.fkPoleVector, True, False)
+		cmds.xform(self.fkPoleVector, ws=True, t=[0, 0, distance], r=True)
+		cmds.parent(self.fkPoleVector, self.rigControl.transform)
+		freezeTransform(self.fkPoleVector)
+		lockKeyableAttributes(self.fkPoleVector, hide=True)
+
+		# IK
+		self.ikTopNode = self.createTopNode(self.items[-1], kind=Component.ik)
+
+		# IK Joint
+		self.ikJoint = self.createJointChain([self.headItem], kind=Component.ik)
+		cmds.parent(self.ikJoint, self.topNode)
+
+		# IK Control
+		ik = IKCONTROL(prefix=self.prefix,
+		               side=self.side,
+		               item=self.headItem,
+		               wireType=WireType.sphere,
+		               axis=[0, 0, 0],
+		               scale=self.scale * 0.05,
+		               )
+
+		ik.snapTo(self.headItem, True, False)
+		cmds.xform(ik.nullPosition, ws=True, t=[0, 0, distance], r=True)
+		ik.parentTo(self.ikTopNode)
+		self.ikHeadControl = ik
+
+		# IK Aim
+		createAimVector(ik, self.ikJoint[0], name=longName(self.longName, 'aimVector0'))
+
+		# FKIK
+		fkik = createFKIK(items=self.joint[-1],
+		                  fkControls=self.rigControl,
+		                  ikControls=self.ikJoint,
+		                  parent=self.rigControl,
+		                  attrName=Component.fkik,
+		                  )
+
+		# Visibility
+		cmds.connectAttr('{}.{}'.format(self.rigControl, Component.fkik),
+		                 '{}.v'.format(ik.nullConnection),
+		                 f=True)
 		return
 
-	def createIK(self):
-		ctl = CONTROL(name='{}_ik_ctl'.format(self.name),
-		              typ=WireType.sphere,
-		              scale=self.scale / 8,
-		              axis=[0, 0, 0],
-		              )
+	def createNeck(self):
+		neck = BASERIG(prefix=Part.neck,
+		               side=Position.center,
+		               kind=Part.neck,
+		               items=self.neckItems,
+		               axis=self.axis,
+		               )
 
-		rigging.snap(self.head, ctl.group, t=True)
-		distance = cmds.xform(self.head, q=True, ws=True, rp=True)[1]
-		cmds.xform(ctl.group, ws=True, t=[0, 0, distance], r=True)
+		neck.createFKChain(parent=self.rigControl)
+		neck.createBindChain(self.neckItems)
+		neck.constrainChain(neck.fkControl, self.neckItems)
+		self.fkControl += neck.fkControl
+		self.bindControls += neck.bindControls
+		self.leafControls += neck.leafControls
 
-		ikNull = cmds.group(name='{}_ik_aim'.format(self.name), em=True)
-		ikGrp = cmds.group(ikNull, name='{}_grp'.format(ikNull))
-		rigging.snap(self.head, ikGrp, t=True, r=True)
-		rigging.createAimVector(ctl.transform, ikNull, name='{}_aimVector'.format(self.name))
-		rigging.presetWireColor(ctl.transform, typ=Component.ik)
-
-		self.ikControl = [ikNull, ctl.transform]
-		self.ikGroup = [ikGrp, ctl.group]
-		return
-
-	def setupHierarchy(self):
-		parent = cmds.listRelatives(self.head, parent=True)
-		if parent:
-			parent = parent[0]
-			cmds.parent(self.fkGroup[0], self.ikGroup[0], parent)
-		return
-
-	def createFKIK(self):
-		attrName = Component.fkik
-		rigging.createFKIK(obj=self.head,
-		                   fk=self.fkControl[0],
-		                   ctl=self.fkControl[0],
-		                   ik=self.ikControl[0],
-		                   n=attrName,
-		                   )
-
-		cmds.connectAttr('{}.{}'.format(self.fkControl[0], attrName), '{}.v'.format(self.ikGroup[1]))
 		return

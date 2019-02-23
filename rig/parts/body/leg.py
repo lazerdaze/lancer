@@ -1,28 +1,28 @@
 # Lancer Modules
 from rig.utils import *
-from rig.piece import *
-from bodyBase import BASE
+from rigBase import RIGBASE
 
 # Maya Moudles
 from maya import cmds
 
-class LEG(BASE):
+
+class LEG(RIGBASE):
 	def __init__(self,
-	             side=None,
-	             hip=None,
-	             knee=None,
-	             foot=None,
-	             toe=None,
+	             side,
+	             hip,
+	             knee,
+	             foot,
+	             toe,
 	             networkRoot=None,
 	             name=Part.leg,
 	             index=0,
 	             ):
-		BASE.__init__(self,
-		              networkRoot=networkRoot,
-		              name=name,
-		              side=side,
-		              index=index,
-		              )
+		RIGBASE.__init__(self,
+		                 networkRoot=networkRoot,
+		                 name=name,
+		                 side=side,
+		                 index=index,
+		                 )
 
 		self.toe = toe
 		self.toeFKControl = None
@@ -40,7 +40,7 @@ class LEG(BASE):
 		self.getScale()
 		self.createFKIKChain(self.objects)
 		self.resetRotations()
-		self.createTwistChain(self.hip, self.knee, self.foot)
+		# self.createTwistChain(self.hip, self.knee, self.foot)
 		self.setDefaultAttrValues()
 
 		if self.toe:
@@ -55,18 +55,18 @@ class LEG(BASE):
 		                      )
 		self.createSet(self.fkControl + self.ikControl)
 		self.createNetwork(typ=longName(self.name,
-		                                         self.side.upper()[0],
-		                                         self.index,
-		                                         )
+		                                self.side.upper()[0],
+		                                self.index,
+		                                )
 		                   )
 		self.createNetworkConnections()
 
 	def getScale(self):
-		self.scale = rigging.getDistance(self.hip, self.knee) / 5
+		self.scale = getDistance(self.hip, self.knee) / 5
 		return
 
 	def setDefaultAttrValues(self):
-		cmds.setAttr('{}.{}'.format(self.attrControl, Component.fkik), 1)
+		cmds.setAttr('{}.{}'.format(self.master, Component.fkik), 1)
 		return
 
 	def resetRotations(self):
@@ -77,27 +77,27 @@ class LEG(BASE):
 			cmds.setAttr('{}.r{}'.format(self.ikGroup[-1], axis), 0)
 
 		cmds.parent(self.ikHandle, self.ikControl[-1])
-		rigging.lockRotate(self.ikGroup[-1])
+		lockRotate(self.ikGroup[-1])
 
 		return
 
 	def createToe(self):
 		ctl = CONTROL(name=longName(self.name,
-		                                                       self.side[0],
-		                                                       self.index,
-		                                                       Component.fk,
-		                                                       Part.toe.capitalize(),
-		                                                       Component.control,
-		                                                       ),
-		                                typ=WireType.circleRotate,
-		                                scale=self.scale,
-		                                axis=[1, 0, 0],
-		                                child=self.toe,
-		                                side=self.side,
-		                                label=Part.collar,
-		                                color=WireColor.blue,
-		                                )
-		rigging.lockScale(ctl.transform)
+		                            self.side[0],
+		                            self.index,
+		                            Component.fk,
+		                            Part.toe.capitalize(),
+		                            Component.control,
+		                            ),
+		              typ=WireType.circleRotate,
+		              scale=self.scale,
+		              axis=[1, 0, 0],
+		              child=self.toe,
+		              side=self.side,
+		              label=Part.collar,
+		              color=WireColor.blue,
+		              )
+		lockScale(ctl.transform)
 
 		parent = cmds.listRelatives(self.toe, parent=True)
 		if parent:
@@ -109,14 +109,14 @@ class LEG(BASE):
 		return
 
 	def createFootRoll(self):
-		self.roll = rigging.createIKFootRollNulls(foot=self.foot,
+		self.roll = createIKFootRollNulls(foot=self.foot,
 		                                          toe=self.toe,
 		                                          control=self.ikControl[-1],
 		                                          name=longName(self.name,
-		                                                              self.side[0],
-		                                                              self.index,
-		                                                              Component.ik,
-		                                                              'footRoll'),
+		                                                        self.side[0],
+		                                                        self.index,
+		                                                        Component.ik,
+		                                                        'footRoll'),
 		                                          )
 
 		# self.roll.accuratePositions()
@@ -127,12 +127,12 @@ class LEG(BASE):
 		for axis in ['x', 'y', 'z']:
 			cmds.setAttr('{}.t{}'.format(self.ikGroup[-1], axis), lock=False)
 
-		rigging.snap(self.roll.wire, self.ikGroup[-1], t=True)
-		rigging.lockKeyableAttributes(self.ikGroup[-1])
+		snap(self.roll.wire, self.ikGroup[-1], t=True)
+		lockKeyableAttributes(self.ikGroup[-1])
 
 		cmds.parent(self.roll.wire, self.ikGroup[-1])
-		rigging.freezeTransform(self.roll.wire)
-		rigging.swapShape(self.ikControl[-1], self.roll.wire)
+		freezeTransform(self.roll.wire)
+		swapShape(self.ikControl[-1], self.roll.wire)
 		cmds.parent(self.roll.parent, self.ikControl[-1])
 
 		self.toeIKControl = self.roll.toe[0]
@@ -149,10 +149,20 @@ class LEG(BASE):
 			cmds.disconnectAttr('{}.constraintTranslate{}'.format(pc, axis), '{}.translate{}'.format(self.toe, axis))
 
 		pcAttr = cmds.parentConstraint(pc, q=True, wal=True)
-		cmds.connectAttr('{}.{}'.format(self.attrControl, Component.fkik), '{}.{}'.format(pc, pcAttr[-1]), f=True)
+		cmds.connectAttr('{}.{}'.format(self.master, Component.fkik), '{}.{}'.format(pc, pcAttr[-1]), f=True)
 
 		reverse = cmds.createNode('reverse', n='{}_fkik_re0'.format(self.toe))
-		cmds.connectAttr('{}.{}'.format(self.attrControl, Component.fkik), '{}.inputX'.format(reverse), f=True)
+		cmds.connectAttr('{}.{}'.format(self.master, Component.fkik), '{}.inputX'.format(reverse), f=True)
 		cmds.connectAttr('{}.outputX'.format(reverse), '{}.{}'.format(pc, pcAttr[0]), f=True)
 		cmds.connectAttr('{}.outputX'.format(reverse), '{}.v'.format(self.toeFKGroup), f=True)
 		return
+
+
+class LEFTLEG(LEG):
+	def __init__(self, *args, **kwargs):
+		LEG.__init__(self, side=Position.left, *args, **kwargs)
+
+
+class RIGHTLEG(LEG):
+	def __init__(self, *args, **kwargs):
+		LEG.__init__(self, side=Position.right, *args, **kwargs)

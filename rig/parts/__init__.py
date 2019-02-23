@@ -4,14 +4,12 @@
 #
 #
 #
-
-from body.arm import ARM, HAND
-from body.bodyBase import BASE
-from body.cog import COG
+from baseRig import BASERIG
+from body.arm import ARM, LEFTARM, RIGHTARM, HAND
+from body.rigBase import RIGBASE
 from body.digit import DIGIT
-from body.fkik import FKIK
 from body.head import HEAD
-from body.leg import LEG
+from body.leg import LEG, LEFTLEG, RIGHTLEG
 from body.root import ROOT
-from body.spine import SPINE, NECK
+from body.spine import SPINE
 

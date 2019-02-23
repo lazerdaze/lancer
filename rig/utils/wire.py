@@ -859,11 +859,11 @@ WirePoints = {
 def createWire(kind, axis=None, scale=1):
 	kind = kind if kind in WirePoints else WireType.circle
 	axis = [1, 0, 0] if not axis else axis
-	points = WirePoints[kind]
 
 	if kind == WireType.circle:
 		curve = cmds.circle(ch=False, nr=[0, 1, 0], radius=1)[0]
 	else:
+		points = WirePoints[kind]
 		curve = cmds.curve(d=1, p=points)
 
 	forwardAxis(curve, axis=axis)

@@ -333,3 +333,38 @@ def maxOccurrance(items):
 				comparisonResult = comparison.index(compare)
 
 	return items[comparisonResult] if comparisonResult is not None else items[0]
+
+
+def averageValue(*args, **kwargs):
+	values = flatList(args)
+	sumValue = sum(values)
+
+	return sumValue / float(len(values))
+
+
+def averageDistance(*args, **kwargs):
+	items = flatList(args)
+	distanceList = []
+
+	i = 0
+	for item in items:
+		if item != items[-1]:
+			distanceList.append(getDistance(item, items[i + 1]))
+		i += 1
+	return float(sum(distanceList)) / float(len(distanceList))
+
+
+def distanceFromOrigin(item, *args, **kwargs):
+	return cmds.xform(item, q=True, ws=True, rp=True)[1]
+
+
+def hierarchyHeight(item, *args, **kwargs):
+	resultList = []
+	children = cmds.listRelatives(item, ad=True)
+
+	if children:
+		for child in children:
+			value = distanceFromOrigin(child)
+			if value not in resultList:
+				resultList.append(value)
+	return max(resultList) if resultList else 1.0

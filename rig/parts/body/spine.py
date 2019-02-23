@@ -1,106 +1,69 @@
 # Lancer Modules
 from rig.utils import *
-from rig.piece import *
-from bodyBase import BASE
+from rig.parts.baseRig import BASERIG
 
 # Maya Moudles
 from maya import cmds
 
 
-class SPINE(BASE):
+class SPINE(BASERIG):
 	def __init__(self,
-	             objects=None,
-	             networkRoot=None,
-	             name='spine',
-	             scale=1,
-	             attrControl=None,
+	             items,
+	             parent=None,
+	             root=None,
 	             ):
-		BASE.__init__(self,
-		              objects=objects,
-		              networkRoot=networkRoot,
-		              name=name,
-		              side='Center',
-		              scale=scale,
-		              attrControl=attrControl,
-		              )
+		BASERIG.__init__(self,
+		                 prefix=Part.spine,
+		                 side=Position.center,
+		                 kind=Part.spine,
+		                 items=items,
+		                 parent=parent,
+		                 axis=[1, 1, 0],
+		                 root=root,
+		                 )
+
+		self.create()
 
 	def create(self):
-		self.getScale()
-		self.createFKChain(self.objects)
-		self.constrainSpine()
-		self.createParent(name='rig_grp'.format(self.name), child=self.objects[0])
-		self.setupHierarchy()
-		self.createDetailChain(self.objects)
-		self.overrideColor()
+		# Scale
+		self.scale = self.scaleByDistance(self.items) * 2.0
 
-		self.createSet(self.fkControl)
-		self.createNetwork(typ=self.name)
-		self.createNetworkConnections()
+		# Top Node
+		self.topNode = self.createTopNode(self.items)
 
-	def getScale(self):
-		if len(self.objects) > 1:
-			start = self.objects[0]
-			end = self.objects[1]
-			distance = rigging.getDistance(start, end)
-			self.scale = distance * 1.5
+		# Rig Joints
+		self.joint = self.createJointChain(self.items, hierarchy=True)
+
+		# Bind Controls
+		self.createBindChain(self.items)
+
+		# Parent
+		if self.parent:
+			if isinstance(self.parent, object):
+				self.rigControl = getattr(self.parent, 'cogControl')
+			else:
+				self.rigControl = self.parent
+		else:
+			self.rigControl = self.topNode
+
+		# Controls
+		self.createFKChain(self.items)
+		# self.createSplineFKIK(self.items)  # TODO: SPLINE IK
+		self.constrainChain(self.fkControl, self.joint)
+		self.constrainChain(self.joint, self.items)
+
+		# Hierarchy
+		cmds.parent(self.fkTopNode, self.joint[0], self.topNode)
+		if self.parent:
+			if isinstance(self.parent, object):
+				cmds.parent(self.topNode, self.parent.cogControl.offsetTransform)
+
+		# Cleanup
+		self.set = self.createSet(self.allAnimationControls)
+		self.finalize()
 		return
 
-	def constrainSpine(self):
-		for obj in self.objects:
-			i = self.objects.index(obj)
-			cmds.parentConstraint(self.fkControl[i], obj, mo=True)
-
-	def setupHierarchy(self):
-		cmds.parent(self.fkParent, self.parent)
-
-		parent = cmds.listRelatives(self.objects[0], parent=True)
-		parent = parent[0] if parent else None
-		if parent:
-			cmds.parent(self.parent, parent)
-		return
-
-	def overrideColor(self):
-		rigging.presetWireColor(self.fkControl, 'center')
-		return
 
 
-########################################################################################################################
-#
-#
-#	NECK CLASS
-#
-#
-########################################################################################################################
 
 
-class NECK(SPINE):
-	def __init__(self,
-	             objects=None,
-	             networkRoot=None,
-	             name=Part.neck,
-	             scale=1,
-	             attrControl=None,
-	             ):
-		SPINE.__init__(self,
-		               objects=objects,
-		               networkRoot=networkRoot,
-		               name=name,
-		               scale=scale,
-		               attrControl=attrControl,
-		               )
-
-		self.createLocalWorld(obj=self.fkControl[0],
-		                      local=self.fkGroup[0],
-		                      )
-
-	def getScale(self):
-		distanceList = []
-		children = cmds.listRelatives(self.objects[0], children=True)
-		if children:
-			for child in children:
-				start = self.objects[0]
-				end = child
-				distanceList.append(rigging.getDistance(start, end))
-
-		self.scale = max(distanceList) + 0.25
-		return

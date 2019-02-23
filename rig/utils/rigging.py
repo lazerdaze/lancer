@@ -12,6 +12,7 @@ from control import *
 from curve import *
 from constraint import *
 from joint import *
+from wire import *
 
 # Maya Modules
 import maya.cmds as cmds
@@ -77,40 +78,38 @@ class queryIK():
 		self.parent = par
 
 
-def createFKIK(obj, fk, ik, ctl, n='FKIK'):
+def createFKIK(items, fkControls, ikControls, parent, attrName=Component.fkik):
 	# Add Attribute
-
-	if not cmds.attributeQuery(n, node=ctl, ex=True):
-		cmds.addAttr(ctl, ln=n, min=0, max=1, dv=0, k=True)
+	if not attributeExist(parent, attrName):
+		cmds.addAttr(parent, ln=attrName, min=0, max=1, dv=0, k=True)
 
 	# Error Checks
-
-	obj = listCheck(obj)
-	fk = listCheck(fk)
-	ik = listCheck(ik)
+	items = flatList(items)
+	fkControls = flatList(fkControls)
+	ikControls = flatList(ikControls)
 
 	# Main Loop
-
 	pcList = []
 	reList = []
 
-	for x in obj:
-		i = obj.index(x)
+	i = 0
+	for item in items:
+		pc = cmds.parentConstraint(fkControls[i],
+		                           ikControls[i],
+		                           item,
+		                           n='{}_{}_pc0'.format(item, attrName),
+		                           mo=True)[0]
 
-		if len(obj) == 1:
-			pc = cmds.parentConstraint(fk, ik, x, n='{}_{}_pc0'.format(x, n), mo=True)[0]
-		else:
-			pc = cmds.parentConstraint(fk[i], ik[i], x, n='{}_{}_pc0'.format(x, n), mo=True)[0]
 		pcAttr = cmds.parentConstraint(pc, q=True, wal=True)
+		cmds.connectAttr('{}.{}'.format(parent, attrName), '{}.{}'.format(pc, pcAttr[-1]), f=True)
 
-		cmds.connectAttr('{}.{}'.format(ctl, n), '{}.{}'.format(pc, pcAttr[-1]), f=True)
-
-		reverse = cmds.createNode('reverse', n='{}_{}_re1'.format(x, n))
-		cmds.connectAttr('{}.{}'.format(ctl, n), '{}.inputX'.format(reverse), f=True)
+		reverse = cmds.createNode('reverse', n='{}_{}_re1'.format(item, attrName))
+		cmds.connectAttr('{}.{}'.format(parent, attrName), '{}.inputX'.format(reverse), f=True)
 		cmds.connectAttr('{}.outputX'.format(reverse), '{}.{}'.format(pc, pcAttr[0]), f=True)
 
 		pcList.append(pc)
 		reList.append(reverse)
+		i += 1
 
 	# Return
 
@@ -339,7 +338,7 @@ class createIKTwist:
 			ikJoint.append(joint)
 			i += 1
 
-		globalGrp = createGroup(ikJoint[0], n='{}_grp'.format(name))
+		globalGrp = createGroup(ikJoint[0], name='{}_grp'.format(name))
 		cmds.parent(globalGrp, start)
 		freezeTransform(ikJoint[0])
 
@@ -572,7 +571,7 @@ class createIKFootRollNulls:
 		return
 
 	def createWire(self):
-		self.wire = control.wire(typ=control.component.cubeSpecial, axis=[0, 0, 0])
+		self.wire = createWire(kind=WireType.cubeSpecial, axis=[0, 0, 0])
 		snap(self.rock[0], self.wire, r=True, t=True)
 
 		var = [getDistance(self.bank[0], self.bank[1]),

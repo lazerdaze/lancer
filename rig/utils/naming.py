@@ -44,10 +44,14 @@ class MayaNodeType(object):
 
 
 class Component(object):
+	Global = 'global'
 	node = 'node'
 	transform = 'transform'
 	base = 'base'
+	part = 'part'
 	rig = 'rig'
+	rigKind = '{}Kind'.format(rig)
+	rigPart = '{}Part'.format(rig)
 	bind = 'bind'
 	chain = 'chain'
 	fk = 'fk'
@@ -303,13 +307,17 @@ def longName(*args):
 def attributeName(*args):
 	var = ''
 	for arg in args:
-		if arg[0] in NUMBERSTR:
-			raise TypeError('Argument must start with a letter.')
-		else:
-			if var:
-				var += '.{}'.format(arg)
+		if isinstance(arg, object):
+			arg = str(arg)
+
+		if arg is not None:
+			if arg[0] in NUMBERSTR:
+				raise TypeError('Argument must start with a letter.')
 			else:
-				var = str(arg)
+				if var:
+					var += '.{}'.format(arg)
+				else:
+					var = str(arg)
 	return var
 
 

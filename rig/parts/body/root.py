@@ -1,107 +1,208 @@
 # Lancer Modules
 from rig.utils import *
-from rig.piece import *
-from bodyBase import BASE
+from rig.parts.baseRig import BASERIG
 
-# Maya Moudles
+# Maya Modules
 from maya import cmds
 
 
-class ROOT(BASE):
+class ROOT(BASERIG):
 	def __init__(self,
 	             root=None,
-	             name='character',
-	             scale=1,
+	             cog=None,
+	             hip=None,
 	             ):
-		BASE.__init__(self,
-		              name=name,
-		              side='Center',
-		              scale=scale,
-		              )
-		self.root = root
 
-	def create(self):
-		if self.root:
-			self.objects = [self.root]
-			self.getScale()
+		'''
+		Central Rigging Part used in all rigging hierarchies.
 
-		self.createControls()
-		self.createRootOffset()
-		self.createSet(self.fkControl)
-		self.createNetwork(typ='root')
-		self.networkRoot = self.network
-		self.networkParent = self.network
-		self.createNetworkConnections()
-		self.setupDisplayAttr()
-		self.setupGlobalScale()
-		self.hideGroupNodes([self.network] + self.fkGroup)
+		:param root:
+		:param cog:
+		:param hip:
+		'''
 
-	def getScale(self):
-		self.scale = int(determineHeight(self.root) / 2)
-		return
+		items = []
 
-	def createControls(self):
+		for x in [root, cog, hip]:
+			if x is not None:
+				items.append(x)
 
-		ctl = CONTROL(name='{}_ctl'.format(self.name),
-		              typ='root',
-		              scale=self.scale + 2,
-		              axis=[0, 0, 0],
-		              )
-
-		offset = CONTROL(name='{}_offset_ctl'.format(self.name),
-		                 typ='center',
-		                 scale=self.scale,
-		                 axis=[0, 0, 0],
+		BASERIG.__init__(self,
+		                 prefix=Part.root,
+		                 side=Position.center,
+		                 kind=Part.root,
+		                 items=items,
 		                 )
 
-		presetWireColor([ctl.transform, offset.transform, ], typ=Position.center)
-		cmds.parent(offset.group, ctl.transform)
-		self.fkControl = [ctl.transform, offset.transform]
-		self.fkGroup = [ctl.group, offset.group]
+		# Items
+		self.rootItem = root
+		self.cogItem = cog
+		self.hipItem = hip
 
-		if self.root:
-			cmds.parent(self.root, offset.transform)
+		# Controls
+		self.offsetControl = None
+		self.cogControl = None
+		self.hipControl = None
+
+		# Init
+		self.create()
+
+	@property
+	def allAnimationControls(self):
+		result = []
+
+		for ctrl in [self.rigControl, self.offsetControl, self.cogControl, self.hipControl]:
+			if isinstance(ctrl, object):
+				for attr in ['transform', 'offsetTransform']:
+					if hasattr(ctrl, attr):
+						value = getattr(ctrl, attr)
+						if value:
+							result.append(value)
+			elif ctrl is not None:
+				result.append(self.rigControl)
+		return result
+
+	def create(self):
+		self.createRootControl()
+
+		if self.cogItem:
+			self.createCOGControl()
+
+		if self.hipItem:
+			self.createHipControl()
+
+		self.set = self.createSet(self.allAnimationControls)
+		self.finalize()
 		return
 
-	def createRootOffset(self):
-		attrName = 'rootOffset'
-		parent = self.fkControl[0]
+	def createRootControl(self, item=None):
+		# Edge Case
+		if not item:
+			item = self.rootItem
 
-		rootOffset = CONTROL(name='{}_root_offset_ctl'.format(self.name),
-		                     typ='center',
-		                     scale=self.scale - 0.8,
-		                     axis=[0, 0, 0],
-		                     )
+		# Scale
+		scale = 1.0
 
-		presetWireColor([rootOffset.transform], typ=Position.center)
-		cmds.parent(rootOffset.group, self.fkControl[-1])
-		addBoolAttr(parent, name=attrName)
-		cmds.connectAttr('{}.{}'.format(parent, attrName), '{}.v'.format(rootOffset.group))
+		if self.items:
+			scale = self.scaleByHeight(self.items) * .35
 
-		if self.root:
-			cmds.parentConstraint(rootOffset.transform, self.root, mo=True)
+		# Controls
+		self.rigControl = CONTROL(name=Component.Global,
+		                          prefix=self.prefix,
+		                          item=item,
+		                          wireType=WireType.gearMover,
+		                          axis=[0, 0, 0],
+		                          scale=scale,
+		                          color=WireColor.purple,
+		                          kind=Component.rig,
+		                          offset=WireType.circleRotate
+		                          )
 
-		self.fkControl.append(rootOffset.transform)
-		self.fkGroup.append(rootOffset.group)
-		return
+		# createRootOffset
+		attrName = 'repoVisibility'
 
-	def setupDisplayAttr(self):
-		for attr in ['jointDisplay', 'controlDisplay']:
-			addBoolAttr(self.fkControl[0], attr)
-			cmds.connectAttr('{}.{}'.format(self.fkControl[0], attr), '{}.{}'.format(self.network, attr))
-		return
+		self.offsetControl = CONTROL(name=Component.Global,
+		                             prefix=self.prefix,
+		                             item=item,
+		                             wireType=WireType.sphere,
+		                             axis=[0, 0, 0],
+		                             scale=scale * .25,
+		                             color=WireColor.purple,
+		                             kind='repo',
+		                             )
 
-	def setupGlobalScale(self):
-		globalNode = self.fkControl[0]
+		addAttribute(node=self.rigControl, attribute=attrName, kind=MayaAttrType.bool, channelBox=True, keyable=False)
+		cmds.connectAttr('{}.{}'.format(self.rigControl, attrName), '{}.v'.format(self.offsetControl.shape))
+
+		# Hierarchy
+		self.offsetControl.parentTo(self.rigControl.offsetTransform)
+
+		# Constrain
+		if item:
+			cmds.parentConstraint(self.offsetControl, item, mo=True)
+			cmds.scaleConstraint(self.offsetControl, item, mo=True)
+
+		# Global
+		globalNode = self.rigControl.nullConnection
 		attrName = 'globalScale'
 
-		cmds.addAttr(globalNode, ln=attrName, dv=1)
-		cmds.setAttr('{}.globalScale'.format(globalNode), k=False, channelBox=True)
+		cmds.addAttr(self.rigControl, ln=attrName, dv=1)
+		cmds.setAttr('{}.{}'.format(self.rigControl, attrName), k=False, channelBox=True)
 
 		for axis in ['x', 'y', 'z']:
-			cmds.connectAttr('{}.{}'.format(globalNode, attrName), '{}.s{}'.format(globalNode, axis))
-			cmds.setAttr('{}.s{}'.format(globalNode, axis), k=False, channelBox=False, lock=True)
+			cmds.connectAttr('{}.{}'.format(self.rigControl, attrName), '{}.s{}'.format(globalNode, axis))
 
-	def hideGroupNodes(self, objects):
-		self.hideObjectsAttributes(objects)
+		return
+
+	def createCOGControl(self, item=None):
+		# Edge Case
+		if not item:
+			if self.cogItem:
+				item = self.cogItem
+			else:
+				raise ValueError('No item provided.')
+
+		# Scale
+		scale = 1.0
+
+		if item:
+			scale = distanceFromOrigin(item)
+
+		self.cogControl = CONTROL(name=Component.rig,
+		                          prefix=Part.cog,
+		                          item=item,
+		                          wireType=WireType.gear,
+		                          axis=[0, 2, 0],
+		                          scale=scale * .3,
+		                          color=WireColor.purple,
+		                          offset=WireType.circleRotate,
+		                          )
+		# Hierarchy
+		self.cogControl.parentTo(self.rigControl.offsetTransform)
+		self.cogControl.snapTo(item, True, False)
+
+		# Constrain
+		cmds.parentConstraint(self.cogControl.offsetTransform, item, mo=True)
+		cmds.scaleConstraint(self.cogControl.offsetTransform, item, mo=True)
+
+		return
+
+	def createHipControl(self, item=None):
+		# Edge Case
+		if not item:
+			if self.hipItem:
+				item = self.hipItem
+			else:
+				raise ValueError('No item provided.')
+
+		# Scale
+		scale = 1.0
+
+		if item:
+			scale = distanceFromOrigin(item)
+
+		self.hipControl = CONTROL(name=Component.rig,
+		                          prefix=Part.hip,
+		                          item=item,
+		                          side=Position.center,
+		                          wireType=WireType.circleRotate,
+		                          scale=scale * .2,
+		                          color=WireColor.yellow,
+		                          offset=True,
+		                          axis=[1, 1, 0]
+		                          )
+		# Hierarchy
+		self.hipControl.parentTo(self.cogControl.offsetTransform)
+		self.hipControl.snapTo(item)
+
+		# Constrain
+		cmds.parentConstraint(self.hipControl.offsetTransform, item, mo=True)
+		return
+
+	def finalize(self, items=None, parent=None):
+		BASERIG.finalize(self, items, parent)
+
+		self.connectToRig(self.offsetControl, self.rigControl, 'offsetControl')
+		self.connectToRig(self.cogControl, self.rigControl, 'cogControl')
+		self.connectToRig(self.hipControl, self.rigControl, 'hipControl')
 		return

@@ -729,7 +729,7 @@ def determineHeight(root):
 				pos = cmds.xform(child, q=True, ws=True, rp=True)
 				posList.append(pos[1])
 	if posList:
-		scale = int(max(posList))
+		scale = float(max(posList))
 
 	return scale
 
@@ -1073,7 +1073,7 @@ class Joint(Node):
 		:param str name:        Name of Node.
 		:param str prefix:      Prefix name of the control
 		:param str side:        Side of the controls origin.
-		:param int index:       Used to determined rig priority.
+		:param int None index:       Used to determined rig priority.
 		:param str sector:      Sector of control. Possible Sectors: "A", "B", "C"
 		:param float radius:    Joint radius scale.
 		:param enum drawStyle:  Joint draw style visibility.
