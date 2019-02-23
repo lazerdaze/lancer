@@ -260,7 +260,6 @@ class Auto(object):
 		self.templateDatabase = Templates()
 
 		self.validate()
-		self.createRootRig()
 
 	@property
 	def handler(self):
@@ -309,13 +308,14 @@ class Auto(object):
 			raise KeyError('{} is not a valid definition.'.format(self.template))
 		else:
 			self.template = query
+			self.createRootRig()
 		return
 
 	def createRootRig(self):
 		self.rootRig = parts.ROOT(root=self.root)
-		self.rootRig.create()
 		return
 
+	# TODO: Rig Bind / Leaf Joints
 	def rigFromDefinitions(self, debug=False):
 		template = self.templateDatabase.getTemplate(self.template)
 
@@ -325,11 +325,12 @@ class Auto(object):
 			# Get Part Class
 			if hasattr(parts, componentName):
 				rig = getattr(parts, componentName)
-				rig = rig()
 
 				attributes = component.attrib
 
 				# Set Class Arguments
+				params = {'networkRoot': self.rootRig.network}
+
 				for attr in attributes:
 					definition = attributes[attr]
 					items = getConnectedNode(self.root, definition)
@@ -337,16 +338,17 @@ class Auto(object):
 					if attr == 'objects':
 						if not isinstance(items, (list, dict, tuple)):
 							items = [items]
+						else:
+							# FIXME: Breaks on HANDS?
+							items = sortJointHierarchy(items)
 
-					setattr(rig, attr, items)
-					if debug:
-						print component, attr, definition, items, rig
+					params[attr] = items
 
-				# Setup Network
-				rig.networkRoot = self.rootRig.network
+				if debug:
+					print component, rig, params
 
 				# Create Rig
-				rig.create()
+				rig(**params)
 		return
 
 	def rigFromLabels(self):

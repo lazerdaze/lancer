@@ -2,9 +2,35 @@
 from general import *
 from naming import *
 from attribute import *
+from customError import *
 
 # Maya Modules
 from maya import cmds
+
+
+def loadMatrixPlugin(*agrs, **kwargs):
+	plugin = 'matrixNodes.mll'
+	isLoaded = cmds.pluginInfo(plugin, q=True, l=True)
+	isAutoLoaded = cmds.pluginInfo(plugin, q=True, a=True)
+
+	if not isLoaded:
+		try:
+			cmds.loadPlugin(plugin)
+			isLoaded = True
+			#print 'Plugin "{}" was loaded successfully.'.format(plugin)
+		except:
+			raise PluginError('Unable to load plugin "{}".'.format(plugin))
+
+	if isLoaded:
+		if not isAutoLoaded:
+			try:
+				cmds.pluginInfo(plugin, e=True, a=True)
+			except:
+				cmds.warning('Unable to set plugin "{}" to auto load.'.format(plugin))
+	return isLoaded
+
+
+MATRIX_PLUGIN_LOADED = loadMatrixPlugin()
 
 
 def constraint(*args, **kwargs):
@@ -55,7 +81,7 @@ def localWorldConstraint(obj, local, world, n='localWorld', t=False, r=True):
 	if cmds.objExists(name):
 		name = '{}0'.format(name)
 
-	null = createGroup(obj, n=name)
+	null = createGroup(obj, name=name)
 
 	cmds.addAttr(obj, ln=n, min=0, max=1, dv=1, k=True)
 
@@ -78,7 +104,6 @@ def localWorldConstraint(obj, local, world, n='localWorld', t=False, r=True):
 	cmds.connectAttr('{}.outputX'.format(reverse), '{}.{}'.format(pc, pcAttr[0]))
 
 	return [null, pc]
-
 
 
 def clusterCurve(curve, n='cluster', *args):
@@ -151,7 +176,7 @@ def locOnCurve(curve, intLoc=1, n='locator', upObject='', start=False, end=False
 	return locList
 
 
-def createAimVectorHelper(start, end, name='poleVector_helper'):
+def createAimVectorHelper(start, end, name='poleVector_helper', color=None):
 	# Create Curve
 	curve = cmds.curve(n=name, d=1, p=[[0, 0, 0], [0, 0, 0]])
 	curveShape = cmds.rename(cmds.listRelatives(curve, shapes=True)[0],
@@ -169,13 +194,28 @@ def createAimVectorHelper(start, end, name='poleVector_helper'):
 
 	cmds.connectAttr('{}.matrixSum'.format(mult), '{}.inputMatrix'.format(dec))
 	cmds.connectAttr('{}.outputTranslate'.format(dec), '{}.controlPoints[1]'.format(curveShape))
+
+	# Color
+	if color and isinstance(color, list):
+		cmds.setAttr(attributeName(curveShape, MayaAttr.useObjectColor), 0)
+		cmds.setAttr(attributeName(curveShape, MayaAttr.overrideEnabled), 1)
+		cmds.setAttr(attributeName(curveShape, MayaAttr.overrideRGBColors), 1)
+		i = 0
+		for x in ['R', 'G', 'B']:
+			cmds.setAttr('{}.overrideColor{}'.format(curveShape, x), color[i])
+			i += 1
 	return curveShape
 
 
-def createPoleVector(joint, ctl, ik, name='ik_poleVector'):
-	poleVector = cmds.poleVectorConstraint(ctl, ik)
-	shape = createAimVectorHelper(joint, ctl, name='{}_helper'.format(name))
-	return [poleVector, shape]
+def createPoleVector(joint, ctl, ik, name='ik_poleVector', color=None):
+	locator = cmds.spaceLocator(name=longName(name, Component.poleVector))[0]
+	snap(ctl, locator, True, True)
+	cmds.parent(locator, ctl)
+	cmds.setAttr('{}.v'.format(locator), 0)
+
+	poleVector = cmds.poleVectorConstraint(locator, ik)
+	shape = createAimVectorHelper(joint, ctl, name='{}_helper'.format(name), color=color)
+	return locator
 
 
 def createAimVector(par, child, name='aimVector', aimVector=[0, 0, 1]):

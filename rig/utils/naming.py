@@ -57,18 +57,22 @@ class Component(object):
 	fk = 'fk'
 	ik = 'ik'
 
-	fkik = 'fkik'
+	fkik = '{}{}'.format(fk, ik)
 	set = 'set'
 	joint = 'joint'
 	leaf = 'leaf'
+	master = 'master'
 
 	control = 'control'
-	fkControl = 'FK{}'.format(control.capitalize())
-	ikControl = 'IK{}'.format(control.capitalize())
-	master = 'master'
+	fkControl = '{}{}'.format(fk, control.capitalize())
+	ikJoint = '{}{}'.format(ik, joint.capitalize())
+	ikControl = '{}{}'.format(ik, control.capitalize())
+	masterControl = '{}{}'.format(master, control.capitalize())
 	detailControl = 'detail{}'.format(control.capitalize())
 	offsetControl = 'offset{}'.format(control.capitalize())
-	leafControl = 'leaf{}'.format(control.capitalize())
+	bindControl = '{}{}'.format(bind, control.capitalize())
+	leafControl = '{}{}'.format(leaf, control.capitalize())
+
 	group = 'group'
 	offset = 'offset'
 	origin = 'origin'
@@ -84,12 +88,13 @@ class Component(object):
 	attr = 'attr'
 	aux = 'aux'
 	parent = 'parent'
+	children = 'children'
 	rigNetwork = 'rigNetwork'
 	rigNetworkRoot = 'rigNetworkRoot'
 	skeletonNetwork = 'skeletonNetwork'
 	character = 'character'
 	index = 'index'
-	stretch = 'stretch'
+
 	autoStretch = 'autoStretch'
 	detailControlDisplay = 'detailControlDisplay'
 
@@ -99,6 +104,38 @@ class Component(object):
 	ikPoleVector = 'ikPoleVector'
 	fkPoleVector = 'fkPoleVector'
 	aimVector = 'aimVector'
+
+	local = 'local'
+	world = 'world'
+	localWorld = '{}{}'.format(local, world.capitalize())
+	fkLocalWorld = '{}{}{}'.format(fk, local.capitalize(), world.capitalize())
+	ikLocalWorld = '{}{}{}'.format(ik, local.capitalize(), world.capitalize())
+
+	twist = 'twist'
+	bindTwist = '{}{}'.format(bind, twist.capitalize())
+	twistAuto = '{}Auto'.format(twist)
+	twistAdd = '{}Add'.format(twist)
+
+	stretch = 'stretch'
+	fkStretch = '{}{}'.format(fk, stretch.capitalize())
+	ikStretch = '{}{}'.format(ik, stretch.capitalize())
+	bindStretch = '{}{}'.format(bind, stretch.capitalize())
+	stretchAuto = '{}Auto'.format(stretch)
+	stretchAdd = '{}Add'.format(stretch)
+
+	sns = 'sns'
+	bindSns = '{}{}'.format(bind, sns.capitalize())
+	snsAuto = '{}Auto'.format(sns)
+	snsAdd = '{}Add'.format(sns)
+
+	display = 'display'
+	jointDisplay = '{}{}'.format(joint, display.capitalize())
+	controlDisplay = '{}{}'.format(control, display.capitalize())
+	bindDisplay = '{}{}'.format(bind, display.capitalize())
+	leafControlDisplay = '{}{}'.format(leaf, display.capitalize())
+
+	mirror = 'mirror'
+	opposite = 'opposite'
 
 
 class MayaAttr(object):
@@ -277,6 +314,8 @@ class JointLabelOtherType(object):
 	footPivot = 'footPivot'
 	cog = 'cog'
 	tail = 'tail'
+	leaf = 'leaf'
+	heel = 'heel'
 
 
 AnimCurves = ['animCurveUL',
@@ -328,7 +367,7 @@ def camelCase(*args, **kwargs):
 	result = ''
 	i = 0
 	for arg in args:
-		if ' ' in arg:
+		if arg is not None and ' ' in arg:
 			arg = [x.strip() for x in arg.split(' ')]
 
 		if isinstance(arg, (list, dict, tuple)):
@@ -337,14 +376,15 @@ def camelCase(*args, **kwargs):
 				result += camelCase(item, start=start)
 				start = False
 		else:
-			if start:
-				if capitalize:
-					result += str(arg).strip().capitalize()
+			if arg is not None:
+				if start:
+					if capitalize:
+						result += str(arg).strip().capitalize()
+					else:
+						result += str(arg).strip().lower()
+					start = False
 				else:
-					result += str(arg).strip().lower()
-				start = False
-			else:
-				result += str(arg).strip().title()
+					result += str(arg).strip().title()
 		i += 1
 	return result
 

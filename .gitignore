@@ -16,3 +16,5 @@ temp
 BigTimelineWindow.py
 maya_to_keyframe_mp.py
 timeline_markers.py
+.mayaSwatches
+*.swatches
