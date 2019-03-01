@@ -10,6 +10,10 @@ from maya import cmds
 
 # TODO: Rigging Logger
 
+class RIG(object):
+	def __init__(self):
+		pass
+
 
 class BASERIG(object):
 	def __init__(self,
@@ -66,6 +70,8 @@ class BASERIG(object):
 		self.joint = []
 		self.set = None
 		self.opposite = opposite
+		self.local = None
+		self.world = None
 
 		# Attributes
 		self.axis = axis
@@ -101,10 +107,16 @@ class BASERIG(object):
 	####################################################################################################################
 
 	def __str__(self):
-		return '{}: {}'.format(self.__class__.__name__, self.longName)
+		if self.rigControl:
+			return '{}: {}'.format(self.__class__.__name__, self.rigControl)
+		else:
+			return '{}: {}'.format(self.__class__.__name__, self.longName)
 
 	def __repr__(self):
-		return '{}: {}'.format(self.__class__.__name__, self.longName)
+		if self.rigControl:
+			return str(self.rigControl)
+		else:
+			return str(self.longName)
 
 	def printAttributes(self):
 		var = ''
@@ -172,7 +184,7 @@ class BASERIG(object):
 	# Joint Chain
 	####################################################################################################################
 
-	def createJointChain(self, items=None, kind=Component.rig, hierarchy=False):
+	def createJointChain(self, items=None, kind=Component.rig, hierarchy=False, autoName=True):
 		if items is None:
 			items = self.items
 
@@ -186,17 +198,18 @@ class BASERIG(object):
 			name = self.name
 			index = i
 
-			if attributeExist(item, MayaAttr.type) and attributeExist(item, MayaAttr.otherType):
-				label = getJointLabelType(item)
-				otherLabel = getJointLabelOtherType(item)
+			if autoName:
+				if attributeExist(item, MayaAttr.type) and attributeExist(item, MayaAttr.otherType):
+					label = getJointLabelType(item)
+					otherLabel = getJointLabelOtherType(item)
 
-				if label.lower() not in ['none', 'spine', 'neck']:
-					name = label
-					index = None
-				else:
-					if otherLabel:
-						name = otherLabel
+					if label.lower() != 'none':
+						name = label
 						index = None
+					else:
+						if otherLabel:
+							name = otherLabel
+							index = None
 
 			joint = Joint(prefix=self.prefix,
 			              name=name.lower(),
@@ -232,7 +245,7 @@ class BASERIG(object):
 	# FK Chain
 	####################################################################################################################
 
-	def createFKChain(self, items=None, parent=None):
+	def createFKChain(self, items=None, parent=None, autoName=True):
 		# Edge Case
 		if items is None:
 			items = self.items
@@ -252,18 +265,18 @@ class BASERIG(object):
 			name = self.name
 			index = i
 
-			if attributeExist(item, MayaAttr.type) and attributeExist(item, MayaAttr.otherType):
-				label = getJointLabelType(item)
-				otherLabel = getJointLabelOtherType(item)
+			if autoName:
+				if attributeExist(item, MayaAttr.type) and attributeExist(item, MayaAttr.otherType):
+					label = getJointLabelType(item)
+					otherLabel = getJointLabelOtherType(item)
 
-				if label.lower() not in ['none', 'spine', 'neck']:
-					name = label
-					index = None
-
-				else:
-					if otherLabel:
-						name = otherLabel
+					if label.lower() != 'none':
+						name = label
 						index = None
+					else:
+						if otherLabel:
+							name = otherLabel
+							index = None
 
 			ctrl = FKCONTROL(name=name,
 			                 prefix=self.prefix,
@@ -332,7 +345,7 @@ class BASERIG(object):
 	# IK Chain
 	####################################################################################################################
 
-	def createIKChain(self, items=None, parent=None):
+	def createIKChain(self, items=None, parent=None, autoName=True):
 		# Edge Case
 		if items is None:
 			items = self.items
@@ -358,18 +371,18 @@ class BASERIG(object):
 			index = i
 			name = self.name
 
-			if attributeExist(item, MayaAttr.type) and attributeExist(item, MayaAttr.otherType):
-				label = getJointLabelType(item)
-				otherLabel = getJointLabelOtherType(item)
+			if autoName:
+				if attributeExist(item, MayaAttr.type) and attributeExist(item, MayaAttr.otherType):
+					label = getJointLabelType(item)
+					otherLabel = getJointLabelOtherType(item)
 
-				if label.lower() not in ['none', 'spine', 'neck']:
-					name = label
-					index = None
-
-				else:
-					if otherLabel:
-						name = otherLabel
+					if label.lower() != 'none':
+						name = label
 						index = None
+					else:
+						if otherLabel:
+							name = otherLabel
+							index = None
 
 			ctrl = IKCONTROL(name=name,
 			                 prefix=self.prefix,
@@ -412,7 +425,6 @@ class BASERIG(object):
 		                              joint=self.ikJoint[1].transform,
 		                              ctl=self.ikControl[1].offsetTransform,
 		                              ik=self.ikHandle,
-		                              color=self.ikControl[1].color,
 		                              )
 		self.ikPoleVector = poleVector
 
@@ -461,7 +473,6 @@ class BASERIG(object):
 	# Bind Chain
 	####################################################################################################################
 
-	# TODO: Bind Chain
 	def createBindChain(self, items):
 		bindDict = {}
 		sectors = CHARACTERSTR
@@ -558,7 +569,7 @@ class BASERIG(object):
 
 		i = 0
 		for parent in parentItems:
-			con = cmds.parentConstraint(parentItems[i], childItems[i], mo=True)
+			con = cmds.parentConstraint(parent, childItems[i], mo=True)
 			result.append(con)
 			i += 1
 
@@ -621,7 +632,7 @@ class BASERIG(object):
 	# Sets
 	####################################################################################################################
 
-	def createSet(self, items):
+	def createSet(self, items, parentSet=None):
 		if not items:
 			raise ValueError('No items provided.')
 
@@ -631,49 +642,17 @@ class BASERIG(object):
 		items = listCheck(items)
 		set = cmds.sets(items, name=name)
 
-		if self.root:
-			if isinstance(self.root, object) and hasattr(self.root, Component.set):
-				rootSet = self.root.set
-			else:
-				rootSet = getConnectedNode(self.root, Component.set)
+		if not parentSet:
+			if self.root:
+				if isinstance(self.root, object) and hasattr(self.root, Component.set):
+					parentSet = getattr(self.root, Component.set)
+				else:
+					if attributeExist(self.root, Component.set):
+						parentSet = getConnectedNode(self.root, Component.set)
 
-			if rootSet and nodeExists(str(rootSet)):
-				cmds.sets(set, add=rootSet)
+		if parentSet and nodeExists(str(parentSet)):
+			cmds.sets(set, add=parentSet)
 		return set
-
-	####################################################################################################################
-	# Control
-	####################################################################################################################
-
-	def createControl(self,
-	                  name=Component.rig,
-	                  prefix=None,
-	                  parent=None,
-	                  item=None,
-	                  wireType=WireType.circleRotate,
-	                  axis=None,
-	                  scale=1.0,
-	                  index=None,
-	                  sector=None,
-	                  color=WireColor.blue,
-	                  offset=False,
-	                  kind=None,
-	                  ):
-		ctrl = CONTROL(name=name,
-		               parent=parent,
-		               prefix=prefix,
-		               item=item,
-		               wireType=wireType,
-		               axis=axis,
-		               scale=scale,
-		               index=index,
-		               side=sector,
-		               sector=sector,
-		               color=color,
-		               offset=offset,
-		               kind=camelCase(kind, Component.control, capitalize=False)
-		               )
-		return ctrl
 
 	####################################################################################################################
 	# FKIK

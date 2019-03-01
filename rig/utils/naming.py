@@ -161,6 +161,7 @@ class MayaAttr(object):
 	overrideEnabled = 'overrideEnabled'
 	overrideRGBColors = 'overrideRGBColors'
 	useObjectColor = 'useObjectColor'
+	overrideColor = 'overrideColor'
 
 	# Joints
 	radius = 'radius'

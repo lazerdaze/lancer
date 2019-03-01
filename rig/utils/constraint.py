@@ -3,6 +3,7 @@ from general import *
 from naming import *
 from attribute import *
 from customError import *
+from curve import overrideColorFromParent
 
 # Maya Modules
 from maya import cmds
@@ -176,7 +177,7 @@ def locOnCurve(curve, intLoc=1, n='locator', upObject='', start=False, end=False
 	return locList
 
 
-def createAimVectorHelper(start, end, name='poleVector_helper', color=None):
+def createAimVectorHelper(start, end, name='poleVector_helper'):
 	# Create Curve
 	curve = cmds.curve(n=name, d=1, p=[[0, 0, 0], [0, 0, 0]])
 	curveShape = cmds.rename(cmds.listRelatives(curve, shapes=True)[0],
@@ -194,32 +195,33 @@ def createAimVectorHelper(start, end, name='poleVector_helper', color=None):
 
 	cmds.connectAttr('{}.matrixSum'.format(mult), '{}.inputMatrix'.format(dec))
 	cmds.connectAttr('{}.outputTranslate'.format(dec), '{}.controlPoints[1]'.format(curveShape))
-
-	# Color
-	if color and isinstance(color, list):
-		cmds.setAttr(attributeName(curveShape, MayaAttr.useObjectColor), 0)
-		cmds.setAttr(attributeName(curveShape, MayaAttr.overrideEnabled), 1)
-		cmds.setAttr(attributeName(curveShape, MayaAttr.overrideRGBColors), 1)
-		i = 0
-		for x in ['R', 'G', 'B']:
-			cmds.setAttr('{}.overrideColor{}'.format(curveShape, x), color[i])
-			i += 1
 	return curveShape
 
 
-def createPoleVector(joint, ctl, ik, name='ik_poleVector', color=None):
+def createPoleVector(joint, ctl, ik, name='ik_poleVector'):
 	locator = cmds.spaceLocator(name=longName(name, Component.poleVector))[0]
 	snap(ctl, locator, True, True)
 	cmds.parent(locator, ctl)
 	cmds.setAttr('{}.v'.format(locator), 0)
 
 	poleVector = cmds.poleVectorConstraint(locator, ik)
-	shape = createAimVectorHelper(joint, ctl, name='{}_helper'.format(name), color=color)
+	shape = createAimVectorHelper(joint, ctl, name='{}_helper'.format(name))
+
+	# Color
+	parentShape = cmds.listRelatives(ctl, shapes=True)
+
+	if parentShape:
+		parentShape = parentShape[0]
+		overrideColorFromParent(parentShape, shape)
+
 	return locator
 
 
-def createAimVector(par, child, name='aimVector', aimVector=[0, 0, 1]):
-	aim = cmds.aimConstraint(par,
+def createAimVector(parent, child, name='aimVector', aimVector=None):
+	if aimVector is not None:
+		aimVector = [0, 0, 1]
+
+	aim = cmds.aimConstraint(parent,
 	                         child,
 	                         name='{}_constraint0'.format(name),
 	                         mo=True,
@@ -227,10 +229,17 @@ def createAimVector(par, child, name='aimVector', aimVector=[0, 0, 1]):
 	                         upVector=[0, 1, 0],
 	                         worldUpType='objectrotation',
 	                         worldUpVector=[0, 1, 0],
-	                         worldUpObject=par,
+	                         worldUpObject=parent,
 	                         )
 
-	shape = createAimVectorHelper(child, par, name='{}_helper'.format(name))
+	shape = createAimVectorHelper(child, parent, name='{}_helper'.format(name))
+
+	# Color
+	parentShape = cmds.listRelatives(parent, shapes=True)
+
+	if parentShape:
+		parentShape = parentShape[0]
+		overrideColorFromParent(parentShape, shape)
 
 	return [aim, shape]
 

@@ -1052,48 +1052,40 @@ def aimAtSelected(*args, **kwargs):
 #
 ########################################################################################################################
 
-class Joint(Node):
+class Joint(DagNode):
 	def __init__(self,
 	             name='rigJoint',
-	             prefix=None,
-	             side=None,
-	             sector=None,
-	             index=None,
 	             radius=1.0,
 	             drawStyle=JointDrawStyle.bone,
 	             type=None,
 	             otherType=None,
-	             kind=None,
+	             *args,
+	             **kwargs
 	             ):
+
+		DagNode.__init__(self, name=name, *args, **kwargs)
+
 		'''
 		Base Joint class to be used in all parts classes.
 
 		:param str name:        Name of Node.
-		:param str prefix:      Prefix name of the control
-		:param str side:        Side of the controls origin.
-		:param int None index:       Used to determined rig priority.
-		:param str sector:      Sector of control. Possible Sectors: "A", "B", "C"
 		:param float radius:    Joint radius scale.
 		:param enum drawStyle:  Joint draw style visibility.
 		:param enum type:       Label type.
 		:param str otherType:   Label other type.
 		'''
-
-		Node.__init__(self,
-		              prefix=prefix,
-		              side=side,
-		              name=name,
-		              sector=sector,
-		              index=index,
-		              kind=kind,
-		              )
-
 		# Custom Attributes
 		self.forwardAxis = None
 		self.upAxis = None
 
 		if not self.exists:
 			self.create(radius, drawStyle, type, otherType, kind, side)
+			self.radius = radius
+			self.drawStyle = drawStyle
+			self.type = type
+			self.otherType = otherType
+			self.kind = kind
+			self.side = side
 
 	def create(self,
 	           radius=1.0,
@@ -1111,12 +1103,6 @@ class Joint(Node):
 
 		cmds.select(d=True)
 		self.transform = cmds.joint(name=name)
-		self.radius = radius
-		self.drawStyle = drawStyle
-		self.type = type
-		self.otherType = otherType
-		self.kind = kind
-		self.side = side
 		self.canUpdateName = True
 		self.disableSegmentScale()
 

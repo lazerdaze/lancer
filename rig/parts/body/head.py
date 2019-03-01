@@ -6,69 +6,12 @@ from rig.parts.baseRig import BASERIG
 from maya import cmds
 
 
-class NECK(BASERIG):
-	def __init__(self,
-	             items,
-	             parent=None
-	             ):
-		BASERIG.__init__(self,
-		                 prefix=Part.neck,
-		                 side=Position.center,
-		                 kind=Part.neck,
-		                 items=items,
-		                 parent=parent,
-		                 axis=[1, 1, 0]
-		                 )
-
-		self.create()
-
-	def create(self):
-		# Scale
-		self.scale = self.scaleByDistance(self.items) * 2.0
-
-		# Top Node
-		self.topNode = self.createTopNode(self.items)
-
-		# Rig Joints
-		self.joint = self.createJointChain(self.items, hierarchy=True)
-
-		# Bind Controls
-		self.createBindChain(self.items)
-
-		# Parent
-		if self.parent:
-			if isinstance(self.parent, object):
-				self.rigControl = getattr(self.parent, 'cogControl')
-			else:
-				self.rigControl = self.parent
-		else:
-			self.rigControl = self.topNode
-
-		# Controls
-		self.createFKChain(self.items)
-		# self.createSplineFKIK(self.items)  # TODO: SPLINE IK
-		self.constrainChain(self.fkControl, self.joint)
-		self.constrainChain(self.joint, self.items)
-
-		# Hierarchy
-		cmds.parent(self.fkTopNode, self.joint[0], self.topNode)
-		if self.parent:
-			if isinstance(self.parent, object):
-				cmds.parent(self.topNode, self.parent.cogControl.offsetTransform)
-
-		# Cleanup
-		self.set = self.createSet(self.allAnimationControls)
-		self.finalize()
-		return
-
-
 class HEAD(BASERIG):
 	def __init__(self,
 	             head,
 	             neck=None,
 	             parent=None,
-	             spine=None,
-	             root=None,
+	             rootRig=None,
 	             ):
 		items = []
 
@@ -86,15 +29,12 @@ class HEAD(BASERIG):
 		                 items=items,
 		                 parent=parent,
 		                 axis=[1, 1, 0],
-		                 root=root,
+		                 root=rootRig,
 		                 )
 
 		# Items
 		self.headItem = head
 		self.neckItems = neck
-
-		# Parent
-		self.spine = spine
 
 		# Controls
 		self.fkHeadControl = None
@@ -119,6 +59,7 @@ class HEAD(BASERIG):
 		# Head
 		self.createHead()
 
+		# Cleanup
 		self.set = self.createSet(self.allAnimationControls)
 		self.finalize()
 
@@ -195,11 +136,10 @@ class HEAD(BASERIG):
 		               axis=self.axis,
 		               )
 
-		neck.createFKChain(parent=self.rigControl)
+		neck.createFKChain(parent=self.rigControl, autoName=False)
 		neck.createBindChain(self.neckItems)
 		neck.constrainChain(neck.fkControl, self.neckItems)
 		self.fkControl += neck.fkControl
 		self.bindControls += neck.bindControls
 		self.leafControls += neck.leafControls
-
 		return

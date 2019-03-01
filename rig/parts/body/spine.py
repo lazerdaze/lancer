@@ -9,7 +9,6 @@ from maya import cmds
 class SPINE(BASERIG):
 	def __init__(self,
 	             items,
-	             parent=None,
 	             root=None,
 	             ):
 		BASERIG.__init__(self,
@@ -17,11 +16,9 @@ class SPINE(BASERIG):
 		                 side=Position.center,
 		                 kind=Part.spine,
 		                 items=items,
-		                 parent=parent,
 		                 axis=[1, 1, 0],
 		                 root=root,
 		                 )
-
 		self.create()
 
 	def create(self):
@@ -38,25 +35,34 @@ class SPINE(BASERIG):
 		self.createBindChain(self.items)
 
 		# Parent
-		if self.parent:
-			if isinstance(self.parent, object):
-				self.rigControl = getattr(self.parent, 'cogControl')
+		if self.root:
+			if isinstance(self.root, object):
+				self.rigControl = getattr(self.root, 'cogControl')
 			else:
-				self.rigControl = self.parent
+				self.rigControl = self.root
 		else:
 			self.rigControl = self.topNode
 
 		# Controls
-		self.createFKChain(self.items)
+		self.createFKChain(self.items, autoName=False)
 		# self.createSplineFKIK(self.items)  # TODO: SPLINE IK
 		self.constrainChain(self.fkControl, self.joint)
 		self.constrainChain(self.joint, self.items)
 
 		# Hierarchy
 		cmds.parent(self.fkTopNode, self.joint[0], self.topNode)
-		if self.parent:
-			if isinstance(self.parent, object):
-				cmds.parent(self.topNode, self.parent.cogControl.offsetTransform)
+
+		local = None
+		world = None
+
+		if self.root:
+			if isinstance(self.root, object):
+				if hasattr(self.root, Component.world):
+					world = getattr(self.root, Component.world)
+				if hasattr(self.root, Component.local):
+					local = getattr(self.root, Component.local)
+		if local:
+			cmds.parent(self.topNode, local)
 
 		# Cleanup
 		self.set = self.createSet(self.allAnimationControls)

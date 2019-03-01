@@ -15,6 +15,7 @@ class ROOT(BASERIG):
 
 		'''
 		Central Rigging Part used in all rigging hierarchies.
+		Rig is not complete without a ROOT.
 
 		:param root:
 		:param cog:
@@ -40,7 +41,7 @@ class ROOT(BASERIG):
 		self.hipItem = hip
 
 		# Controls
-		self.offsetControl = None
+		self.repoControl = None
 		self.cogControl = None
 		self.hipControl = None
 
@@ -51,7 +52,7 @@ class ROOT(BASERIG):
 	def allAnimationControls(self):
 		result = []
 
-		for ctrl in [self.rigControl, self.offsetControl, self.cogControl, self.hipControl]:
+		for ctrl in [self.rigControl, self.repoControl, self.cogControl, self.hipControl]:
 			if isinstance(ctrl, object):
 				for attr in ['transform', 'offsetTransform']:
 					if hasattr(ctrl, attr):
@@ -98,29 +99,31 @@ class ROOT(BASERIG):
 		                          offset=WireType.circleRotate
 		                          )
 
+		self.world = self.rigControl.offsetTransform
+
 		# createRootOffset
 		attrName = 'repoVisibility'
 
-		self.offsetControl = CONTROL(name=Component.Global,
-		                             prefix=self.prefix,
-		                             item=item,
-		                             wireType=WireType.sphere,
-		                             axis=[0, 0, 0],
-		                             scale=scale * .25,
-		                             color=WireColor.purple,
-		                             kind='repo',
-		                             )
+		self.repoControl = CONTROL(name=Component.Global,
+		                           prefix=self.prefix,
+		                           item=item,
+		                           wireType=WireType.sphere,
+		                           axis=[0, 0, 0],
+		                           scale=scale * .25,
+		                           color=WireColor.purple,
+		                           kind='repo',
+		                           )
 
 		addAttribute(node=self.rigControl, attribute=attrName, kind=MayaAttrType.bool, channelBox=True, keyable=False)
-		cmds.connectAttr('{}.{}'.format(self.rigControl, attrName), '{}.v'.format(self.offsetControl.shape))
+		cmds.connectAttr('{}.{}'.format(self.rigControl, attrName), '{}.v'.format(self.repoControl.shape))
 
 		# Hierarchy
-		self.offsetControl.parentTo(self.rigControl.offsetTransform)
+		self.repoControl.parentTo(self.rigControl.offsetTransform)
 
 		# Constrain
 		if item:
-			cmds.parentConstraint(self.offsetControl, item, mo=True)
-			cmds.scaleConstraint(self.offsetControl, item, mo=True)
+			cmds.parentConstraint(self.repoControl, item, mo=True)
+			cmds.scaleConstraint(self.repoControl, item, mo=True)
 
 		# Global
 		globalNode = self.rigControl.nullConnection
@@ -157,6 +160,9 @@ class ROOT(BASERIG):
 		                          color=WireColor.purple,
 		                          offset=WireType.circleRotate,
 		                          )
+
+		self.local = self.cogControl.offsetTransform
+
 		# Hierarchy
 		self.cogControl.parentTo(self.rigControl.offsetTransform)
 		self.cogControl.snapTo(item, True, False)
@@ -202,7 +208,7 @@ class ROOT(BASERIG):
 	def finalize(self, items=None, parent=None):
 		BASERIG.finalize(self, items, parent)
 
-		self.connectToRig(self.offsetControl, self.rigControl, 'offsetControl')
+		self.connectToRig(self.repoControl, self.rigControl, 'repoControl')
 		self.connectToRig(self.cogControl, self.rigControl, 'cogControl')
 		self.connectToRig(self.hipControl, self.rigControl, 'hipControl')
 		return

@@ -69,7 +69,7 @@ def createControl(name='control', shape=WireType.circle, axis=None, scale=1, col
 ########################################################################################################################
 
 
-class Control(Node):
+class Control(DagNode):
 	def __init__(self,
 	             name='rig',
 	             parent=None,
@@ -103,16 +103,16 @@ class Control(Node):
 		:param bool str None offset:     Create Offset Control
 		'''
 
-		Node.__init__(self,
-		              name=name,
-		              parent=parent,
-		              prefix=prefix,
-		              kind=kind,
-		              index=index,
-		              side=side,
-		              sector=sector,
-		              color=color,
-		              )
+		DagNode.__init__(self,
+		                 name=name,
+		                 parent=parent,
+		                 prefix=prefix,
+		                 kind=kind,
+		                 index=index,
+		                 side=side,
+		                 sector=sector,
+		                 color=color,
+		                 )
 
 		self.item = item
 
@@ -196,7 +196,7 @@ class Control(Node):
 		return
 
 	def updateName(self):
-		Node.updateName(self)
+		DagNode.updateName(self)
 
 		self.nullPosition = cmds.rename(self.nullPosition,
 		                                longName(self.longName, Component.position)

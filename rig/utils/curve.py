@@ -132,6 +132,30 @@ def overrideColor(selected=[], color=[], reset=False, index=False, *args):
 									i += 1
 
 
+def overrideColorFromParent(parent, child, *args, **kwargs):
+	override = cmds.getAttr(attributeName(parent, MayaAttr.overrideEnabled))
+	rgbOverride = cmds.getAttr(attributeName(parent, MayaAttr.overrideRGBColors))
+
+	if override:
+		cmds.setAttr(attributeName(child, MayaAttr.overrideEnabled), True)
+
+		# RGB
+		if rgbOverride:
+			cmds.setAttr(attributeName(child, MayaAttr.overrideRGBColors), True)
+
+			for hue in ['R', 'G', 'B']:
+				value = cmds.getAttr('{}.overrideColor{}'.format(parent, hue))
+				cmds.setAttr('{}.overrideColor{}'.format(child, hue), value)
+				return True
+		# INDEX
+		else:
+			index = cmds.getAttr(attributeName(parent, MayaAttr.overrideColor))
+			cmds.setAttr(attributeName(child, MayaAttr.overrideColor), index)
+			return True
+
+	return False
+
+
 def createCurveInfo(curve):
 	node = cmds.createNode('curveInfo', name='{}_curveInfo0'.format(curve))
 	shape = cmds.listRelatives(curve, shapes=True)[0]

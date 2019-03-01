@@ -96,30 +96,29 @@ def createNull(*args, **kwargs):
 ########################################################################################################################
 #
 #
-#	Node Class
+#	Abstract Node Class
 #
 #
 ########################################################################################################################
 
-class Node(object):
+class AbstractNode(object):
 	def __init__(self,
-	             name='rigNode',
+	             name=None,
 	             prefix=None,
 	             parent=None,
-	             children=None,
 	             color=None,
 	             side=None,
 	             index=None,
 	             sector=None,
 	             kind=None,
+	             fullpath=None,
 	             ):
-
 		'''
-		Base Node class to be sub-classed in all Component classes.
+		Abstract Node to be sub-classed by all dag node related classes.
 
 		:param str name:            Name of Node.
 		:param str prefix:          Prefix name of the control
-		:param object parent:       Parent of Node.
+		:param object str parent:   Parent of Node.
 		:param list children:       Direct descendants of Node.
 		:param list color:          RGB Color.
 		:param str side:            Side of the controls origin.
@@ -129,10 +128,11 @@ class Node(object):
 		'''
 
 		# Name
+		self._fullpath = fullpath
 		self._name = name
 		self._prefix = prefix
 		self._parent = parent
-		self._children = children
+		self._children = []
 		self._descendants = []
 
 		# Custom Maya Attributes
@@ -143,43 +143,28 @@ class Node(object):
 
 		# Attributes
 		self.exists = False
-		self.canUpdateName = False
 		self.color = color
 
 		# Nodes
 		self.transform = None
 		self.shape = None
 
-		if nodeExists(name):
-			self.exists = True
-			self.transform = name
-			self.shape = nodeShapes(name)
-
+	####################################################################################################################
+	# Name Properties
+	####################################################################################################################
 	def __str__(self):
 		return self.longName
 
 	def __repr__(self):
 		return self.longName
 
-	def create(self, *args, **kwargs):
-		if not self.isValid():
-			self.transform = cmds.group(name=self.longName, empty=True)
-			self.canUpdateName = True
-		else:
-			raise NodeExistsError('Node "{}" already exists.'.format(self.longName))
-
-	####################################################################################################################
-	# Name Properties
-	####################################################################################################################
 	@property
-	def name(self):
-		return self._name
+	def fullpath(self):
+		return self._fullpath
 
-	@name.setter
-	def name(self, name):
-		self._name = name
-		# if self.canUpdateName:
-		#	self.updateName()
+	@fullpath.setter
+	def fullpath(self, fullpath):
+		self._fullpath = fullpath
 		return
 
 	@property
@@ -189,6 +174,51 @@ class Node(object):
 	@prefix.setter
 	def prefix(self, prefix):
 		self._prefix = prefix
+		return
+
+	@property
+	def side(self):
+		return self._side
+
+	@side.setter
+	def side(self, side):
+		self._side = side
+		return
+
+	@property
+	def name(self):
+		return self._name
+
+	@name.setter
+	def name(self, name):
+		self._name = name
+		return
+
+	@property
+	def sector(self):
+		return self._prefix
+
+	@sector.setter
+	def sector(self, sector):
+		self._sector = sector
+		return
+
+	@property
+	def index(self):
+		return self._index
+
+	@index.setter
+	def index(self, index):
+		self._index = index
+		return
+
+	@property
+	def kind(self):
+		return self._kind
+
+	@kind.setter
+	def kind(self, kind):
+		self._kind = kind
 		return
 
 	@property
@@ -204,14 +234,158 @@ class Node(object):
 			                self._kind,
 			                )
 
-	@longName.setter
-	def longName(self, prefix=None, side=None, name=None, sector=None, index=None, kind=None):
-		self._prefix = prefix
-		self._side = side
-		self._name = name
-		self._sector = sector
-		self._index = index
-		self._kind = kind
+	####################################################################################################################
+	# Hierarchy
+	####################################################################################################################
+	@property
+	def parent(self):
+		return self._parent
+
+	@parent.setter
+	def parent(self, parent):
+		self._parent = parent
+		return
+
+	@property
+	def children(self):
+		return self._children
+
+	@children.setter
+	def children(self, children):
+		self._children = children
+		return
+
+	@property
+	def descendants(self):
+		return self._descendants
+
+	@descendants.setter
+	def descendants(self, descendants):
+		self._descendants = descendants
+		return
+
+	####################################################################################################################
+	# Attributes
+	####################################################################################################################
+	def getAttribute(self, attribute):
+		if hasattr(self, attribute):
+			return getattr(self, attribute)
+		return None
+
+	def setAttribute(self, attribute, value):
+		if hasattr(self, attribute):
+			setattr(self, attribute, value)
+			return True
+		return False
+
+	def hasAttribute(self, attribute):
+		return hasattr(self, attribute)
+
+	def addAttribute(self,
+	                 attribute,
+	                 value,
+	                 ):
+
+		if hasattr(self, attribute):
+			raise AttributeError('Attribute "{}" already exists.'.format(attribute))
+
+		setattr(self, attribute, value)
+		return
+
+
+########################################################################################################################
+#
+#
+#	Node Class
+#
+#
+########################################################################################################################
+
+class DagNode(AbstractNode):
+	def __init__(self, *args, **kwargs):
+		AbstractNode.__init__(self, *args, **kwargs)
+
+		# Attributes
+		self.canUpdateName = False
+
+		# Node In Scene
+		if nodeExists(self.name):
+			self.exists = True
+			self.transform = self.name
+			self.shape = nodeShapes(self.name)
+
+	def isValid(self):
+		return nodeExists(self.longName)
+
+	def create(self, *args, **kwargs):
+		if not self.isValid():
+			self.transform = cmds.group(name=self.longName, empty=True)
+			self.canUpdateName = True
+		else:
+			raise NodeExistsError('Node "{}" already exists.'.format(self.longName))
+
+	####################################################################################################################
+	# Attributes
+	####################################################################################################################
+
+	def getAttribute(self, attribute):
+		value = AbstractNode.getAttribute(self, attribute)
+		if value is not None:
+			return value
+		else:
+			if attributeExist(self.longName, attribute):
+				return getAttribute(self.longName, attribute)
+			else:
+				return None
+
+	def setAttribute(self, attribute, value):
+		result = AbstractNode.setAttribute(self, attribute, value)
+
+		if result:
+			if self.isValid():
+				if attributeLocked(self.longName, attribute):
+					raise AttributeError('Attribute "{}" is locked.'.format(attribute))
+				elif attributeConnected(self.longName, attribute):
+					raise AttributeError('Attribute "{}" is connected.'.format(attribute))
+				else:
+					setAttribute(self.longName, attribute, value)
+		else:
+			raise AttributeError('Attribute "{}" does not exist.'.format(attribute))
+		return
+
+	def hasAttribute(self, attribute):
+		if hasattr(self, attribute):
+			return True
+		else:
+			return attributeExist(self, attribute)
+
+	def addAttribute(self,
+	                 attribute,
+	                 value,
+	                 *args,
+	                 **kwargs
+	                 ):
+		AbstractNode.addAttribute(self, attribute, value)
+
+		kind = kwargs.get('kind', MayaAttrType.float)
+		minValue = kwargs.get('minValue', None)
+		maxValue = kwargs.get('maxValue', None)
+		lock = kwargs.get('lock', False)
+		channelBox = kwargs.get('channelBox', False)
+		keyable = kwargs.get('keyable', True)
+		array = kwargs.get('array', False)
+
+		addAttribute(self.longName,
+		             attribute=attribute,
+		             kind=kind,
+		             value=value,
+		             minValue=minValue,
+		             maxValue=maxValue,
+		             keyable=keyable,
+		             channelBox=channelBox,
+		             lock=lock,
+		             array=array,
+		             )
 		return
 
 	####################################################################################################################
@@ -221,8 +395,7 @@ class Node(object):
 	def translate(self):
 		if self.isValid():
 			return [self.translateX, self.translateY, self.translateZ]
-		else:
-			return [0.0, 0.0, 0.0]
+		return None
 
 	@translate.setter
 	def translate(self, *args):
@@ -249,8 +422,7 @@ class Node(object):
 	def translateX(self):
 		if self.isValid():
 			return cmds.getAttr(attributeName(self.longName, MayaAttr.translateX))
-		else:
-			return 0.0
+		return None
 
 	@translateX.setter
 	def translateX(self, value):
@@ -264,8 +436,7 @@ class Node(object):
 	def translateY(self):
 		if self.isValid():
 			return cmds.getAttr(attributeName(self.longName, MayaAttr.translateY))
-		else:
-			return 0
+		return None
 
 	@translateY.setter
 	def translateY(self, value):
@@ -279,8 +450,7 @@ class Node(object):
 	def translateZ(self):
 		if self.isValid():
 			return cmds.getAttr(attributeName(self.longName, MayaAttr.translateZ))
-		else:
-			return 0.0
+		return None
 
 	@translateZ.setter
 	def translateZ(self, value):
@@ -297,8 +467,7 @@ class Node(object):
 	def rotate(self):
 		if self.isValid():
 			return [self.rotateX, self.rotateY, self.rotateZ]
-		else:
-			return [0.0, 0.0, 0.0]
+		return None
 
 	@rotate.setter
 	def rotate(self, *args):
@@ -324,8 +493,7 @@ class Node(object):
 	def rotateX(self):
 		if self.isValid():
 			return cmds.getAttr(attributeName(self.longName, MayaAttr.rotateX))
-		else:
-			return 0.0
+		return None
 
 	@rotateX.setter
 	def rotateX(self, value):
@@ -339,8 +507,7 @@ class Node(object):
 	def rotateY(self):
 		if self.isValid():
 			return cmds.getAttr(attributeName(self.longName, MayaAttr.rotateY))
-		else:
-			return 0.0
+		return None
 
 	@rotateY.setter
 	def rotateY(self, value):
@@ -354,8 +521,7 @@ class Node(object):
 	def rotateZ(self):
 		if self.isValid():
 			return cmds.getAttr(attributeName(self.longName, MayaAttr.rotateZ))
-		else:
-			return 0.0
+		return None
 
 	@rotateZ.setter
 	def rotateZ(self, value):
@@ -372,8 +538,7 @@ class Node(object):
 	def scale(self):
 		if self.isValid():
 			return [self.scaleX, self.scaleY, self.scaleZ]
-		else:
-			return [1.0, 1.0, 1.0]
+		return None
 
 	@scale.setter
 	def scale(self, *args):
@@ -403,8 +568,7 @@ class Node(object):
 	def scaleX(self):
 		if self.isValid():
 			return cmds.getAttr(attributeName(self.longName, MayaAttr.scaleX))
-		else:
-			return 1.0
+		return None
 
 	@scaleX.setter
 	def scaleX(self, value):
@@ -418,8 +582,7 @@ class Node(object):
 	def scaleY(self):
 		if self.isValid():
 			return cmds.getAttr(attributeName(self.longName, MayaAttr.scaleY))
-		else:
-			return 1.0
+		return None
 
 	@scaleY.setter
 	def scaleY(self, value):
@@ -433,8 +596,7 @@ class Node(object):
 	def scaleZ(self):
 		if self.isValid():
 			return cmds.getAttr(attributeName(self.longName, MayaAttr.scaleZ))
-		else:
-			return 1.0
+		return None
 
 	@scaleZ.setter
 	def scaleZ(self, value):
@@ -450,14 +612,13 @@ class Node(object):
 	@property
 	def visibility(self):
 		if self.isValid():
-			return cmds.getAttr(attributeName(self.longName, MayaAttr.visibility))
-		else:
-			return 1.0
+			return bool(cmds.getAttr(attributeName(self.longName, MayaAttr.visibility)))
+		return None
 
 	@visibility.setter
 	def visibility(self, value):
 		if self.isValid():
-			setAttribute(self.longName, attribute=MayaAttr.visibility, value=value, force=True)
+			setAttribute(self.longName, attribute=MayaAttr.visibility, value=bool(value), force=True)
 		else:
 			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
@@ -466,9 +627,10 @@ class Node(object):
 	# Custom Properties
 	####################################################################################################################
 	def updateName(self):
-		if self.transform:
+		if self.isValid() and self.transform:
 			self.transform = cmds.rename(self.transform, self.longName)
-		return
+			return True
+		return False
 
 	@property
 	def side(self):
@@ -507,12 +669,9 @@ class Node(object):
 				self._side = sideList[int(side)]
 			else:
 				raise ValueError('Invalid side type provided: {}'.format(type(side)))
-
-			# if self.canUpdateName:
-			# 	self.updateName()
 			setAttribute(self.longName, attribute=MayaAttr.side, value=value)
 		else:
-			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
+			self._side = side
 		return
 
 	@property
@@ -542,10 +701,8 @@ class Node(object):
 				setAttribute(self.longName, attribute=UserAttr.sector, value=value, force=True)
 
 			self._sector = sector
-		# if self.canUpdateName:
-		# 	self.updateName()
 		else:
-			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
+			self._sector = sector
 		return
 
 	@property
@@ -576,10 +733,8 @@ class Node(object):
 					setAttribute(self.longName, attribute=UserAttr.index, value=value, force=True)
 
 				self._index = int(index)
-			# if self.canUpdateName:
-			# 	self.updateName()
 		else:
-			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
+			self._index = index
 		return
 
 	@property
@@ -612,10 +767,8 @@ class Node(object):
 				setAttribute(self.longName, attribute=UserAttr.kind, value=value, force=True)
 
 			self._kind = kind
-		# if self.canUpdateName:
-		# 	self.updateName()
 		else:
-			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
+			self._kind = kind
 		return
 
 	####################################################################################################################
@@ -625,25 +778,26 @@ class Node(object):
 	def parent(self):
 		if self.isValid():
 			return nodeParent(self.longName)
-		else:
-			return self._parent
+		return self._parent
 
 	@parent.setter
 	def parent(self, parent):
 		self._parent = parent
-		cmds.parent(self.longName, self._parent)
+
+		if self.isValid() and nodeExists(parent):
+			cmds.parent(self.longName, parent)
 		return
 
-	####################################################################################################################
-	# Children Methods
-	####################################################################################################################
-	def append(self, child):
-		self._children.append(child)
-		return
+	@property
+	def children(self):
+		if self.isValid():
+			return nodeChildren(self.longName)
+		return self._children
 
-	def remove(self, child):
-		if child in self._children:
-			self._children.remove(child)
+	@children.setter
+	def children(self, children):
+		if self.isValid():
+			pass
 		return
 
 	####################################################################################################################
@@ -694,61 +848,5 @@ class Node(object):
 
 	def freezeTransforms(self):
 		if self.isValid():
-			freezeTransform(self.longName, True, True, True)
-		return
-
-	def isValid(self):
-		return nodeExists(self.longName)
-
-	def isAttributeLocked(self, attribute):
-		return attributeLocked(self.longName, attribute)
-
-	def getAttribute(self, attribute):
-		return getattr(self, attribute)
-
-	def setAttribute(self, attribute, value):
-		if self.isValid():
-			if isinstance(attribute, str):
-				if hasattr(self, attribute):
-					if self.isAttributeLocked(attribute):
-						raise AttributeError('Attribute "{}" is locked.'.format(attribute))
-					else:
-						if getattr(self, attribute) != value:
-							setattr(self, attribute, value)
-						setAttribute(self.longName, attribute, value)
-				else:
-					raise AttributeError('Attribute "{}" does not exist.'.format(attribute))
-				return
-			else:
-				raise TypeError('Attribute must be str.')
-
-	def populateAttributes(self):
-		exceptions = ['message', 'TdataCompound']
-
-		if self.isValid():
-			for attribute in listAllAttributes(self.longName):
-				if hasattr(self, attribute):
-					name = attributeName(self.longName, attribute)
-
-					try:
-						kind = str(cmds.getAttr(name, type=True))
-						value = cmds.getAttr(name) if kind not in exceptions else None
-						setattr(self, attribute, value)
-
-					except ValueError:
-						pass
-		return
-
-	def populateFromScene(self):
-		if self.isValid():
-			# self.parent = utils.nodeParent(self._name)
-			self._kind = nodeType(self.longName)
-
-			children = nodeChildren(self.longName)
-
-			if children:
-				for child in children:
-					childNode = Node(parent=self, name=child)
-					childNode.populateFromScene()
-					self.append(childNode)
+			freezeTransform(self.transform, True, True, True)
 		return
