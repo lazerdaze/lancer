@@ -445,18 +445,18 @@ class RIGBASE(object):
 		elif self.side.lower() == Position.right:
 			axis = [1, 1, 0]
 
-		ctl = RIGCONTROL(name=longName(self.name,
-		                               self.side.upper()[0],
-		                               self.index,
-		                               Component.attr,
-		                               Component.control,
-		                               ),
-		                 child=child,
-		                 scale=self.scale * 2.0,
-		                 side=self.side,
-		                 label='None',
-		                 axis=axis,
-		                 )
+		ctl = INTERFACE_CONTROL(name=longName(self.name,
+											  self.side.upper()[0],
+											  self.index,
+											  Component.attr,
+											  Component.control,
+											  ),
+								child=child,
+								scale=self.scale * 2.0,
+								side=self.side,
+								label='None',
+								axis=axis,
+								)
 
 		self.master = ctl.transform
 		self.masterGroup = ctl.group

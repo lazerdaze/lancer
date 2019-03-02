@@ -3,6 +3,7 @@ from attribute import *
 from general import *
 from naming import *
 from customError import *
+from network import *
 
 # Python Modules
 import re
@@ -300,6 +301,15 @@ class DagNode(AbstractNode):
 	def __init__(self, *args, **kwargs):
 		AbstractNode.__init__(self, *args, **kwargs)
 
+		# Dag Node Attributes
+		self._color = None
+
+		# Rig Relationships
+		self._rigPart = None
+		self._rigParent = None
+		self._rigRoot = None
+		self._rigChildren = None
+
 		# Node In Scene
 		if nodeExists(self.name):
 			self.wrapper = True
@@ -307,12 +317,13 @@ class DagNode(AbstractNode):
 			self.shape = nodeShapes(self.name)
 		else:
 			self.create()
+			self.setDefaults()
 			self.side = kwargs.get('side', None)
 			self.index = kwargs.get('index', None)
 			self.sector = kwargs.get('sector', None)
 			self.kind = kwargs.get('kind', None)
 			self.parent = kwargs.get('parent', None)
-			self._color = kwargs.get('color', None)
+			self.color = kwargs.get('color', None)
 
 	def isValid(self):
 		return nodeExists(self.longName)
@@ -762,6 +773,74 @@ class DagNode(AbstractNode):
 		return
 
 	####################################################################################################################
+	# Control Properties
+	####################################################################################################################
+	@property
+	def rigPart(self):
+		return self._rigPart
+
+	@rigPart.setter
+	def rigPart(self, part):
+		attr = 'rigPart'
+		part = '' if part is None else part
+
+		if self.isValid():
+			if attributeExist(self.longName, attr):
+				setAttribute(self.transform, attr, value=part, force=True)
+			else:
+				addAttribute(node=self.longName,
+							 attribute=Component.rigPart,
+							 value=part,
+							 kind=MayaAttrType.string,
+							 lock=True)
+
+		self._rigPart = part
+		return
+
+	@property
+	def rigParent(self):
+		attr = 'rigParent'
+
+		if self.isValid():
+			if attributeExist(self.longName, attr):
+				return getConnectedNode(self.longName, attr)
+		return self._rigParent
+
+	@property
+	def rigRoot(self):
+		attr = 'rigRoot'
+
+		if self.isValid():
+			if attributeExist(self.longName, attr):
+				return getConnectedNode(self.longName, attr)
+		return self._rigRoot
+
+	@property
+	def rigChildren(self):
+		attr = 'rigChildren'
+
+		if self.isValid():
+			if attributeExist(self.longName, attr):
+				return getConnectedNode(self.longName, attr)
+		return self._rigChildren
+
+	def setDefaults(self):
+		# Rig Part
+		addAttribute(node=self.transform, attribute=Component.rigPart, value=self.prefix, kind=MayaAttrType.string,
+					 lock=True)
+
+		# Parent
+		for attr in ['rigParent', 'rigRoot']:
+			if not attributeExist(self.transform, attr):
+				addAttribute(node=self.transform, attribute=attr, kind=MayaAttrType.message)
+
+		# Children
+		for attr in ['rigChildren']:
+			if not attributeExist(self.transform, attr):
+				addAttribute(node=self.transform, attribute=attr, kind=MayaAttrType.string, lock=True)
+		return
+
+	####################################################################################################################
 	# Hierarchy
 	####################################################################################################################
 	@property
@@ -806,7 +885,7 @@ class DagNode(AbstractNode):
 
 	@color.setter
 	def color(self, color):
-		if self.isValid():
+		if self.isValid() and color is not None:
 			if isinstance(color, int):
 				pass
 			elif isinstance(color, list) and len(color) == 3:
@@ -859,12 +938,12 @@ class DagNode(AbstractNode):
 					cmds.rotate(z, self.longName, z=True, worldSpace=worldSpace)
 		return
 
-	def snapTo(self, node, translation=True, rotation=True):
+	def snapTo(self, item, translation=True, rotation=True):
 		if self.isValid():
-			snap(node, self.longName, t=translation, r=rotation)
+			snap(item, self.longName, t=translation, r=rotation)
 		return
 
 	def freezeTransforms(self):
 		if self.isValid():
-			freezeTransform(self.transform, True, True, True)
+			freezeTransform(self.longName, True, True, True)
 		return

@@ -5,69 +5,69 @@ from naming import *
 from maya import cmds
 
 DataTypes = ['string',
-             'stringArray',
-             'matrix',
-             'reflectanceRGB',
-             'spectrumRGB',
-             'float2',
-             'float3',
-             'double2',
-             'double3',
-             'long2',
-             'long3',
-             'short2',
-             'short3',
-             'doubleArray',
-             'floatArray',
-             'Int32Array',
-             'vectorArray',
-             'nurbsCurve',
-             'nurbsSurface',
-             'mesh',
-             'lattice',
-             'pointArray',
-             ]
+			 'stringArray',
+			 'matrix',
+			 'reflectanceRGB',
+			 'spectrumRGB',
+			 'float2',
+			 'float3',
+			 'double2',
+			 'double3',
+			 'long2',
+			 'long3',
+			 'short2',
+			 'short3',
+			 'doubleArray',
+			 'floatArray',
+			 'Int32Array',
+			 'vectorArray',
+			 'nurbsCurve',
+			 'nurbsSurface',
+			 'mesh',
+			 'lattice',
+			 'pointArray',
+			 ]
 
 AttributeTypes = ['bool',
-                  'long',
-                  'short',
-                  'byte',
-                  'char',
-                  'enum',
-                  'float',
-                  'double',
-                  'doubleAngle',
-                  'doubleLinear',
-                  'compound',
-                  'message',
-                  'time',
-                  'fltMatrix',
-                  'reflectance',
-                  'spectrum',
-                  'float2',
-                  'float3',
-                  'double2',
-                  'double3',
-                  'long2',
-                  'long3',
-                  'short2',
-                  'short3'
-                  ]
+				  'long',
+				  'short',
+				  'byte',
+				  'char',
+				  'enum',
+				  'float',
+				  'double',
+				  'doubleAngle',
+				  'doubleLinear',
+				  'compound',
+				  'message',
+				  'time',
+				  'fltMatrix',
+				  'reflectance',
+				  'spectrum',
+				  'float2',
+				  'float3',
+				  'double2',
+				  'double3',
+				  'long2',
+				  'long3',
+				  'short2',
+				  'short3'
+				  ]
 
 
 def addAttribute(node,
-                 attribute,
-                 kind=MayaAttrType.float,
-                 value=None,
-                 minValue=None,
-                 maxValue=None,
-                 keyable=True,
-                 channelBox=True,
-                 lock=False,
-                 destinationNode=None,
-                 destinationAttribute=None,
-                 array=False,
-                 ):
+				 attribute,
+				 kind=MayaAttrType.float,
+				 value=None,
+				 minValue=None,
+				 maxValue=None,
+				 keyable=True,
+				 channelBox=True,
+				 lock=False,
+				 destinationNode=None,
+				 destinationAttribute=None,
+				 array=False,
+				 ):
 	name = attributeName(node, attribute)
 
 	if not attributeExist(node, attribute):
@@ -209,8 +209,8 @@ def connectAttribute(*args, **kwargs):
 				# Offset
 				if offset:
 					offsetNode = cmds.createNode(MayaNodeType.addDoubleLinear,
-					                             name=longName(source, Component.offset, 0),
-					                             )
+												 name=longName(source, Component.offset, 0),
+												 )
 
 					sourceValue = cmds.getAttr(sourceName)
 					destinationValue = cmds.getAttr(destinationName)
@@ -245,8 +245,8 @@ def connectDefaultAttributes(*args, **kwargs):
 
 	attributes = {
 		MayaAttr.translate: translate,
-		MayaAttr.rotate   : rotate,
-		MayaAttr.scale    : scale,
+		MayaAttr.rotate: rotate,
+		MayaAttr.scale: scale,
 	}
 
 	if len(args) > 1:
@@ -261,10 +261,49 @@ def connectDefaultAttributes(*args, **kwargs):
 
 							if not attributeLocked(parent, connectAttr) and not attributeLocked(arg, connectAttr):
 								cmds.connectAttr(attributeName(parent, connectAttr),
-								                 attributeName(arg, connectAttr)
-								                 )
+												 attributeName(arg, connectAttr)
+												 )
 	else:
 		raise ValueError('Must provide two nodes.')
+	return
+
+
+def connectAxisArray(source, destination, attribute, offset=False, *args, **kwargs):
+	for axis in ['x', 'y', 'z']:
+		sourceName = '{}.{}{}'.format(source, attribute, axis.upper())
+		destinationName = '{}.{}{}'.format(destination, attribute, axis.upper())
+
+		# Offset
+		if offset:
+			offsetNode = cmds.createNode(MayaNodeType.addDoubleLinear,
+										 name=longName(sourceName, Component.offset, 0),
+										 )
+
+			sourceValue = cmds.getAttr(sourceName)
+			destinationValue = cmds.getAttr(destinationName)
+
+			cmds.setAttr(attributeName(offsetNode, 'input2'), destinationValue - sourceValue)
+
+			# Connect Offset
+			cmds.connectAttr(sourceName, attributeName(offsetNode, 'input1'), force=True)
+			sourceName = attributeName(offsetNode, 'output')
+
+		cmds.connectAttr(sourceName, destinationName, force=True)
+	return
+
+
+def connectTranslate(source, destination, offset=False, *args, **kwargs):
+	connectAxisArray(source, destination, 'translate', offset)
+	return
+
+
+def connectRotate(source, destination, offset=False, *args, **kwargs):
+	connectAxisArray(source, destination, 'rotate', offset)
+	return
+
+
+def connectScale(source, destination, offset, *args, **kwargs):
+	connectAxisArray(source, destination, 'scale', offset)
 	return
 
 
@@ -421,17 +460,16 @@ def addIndexAttribute(node, value):
 	if not attributeExist(node, name):
 
 		addAttribute(node=node,
-		             attribute=name,
-		             kind=MayaAttrType.int,
-		             value=value,
-		             keyable=False,
-		             channelBox=False,
-		             )
+					 attribute=name,
+					 kind=MayaAttrType.int,
+					 value=value,
+					 keyable=False,
+					 channelBox=False,
+					 )
 	else:
 		cmds.setAttr(attributeName(node, name), value)
 
 	return
-
 
 
 ########################################################################################################################

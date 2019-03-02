@@ -85,7 +85,6 @@ class Control(Joint):
 				 axis=None,
 				 scale=1.0,
 				 color=WireColor.blue,
-				 offset=False,
 				 *args,
 				 **kwargs
 				 ):
@@ -121,7 +120,6 @@ class Control(Joint):
 		# Control attributes
 		self.item = item
 		self.axis = axis
-		self.offset = offset
 		self.wire = wire
 		self.wireScale = scale
 
@@ -135,48 +133,92 @@ class Control(Joint):
 							   )
 
 		self.transform, self.shape = result
+		self.rigPart = self.prefix
 		self.disableSegmentScale()
 		return
 
-	def constrainItem(self, item=None, point=False, orient=False, scale=False, offset=True):
+	####################################################################################################################
+	# Methods
+	####################################################################################################################
+
+	def constrainItem(self, *args, **kwargs):
+		item = kwargs.get('item', None)
+		point = kwargs.get('point', False)
+		orient = kwargs.get('orient', False)
+		scale = kwargs.get('scale', False)
+		offset = kwargs.get('offset', False)
+
+		# Edge Case
 		if not item:
 			if not self.item:
 				raise RuntimeError('No valid item provided.'.format(self.item))
 			else:
 				item = self.item
 
-		if point:
-			cmds.pointConstraint(self.longName, item, mo=offset)
-		if orient:
-			cmds.orientConstraint(self.longName, item, mo=offset)
-		if scale:
-			cmds.scaleConstraint(self.longName, item, mo=offset)
+		if not self.isValid():
+			raise RuntimeError('Node "{}" does not have a valid transform.'.format(self.longName))
+
+		else:
+			if point:
+				cmds.pointConstraint(self.transform, item, mo=offset)
+			if orient:
+				cmds.orientConstraint(self.transform, item, mo=offset)
+			if scale:
+				cmds.scaleConstraint(self.transform, item, mo=offset)
 		return
 
-	def connectItem(self, item=None, translate=False, rotate=False, scale=False, offset=True):
+	def connectItem(self, *args, **kwargs):
+		item = kwargs.get('item', None)
+		translate = kwargs.get('translate', False)
+		rotate = kwargs.get('rotate', False)
+		scale = kwargs.get('scale', False)
+		offset = kwargs.get('offset', False)
+
+		# Edge Case
 		if not item:
 			if not self.item:
 				raise RuntimeError('No valid item provided.'.format(self.item))
 			else:
 				item = self.item
 
-		if translate:
-			pass
-		if rotate:
-			pass
-		if scale:
-			pass
+		if not self.isValid():
+			raise RuntimeError('Node "{}" does not have a valid transform.'.format(self.longName))
+
+		else:
+			if translate:
+				connectTranslate(source=self.transform,
+								 destination=item,
+								 offset=offset,
+								 )
+			if rotate:
+				connectRotate(source=self.transform,
+							  destination=item,
+							  offset=offset,
+							  )
+			if scale:
+				connectScale(source=self.transform,
+							 destination=item,
+							 offset=offset,
+							 )
 		return
 
 
-class CONTROL(Control):
+########################################################################################################################
+#
+#
+#	Rig Control Class
+#
+#
+########################################################################################################################
+
+class RIGCONTROL(Control):
 	def __init__(self,
 				 prefix=None,
 				 side=None,
-				 name='rigControl',
+				 name=Component.rig,
 				 sector=None,
 				 index=None,
-				 kind=Component.control,
+				 kind=None,
 				 parent=None,
 				 type=None,
 				 otherType=None,
@@ -184,7 +226,7 @@ class CONTROL(Control):
 				 wire=WireType.circleRotate,
 				 axis=None,
 				 scale=1.0,
-				 color=WireColor.blue,
+				 color=None,
 				 offset=False,
 				 *args,
 				 **kwargs
@@ -215,103 +257,94 @@ class CONTROL(Control):
 		self.nullZero = None
 
 		# Offset Control
-		self.offset = offset
-		self.offsetTransform = None
-		self.offsetShape = None
-
+		self.createOffset = offset
+		self.offset = None
 
 	def create(self, *args, **kwargs):
 		Control.create(self)
 
 		# Offset Control
-		if self.offset:
+		if self.createOffset:
 			offsetWire = self.wire
 
-			if not isinstance(self.offset, bool) and hasattr(WireType, self.offset):
-				offsetWire = self.offset
+			if not isinstance(self.createOffset, bool) and hasattr(WireType, self.createOffset):
+				offsetWire = self.createOffset
 
-			offsetName = self.longName.replace('_{}'.format(self.kind),
-											   '_{}_{}'.format(Component.offset, self.kind)
-											   )
-			resultOffset = createControl(name=offsetName,
-										 shape=offsetWire,
-										 axis=self.axis,
-										 scale=self.wireScale * .8,
-										 color=self.color,
-										 kind=Component.offsetControl
-										 )
-
-			self.offsetTransform, self.offsetShape = resultOffset
+			self.offset = Control(prefix=self.prefix,
+								  side=self.side,
+								  name=self.name,
+								  sector=self.sector,
+								  index=self.index,
+								  kind=camelCase(Component.offset, self.kind, capitalize=False),
+								  shape=offsetWire,
+								  axis=self.axis,
+								  scale=self.wireScale * .8,
+								  color=self.color,
+								  parent=self.transform,
+								  type=self.type,
+								  otherType=self.type,
+								  wire=WireType.circleRotate,
+								  )
 
 			# Connect Offset Controls
-			cmds.parent(self.offsetTransform, self.transform)
-
-			attribute = UserAttr.offsetVisibility
-
 			addAttribute(node=self.transform,
-						 attribute=attribute,
+						 attribute=UserAttr.offsetVisibility,
 						 kind=MayaAttrType.bool,
 						 keyable=False,
 						 channelBox=True,
-						 destinationNode=self.offsetShape,
+						 destinationNode=self.offset.shape,
 						 destinationAttribute=MayaAttr.visibility,
 						 )
 
 			createMonoRelationship(source=self.transform,
-								   destination=self.offsetTransform,
+								   destination=self.offset.transform,
 								   sourceAttr=Component.offset,
 								   destinationAttr=Component.parent,
 								   )
 
 		# Create Nulls
-		nulls = createNull(longName(self.longName, Component.position),
-						   longName(self.longName, Component.connection),
-						   longName(self.longName, Component.zero),
-						   child=self.transform,
-						   )
+		nullList = []
 
-		self.nullPosition, self.nullConnection, self.nullZero = nulls
+		i = 0
+		for null in [Component.position, Component.connection, Component.zero]:
+			nullNode = DagNode(prefix=self.prefix,
+							   side=self.side,
+							   name=self.name,
+							   sector=self.sector,
+							   index=self.index,
+							   kind=camelCase(self.kind, null, capitalize=False),
+							   )
+
+			if i != 0:
+				nullNode.parent = nullList[i - 1]
+
+			nullList.append(nullNode)
+			i += 1
+
+		self.nullPosition, self.nullConnection, self.nullZero = nullList
+		cmds.parent(self.longName, self.nullZero)
 		return
 
-	def updateName(self):
-		DagNode.updateName(self)
+	####################################################################################################################
+	# Methods
+	####################################################################################################################
 
-		self.nullPosition = cmds.rename(self.nullPosition,
-										longName(self.longName, Component.position)
-										)
-		self.nullConnection = cmds.rename(self.nullConnection,
-										  longName(self.longName, Component.connection)
-										  )
-		self.nullZero = cmds.rename(self.nullZero,
-									longName(self.longName, Component.zero)
-									)
-
-		if self.offsetTransform:
-			self.offsetTransform = cmds.rename(self.offsetTransform,
-											   self.longName.replace('_{}'.format(self.longName.split('_')[-1]),
-																	 '_{}'.format(
-																		 Component.offsetControl)
-																	 ))
-		return
-
-	def constrainItem(self):
-		if self.item:
-			if self.offsetTransform:
-				constraint(self.offsetTransform, self.item, offset=True)
-			elif self.transform:
-				constraint(self.transform, self.item, offset=True)
-			else:
-				raise RuntimeError('Unable to constrain item "{}"'.format(self.item))
+	def constrainItem(self, *args, **kwargs):
+		if self.offset:
+			self.offset.contrainItem(*args, **kwargs)
 		else:
-			raise RuntimeError('No valid item provided.'.format(self.item))
-
-	def connectItem(self):
-		if self.item:
-			pass
+			Control.constrainItem(self, *args, **kwargs)
 		return
 
-	def snapTo(self, node, translation=True, rotation=True):
-		snap(node, self.nullPosition, t=translation, r=rotation)
+	def connectItem(self, *args, **kwargs):
+		if self.offset:
+			self.offset.connectItem(*args, **kwargs)
+		else:
+			Control.connectItem(self, *args, **kwargs)
+		return
+
+	def snapTo(self, item, translation=True, rotation=True):
+		snap(item, self.nullPosition, t=translation, r=rotation)
 		return
 
 	def parentTo(self, node):
@@ -319,59 +352,15 @@ class CONTROL(Control):
 		return
 
 
-class CONTROL(Control):
-	def __init__(self,
-				 name=Component.rig,
-				 parent=None,
-				 prefix=None,
-				 item=None,
-				 wireType=WireType.circleRotate,
-				 axis=None,
-				 scale=1.0,
-				 index=None,
-				 side=None,
-				 sector=None,
-				 color=WireColor.blue,
-				 offset=False,
-				 kind=None,
-				 ):
-		Control.__init__(self,
-						 name=name,
-						 parent=parent,
-						 prefix=prefix,
-						 item=item,
-						 wire=wireType,
-						 axis=axis,
-						 scale=scale,
-						 index=index,
-						 side=side,
-						 sector=sector,
-						 color=color,
-						 offset=offset,
-						 kind=camelCase(kind, Component.control, capitalize=False),
-						 )
+########################################################################################################################
+#
+#
+#	FK Control Class
+#
+#
+########################################################################################################################
 
-		self.setDefaults()
-
-	def setDefaults(self):
-		for item in [self.transform, self.offsetTransform]:
-			if item:
-				addAttribute(node=item, attribute=Component.rigPart, value=self.prefix, kind=MayaAttrType.string,
-							 lock=True)
-
-				for attr in [Component.parent,
-							 Component.rig,
-							 ]:
-					if not attributeExist(item, attr):
-						addAttribute(node=item, attribute=attr, kind=MayaAttrType.message)
-
-				for attr in [Component.children]:
-					if not attributeExist(item, attr):
-						addAttribute(node=item, attribute=attr, kind=MayaAttrType.string, lock=True)
-		return
-
-
-class FKCONTROL(CONTROL):
+class FKCONTROL(RIGCONTROL):
 	def __init__(self,
 				 name=Component.rig,
 				 parent=None,
@@ -396,24 +385,32 @@ class FKCONTROL(CONTROL):
 			else:
 				color = WireColor.blue
 
-		CONTROL.__init__(self,
-						 name=name,
-						 parent=parent,
-						 prefix=prefix,
-						 item=item,
-						 wireType=wireType,
-						 axis=axis,
-						 scale=scale,
-						 index=index,
-						 side=side,
-						 sector=sector,
-						 offset=True,
-						 kind=Component.fk,
-						 color=color,
-						 )
+		RIGCONTROL.__init__(self,
+							name=name,
+							parent=parent,
+							prefix=prefix,
+							item=item,
+							wireType=wireType,
+							axis=axis,
+							scale=scale,
+							index=index,
+							side=side,
+							sector=sector,
+							offset=True,
+							kind=Component.fk,
+							color=color,
+							)
 
 
-class IKCONTROL(CONTROL):
+########################################################################################################################
+#
+#
+#	IK Control Class
+#
+#
+########################################################################################################################
+
+class IKCONTROL(RIGCONTROL):
 	def __init__(self,
 				 name=Component.rig,
 				 parent=None,
@@ -438,24 +435,32 @@ class IKCONTROL(CONTROL):
 			else:
 				color = WireColor.red
 
-		CONTROL.__init__(self,
-						 name=name,
-						 parent=parent,
-						 prefix=prefix,
-						 item=item,
-						 wireType=wireType,
-						 axis=axis,
-						 scale=scale,
-						 index=index,
-						 side=side,
-						 sector=sector,
-						 color=color,
-						 offset=True,
-						 kind=Component.ik,
-						 )
+		RIGCONTROL.__init__(self,
+							name=name,
+							parent=parent,
+							prefix=prefix,
+							item=item,
+							wireType=wireType,
+							axis=axis,
+							scale=scale,
+							index=index,
+							side=side,
+							sector=sector,
+							color=color,
+							offset=True,
+							kind=Component.ik,
+							)
 
 
-class RIGCONTROL(CONTROL):
+########################################################################################################################
+#
+#
+#	Interface Control Class
+#
+#
+########################################################################################################################
+
+class INTERFACE_CONTROL(RIGCONTROL):
 	def __init__(self,
 				 name=Component.rig,
 				 parent=None,
@@ -469,24 +474,24 @@ class RIGCONTROL(CONTROL):
 				 sector=None,
 				 offset=False,
 				 ):
-		CONTROL.__init__(self,
-						 name=name,
-						 parent=parent,
-						 prefix=prefix,
-						 item=item,
-						 wireType=wireType,
-						 axis=axis,
-						 scale=scale,
-						 index=index,
-						 side=side,
-						 sector=sector,
-						 color=WireColor.purple,
-						 kind=Component.rig,
-						 offset=offset
-						 )
+		RIGCONTROL.__init__(self,
+							name=name,
+							parent=parent,
+							prefix=prefix,
+							item=item,
+							wireType=wireType,
+							axis=axis,
+							scale=scale,
+							index=index,
+							side=side,
+							sector=sector,
+							color=WireColor.purple,
+							kind=Component.rig,
+							offset=offset
+							)
 
 	def setDefaults(self):
-		CONTROL.setDefaults(self)
+		RIGCONTROL.setDefaults(self)
 
 		item = self.transform
 
@@ -567,7 +572,14 @@ class RIGCONTROL(CONTROL):
 		return
 
 
-class BINDCONTROL(CONTROL):
+########################################################################################################################
+#
+#
+#	Bind Control Class
+#
+#
+########################################################################################################################
+class BINDCONTROL(RIGCONTROL):
 	def __init__(self,
 				 name=Component.rig,
 				 parent=None,
@@ -580,23 +592,31 @@ class BINDCONTROL(CONTROL):
 				 side=None,
 				 sector=None,
 				 ):
-		CONTROL.__init__(self,
-						 name=name,
-						 parent=parent,
-						 prefix=prefix,
-						 item=item,
-						 wireType=wireType,
-						 axis=axis,
-						 scale=scale * 1.5,
-						 index=index,
-						 side=side,
-						 sector=sector,
-						 color=[.5, 1, 1],
-						 kind=Component.bind,
-						 )
+		RIGCONTROL.__init__(self,
+							name=name,
+							parent=parent,
+							prefix=prefix,
+							item=item,
+							wireType=wireType,
+							axis=axis,
+							scale=scale * 1.5,
+							index=index,
+							side=side,
+							sector=sector,
+							color=[.5, 1, 1],
+							kind=Component.bind,
+							)
 
 
-class LEAFCONTROL(CONTROL):
+########################################################################################################################
+#
+#
+#	Leaf Control Class
+#
+#
+########################################################################################################################
+
+class LEAFCONTROL(RIGCONTROL):
 	def __init__(self,
 				 name=Component.rig,
 				 parent=None,
@@ -609,17 +629,17 @@ class LEAFCONTROL(CONTROL):
 				 side=None,
 				 sector=None,
 				 ):
-		CONTROL.__init__(self,
-						 name=name,
-						 parent=parent,
-						 prefix=prefix,
-						 item=item,
-						 wireType=wireType,
-						 axis=axis,
-						 scale=scale,
-						 index=index,
-						 side=side,
-						 sector=sector,
-						 color=[.5, 1, 1],
-						 kind=Component.leaf,
-						 )
+		RIGCONTROL.__init__(self,
+							name=name,
+							parent=parent,
+							prefix=prefix,
+							item=item,
+							wireType=wireType,
+							axis=axis,
+							scale=scale,
+							index=index,
+							side=side,
+							sector=sector,
+							color=[.5, 1, 1],
+							kind=Component.leaf,
+							)

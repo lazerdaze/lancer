@@ -612,16 +612,16 @@ class BASERIG(object):
 			elif self.side == Position.right:
 				axis = [1, 1, 0]
 
-		ctl = RIGCONTROL(name=self.name,
-		                 prefix=self.prefix,
-		                 item=child,
-		                 axis=axis,
-		                 scale=self.scale,
-		                 index=self.index,
-		                 side=self.side,
-		                 sector=self.sector,
-		                 wireType=wireType,
-		                 )
+		ctl = INTERFACE_CONTROL(name=self.name,
+								prefix=self.prefix,
+								item=child,
+								axis=axis,
+								scale=self.scale,
+								index=self.index,
+								side=self.side,
+								sector=self.sector,
+								wireType=wireType,
+								)
 
 		if child:
 			ctl.snapTo(child)
