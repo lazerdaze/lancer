@@ -10,7 +10,7 @@ from node import *
 from maya import cmds
 
 
-def createControl(name='control', shape=WireType.circle, axis=None, scale=1, color=None, kind=None):
+def createControl(name='control', shape=WireType.circle, axis=None, scale=1.0, color=None, kind=None):
 	axis = axis if axis else [1, 0, 0]
 
 	# Joint Node
@@ -38,11 +38,11 @@ def createControl(name='control', shape=WireType.circle, axis=None, scale=1, col
 	# Add Kind Attribute
 	if kind:
 		addAttribute(node=node,
-		             attribute=UserAttr.kind,
-		             kind=MayaAttrType.string,
-		             value=kind,
-		             lock=True,
-		             )
+					 attribute=UserAttr.kind,
+					 kind=MayaAttrType.string,
+					 value=kind,
+					 lock=True,
+					 )
 
 	# Color
 	if color and isinstance(color, list):
@@ -69,52 +69,145 @@ def createControl(name='control', shape=WireType.circle, axis=None, scale=1, col
 ########################################################################################################################
 
 
-class Control(DagNode):
+class Control(Joint):
 	def __init__(self,
-	             name='rig',
-	             parent=None,
-	             prefix=None,
-	             item=None,
-	             wire=WireType.circleRotate,
-	             axis=None,
-	             scale=1.0,
-	             index=None,
-	             side=None,
-	             sector=None,
-	             color=WireColor.blue,
-	             offset=False,
-	             kind=Component.control,
-	             ):
+				 prefix=None,
+				 side=None,
+				 name='rigControl',
+				 sector=None,
+				 index=None,
+				 kind=Component.control,
+				 parent=None,
+				 type=None,
+				 otherType=None,
+				 item=None,
+				 wire=WireType.circleRotate,
+				 axis=None,
+				 scale=1.0,
+				 color=WireColor.blue,
+				 offset=False,
+				 *args,
+				 **kwargs
+				 ):
+
+		Joint.__init__(self,
+					   prefix=prefix,
+					   side=side,
+					   name=name,
+					   sector=sector,
+					   index=index,
+					   kind=kind,
+					   parent=parent,
+					   radius=1.0,
+					   drawStyle=JointDrawStyle.none,
+					   type=type,
+					   otherType=otherType,
+					   color=color,
+					   *args,
+					   **kwargs
+					   )
+
 		'''
 		Base Control class to be used in all parts classes.
 		Created as a joint with nurbs shape node and default attributes.
 
-		:param str None prefix:          Prefix name of the control
-		:param str None name:            Name of the control.
 		:param str None item:            Object that is parented to the control.
-		:param str None kind:            Label of the control to determine rig type.
 		:param str None wire:            Preset wire type.
 		:param list None axis:           Forward axis of the control.
 		:param int float None scale:     Scale of control. Default is 1.
-		:param int None index:           Used to determined rig priority.
-		:param str None side:            Side of the controls origin.
-		:param str None sector:          Sector of control. Possible Sectors: "A", "B", "C"...
-		:param list None color:          RGB Color of control.
 		:param bool str None offset:     Create Offset Control
 		'''
 
-		DagNode.__init__(self,
-		                 name=name,
-		                 parent=parent,
-		                 prefix=prefix,
-		                 kind=kind,
-		                 index=index,
-		                 side=side,
-		                 sector=sector,
-		                 color=color,
-		                 )
-
+		# Control attributes
 		self.item = item
+		self.axis = axis
+		self.offset = offset
+		self.wire = wire
+		self.wireScale = scale
+
+	def create(self, *args, **kwargs):
+		# Main Control
+		result = createControl(name=self.longName,
+							   shape=self.wire,
+							   axis=self.axis,
+							   scale=self.wireScale,
+							   color=self.color,
+							   )
+
+		self.transform, self.shape = result
+		self.disableSegmentScale()
+		return
+
+	def constrainItem(self, item=None, point=False, orient=False, scale=False, offset=True):
+		if not item:
+			if not self.item:
+				raise RuntimeError('No valid item provided.'.format(self.item))
+			else:
+				item = self.item
+
+		if point:
+			cmds.pointConstraint(self.longName, item, mo=offset)
+		if orient:
+			cmds.orientConstraint(self.longName, item, mo=offset)
+		if scale:
+			cmds.scaleConstraint(self.longName, item, mo=offset)
+		return
+
+	def connectItem(self, item=None, translate=False, rotate=False, scale=False, offset=True):
+		if not item:
+			if not self.item:
+				raise RuntimeError('No valid item provided.'.format(self.item))
+			else:
+				item = self.item
+
+		if translate:
+			pass
+		if rotate:
+			pass
+		if scale:
+			pass
+		return
+
+
+class CONTROL(Control):
+	def __init__(self,
+				 prefix=None,
+				 side=None,
+				 name='rigControl',
+				 sector=None,
+				 index=None,
+				 kind=Component.control,
+				 parent=None,
+				 type=None,
+				 otherType=None,
+				 item=None,
+				 wire=WireType.circleRotate,
+				 axis=None,
+				 scale=1.0,
+				 color=WireColor.blue,
+				 offset=False,
+				 *args,
+				 **kwargs
+				 ):
+
+		Control.__init__(self,
+						 prefix=prefix,
+						 side=side,
+						 name=name,
+						 sector=sector,
+						 index=index,
+						 kind=camelCase(kind, Component.control, capitalize=False),
+						 parent=parent,
+						 item=item,
+						 wire=wire,
+						 axis=axis,
+						 scale=scale,
+						 color=color,
+						 type=type,
+						 otherType=otherType,
+						 *args,
+						 **kwargs
+						 )
 
 		# Null Groups
 		self.nullPosition = None
@@ -122,40 +215,31 @@ class Control(DagNode):
 		self.nullZero = None
 
 		# Offset Control
+		self.offset = offset
 		self.offsetTransform = None
 		self.offsetShape = None
 
-		# Init
-		if not nodeExists(name):
-			self.create(wire, axis, scale, color, offset)
 
-	def create(self, wire, axis, scale, color, offset):
-		# Main Control
-		result = createControl(name=self.longName,
-		                       shape=wire,
-		                       axis=axis,
-		                       scale=scale,
-		                       color=color,
-		                       )
-		self.transform, self.shape = result
+	def create(self, *args, **kwargs):
+		Control.create(self)
 
 		# Offset Control
-		if offset:
-			offsetWire = wire
+		if self.offset:
+			offsetWire = self.wire
 
-			if not isinstance(offset, bool) and hasattr(WireType, offset):
-				offsetWire = offset
+			if not isinstance(self.offset, bool) and hasattr(WireType, self.offset):
+				offsetWire = self.offset
 
 			offsetName = self.longName.replace('_{}'.format(self.kind),
-			                                   '_{}_{}'.format(Component.offset, self.kind)
-			                                   )
+											   '_{}_{}'.format(Component.offset, self.kind)
+											   )
 			resultOffset = createControl(name=offsetName,
-			                             shape=offsetWire,
-			                             axis=axis,
-			                             scale=scale * .8,
-			                             color=color,
-			                             kind=Component.offsetControl
-			                             )
+										 shape=offsetWire,
+										 axis=self.axis,
+										 scale=self.wireScale * .8,
+										 color=self.color,
+										 kind=Component.offsetControl
+										 )
 
 			self.offsetTransform, self.offsetShape = resultOffset
 
@@ -165,55 +249,49 @@ class Control(DagNode):
 			attribute = UserAttr.offsetVisibility
 
 			addAttribute(node=self.transform,
-			             attribute=attribute,
-			             kind=MayaAttrType.bool,
-			             keyable=False,
-			             channelBox=True,
-			             destinationNode=self.offsetShape,
-			             destinationAttribute=MayaAttr.visibility,
-			             )
+						 attribute=attribute,
+						 kind=MayaAttrType.bool,
+						 keyable=False,
+						 channelBox=True,
+						 destinationNode=self.offsetShape,
+						 destinationAttribute=MayaAttr.visibility,
+						 )
 
 			createMonoRelationship(source=self.transform,
-			                       destination=self.offsetTransform,
-			                       sourceAttr=Component.offset,
-			                       destinationAttr=Component.parent,
-			                       )
+								   destination=self.offsetTransform,
+								   sourceAttr=Component.offset,
+								   destinationAttr=Component.parent,
+								   )
 
 		# Create Nulls
 		nulls = createNull(longName(self.longName, Component.position),
-		                   longName(self.longName, Component.connection),
-		                   longName(self.longName, Component.zero),
-		                   child=self.transform,
-		                   )
+						   longName(self.longName, Component.connection),
+						   longName(self.longName, Component.zero),
+						   child=self.transform,
+						   )
 
 		self.nullPosition, self.nullConnection, self.nullZero = nulls
-
-		self.side = self._side
-		self.index = self._index
-		self.sector = self._sector
-		self.kind = self._kind
-		self.canUpdateName = True
 		return
 
 	def updateName(self):
 		DagNode.updateName(self)
 
 		self.nullPosition = cmds.rename(self.nullPosition,
-		                                longName(self.longName, Component.position)
-		                                )
+										longName(self.longName, Component.position)
+										)
 		self.nullConnection = cmds.rename(self.nullConnection,
-		                                  longName(self.longName, Component.connection)
-		                                  )
+										  longName(self.longName, Component.connection)
+										  )
 		self.nullZero = cmds.rename(self.nullZero,
-		                            longName(self.longName, Component.zero)
-		                            )
+									longName(self.longName, Component.zero)
+									)
 
 		if self.offsetTransform:
 			self.offsetTransform = cmds.rename(self.offsetTransform,
-			                                   self.longName.replace('_{}'.format(self.longName.split('_')[-1]),
-			                                                         '_{}'.format(
-					                                                         Component.offsetControl)
-			                                                         ))
+											   self.longName.replace('_{}'.format(self.longName.split('_')[-1]),
+																	 '_{}'.format(
+																		 Component.offsetControl)
+																	 ))
 		return
 
 	def constrainItem(self):
@@ -243,35 +321,35 @@ class Control(DagNode):
 
 class CONTROL(Control):
 	def __init__(self,
-	             name=Component.rig,
-	             parent=None,
-	             prefix=None,
-	             item=None,
-	             wireType=WireType.circleRotate,
-	             axis=None,
-	             scale=1.0,
-	             index=None,
-	             side=None,
-	             sector=None,
-	             color=WireColor.blue,
-	             offset=False,
-	             kind=None,
-	             ):
+				 name=Component.rig,
+				 parent=None,
+				 prefix=None,
+				 item=None,
+				 wireType=WireType.circleRotate,
+				 axis=None,
+				 scale=1.0,
+				 index=None,
+				 side=None,
+				 sector=None,
+				 color=WireColor.blue,
+				 offset=False,
+				 kind=None,
+				 ):
 		Control.__init__(self,
-		                 name=name,
-		                 parent=parent,
-		                 prefix=prefix,
-		                 item=item,
-		                 wire=wireType,
-		                 axis=axis,
-		                 scale=scale,
-		                 index=index,
-		                 side=side,
-		                 sector=sector,
-		                 color=color,
-		                 offset=offset,
-		                 kind=camelCase(kind, Component.control, capitalize=False),
-		                 )
+						 name=name,
+						 parent=parent,
+						 prefix=prefix,
+						 item=item,
+						 wire=wireType,
+						 axis=axis,
+						 scale=scale,
+						 index=index,
+						 side=side,
+						 sector=sector,
+						 color=color,
+						 offset=offset,
+						 kind=camelCase(kind, Component.control, capitalize=False),
+						 )
 
 		self.setDefaults()
 
@@ -279,11 +357,11 @@ class CONTROL(Control):
 		for item in [self.transform, self.offsetTransform]:
 			if item:
 				addAttribute(node=item, attribute=Component.rigPart, value=self.prefix, kind=MayaAttrType.string,
-				             lock=True)
+							 lock=True)
 
 				for attr in [Component.parent,
-				             Component.rig,
-				             ]:
+							 Component.rig,
+							 ]:
 					if not attributeExist(item, attr):
 						addAttribute(node=item, attribute=attr, kind=MayaAttrType.message)
 
@@ -295,18 +373,18 @@ class CONTROL(Control):
 
 class FKCONTROL(CONTROL):
 	def __init__(self,
-	             name=Component.rig,
-	             parent=None,
-	             prefix=None,
-	             item=None,
-	             wireType=WireType.circleRotate,
-	             axis=None,
-	             scale=1.0,
-	             index=None,
-	             side=None,
-	             sector=None,
-	             color=None,
-	             ):
+				 name=Component.rig,
+				 parent=None,
+				 prefix=None,
+				 item=None,
+				 wireType=WireType.circleRotate,
+				 axis=None,
+				 scale=1.0,
+				 index=None,
+				 side=None,
+				 sector=None,
+				 color=None,
+				 ):
 
 		if color is None:
 			if side == Position.left:
@@ -319,36 +397,36 @@ class FKCONTROL(CONTROL):
 				color = WireColor.blue
 
 		CONTROL.__init__(self,
-		                 name=name,
-		                 parent=parent,
-		                 prefix=prefix,
-		                 item=item,
-		                 wireType=wireType,
-		                 axis=axis,
-		                 scale=scale,
-		                 index=index,
-		                 side=side,
-		                 sector=sector,
-		                 offset=True,
-		                 kind=Component.fk,
-		                 color=color,
-		                 )
+						 name=name,
+						 parent=parent,
+						 prefix=prefix,
+						 item=item,
+						 wireType=wireType,
+						 axis=axis,
+						 scale=scale,
+						 index=index,
+						 side=side,
+						 sector=sector,
+						 offset=True,
+						 kind=Component.fk,
+						 color=color,
+						 )
 
 
 class IKCONTROL(CONTROL):
 	def __init__(self,
-	             name=Component.rig,
-	             parent=None,
-	             prefix=None,
-	             item=None,
-	             wireType=WireType.sphere,
-	             axis=None,
-	             scale=1.0,
-	             index=None,
-	             side=None,
-	             sector=None,
-	             color=None,
-	             ):
+				 name=Component.rig,
+				 parent=None,
+				 prefix=None,
+				 item=None,
+				 wireType=WireType.sphere,
+				 axis=None,
+				 scale=1.0,
+				 index=None,
+				 side=None,
+				 sector=None,
+				 color=None,
+				 ):
 
 		if color is None:
 			if side == Position.left:
@@ -361,51 +439,51 @@ class IKCONTROL(CONTROL):
 				color = WireColor.red
 
 		CONTROL.__init__(self,
-		                 name=name,
-		                 parent=parent,
-		                 prefix=prefix,
-		                 item=item,
-		                 wireType=wireType,
-		                 axis=axis,
-		                 scale=scale,
-		                 index=index,
-		                 side=side,
-		                 sector=sector,
-		                 color=color,
-		                 offset=True,
-		                 kind=Component.ik,
-		                 )
+						 name=name,
+						 parent=parent,
+						 prefix=prefix,
+						 item=item,
+						 wireType=wireType,
+						 axis=axis,
+						 scale=scale,
+						 index=index,
+						 side=side,
+						 sector=sector,
+						 color=color,
+						 offset=True,
+						 kind=Component.ik,
+						 )
 
 
 class RIGCONTROL(CONTROL):
 	def __init__(self,
-	             name=Component.rig,
-	             parent=None,
-	             prefix=None,
-	             item=None,
-	             wireType=WireType.master,
-	             axis=None,
-	             scale=1.0,
-	             index=None,
-	             side=None,
-	             sector=None,
-	             offset=False,
-	             ):
+				 name=Component.rig,
+				 parent=None,
+				 prefix=None,
+				 item=None,
+				 wireType=WireType.master,
+				 axis=None,
+				 scale=1.0,
+				 index=None,
+				 side=None,
+				 sector=None,
+				 offset=False,
+				 ):
 		CONTROL.__init__(self,
-		                 name=name,
-		                 parent=parent,
-		                 prefix=prefix,
-		                 item=item,
-		                 wireType=wireType,
-		                 axis=axis,
-		                 scale=scale,
-		                 index=index,
-		                 side=side,
-		                 sector=sector,
-		                 color=WireColor.purple,
-		                 kind=Component.rig,
-		                 offset=offset
-		                 )
+						 name=name,
+						 parent=parent,
+						 prefix=prefix,
+						 item=item,
+						 wireType=wireType,
+						 axis=axis,
+						 scale=scale,
+						 index=index,
+						 side=side,
+						 sector=sector,
+						 color=WireColor.purple,
+						 kind=Component.rig,
+						 offset=offset
+						 )
 
 	def setDefaults(self):
 		CONTROL.setDefaults(self)
@@ -413,42 +491,42 @@ class RIGCONTROL(CONTROL):
 		item = self.transform
 
 		for attr in [Component.joint,
-		             ]:
+					 ]:
 
 			if not attributeExist(item, attr):
 				addAttribute(node=item, attribute=attr, kind=MayaAttrType.string, lock=True)
 
 		for attr in [Component.fkControl,
-		             Component.ikControl,
-		             Component.ikJoint,
-		             Component.bindControl,
-		             Component.leafControl,
-		             ]:
+					 Component.ikControl,
+					 Component.ikJoint,
+					 Component.bindControl,
+					 Component.leafControl,
+					 ]:
 
 			if not attributeExist(item, attr):
 				addAttribute(node=item, attribute=attr, kind=MayaAttrType.string, array=True)
 
 		for attr in [Component.bindTwist,
-		             Component.fkStretch,
-		             Component.ikStretch,
-		             Component.bindStretch,
-		             Component.bindSns,
-		             ]:
+					 Component.fkStretch,
+					 Component.ikStretch,
+					 Component.bindStretch,
+					 Component.bindSns,
+					 ]:
 
 			if not attributeExist(item, attr):
 				addAttribute(node=item, attribute=attr, kind=MayaAttrType.float, array=True,
-				             keyable=False)
+							 keyable=False)
 
 		for attr in [Component.fkik,
-		             Component.fkLocalWorld,
-		             Component.ikLocalWorld,
-		             Component.twistAuto,
-		             Component.twist,
-		             Component.stretchAuto,
-		             Component.stretch,
-		             Component.snsAuto,
-		             Component.sns,
-		             ]:
+					 Component.fkLocalWorld,
+					 Component.ikLocalWorld,
+					 Component.twistAuto,
+					 Component.twist,
+					 Component.stretchAuto,
+					 Component.stretch,
+					 Component.snsAuto,
+					 Component.sns,
+					 ]:
 
 			if not attributeExist(item, attr):
 				minValue = None
@@ -471,14 +549,14 @@ class RIGCONTROL(CONTROL):
 					defaultValue = 0
 
 				addAttribute(node=item, attribute=attr, kind=MayaAttrType.float, minValue=minValue, maxValue=maxValue,
-				             value=defaultValue, channelBox=False, keyable=True)
+							 value=defaultValue, channelBox=False, keyable=True)
 
 		for attr in [Component.mirror,
-		             Component.fkPoleVector,
-		             Component.ikPoleVector,
-		             Component.ikHandle,
-		             Component.set,
-		             ]:
+					 Component.fkPoleVector,
+					 Component.ikPoleVector,
+					 Component.ikHandle,
+					 Component.set,
+					 ]:
 
 			if not attributeExist(item, attr):
 				addAttribute(node=item, attribute=attr, kind=MayaAttrType.message)
@@ -491,57 +569,57 @@ class RIGCONTROL(CONTROL):
 
 class BINDCONTROL(CONTROL):
 	def __init__(self,
-	             name=Component.rig,
-	             parent=None,
-	             prefix=None,
-	             item=None,
-	             wireType=WireType.doubleLollipop,
-	             axis=None,
-	             scale=1.0,
-	             index=None,
-	             side=None,
-	             sector=None,
-	             ):
+				 name=Component.rig,
+				 parent=None,
+				 prefix=None,
+				 item=None,
+				 wireType=WireType.doubleLollipop,
+				 axis=None,
+				 scale=1.0,
+				 index=None,
+				 side=None,
+				 sector=None,
+				 ):
 		CONTROL.__init__(self,
-		                 name=name,
-		                 parent=parent,
-		                 prefix=prefix,
-		                 item=item,
-		                 wireType=wireType,
-		                 axis=axis,
-		                 scale=scale * 1.5,
-		                 index=index,
-		                 side=side,
-		                 sector=sector,
-		                 color=[.5, 1, 1],
-		                 kind=Component.bind,
-		                 )
+						 name=name,
+						 parent=parent,
+						 prefix=prefix,
+						 item=item,
+						 wireType=wireType,
+						 axis=axis,
+						 scale=scale * 1.5,
+						 index=index,
+						 side=side,
+						 sector=sector,
+						 color=[.5, 1, 1],
+						 kind=Component.bind,
+						 )
 
 
 class LEAFCONTROL(CONTROL):
 	def __init__(self,
-	             name=Component.rig,
-	             parent=None,
-	             prefix=None,
-	             item=None,
-	             wireType=WireType.diamond,
-	             axis=None,
-	             scale=1.0,
-	             index=None,
-	             side=None,
-	             sector=None,
-	             ):
+				 name=Component.rig,
+				 parent=None,
+				 prefix=None,
+				 item=None,
+				 wireType=WireType.diamond,
+				 axis=None,
+				 scale=1.0,
+				 index=None,
+				 side=None,
+				 sector=None,
+				 ):
 		CONTROL.__init__(self,
-		                 name=name,
-		                 parent=parent,
-		                 prefix=prefix,
-		                 item=item,
-		                 wireType=wireType,
-		                 axis=axis,
-		                 scale=scale,
-		                 index=index,
-		                 side=side,
-		                 sector=sector,
-		                 color=[.5, 1, 1],
-		                 kind=Component.leaf,
-		                 )
+						 name=name,
+						 parent=parent,
+						 prefix=prefix,
+						 item=item,
+						 wireType=wireType,
+						 axis=axis,
+						 scale=scale,
+						 index=index,
+						 side=side,
+						 sector=sector,
+						 color=[.5, 1, 1],
+						 kind=Component.leaf,
+						 )

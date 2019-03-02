@@ -103,23 +103,20 @@ def createNull(*args, **kwargs):
 
 class AbstractNode(object):
 	def __init__(self,
-	             name=None,
-	             prefix=None,
-	             parent=None,
-	             color=None,
-	             side=None,
-	             index=None,
-	             sector=None,
-	             kind=None,
-	             fullpath=None,
-	             ):
+				 name=None,
+				 prefix=None,
+				 parent=None,
+				 side=None,
+				 index=None,
+				 sector=None,
+				 kind=None,
+				 ):
 		'''
 		Abstract Node to be sub-classed by all dag node related classes.
 
 		:param str name:            Name of Node.
 		:param str prefix:          Prefix name of the control
 		:param object str parent:   Parent of Node.
-		:param list children:       Direct descendants of Node.
 		:param list color:          RGB Color.
 		:param str side:            Side of the controls origin.
 		:param int index:           Used to determined rig priority.
@@ -128,7 +125,6 @@ class AbstractNode(object):
 		'''
 
 		# Name
-		self._fullpath = fullpath
 		self._name = name
 		self._prefix = prefix
 		self._parent = parent
@@ -142,8 +138,7 @@ class AbstractNode(object):
 		self._kind = kind
 
 		# Attributes
-		self.exists = False
-		self.color = color
+		self.wrapper = False
 
 		# Nodes
 		self.transform = None
@@ -223,16 +218,16 @@ class AbstractNode(object):
 
 	@property
 	def longName(self):
-		if self.exists:
+		if self.wrapper:
 			return self._name
 		else:
 			return longName(self._prefix,
-			                self._side[0].upper() if self._side else None,
-			                self._name,
-			                self._sector,
-			                self._index,
-			                self._kind,
-			                )
+							self._side[0].upper() if self._side else None,
+							self._name,
+							self._sector,
+							self._index,
+							self._kind,
+							)
 
 	####################################################################################################################
 	# Hierarchy
@@ -282,9 +277,9 @@ class AbstractNode(object):
 		return hasattr(self, attribute)
 
 	def addAttribute(self,
-	                 attribute,
-	                 value,
-	                 ):
+					 attribute,
+					 value,
+					 ):
 
 		if hasattr(self, attribute):
 			raise AttributeError('Attribute "{}" already exists.'.format(attribute))
@@ -305,24 +300,32 @@ class DagNode(AbstractNode):
 	def __init__(self, *args, **kwargs):
 		AbstractNode.__init__(self, *args, **kwargs)
 
-		# Attributes
-		self.canUpdateName = False
-
 		# Node In Scene
 		if nodeExists(self.name):
-			self.exists = True
+			self.wrapper = True
 			self.transform = self.name
 			self.shape = nodeShapes(self.name)
+		else:
+			self.create()
+			self.side = kwargs.get('side', None)
+			self.index = kwargs.get('index', None)
+			self.sector = kwargs.get('sector', None)
+			self.kind = kwargs.get('kind', None)
+			self.parent = kwargs.get('parent', None)
+			self._color = kwargs.get('color', None)
 
 	def isValid(self):
 		return nodeExists(self.longName)
 
+	def updateName(self):
+		if self.isValid() and self.transform:
+			self.transform = cmds.rename(self.transform, self.longName)
+			return True
+		return False
+
 	def create(self, *args, **kwargs):
-		if not self.isValid():
-			self.transform = cmds.group(name=self.longName, empty=True)
-			self.canUpdateName = True
-		else:
-			raise NodeExistsError('Node "{}" already exists.'.format(self.longName))
+		self.transform = cmds.group(name=self.longName, empty=True)
+		return
 
 	####################################################################################################################
 	# Attributes
@@ -356,15 +359,14 @@ class DagNode(AbstractNode):
 	def hasAttribute(self, attribute):
 		if hasattr(self, attribute):
 			return True
-		else:
-			return attributeExist(self, attribute)
+		return attributeExist(self, attribute)
 
 	def addAttribute(self,
-	                 attribute,
-	                 value,
-	                 *args,
-	                 **kwargs
-	                 ):
+					 attribute,
+					 value,
+					 *args,
+					 **kwargs
+					 ):
 		AbstractNode.addAttribute(self, attribute, value)
 
 		kind = kwargs.get('kind', MayaAttrType.float)
@@ -376,16 +378,16 @@ class DagNode(AbstractNode):
 		array = kwargs.get('array', False)
 
 		addAttribute(self.longName,
-		             attribute=attribute,
-		             kind=kind,
-		             value=value,
-		             minValue=minValue,
-		             maxValue=maxValue,
-		             keyable=keyable,
-		             channelBox=channelBox,
-		             lock=lock,
-		             array=array,
-		             )
+					 attribute=attribute,
+					 kind=kind,
+					 value=value,
+					 minValue=minValue,
+					 maxValue=maxValue,
+					 keyable=keyable,
+					 channelBox=channelBox,
+					 lock=lock,
+					 array=array,
+					 )
 		return
 
 	####################################################################################################################
@@ -626,12 +628,6 @@ class DagNode(AbstractNode):
 	####################################################################################################################
 	# Custom Properties
 	####################################################################################################################
-	def updateName(self):
-		if self.isValid() and self.transform:
-			self.transform = cmds.rename(self.transform, self.longName)
-			return True
-		return False
-
 	@property
 	def side(self):
 		if attributeExist(self.longName, MayaAttr.side):
@@ -646,12 +642,12 @@ class DagNode(AbstractNode):
 		if self.isValid():
 			if not attributeExist(self.longName, MayaAttr.side):
 				addAttribute(node=self.longName,
-				             attribute=MayaAttr.side,
-				             kind=MayaAttrType.enum,
-				             value=sideList,
-				             keyable=False,
-				             channelBox=False,
-				             )
+							 attribute=MayaAttr.side,
+							 kind=MayaAttrType.enum,
+							 value=sideList,
+							 keyable=False,
+							 channelBox=False,
+							 )
 
 			if side is None:
 				value = JointLabelSide.none
@@ -690,19 +686,18 @@ class DagNode(AbstractNode):
 
 			if not attributeExist(self.longName, UserAttr.sector):
 				addAttribute(node=self.longName,
-				             attribute=UserAttr.sector,
-				             kind=MayaAttrType.string,
-				             value=value,
-				             keyable=False,
-				             channelBox=False,
-				             lock=True,
-				             )
+							 attribute=UserAttr.sector,
+							 kind=MayaAttrType.string,
+							 value=value,
+							 keyable=False,
+							 channelBox=False,
+							 lock=True,
+							 )
 			else:
 				setAttribute(self.longName, attribute=UserAttr.sector, value=value, force=True)
 
-			self._sector = sector
-		else:
-			self._sector = sector
+		self._sector = str(sector)
+
 		return
 
 	@property
@@ -720,29 +715,26 @@ class DagNode(AbstractNode):
 				value = int(index)
 				if not attributeExist(self.longName, UserAttr.index):
 					addAttribute(node=self.longName,
-					             attribute=UserAttr.index,
-					             kind=MayaAttrType.int,
-					             value=value,
-					             minValue=0,
-					             keyable=False,
-					             channelBox=False,
-					             lock=True,
-					             )
+								 attribute=UserAttr.index,
+								 kind=MayaAttrType.int,
+								 value=value,
+								 minValue=0,
+								 keyable=False,
+								 channelBox=False,
+								 lock=True,
+								 )
 
 				else:
 					setAttribute(self.longName, attribute=UserAttr.index, value=value, force=True)
 
-				self._index = int(index)
-		else:
-			self._index = index
+		self._index = int(index)
 		return
 
 	@property
 	def kind(self):
 		if attributeExist(self.longName, UserAttr.kind):
 			return getAttribute(self.longName, UserAttr.kind)
-		else:
-			return self._kind
+		return self._kind
 
 	@kind.setter
 	def kind(self, kind):
@@ -756,19 +748,17 @@ class DagNode(AbstractNode):
 
 			if not attributeExist(self.longName, UserAttr.kind):
 				addAttribute(node=self.longName,
-				             attribute=UserAttr.kind,
-				             kind=MayaAttrType.string,
-				             value=value,
-				             keyable=False,
-				             channelBox=False,
-				             lock=True,
-				             )
+							 attribute=UserAttr.kind,
+							 kind=MayaAttrType.string,
+							 value=value,
+							 keyable=False,
+							 channelBox=False,
+							 lock=True,
+							 )
 			else:
 				setAttribute(self.longName, attribute=UserAttr.kind, value=value, force=True)
 
-			self._kind = kind
-		else:
-			self._kind = kind
+		self._kind = str(kind)
 		return
 
 	####################################################################################################################
@@ -782,7 +772,7 @@ class DagNode(AbstractNode):
 
 	@parent.setter
 	def parent(self, parent):
-		self._parent = parent
+		self._parent = str(parent)
 
 		if self.isValid() and nodeExists(parent):
 			cmds.parent(self.longName, parent)
@@ -796,8 +786,36 @@ class DagNode(AbstractNode):
 
 	@children.setter
 	def children(self, children):
+		children = flatList(children)
+
 		if self.isValid():
-			pass
+			cmds.parent(children, self.longName)
+		else:
+			for child in children:
+				if child not in self._children:
+					self._children.append(child)
+		return
+
+	####################################################################################################################
+	# Color Property
+	####################################################################################################################
+
+	@property
+	def color(self):
+		return self._color
+
+	@color.setter
+	def color(self, color):
+		if self.isValid():
+			if isinstance(color, int):
+				pass
+			elif isinstance(color, list) and len(color) == 3:
+				pass
+			elif isinstance(color, str):
+				pass
+			else:
+				raise ValueError('No valid color was provided: "{}"'.format(color))
+		self._color = color
 		return
 
 	####################################################################################################################
