@@ -283,19 +283,19 @@ class RIGBASE(object):
 
 			if children:
 				for child in children:
-					ctl = BINDCONTROL(name=longName(self.name,
-					                                self.side.upper()[0],
-					                                self.index,
-					                                Component.detail,
-					                                indexNum,
-					                                Component.control
-					                                ),
-					                  scale=self.scale,
-					                  parent=None,
-					                  child=child,
-					                  index=i,
-					                  axis=self.axis,
-					                  )
+					ctl = CHILDCONTROL(name=longName(self.name,
+													 self.side.upper()[0],
+													 self.index,
+													 Component.detail,
+													 indexNum,
+													 Component.control
+													 ),
+									   scale=self.scale,
+									   parent=None,
+									   child=child,
+									   index=i,
+									   axis=self.axis,
+									   )
 					indexNum += 1
 					cmds.parent(ctl.group, obj)
 					cmds.parentConstraint(ctl.transform, child, mo=True)
@@ -309,15 +309,15 @@ class RIGBASE(object):
 					if grandchildren:
 
 						for grandchild in grandchildren:
-							gctl = LEAFCONTROL(name=longName(grandchild,
-							                                 Component.control
-							                                 ),
-							                   scale=cmds.getAttr('{}.radius'.format(grandchild)),
-							                   parent=None,
-							                   child=grandchild,
-							                   index=i,
-							                   axis=self.axis,
-							                   )
+							gctl = GRANDCHILDCONTROL(name=longName(grandchild,
+																   Component.control
+																   ),
+													 scale=cmds.getAttr('{}.radius'.format(grandchild)),
+													 parent=None,
+													 child=grandchild,
+													 index=i,
+													 axis=self.axis,
+													 )
 							indexNum += 1
 							cmds.parent(gctl.group, child)
 							cmds.parentConstraint(gctl.transform, grandchild, mo=True)
@@ -341,15 +341,15 @@ class RIGBASE(object):
 					if grandchildren:
 
 						for grandchild in grandchildren:
-							ctl = LEAFCONTROL(name=longName(grandchild,
-							                                Component.control
-							                                ),
-							                  scale=cmds.getAttr('{}.radius'.format(grandchild)),
-							                  parent=None,
-							                  child=grandchild,
-							                  index=i,
-							                  axis=self.axis,
-							                  )
+							ctl = GRANDCHILDCONTROL(name=longName(grandchild,
+																  Component.control
+																  ),
+													scale=cmds.getAttr('{}.radius'.format(grandchild)),
+													parent=None,
+													child=grandchild,
+													index=i,
+													axis=self.axis,
+													)
 
 							cmds.parent(ctl.group, child)
 							cmds.parentConstraint(ctl.transform, grandchild, mo=True)

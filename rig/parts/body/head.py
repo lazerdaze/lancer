@@ -107,7 +107,7 @@ class HEAD(BASERIG):
 		               )
 
 		ik.snapTo(self.headItem, True, False)
-		cmds.xform(ik.nullPosition, ws=True, t=[0, 0, distance], r=True)
+		cmds.xform(ik._nullPosition, ws=True, t=[0, 0, distance], r=True)
 		ik.parentTo(self.ikTopNode)
 		self.ikHeadControl = ik
 
@@ -124,8 +124,8 @@ class HEAD(BASERIG):
 
 		# Visibility
 		cmds.connectAttr('{}.{}'.format(self.rigControl, Component.fkik),
-		                 '{}.v'.format(ik.nullConnection),
-		                 f=True)
+		                 '{}.v'.format(ik._nullConnection),
+						 f=True)
 		return
 
 	def createNeck(self):

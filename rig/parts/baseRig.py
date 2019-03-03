@@ -501,15 +501,15 @@ class BASERIG(object):
 			if children:
 				childIndex = 0
 				for child in children:
-					bind = BINDCONTROL(name=name,
-					                   prefix=self.prefix,
-					                   item=child,
-					                   scale=self.scale,
-					                   index=childIndex,
-					                   side=self.side,
-					                   sector=sectors[itemIndex].upper(),
-					                   axis=self.axis,
-					                   )
+					bind = CHILDCONTROL(name=name,
+										prefix=self.prefix,
+										item=child,
+										scale=self.scale,
+										index=childIndex,
+										side=self.side,
+										sector=sectors[itemIndex].upper(),
+										axis=self.axis,
+										)
 
 					bind.snapTo(child)
 
@@ -527,14 +527,14 @@ class BASERIG(object):
 					if grandChildren:
 						grandIndex = 0
 						for grandChild in grandChildren:
-							leaf = LEAFCONTROL(name=name,
-							                   prefix=self.prefix,
-							                   item=grandChild,
-							                   scale=self.scale * .25,
-							                   index=grandIndex,
-							                   side=self.side,
-							                   sector=sectors[itemIndex].upper(),
-							                   )
+							leaf = GRANDCHILDCONTROL(name=name,
+													 prefix=self.prefix,
+													 item=grandChild,
+													 scale=self.scale * .25,
+													 index=grandIndex,
+													 side=self.side,
+													 sector=sectors[itemIndex].upper(),
+													 )
 
 							leaf.snapTo(grandChild)
 							leaf.parentTo(bind)
@@ -1221,15 +1221,15 @@ class RIBBONLIMB:
 		i = 0
 		for obj in objects:
 			i = objects.index(obj)
-			ctl = BINDCONTROL(name=longName(self.name,
+			ctl = CHILDCONTROL(name=longName(self.name,
 			                                'detail',
-			                                i,
-			                                Component.control,
-			                                ),
-			                  scale=self.scale,
-			                  axis=self.axis,
-			                  child=obj,
-			                  )
+											 i,
+											 Component.control,
+											 ),
+							   scale=self.scale,
+							   axis=self.axis,
+							   child=obj,
+							   )
 
 			cmds.parentConstraint(ctl.transform, obj, mo=True)
 			cmds.scaleConstraint(ctl.transform, obj, mo=True)

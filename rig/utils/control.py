@@ -160,11 +160,11 @@ class Control(Joint):
 
 		else:
 			if point:
-				cmds.pointConstraint(self.transform, item, mo=offset)
+				cmds.pointConstraint(self.longName, item, mo=offset)
 			if orient:
-				cmds.orientConstraint(self.transform, item, mo=offset)
+				cmds.orientConstraint(self.longName, item, mo=offset)
 			if scale:
-				cmds.scaleConstraint(self.transform, item, mo=offset)
+				cmds.scaleConstraint(self.longName, item, mo=offset)
 		return
 
 	def connectItem(self, *args, **kwargs):
@@ -186,17 +186,17 @@ class Control(Joint):
 
 		else:
 			if translate:
-				connectTranslate(source=self.transform,
+				connectTranslate(source=self.longName,
 								 destination=item,
 								 offset=offset,
 								 )
 			if rotate:
-				connectRotate(source=self.transform,
+				connectRotate(source=self.longName,
 							  destination=item,
 							  offset=offset,
 							  )
 			if scale:
-				connectScale(source=self.transform,
+				connectScale(source=self.longName,
 							 destination=item,
 							 offset=offset,
 							 )
@@ -252,9 +252,9 @@ class RIGCONTROL(Control):
 						 )
 
 		# Null Groups
-		self.nullPosition = None
-		self.nullConnection = None
-		self.nullZero = None
+		self._nullPosition = None
+		self._nullConnection = None
+		self._nullZero = None
 
 		# Offset Control
 		self.createOffset = offset
@@ -322,7 +322,74 @@ class RIGCONTROL(Control):
 			i += 1
 
 		self.nullPosition, self.nullConnection, self.nullZero = nullList
-		cmds.parent(self.longName, self.nullZero)
+		cmds.parent(self.longName, self._nullZero)
+		return
+
+	####################################################################################################################
+	# Null Properties
+	####################################################################################################################
+
+	@property
+	def nullPosition(self):
+		attr = Component.position
+
+		if self.isValid():
+			if attributeExist(self.longName, attr):
+				return getConnectedNode(self.longName, attr)
+		return self._nullPosition
+
+	@nullPosition.setter
+	def nullPosition(self, null):
+		if self.isValid():
+			createMonoRelationship(source=self.longName,
+								   destination=null,
+								   sourceAttr=Component.position,
+								   destinationAttr=Component.parent
+								   )
+
+		self._nullPosition = null
+		return
+
+	@property
+	def nullConnection(self):
+		attr = Component.connection
+
+		if self.isValid():
+			if attributeExist(self.longName, attr):
+				return getConnectedNode(self.longName, attr)
+		return self._nullConnection
+
+	@nullConnection.setter
+	def nullConnection(self, null):
+		if self.isValid():
+			createMonoRelationship(source=self.longName,
+								   destination=null,
+								   sourceAttr=Component.connection,
+								   destinationAttr=Component.parent
+								   )
+
+		self._nullPosition = null
+		return
+
+	@property
+	def nullZero(self):
+		attr = Component.zero
+
+		if self.isValid():
+			if attributeExist(self.longName, attr):
+				return getConnectedNode(self.longName, attr)
+		return self._nullZero
+
+	@nullZero.setter
+	def nullZero(self, null):
+		if self.isValid():
+			createMonoRelationship(source=self.longName,
+								   destination=null,
+								   sourceAttr=Component.zero,
+								   destinationAttr=Component.parent
+								   )
+
+		self._nullPosition = null
 		return
 
 	####################################################################################################################
@@ -344,11 +411,174 @@ class RIGCONTROL(Control):
 		return
 
 	def snapTo(self, item, translation=True, rotation=True):
-		snap(item, self.nullPosition, t=translation, r=rotation)
+		snap(item, self._nullPosition, t=translation, r=rotation)
 		return
 
-	def parentTo(self, node):
-		cmds.parent(self.nullPosition, node)
+	@property
+	def parent(self):
+		if self.isValid():
+			return nodeParent(self._nullPosition)
+		return self._parent
+
+	@parent.setter
+	def parent(self, parent):
+		self._parent = str(parent)
+
+		if self.isValid() and nodeExists(parent):
+			cmds.parent(self._nullPosition, parent)
+		return
+
+
+########################################################################################################################
+#
+#
+#	Interface Control Class
+#
+#
+########################################################################################################################
+
+class INTERFACE_CONTROL(RIGCONTROL):
+	def __init__(self,
+				 name=Component.rig,
+				 parent=None,
+				 prefix=None,
+				 item=None,
+				 wireType=WireType.master,
+				 axis=None,
+				 scale=1.0,
+				 index=None,
+				 side=None,
+				 sector=None,
+				 offset=False,
+				 ):
+
+		RIGCONTROL.__init__(self,
+							name=name,
+							parent=parent,
+							prefix=prefix,
+							item=item,
+							wireType=wireType,
+							axis=axis,
+							scale=scale,
+							index=index,
+							side=side,
+							sector=sector,
+							color=WireColor.purple,
+							kind='interface',
+							offset=offset
+							)
+
+		# Hierarchy
+		self._joint = []
+		self._set = None
+		self._opposite = None
+
+		# FK
+		self._fkControl = []
+		self._fkPoleVector = None
+		self._fkStretch = None
+		self._fkTopNode = None
+
+		# IK
+		self._ikControl = []
+		self._ikJoint = []
+		self._ikHandle = None
+		self._ikPoleVector = None
+		self._ikStretch = []
+		self._ikTopNode = None
+
+		# Detail
+		self._childControl = []
+		self._grandchildControl = []
+
+	def setDefaults(self):
+		RIGCONTROL.setDefaults(self)
+
+		# Array Attribute
+		for attr in [Component.joint,
+					 Component.fkControl,
+					 Component.ikControl,
+					 Component.ikJoint,
+					 Component.bindControl,
+					 Component.leafControl,
+					 ]:
+
+			if not attributeExist(self.longName, attr):
+				addAttribute(node=self.longName, attribute=attr, kind=MayaAttrType.string, array=True)
+
+		for attr in [Component.bindTwist,
+					 Component.fkStretch,
+					 Component.ikStretch,
+					 Component.bindStretch,
+					 Component.bindSns,
+					 ]:
+
+			if not attributeExist(self.longName, attr):
+				addAttribute(node=self.longName, attribute=attr, kind=MayaAttrType.float, array=True,
+							 keyable=False)
+
+		# Float Attributes
+		for attr in [Component.fkik,
+					 Component.fkLocalWorld,
+					 Component.ikLocalWorld,
+					 Component.twistAuto,
+					 Component.twist,
+					 Component.stretchAuto,
+					 Component.stretch,
+					 Component.snsAuto,
+					 Component.sns,
+					 ]:
+
+			if not attributeExist(self.longName, attr):
+				minValue = None
+				maxValue = None
+				defaultValue = None
+
+				if 'local' in attr.lower():
+					minValue = 0
+					maxValue = 1
+					defaultValue = 0
+
+				elif 'auto' in attr.lower():
+					minValue = 0
+					maxValue = 1
+					defaultValue = 1
+
+				elif Component.fkik == attr:
+					minValue = 0
+					maxValue = 1
+					defaultValue = 0
+
+				addAttribute(node=self.longName,
+							 attribute=attr,
+							 kind=MayaAttrType.float,
+							 minValue=minValue,
+							 maxValue=maxValue,
+							 value=defaultValue,
+							 channelBox=False,
+							 keyable=True
+							 )
+
+		# Message Attriibutes
+		for attr in [Component.mirror,
+					 Component.fkPoleVector,
+					 Component.ikPoleVector,
+					 Component.ikHandle,
+					 Component.set,
+					 ]:
+
+			if not attributeExist(self.longName, attr):
+				addAttribute(node=self.longName, attribute=attr, kind=MayaAttrType.message)
+
+		# Bool Attributes
+		for attr in [Component.jointDisplay, Component.controlDisplay, Component.detailControlDisplay]:
+			if not attributeExist(self.longName, attr):
+				addAttribute(node=self.longName,
+							 attribute=attr,
+							 kind=MayaAttrType.bool,
+							 channelBox=True,
+							 keyable=False,
+							 )
 		return
 
 
@@ -455,131 +685,11 @@ class IKCONTROL(RIGCONTROL):
 ########################################################################################################################
 #
 #
-#	Interface Control Class
+#	Child Control Class
 #
 #
 ########################################################################################################################
-
-class INTERFACE_CONTROL(RIGCONTROL):
-	def __init__(self,
-				 name=Component.rig,
-				 parent=None,
-				 prefix=None,
-				 item=None,
-				 wireType=WireType.master,
-				 axis=None,
-				 scale=1.0,
-				 index=None,
-				 side=None,
-				 sector=None,
-				 offset=False,
-				 ):
-		RIGCONTROL.__init__(self,
-							name=name,
-							parent=parent,
-							prefix=prefix,
-							item=item,
-							wireType=wireType,
-							axis=axis,
-							scale=scale,
-							index=index,
-							side=side,
-							sector=sector,
-							color=WireColor.purple,
-							kind=Component.rig,
-							offset=offset
-							)
-
-	def setDefaults(self):
-		RIGCONTROL.setDefaults(self)
-
-		item = self.transform
-
-		for attr in [Component.joint,
-					 ]:
-
-			if not attributeExist(item, attr):
-				addAttribute(node=item, attribute=attr, kind=MayaAttrType.string, lock=True)
-
-		for attr in [Component.fkControl,
-					 Component.ikControl,
-					 Component.ikJoint,
-					 Component.bindControl,
-					 Component.leafControl,
-					 ]:
-
-			if not attributeExist(item, attr):
-				addAttribute(node=item, attribute=attr, kind=MayaAttrType.string, array=True)
-
-		for attr in [Component.bindTwist,
-					 Component.fkStretch,
-					 Component.ikStretch,
-					 Component.bindStretch,
-					 Component.bindSns,
-					 ]:
-
-			if not attributeExist(item, attr):
-				addAttribute(node=item, attribute=attr, kind=MayaAttrType.float, array=True,
-							 keyable=False)
-
-		for attr in [Component.fkik,
-					 Component.fkLocalWorld,
-					 Component.ikLocalWorld,
-					 Component.twistAuto,
-					 Component.twist,
-					 Component.stretchAuto,
-					 Component.stretch,
-					 Component.snsAuto,
-					 Component.sns,
-					 ]:
-
-			if not attributeExist(item, attr):
-				minValue = None
-				maxValue = None
-				defaultValue = None
-
-				if 'local' in attr.lower():
-					minValue = 0
-					maxValue = 1
-					defaultValue = 0
-
-				elif 'auto' in attr.lower():
-					minValue = 0
-					maxValue = 1
-					defaultValue = 1
-
-				elif Component.fkik == attr:
-					minValue = 0
-					maxValue = 1
-					defaultValue = 0
-
-				addAttribute(node=item, attribute=attr, kind=MayaAttrType.float, minValue=minValue, maxValue=maxValue,
-							 value=defaultValue, channelBox=False, keyable=True)
-
-		for attr in [Component.mirror,
-					 Component.fkPoleVector,
-					 Component.ikPoleVector,
-					 Component.ikHandle,
-					 Component.set,
-					 ]:
-
-			if not attributeExist(item, attr):
-				addAttribute(node=item, attribute=attr, kind=MayaAttrType.message)
-
-		for attr in [Component.jointDisplay, Component.controlDisplay, Component.detailControlDisplay]:
-			if not attributeExist(item, attr):
-				addAttribute(node=item, attribute=attr, kind=MayaAttrType.bool, channelBox=True, keyable=False)
-		return
-
-
-########################################################################################################################
-#
-#
-#	Bind Control Class
-#
-#
-########################################################################################################################
-class BINDCONTROL(RIGCONTROL):
+class CHILDCONTROL(RIGCONTROL):
 	def __init__(self,
 				 name=Component.rig,
 				 parent=None,
@@ -611,12 +721,12 @@ class BINDCONTROL(RIGCONTROL):
 ########################################################################################################################
 #
 #
-#	Leaf Control Class
+#	Grandchild Control Class
 #
 #
 ########################################################################################################################
 
-class LEAFCONTROL(RIGCONTROL):
+class GRANDCHILDCONTROL(RIGCONTROL):
 	def __init__(self,
 				 name=Component.rig,
 				 parent=None,

@@ -308,7 +308,8 @@ class DagNode(AbstractNode):
 		self._rigPart = None
 		self._rigParent = None
 		self._rigRoot = None
-		self._rigChildren = None
+		self._rigChildren = []
+		self._rigInterface = None
 
 		# Node In Scene
 		if nodeExists(self.name):
@@ -786,7 +787,7 @@ class DagNode(AbstractNode):
 
 		if self.isValid():
 			if attributeExist(self.longName, attr):
-				setAttribute(self.transform, attr, value=part, force=True)
+				setAttribute(self.longName, attr, value=part, force=True)
 			else:
 				addAttribute(node=self.longName,
 							 attribute=Component.rigPart,
@@ -806,6 +807,11 @@ class DagNode(AbstractNode):
 				return getConnectedNode(self.longName, attr)
 		return self._rigParent
 
+	@rigParent.setter
+	def rigParent(self, parent):
+		self._rigParent = parent
+		return
+
 	@property
 	def rigRoot(self):
 		attr = 'rigRoot'
@@ -814,6 +820,11 @@ class DagNode(AbstractNode):
 			if attributeExist(self.longName, attr):
 				return getConnectedNode(self.longName, attr)
 		return self._rigRoot
+
+	@rigRoot.setter
+	def rigRoot(self, root):
+		self._rigRoot = root
+		return
 
 	@property
 	def rigChildren(self):
@@ -824,20 +835,47 @@ class DagNode(AbstractNode):
 				return getConnectedNode(self.longName, attr)
 		return self._rigChildren
 
+	@rigChildren.setter
+	def rigChildren(self, child):
+		if child not in self._rigChildren:
+			self._rigChildren.append(child)
+		return
+
+	@property
+	def rigInterface(self):
+		attr = 'rigInterface'
+
+		if self.isValid():
+			if attributeExist(self.longName, attr):
+				return getConnectedNode(self.longName, attr)
+		return self._rigInterface
+
+	@rigInterface.setter
+	def rigInterface(self, interface):
+		if self.isValid():
+			createMonoRelationship(source=interface,
+								   destination=self.longName,
+								   sourceAttr=None,
+								   destinationAttr=None
+								   )
+
+		self._rigInterface = interface
+		return
+
 	def setDefaults(self):
 		# Rig Part
-		addAttribute(node=self.transform, attribute=Component.rigPart, value=self.prefix, kind=MayaAttrType.string,
+		addAttribute(node=self.longName, attribute=Component.rigPart, value=self.prefix, kind=MayaAttrType.string,
 					 lock=True)
 
 		# Parent
-		for attr in ['rigParent', 'rigRoot']:
-			if not attributeExist(self.transform, attr):
-				addAttribute(node=self.transform, attribute=attr, kind=MayaAttrType.message)
+		for attr in ['rigParent', 'rigRoot', 'rigInterface']:
+			if not attributeExist(self.longName, attr):
+				addAttribute(node=self.longName, attribute=attr, kind=MayaAttrType.message)
 
 		# Children
 		for attr in ['rigChildren']:
-			if not attributeExist(self.transform, attr):
-				addAttribute(node=self.transform, attribute=attr, kind=MayaAttrType.string, lock=True)
+			if not attributeExist(self.longName, attr):
+				addAttribute(node=self.longName, attribute=attr, kind=MayaAttrType.string, lock=True)
 		return
 
 	####################################################################################################################
