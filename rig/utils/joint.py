@@ -876,7 +876,7 @@ def getBindJoint(joint):
 		for child in children:
 			if cmds.objectType(child) == 'joint':
 				label = getJointLabel(child)[1]
-				if label == JointLabelOtherType.bind:
+				if label == JointLabelOtherType.bind or label == JointLabelOtherType.child:
 					bindDict[child] = getDistance(joint, child)
 
 	for key, value in sorted(bindDict.iteritems(), key=lambda (k, v): (v, k)):

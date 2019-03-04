@@ -8,11 +8,11 @@ from maya import cmds
 
 class HEAD(BASERIG):
 	def __init__(self,
-	             head,
-	             neck=None,
-	             parent=None,
-	             rootRig=None,
-	             ):
+				 head,
+				 neck=None,
+				 parent=None,
+				 rootRig=None,
+				 ):
 		items = []
 
 		if neck:
@@ -23,14 +23,14 @@ class HEAD(BASERIG):
 		items.append(head)
 
 		BASERIG.__init__(self,
-		                 prefix=Part.head,
-		                 side=Position.center,
-		                 kind=Part.head,
-		                 items=items,
-		                 parent=parent,
-		                 axis=[1, 1, 0],
-		                 root=rootRig,
-		                 )
+						 prefix=Part.head,
+						 side=Position.center,
+						 kind=Part.head,
+						 items=items,
+						 parent=parent,
+						 axis=[1, 1, 0],
+						 root=rootRig,
+						 )
 
 		# Items
 		self.headItem = head
@@ -60,7 +60,7 @@ class HEAD(BASERIG):
 		self.createHead()
 
 		# Cleanup
-		self.set = self.createSet(self.allAnimationControls)
+		self.set = self.createSet(self.allControls)
 		self.finalize()
 
 	def createHead(self):
@@ -69,24 +69,24 @@ class HEAD(BASERIG):
 		self.scale = distance
 
 		# Rig Control / FK Control
-		self.rigControl = CONTROL(prefix=self.prefix,
-		                          side=self.side,
-		                          item=self.headItem,
-		                          wireType=WireType.master,
-		                          axis=[0, 0, 1],
-		                          scale=self.scale * .2,
-		                          color=WireColor.purple,
-		                          kind=Component.rig,
-		                          )
+		self.interface = RIGCONTROL(prefix=self.prefix,
+									side=self.side,
+									item=self.headItem,
+									wireType=WireType.master,
+									axis=[0, 0, 1],
+									scale=self.scale * .2,
+									color=WireColor.purple,
+									kind=Component.rig,
+									)
 
-		self.rigControl.snapTo(self.headItem, True, False)
-		self.rigControl.parentTo(self.topNode)
+		self.interface.snapTo(self.headItem, True, False)
+		self.interface.parent = self.topNode
 
 		# FK Pole Vector
 		self.fkPoleVector = cmds.group(n=longName(self.longName, Component.fkPoleVector), em=True)
 		snap(self.headItem, self.fkPoleVector, True, False)
 		cmds.xform(self.fkPoleVector, ws=True, t=[0, 0, distance], r=True)
-		cmds.parent(self.fkPoleVector, self.rigControl.transform)
+		cmds.parent(self.fkPoleVector, self.interface.transform)
 		freezeTransform(self.fkPoleVector)
 		lockKeyableAttributes(self.fkPoleVector, hide=True)
 
@@ -99,16 +99,16 @@ class HEAD(BASERIG):
 
 		# IK Control
 		ik = IKCONTROL(prefix=self.prefix,
-		               side=self.side,
-		               item=self.headItem,
-		               wireType=WireType.sphere,
-		               axis=[0, 0, 0],
-		               scale=self.scale * 0.05,
-		               )
+					   side=self.side,
+					   item=self.headItem,
+					   wireType=WireType.sphere,
+					   axis=[0, 0, 0],
+					   scale=self.scale * 0.05,
+					   )
 
 		ik.snapTo(self.headItem, True, False)
-		cmds.xform(ik._nullPosition, ws=True, t=[0, 0, distance], r=True)
-		ik.parentTo(self.ikTopNode)
+		cmds.xform(ik.nullPosition, ws=True, t=[0, 0, distance], r=True)
+		ik.parent = self.ikTopNode
 		self.ikHeadControl = ik
 
 		# IK Aim
@@ -116,30 +116,31 @@ class HEAD(BASERIG):
 
 		# FKIK
 		fkik = createFKIK(items=self.joint[-1],
-		                  fkControls=self.rigControl,
-		                  ikControls=self.ikJoint,
-		                  parent=self.rigControl,
-		                  attrName=Component.fkik,
-		                  )
+						  fkControls=self.interface,
+						  ikControls=self.ikJoint,
+						  parent=self.interface,
+						  attrName=Component.fkik,
+						  )
 
 		# Visibility
-		cmds.connectAttr('{}.{}'.format(self.rigControl, Component.fkik),
-		                 '{}.v'.format(ik._nullConnection),
-						 f=True)
+		cmds.connectAttr('{}.{}'.format(self.interface, Component.fkik),
+						 '{}.v'.format(ik.nullConnection),
+						 force=True,
+						 )
 		return
 
 	def createNeck(self):
 		neck = BASERIG(prefix=Part.neck,
-		               side=Position.center,
-		               kind=Part.neck,
-		               items=self.neckItems,
-		               axis=self.axis,
-		               )
+					   side=Position.center,
+					   kind=Part.neck,
+					   items=self.neckItems,
+					   axis=self.axis,
+					   )
 
-		neck.createFKChain(parent=self.rigControl, autoName=False)
+		neck.createFKChain(interface=self.interface, autoName=False)
 		neck.createBindChain(self.neckItems)
 		neck.constrainChain(neck.fkControl, self.neckItems)
 		self.fkControl += neck.fkControl
-		self.bindControls += neck.bindControls
-		self.leafControls += neck.leafControls
+		self.childControl += neck.childControl
+		self.grandchildControl += neck.grandchildControl
 		return

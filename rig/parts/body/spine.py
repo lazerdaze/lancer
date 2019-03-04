@@ -8,17 +8,17 @@ from maya import cmds
 
 class SPINE(BASERIG):
 	def __init__(self,
-	             items,
-	             root=None,
-	             ):
+				 items,
+				 root=None,
+				 ):
 		BASERIG.__init__(self,
-		                 prefix=Part.spine,
-		                 side=Position.center,
-		                 kind=Part.spine,
-		                 items=items,
-		                 axis=[1, 1, 0],
-		                 root=root,
-		                 )
+						 prefix=Part.spine,
+						 side=Position.center,
+						 kind=Part.spine,
+						 items=items,
+						 axis=[1, 1, 0],
+						 root=root,
+						 )
 		self.create()
 
 	def create(self):
@@ -37,11 +37,11 @@ class SPINE(BASERIG):
 		# Parent
 		if self.root:
 			if isinstance(self.root, object):
-				self.rigControl = getattr(self.root, 'cogControl')
+				self.interface = getattr(self.root, 'cogControl')
 			else:
-				self.rigControl = self.root
+				self.interface = self.root
 		else:
-			self.rigControl = self.topNode
+			self.interface = self.topNode
 
 		# Controls
 		self.createFKChain(self.items, autoName=False)
@@ -65,11 +65,6 @@ class SPINE(BASERIG):
 			cmds.parent(self.topNode, local)
 
 		# Cleanup
-		self.set = self.createSet(self.allAnimationControls)
+		self.set = self.createSet(self.allControls)
 		self.finalize()
 		return
-
-
-
-
-

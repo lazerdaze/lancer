@@ -7,6 +7,38 @@ from naming import *
 from maya import cmds
 
 
+def createRelationship(source,
+					   sourceAttr,
+					   destination,
+					   destinationAttr,
+					   kind=MayaAttrType.message,
+					   array=False,
+					   *args,
+					   **kwargs
+					   ):
+	sourceName = attributeName(source, sourceAttr)
+	destinationName = attributeName(destination, destinationAttr)
+
+	# Source
+	if not attributeExist(source, sourceAttr):
+		addAttribute(node=source, attribute=sourceAttr, kind=kind, array=array)
+	else:
+		array = attributeArray(source, sourceAttr)
+
+	# Next Available
+	if array:
+		index = int(cmds.listAttr(sourceName, m=True)[-1].split('[')[-1].split(']')[0])
+		sourceName = '{}.{}[{}]'.format(source, sourceAttr, index)
+
+	# Destination
+	if not attributeExist(destination, destinationAttr):
+		addAttribute(node=destination, attribute=destinationAttr, kind=MayaAttrType.message)
+
+	# Connection
+	cmds.connectAttr(sourceName, destinationName, force=True, nextAvailable=True)
+	return
+
+
 def createMonoRelationship(source, destination, sourceAttr=None, destinationAttr=None):
 	if sourceAttr and destinationAttr:
 		pass
@@ -35,13 +67,13 @@ def createMonoRelationship(source, destination, sourceAttr=None, destinationAttr
 
 	# Make Connection
 	cmds.connectAttr(attributeName(source, sourceAttr),
-	                 attributeName(destination, destinationAttr),
-	                 force=True
-	                 )
+					 attributeName(destination, destinationAttr),
+					 force=True
+					 )
 	cmds.connectAttr(attributeName(destination, destinationAttr),
-	                 attributeName(source, sourceAttr),
-	                 force=True
-	                 )
+					 attributeName(source, sourceAttr),
+					 force=True
+					 )
 	return
 
 
@@ -306,7 +338,7 @@ class queryNetwork():
 		cmds.columnLayout(adj=True)
 		textVar = cmds.textScrollList(append=networks)
 		cmds.button(l='Select',
-		            c=lambda x: cmds.layoutDialog(dismiss=str(cmds.textScrollList(textVar, q=True, si=True)[0])))
+					c=lambda x: cmds.layoutDialog(dismiss=str(cmds.textScrollList(textVar, q=True, si=True)[0])))
 		cmds.setParent('..')
 
 	def getConnected(self, obj, attr, *args):

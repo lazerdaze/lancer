@@ -111,6 +111,9 @@ class AbstractNode(object):
 				 index=None,
 				 sector=None,
 				 kind=None,
+				 wrapper=False,
+				 *args,
+				 **kwargs
 				 ):
 		'''
 		Abstract Node to be sub-classed by all dag node related classes.
@@ -139,7 +142,7 @@ class AbstractNode(object):
 		self._kind = kind
 
 		# Attributes
-		self.wrapper = False
+		self.wrapper = wrapper
 
 		# Nodes
 		self.transform = None
@@ -153,15 +156,6 @@ class AbstractNode(object):
 
 	def __repr__(self):
 		return self.longName
-
-	@property
-	def fullpath(self):
-		return self._fullpath
-
-	@fullpath.setter
-	def fullpath(self, fullpath):
-		self._fullpath = fullpath
-		return
 
 	@property
 	def prefix(self):
@@ -312,7 +306,11 @@ class DagNode(AbstractNode):
 		self._rigInterface = None
 
 		# Node In Scene
-		if nodeExists(self.name):
+		if self.wrapper:
+			if nodeExists(self.name):
+				self.transform = self.name
+				self.shape = nodeShapes(self.name)
+		elif nodeExists(self.name):
 			self.wrapper = True
 			self.transform = self.name
 			self.shape = nodeShapes(self.name)
@@ -809,6 +807,13 @@ class DagNode(AbstractNode):
 
 	@rigParent.setter
 	def rigParent(self, parent):
+		if self.isValid():
+			createRelationship(source=parent,
+							   sourceAttr='rigChildren',
+							   destination=self.longName,
+							   destinationAttr='rigParent',
+							   )
+
 		self._rigParent = parent
 		return
 
@@ -823,6 +828,13 @@ class DagNode(AbstractNode):
 
 	@rigRoot.setter
 	def rigRoot(self, root):
+		if self.isValid():
+			createRelationship(source=root,
+							   sourceAttr='rigChildren',
+							   destination=self.longName,
+							   destinationAttr='rigRoot',
+							   )
+
 		self._rigRoot = root
 		return
 
@@ -853,11 +865,11 @@ class DagNode(AbstractNode):
 	@rigInterface.setter
 	def rigInterface(self, interface):
 		if self.isValid():
-			createMonoRelationship(source=interface,
-								   destination=self.longName,
-								   sourceAttr=None,
-								   destinationAttr=None
-								   )
+			createRelationship(source=interface,
+							   sourceAttr='rigChildren',
+							   destination=self.longName,
+							   destinationAttr='rigInterface',
+							   )
 
 		self._rigInterface = interface
 		return
@@ -907,10 +919,10 @@ class DagNode(AbstractNode):
 
 		if self.isValid():
 			cmds.parent(children, self.longName)
-		else:
-			for child in children:
-				if child not in self._children:
-					self._children.append(child)
+
+		for child in children:
+			if child not in self._children:
+				self._children.append(child)
 		return
 
 	####################################################################################################################

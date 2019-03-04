@@ -161,6 +161,10 @@ def attributeLocked(node, attribute):
 	return cmds.getAttr(attributeName(node, attribute), lock=True)
 
 
+def attributeArray(node, attribute):
+	return cmds.attributeQuery(attribute, node=node, multi=True)
+
+
 def disconnectAttribute(attribute):
 	if cmds.connectionInfo(attribute, isDestination=True):
 		source = cmds.connectionInfo(attribute, sourceFromDestination=True)

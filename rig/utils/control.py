@@ -258,7 +258,7 @@ class RIGCONTROL(Control):
 
 		# Offset Control
 		self.createOffset = offset
-		self.offset = None
+		self._offset = None
 
 	def create(self, *args, **kwargs):
 		Control.create(self)
@@ -267,7 +267,7 @@ class RIGCONTROL(Control):
 		if self.createOffset:
 			offsetWire = self.wire
 
-			if not isinstance(self.createOffset, bool) and hasattr(WireType, self.createOffset):
+			if isinstance(self.createOffset, str) and hasattr(WireType, self.createOffset):
 				offsetWire = self.createOffset
 
 			self.offset = Control(prefix=self.prefix,
@@ -333,19 +333,21 @@ class RIGCONTROL(Control):
 	def nullPosition(self):
 		attr = Component.position
 
+		if self._nullPosition:
+			return self._nullPosition
+
 		if self.isValid():
 			if attributeExist(self.longName, attr):
 				return getConnectedNode(self.longName, attr)
-		return self._nullPosition
 
 	@nullPosition.setter
 	def nullPosition(self, null):
 		if self.isValid():
-			createMonoRelationship(source=self.longName,
-								   destination=null,
-								   sourceAttr=Component.position,
-								   destinationAttr=Component.parent
-								   )
+			createRelationship(source=self.longName,
+							   sourceAttr=Component.position,
+							   destination=null,
+							   destinationAttr='rigParent',
+							   )
 
 		self._nullPosition = null
 		return
@@ -362,11 +364,11 @@ class RIGCONTROL(Control):
 	@nullConnection.setter
 	def nullConnection(self, null):
 		if self.isValid():
-			createMonoRelationship(source=self.longName,
-								   destination=null,
-								   sourceAttr=Component.connection,
-								   destinationAttr=Component.parent
-								   )
+			createRelationship(source=self.longName,
+							   sourceAttr=Component.connection,
+							   destination=null,
+							   destinationAttr='rigParent',
+							   )
 
 		self._nullPosition = null
 		return
@@ -383,13 +385,39 @@ class RIGCONTROL(Control):
 	@nullZero.setter
 	def nullZero(self, null):
 		if self.isValid():
-			createMonoRelationship(source=self.longName,
-								   destination=null,
-								   sourceAttr=Component.zero,
-								   destinationAttr=Component.parent
-								   )
+			createRelationship(source=self.longName,
+							   sourceAttr=Component.zero,
+							   destination=null,
+							   destinationAttr='rigParent',
+							   )
 
 		self._nullPosition = null
+		return
+
+	####################################################################################################################
+	# Offset Property
+	####################################################################################################################
+
+	@property
+	def offset(self):
+		attr = Component.offset
+
+		if self._offset:
+			return self._offset
+		else:
+			if self.isValid():
+				if attributeExist(self.longName, attr):
+					return getConnectedNode(self.longName, attr)
+
+	@offset.setter
+	def offset(self, offset):
+		if self.isValid():
+			createRelationship(source=self.longName,
+							   sourceAttr=Component.offset,
+							   destination=offset,
+							   destinationAttr='rigParent',
+							   )
+		self._offset = offset
 		return
 
 	####################################################################################################################
@@ -397,15 +425,15 @@ class RIGCONTROL(Control):
 	####################################################################################################################
 
 	def constrainItem(self, *args, **kwargs):
-		if self.offset:
-			self.offset.contrainItem(*args, **kwargs)
+		if self._offset:
+			self._offset.contrainItem(*args, **kwargs)
 		else:
 			Control.constrainItem(self, *args, **kwargs)
 		return
 
 	def connectItem(self, *args, **kwargs):
-		if self.offset:
-			self.offset.connectItem(*args, **kwargs)
+		if self._offset:
+			self._offset.connectItem(*args, **kwargs)
 		else:
 			Control.connectItem(self, *args, **kwargs)
 		return
@@ -425,7 +453,31 @@ class RIGCONTROL(Control):
 		self._parent = str(parent)
 
 		if self.isValid() and nodeExists(parent):
-			cmds.parent(self._nullPosition, parent)
+			cmds.parent(self._nullPosition, self._parent)
+		return
+
+	@property
+	def children(self):
+		if self.isValid():
+			if self.offset:
+				return nodeChildren(self.offset.transform)
+			else:
+				return nodeChildren(self.transform)
+		return self._children
+
+	@children.setter
+	def children(self, children):
+		children = flatList(children)
+
+		if self.isValid():
+			if self.offset:
+				cmds.parent(children, self.offset.transform)
+			else:
+				cmds.parent(children, self.transform)
+
+		for child in children:
+			if child not in self._children:
+				self._children.append(child)
 		return
 
 
@@ -448,8 +500,11 @@ class INTERFACE_CONTROL(RIGCONTROL):
 				 scale=1.0,
 				 index=None,
 				 side=None,
+				 kind='interface',
 				 sector=None,
 				 offset=False,
+				 *args,
+				 **kwargs
 				 ):
 
 		RIGCONTROL.__init__(self,
@@ -464,8 +519,10 @@ class INTERFACE_CONTROL(RIGCONTROL):
 							side=side,
 							sector=sector,
 							color=WireColor.purple,
-							kind='interface',
-							offset=offset
+							kind=kind,
+							offset=offset,
+							*args,
+							**kwargs
 							)
 
 		# Hierarchy
@@ -487,9 +544,350 @@ class INTERFACE_CONTROL(RIGCONTROL):
 		self._ikStretch = []
 		self._ikTopNode = None
 
-		# Detail
+		# Child Controls
 		self._childControl = []
 		self._grandchildControl = []
+
+	####################################################################################################################
+	# Properties
+	####################################################################################################################
+
+	@property
+	def joint(self):
+		if self._joint:
+			return self._joint
+
+		if self.isValid():
+			if attributeExist(self, Component.joint):
+				getConnectedNode(self, Component.joint)
+		return self._joint
+
+	@joint.setter
+	def joint(self, joints):
+		joints = flatList(joints)
+
+		if self.isValid():
+			for joint in joints:
+				createRelationship(source=self.longName,
+								   sourceAttr=Component.joint,
+								   destination=joint,
+								   destinationAttr='rigInterface',
+								   )
+
+		for joint in joints:
+			if joint not in self._joint:
+				self._joint.append(joint)
+		return
+
+	@property
+	def set(self):
+		if self._set:
+			return self._joint
+
+		if self.isValid():
+			if attributeExist(self, Component.set):
+				getConnectedNode(self, Component.set)
+		return self._set
+
+	@set.setter
+	def set(self, set):
+		if self.isValid():
+			createRelationship(source=self.longName,
+							   sourceAttr=Component.set,
+							   destination=set,
+							   destinationAttr='rigInterface',
+							   )
+		self._set = set
+		return
+
+	@property
+	def opposite(self):
+		if self._opposite:
+			return self._opposite
+
+		if self.isValid():
+			if attributeExist(self, Component.opposite):
+				getConnectedNode(self, Component.opposite)
+
+		return self._opposite
+
+	@opposite.setter
+	def opposite(self, opposite):
+		if self.isValid():
+			createMonoRelationship(source=self.longName,
+								   sourceAttr=Component.opposite,
+								   destination=opposite,
+								   destinationAttr=Component.opposite,
+								   )
+
+		self._opposite = opposite
+		return
+
+	####################################################################################################################
+	# Child Control Properties
+	####################################################################################################################
+
+	@property
+	def childControl(self):
+		if self._childControl:
+			return self._childControl
+
+		if self.isValid():
+			if attributeExist(self, Component.childControl):
+				getConnectedNode(self, Component.childControl)
+
+		return self._childControl
+
+	@childControl.setter
+	def childControl(self, children):
+		children = flatList(children)
+
+		if self.isValid():
+			for child in children:
+				createRelationship(source=self.longName,
+								   sourceAttr=Component.child,
+								   destination=child,
+								   destinationAttr='rigInterface',
+								   )
+
+		for child in children:
+			if child not in self._childControl:
+				self._childControl.append(child)
+		return
+
+	@property
+	def grandchildControl(self):
+		if self._grandchildControl:
+			return self._grandchildControl
+
+		if self.isValid():
+			if attributeExist(self, Component.grandchildControl):
+				getConnectedNode(self, Component.grandchildControl)
+
+		return self._grandchildControl
+
+	@grandchildControl.setter
+	def grandchildControl(self, grandchildren):
+		grandchildren = flatList(grandchildren)
+
+		if self.isValid():
+			for grandchild in grandchildren:
+				createRelationship(source=self.longName,
+								   sourceAttr=Component.grandchildControl,
+								   destination=grandchild,
+								   destinationAttr='rigInterface',
+								   )
+
+		for grandchild in grandchildren:
+			if grandchild not in self._grandchildControl:
+				self._grandchildControl.append(grandchild)
+		return
+
+	####################################################################################################################
+	# FK Properties
+	####################################################################################################################
+
+	@property
+	def fkControl(self):
+		if self._fkControl:
+			return self._fkControl
+
+		if self.isValid():
+			if attributeExist(self, Component.fkControl):
+				getConnectedNode(self, Component.fkControl)
+
+		return self._fkControl
+
+	@fkControl.setter
+	def fkControl(self, fkControls):
+		fkControls = flatList(fkControls)
+
+		if self.isValid():
+			for fkControl in fkControls:
+				createRelationship(source=self.longName,
+								   sourceAttr=Component.fkControl,
+								   destination=fkControl,
+								   destinationAttr='rigInterface',
+								   )
+
+		for fkControl in fkControls:
+			if fkControl not in self._fkControl:
+				self._fkControl.append(fkControl)
+		return
+
+	@property
+	def fkPoleVector(self):
+		if self._fkPoleVector:
+			return self._fkPoleVector
+
+		if self.isValid():
+			if attributeExist(self, Component.fkPoleVector):
+				getConnectedNode(self, Component.fkPoleVector)
+
+		return self._fkPoleVector
+
+	@fkPoleVector.setter
+	def fkPoleVector(self, fkPoleVector):
+		if self.isValid():
+			createRelationship(source=self.longName,
+							   sourceAttr=Component.fkPoleVector,
+							   destination=fkPoleVector,
+							   destinationAttr='rigInterface',
+							   )
+
+		self._fkPoleVector = fkPoleVector
+		return
+
+	@property
+	def fkStretch(self):
+		return self._fkStretch
+
+	@fkStretch.setter
+	def fkStretch(self, fkStretch):
+		self._fkStretch = fkStretch
+		return
+
+	@property
+	def fkTopNode(self):
+		if self._fkTopNode:
+			return self._fkTopNode
+
+		if self.isValid():
+			if attributeExist(self, Component.fkTopNode):
+				getConnectedNode(self, Component.fkTopNode)
+
+		return self._fkTopNode
+
+	@fkTopNode.setter
+	def fkTopNode(self, fkTopNode):
+		if self.isValid():
+			createRelationship(source=self.longName,
+							   sourceAttr=Component.fkTopNode,
+							   destination=fkTopNode,
+							   destinationAttr='rigInterface',
+							   )
+
+		self._fkTopNode = fkTopNode
+		return
+
+	####################################################################################################################
+	# IK Properties
+	####################################################################################################################
+
+	@property
+	def ikJoint(self):
+		if self._ikJoint:
+			return self._ikJoint
+
+		if self.isValid():
+			if attributeExist(self, Component.ikJoint):
+				getConnectedNode(self, Component.ikJoint)
+
+		return self._ikJoint
+
+	@ikJoint.setter
+	def ikJoint(self, ikJoints):
+		ikJoints = flatList(ikJoints)
+
+		if self.isValid():
+			for ikJoint in ikJoints:
+				createRelationship(source=self.longName,
+								   sourceAttr=Component.ikJoint,
+								   destination=ikJoint,
+								   destinationAttr='rigInterface',
+								   )
+
+		for ikJoint in ikJoints:
+			if ikJoint not in self._ikJoint:
+				self._ikJoint.append(ikJoint)
+		return
+
+	@property
+	def ikControl(self):
+		if self._ikControl:
+			return self._ikControl
+
+		if self.isValid():
+			if attributeExist(self, Component.ikControl):
+				getConnectedNode(self, Component.ikControl)
+
+		return self._ikControl
+
+	@ikControl.setter
+	def ikControl(self, ikControls):
+		ikControls = flatList(ikControls)
+
+		if self.isValid():
+			for ikControl in ikControls:
+				createRelationship(source=self.longName,
+								   sourceAttr=Component.ikControl,
+								   destination=ikControl,
+								   destinationAttr='rigInterface',
+								   )
+
+		for ikControl in ikControls:
+			if ikControl not in self._ikControl:
+				self._ikControl.append(ikControl)
+		return
+
+	@property
+	def ikPoleVector(self):
+		if self._ikPoleVector:
+			return self._ikPoleVector
+
+		if self.isValid():
+			if attributeExist(self, Component.ikPoleVector):
+				getConnectedNode(self, Component.ikPoleVector)
+
+		return self._ikPoleVector
+
+	@ikPoleVector.setter
+	def ikPoleVector(self, ikPoleVector):
+		if self.isValid():
+			createRelationship(source=self.longName,
+							   sourceAttr=Component.ikPoleVector,
+							   destination=ikPoleVector,
+							   destinationAttr='rigInterface',
+							   )
+
+		self._ikPoleVector = ikPoleVector
+		return
+
+	@property
+	def ikStretch(self):
+		return self._ikStretch
+
+	@ikStretch.setter
+	def ikStretch(self, ikStretch):
+		self._ikStretch = ikStretch
+		return
+
+	@property
+	def ikTopNode(self):
+		if self._ikTopNode:
+			return self._ikTopNode
+
+		if self.isValid():
+			if attributeExist(self, Component.ikTopNode):
+				getConnectedNode(self, Component.ikTopNode)
+
+		return self._ikTopNode
+
+	@ikTopNode.setter
+	def ikTopNode(self, ikTopNode):
+		if self.isValid():
+			createRelationship(source=self.longName,
+							   sourceAttr=Component.ikTopNode,
+							   destination=ikTopNode,
+							   destinationAttr='rigInterface',
+							   )
+
+		self._ikTopNode = ikTopNode
+		return
+
+	####################################################################################################################
+	# Defaults
+	####################################################################################################################
 
 	def setDefaults(self):
 		RIGCONTROL.setDefaults(self)
@@ -499,18 +897,18 @@ class INTERFACE_CONTROL(RIGCONTROL):
 					 Component.fkControl,
 					 Component.ikControl,
 					 Component.ikJoint,
-					 Component.bindControl,
-					 Component.leafControl,
+					 Component.childControl,
+					 Component.grandchildControl,
 					 ]:
 
 			if not attributeExist(self.longName, attr):
 				addAttribute(node=self.longName, attribute=attr, kind=MayaAttrType.string, array=True)
 
-		for attr in [Component.bindTwist,
+		for attr in [Component.childTwist,
 					 Component.fkStretch,
 					 Component.ikStretch,
-					 Component.bindStretch,
-					 Component.bindSns,
+					 Component.childStretch,
+					 Component.childSns,
 					 ]:
 
 			if not attributeExist(self.longName, attr):
@@ -560,7 +958,10 @@ class INTERFACE_CONTROL(RIGCONTROL):
 							 )
 
 		# Message Attriibutes
-		for attr in [Component.mirror,
+		for attr in [Component.opposite,
+					 Component.topNode,
+					 Component.fkTopNode,
+					 Component.ikTopNode,
 					 Component.fkPoleVector,
 					 Component.ikPoleVector,
 					 Component.ikHandle,
@@ -571,7 +972,10 @@ class INTERFACE_CONTROL(RIGCONTROL):
 				addAttribute(node=self.longName, attribute=attr, kind=MayaAttrType.message)
 
 		# Bool Attributes
-		for attr in [Component.jointDisplay, Component.controlDisplay, Component.detailControlDisplay]:
+		for attr in [Component.jointDisplay,
+					 Component.controlDisplay,
+					 Component.childControlDisplay,
+					 ]:
 			if not attributeExist(self.longName, attr):
 				addAttribute(node=self.longName,
 							 attribute=attr,
@@ -579,6 +983,22 @@ class INTERFACE_CONTROL(RIGCONTROL):
 							 channelBox=True,
 							 keyable=False,
 							 )
+		return
+
+	####################################################################################################################
+	# Methods
+	####################################################################################################################
+
+	def mirror(self, *args, **kwargs):
+		return
+
+	def swap(self, *args, **kwargs):
+		return
+
+	def fkikSwitch(self, *args, **kwargs):
+		return
+
+	def resetToDefaults(self, *args, **kwargs):
 		return
 
 
@@ -603,6 +1023,8 @@ class FKCONTROL(RIGCONTROL):
 				 side=None,
 				 sector=None,
 				 color=None,
+				 *args,
+				 **kwargs
 				 ):
 
 		if color is None:
@@ -629,6 +1051,8 @@ class FKCONTROL(RIGCONTROL):
 							offset=True,
 							kind=Component.fk,
 							color=color,
+							*args,
+							**kwargs
 							)
 
 
@@ -653,6 +1077,8 @@ class IKCONTROL(RIGCONTROL):
 				 side=None,
 				 sector=None,
 				 color=None,
+				 *args,
+				 **kwargs
 				 ):
 
 		if color is None:
@@ -679,6 +1105,8 @@ class IKCONTROL(RIGCONTROL):
 							color=color,
 							offset=True,
 							kind=Component.ik,
+							*args,
+							**kwargs
 							)
 
 
@@ -701,6 +1129,8 @@ class CHILDCONTROL(RIGCONTROL):
 				 index=None,
 				 side=None,
 				 sector=None,
+				 *args,
+				 **kwargs
 				 ):
 		RIGCONTROL.__init__(self,
 							name=name,
@@ -714,7 +1144,9 @@ class CHILDCONTROL(RIGCONTROL):
 							side=side,
 							sector=sector,
 							color=[.5, 1, 1],
-							kind=Component.bind,
+							kind=Component.child,
+							*args,
+							**kwargs
 							)
 
 
@@ -738,6 +1170,8 @@ class GRANDCHILDCONTROL(RIGCONTROL):
 				 index=None,
 				 side=None,
 				 sector=None,
+				 *args,
+				 **kwargs
 				 ):
 		RIGCONTROL.__init__(self,
 							name=name,
@@ -751,5 +1185,7 @@ class GRANDCHILDCONTROL(RIGCONTROL):
 							side=side,
 							sector=sector,
 							color=[.5, 1, 1],
-							kind=Component.leaf,
+							kind=Component.grandChild,
+							*args,
+							**kwargs
 							)

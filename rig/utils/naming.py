@@ -137,6 +137,20 @@ class Component(object):
 	mirror = 'mirror'
 	opposite = 'opposite'
 
+	child = 'child'
+	childControl = '{}{}'.format(child, control.capitalize())
+	childTwist = '{}{}'.format(child, twist.capitalize())
+	childStretch = '{}{}'.format(child, stretch.capitalize())
+	childSns = '{}{}'.format(child, sns.capitalize())
+	childControlDisplay = '{}{}{}'.format(child, control.capitalize(), display.capitalize())
+
+	grandChild = 'grandchild'
+	grandchildControl = '{}{}'.format(grandChild, control.capitalize())
+
+	topNode = 'topNode'
+	fkTopNode = '{}{}'.format(fk, topNode.capitalize())
+	ikTopNode = '{}{}'.format(ik, topNode.capitalize())
+
 
 class MayaAttr(object):
 	# Transforms
@@ -317,13 +331,15 @@ class JointLabelOtherType(object):
 	tail = 'tail'
 	leaf = 'leaf'
 	heel = 'heel'
+	child = 'child'
+	grandChild = 'grandchild'
 
 
 AnimCurves = ['animCurveUL',
-              'animCurveUU',
-              'animCurveUA',
-              'animCurveUT'
-              ]
+			  'animCurveUU',
+			  'animCurveUA',
+			  'animCurveUT'
+			  ]
 
 
 def longName(*args):
