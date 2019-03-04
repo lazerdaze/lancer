@@ -38,11 +38,11 @@ def createControl(name='control', shape=WireType.circle, axis=None, scale=1.0, c
 	# Add Kind Attribute
 	if kind:
 		addAttribute(node=node,
-					 attribute=UserAttr.kind,
-					 kind=MayaAttrType.string,
-					 value=kind,
-					 lock=True,
-					 )
+		             attribute=UserAttr.kind,
+		             kind=MayaAttrType.string,
+		             value=kind,
+		             lock=True,
+		             )
 
 	# Color
 	if color and isinstance(color, list):
@@ -71,40 +71,23 @@ def createControl(name='control', shape=WireType.circle, axis=None, scale=1.0, c
 
 class Control(Joint):
 	def __init__(self,
-				 prefix=None,
-				 side=None,
-				 name='rigControl',
-				 sector=None,
-				 index=None,
-				 kind=Component.control,
-				 parent=None,
-				 type=None,
-				 otherType=None,
-				 item=None,
-				 wire=WireType.circleRotate,
-				 axis=None,
-				 scale=1.0,
-				 color=WireColor.blue,
-				 *args,
-				 **kwargs
-				 ):
-
-		Joint.__init__(self,
-					   prefix=prefix,
-					   side=side,
-					   name=name,
-					   sector=sector,
-					   index=index,
-					   kind=kind,
-					   parent=parent,
-					   radius=1.0,
-					   drawStyle=JointDrawStyle.none,
-					   type=type,
-					   otherType=otherType,
-					   color=color,
-					   *args,
-					   **kwargs
-					   )
+	             prefix=None,
+	             side=None,
+	             name='rigControl',
+	             sector=None,
+	             index=None,
+	             kind=Component.control,
+	             parent=None,
+	             type=None,
+	             otherType=None,
+	             item=None,
+	             wire=WireType.circleRotate,
+	             axis=None,
+	             scale=1.0,
+	             color=WireColor.blue,
+	             *args,
+	             **kwargs
+	             ):
 
 		'''
 		Base Control class to be used in all parts classes.
@@ -123,14 +106,31 @@ class Control(Joint):
 		self.wire = wire
 		self.wireScale = scale
 
+		Joint.__init__(self,
+		               prefix=prefix,
+		               side=side,
+		               name=name,
+		               sector=sector,
+		               index=index,
+		               kind=kind,
+		               parent=parent,
+		               radius=1.0,
+		               drawStyle=JointDrawStyle.none,
+		               type=type,
+		               otherType=otherType,
+		               color=color,
+		               *args,
+		               **kwargs
+		               )
+
 	def create(self, *args, **kwargs):
 		# Main Control
 		result = createControl(name=self.longName,
-							   shape=self.wire,
-							   axis=self.axis,
-							   scale=self.wireScale,
-							   color=self.color,
-							   )
+		                       shape=self.wire,
+		                       axis=self.axis,
+		                       scale=self.wireScale,
+		                       color=self.color,
+		                       )
 
 		self.transform, self.shape = result
 		self.rigPart = self.prefix
@@ -187,19 +187,19 @@ class Control(Joint):
 		else:
 			if translate:
 				connectTranslate(source=self.longName,
-								 destination=item,
-								 offset=offset,
-								 )
+				                 destination=item,
+				                 offset=offset,
+				                 )
 			if rotate:
 				connectRotate(source=self.longName,
-							  destination=item,
-							  offset=offset,
-							  )
+				              destination=item,
+				              offset=offset,
+				              )
 			if scale:
 				connectScale(source=self.longName,
-							 destination=item,
-							 offset=offset,
-							 )
+				             destination=item,
+				             offset=offset,
+				             )
 		return
 
 
@@ -213,44 +213,24 @@ class Control(Joint):
 
 class RIGCONTROL(Control):
 	def __init__(self,
-				 prefix=None,
-				 side=None,
-				 name=Component.rig,
-				 sector=None,
-				 index=None,
-				 kind=None,
-				 parent=None,
-				 type=None,
-				 otherType=None,
-				 item=None,
-				 wire=WireType.circleRotate,
-				 axis=None,
-				 scale=1.0,
-				 color=None,
-				 offset=False,
-				 *args,
-				 **kwargs
-				 ):
-
-		Control.__init__(self,
-						 prefix=prefix,
-						 side=side,
-						 name=name,
-						 sector=sector,
-						 index=index,
-						 kind=camelCase(kind, Component.control, capitalize=False),
-						 parent=parent,
-						 item=item,
-						 wire=wire,
-						 axis=axis,
-						 scale=scale,
-						 color=color,
-						 type=type,
-						 otherType=otherType,
-						 *args,
-						 **kwargs
-						 )
-
+	             prefix=None,
+	             side=None,
+	             name=Component.rig,
+	             sector=None,
+	             index=None,
+	             kind=None,
+	             parent=None,
+	             type=None,
+	             otherType=None,
+	             item=None,
+	             wire=WireType.circleRotate,
+	             axis=None,
+	             scale=1.0,
+	             color=WireColor.blue,
+	             offset=False,
+	             *args,
+	             **kwargs
+	             ):
 		# Null Groups
 		self._nullPosition = None
 		self._nullConnection = None
@@ -259,6 +239,28 @@ class RIGCONTROL(Control):
 		# Offset Control
 		self.createOffset = offset
 		self._offset = None
+
+		Control.__init__(self,
+		                 prefix=prefix,
+		                 side=side,
+		                 name=name,
+		                 sector=sector,
+		                 index=index,
+		                 kind=camelCase(kind, Component.control, capitalize=False),
+		                 parent=parent,
+		                 item=item,
+		                 wire=wire,
+		                 axis=axis,
+		                 scale=scale,
+		                 color=color,
+		                 type=type,
+		                 otherType=otherType,
+		                 *args,
+		                 **kwargs
+		                 )
+
+		if not self.wrapper:
+			self.createNulls()
 
 	def create(self, *args, **kwargs):
 		Control.create(self)
@@ -271,49 +273,40 @@ class RIGCONTROL(Control):
 				offsetWire = self.createOffset
 
 			self.offset = Control(prefix=self.prefix,
-								  side=self.side,
-								  name=self.name,
-								  sector=self.sector,
-								  index=self.index,
-								  kind=camelCase(Component.offset, self.kind, capitalize=False),
-								  shape=offsetWire,
-								  axis=self.axis,
-								  scale=self.wireScale * .8,
-								  color=self.color,
-								  parent=self.transform,
-								  type=self.type,
-								  otherType=self.type,
-								  wire=WireType.circleRotate,
-								  )
+			                      side=self._side,
+			                      name=self.name,
+			                      sector=self.sector,
+			                      index=self.index,
+			                      kind=Component.offsetControl,
+			                      axis=self.axis,
+			                      scale=self.wireScale * .8,
+			                      color=self.color,
+			                      parent=self.transform,
+			                      wire=offsetWire,
+			                      )
 
 			# Connect Offset Controls
 			addAttribute(node=self.transform,
-						 attribute=UserAttr.offsetVisibility,
-						 kind=MayaAttrType.bool,
-						 keyable=False,
-						 channelBox=True,
-						 destinationNode=self.offset.shape,
-						 destinationAttribute=MayaAttr.visibility,
-						 )
+			             attribute=UserAttr.offsetVisibility,
+			             kind=MayaAttrType.bool,
+			             keyable=False,
+			             channelBox=True,
+			             destinationNode=self.offset.shape,
+			             destinationAttribute=MayaAttr.visibility,
+			             )
 
-			createMonoRelationship(source=self.transform,
-								   destination=self.offset.transform,
-								   sourceAttr=Component.offset,
-								   destinationAttr=Component.parent,
-								   )
-
+	def createNulls(self):
 		# Create Nulls
 		nullList = []
-
 		i = 0
 		for null in [Component.position, Component.connection, Component.zero]:
 			nullNode = DagNode(prefix=self.prefix,
-							   side=self.side,
-							   name=self.name,
-							   sector=self.sector,
-							   index=self.index,
-							   kind=camelCase(self.kind, null, capitalize=False),
-							   )
+			                   side=self.side,
+			                   name=self.name,
+			                   sector=self.sector,
+			                   index=self.index,
+			                   kind=null,
+			                   )
 
 			if i != 0:
 				nullNode.parent = nullList[i - 1]
@@ -323,7 +316,7 @@ class RIGCONTROL(Control):
 
 		self.nullPosition, self.nullConnection, self.nullZero = nullList
 		cmds.parent(self.longName, self._nullZero)
-		return
+		return nullList
 
 	####################################################################################################################
 	# Null Properties
@@ -344,10 +337,10 @@ class RIGCONTROL(Control):
 	def nullPosition(self, null):
 		if self.isValid():
 			createRelationship(source=self.longName,
-							   sourceAttr=Component.position,
-							   destination=null,
-							   destinationAttr='rigParent',
-							   )
+			                   sourceAttr=Component.position,
+			                   destination=null,
+			                   destinationAttr='rigParent',
+			                   )
 
 		self._nullPosition = null
 		return
@@ -365,12 +358,12 @@ class RIGCONTROL(Control):
 	def nullConnection(self, null):
 		if self.isValid():
 			createRelationship(source=self.longName,
-							   sourceAttr=Component.connection,
-							   destination=null,
-							   destinationAttr='rigParent',
-							   )
+			                   sourceAttr=Component.connection,
+			                   destination=null,
+			                   destinationAttr='rigParent',
+			                   )
 
-		self._nullPosition = null
+		self._nullConnection = null
 		return
 
 	@property
@@ -386,12 +379,12 @@ class RIGCONTROL(Control):
 	def nullZero(self, null):
 		if self.isValid():
 			createRelationship(source=self.longName,
-							   sourceAttr=Component.zero,
-							   destination=null,
-							   destinationAttr='rigParent',
-							   )
+			                   sourceAttr=Component.zero,
+			                   destination=null,
+			                   destinationAttr='rigParent',
+			                   )
 
-		self._nullPosition = null
+		self._nullZero = null
 		return
 
 	####################################################################################################################
@@ -412,11 +405,11 @@ class RIGCONTROL(Control):
 	@offset.setter
 	def offset(self, offset):
 		if self.isValid():
-			createRelationship(source=self.longName,
-							   sourceAttr=Component.offset,
-							   destination=offset,
-							   destinationAttr='rigParent',
-							   )
+			createMonoRelationship(source=self.longName,
+			                       sourceAttr=Component.offset,
+			                       destination=offset,
+			                       destinationAttr='rigParent',
+			                       )
 		self._offset = offset
 		return
 
@@ -450,10 +443,10 @@ class RIGCONTROL(Control):
 
 	@parent.setter
 	def parent(self, parent):
-		self._parent = str(parent)
-
-		if self.isValid() and nodeExists(parent):
-			cmds.parent(self._nullPosition, self._parent)
+		if self.isValid():
+			if parent and nodeExists(parent):
+				cmds.parent(self._nullPosition, parent)
+		self._parent = parent
 		return
 
 	@property
@@ -491,39 +484,35 @@ class RIGCONTROL(Control):
 
 class INTERFACE_CONTROL(RIGCONTROL):
 	def __init__(self,
-				 name=Component.rig,
-				 parent=None,
-				 prefix=None,
-				 item=None,
-				 wireType=WireType.master,
-				 axis=None,
-				 scale=1.0,
-				 index=None,
-				 side=None,
-				 kind='interface',
-				 sector=None,
-				 offset=False,
-				 *args,
-				 **kwargs
-				 ):
+	             name=Component.rig,
+	             parent=None,
+	             prefix=None,
+	             item=None,
+	             wire=WireType.master,
+	             axis=None,
+	             scale=1.0,
+	             index=None,
+	             side=None,
+	             kind='interface',
+	             sector=None,
+	             offset=False,
+	             ):
 
 		RIGCONTROL.__init__(self,
-							name=name,
-							parent=parent,
-							prefix=prefix,
-							item=item,
-							wireType=wireType,
-							axis=axis,
-							scale=scale,
-							index=index,
-							side=side,
-							sector=sector,
-							color=WireColor.purple,
-							kind=kind,
-							offset=offset,
-							*args,
-							**kwargs
-							)
+		                    name=name,
+		                    parent=parent,
+		                    prefix=prefix,
+		                    item=item,
+		                    wire=wire,
+		                    axis=axis,
+		                    scale=scale,
+		                    index=index,
+		                    side=side,
+		                    sector=sector,
+		                    color=WireColor.purple,
+		                    kind=kind,
+		                    offset=offset,
+		                    )
 
 		# Hierarchy
 		self._joint = []
@@ -569,10 +558,10 @@ class INTERFACE_CONTROL(RIGCONTROL):
 		if self.isValid():
 			for joint in joints:
 				createRelationship(source=self.longName,
-								   sourceAttr=Component.joint,
-								   destination=joint,
-								   destinationAttr='rigInterface',
-								   )
+				                   sourceAttr=Component.joint,
+				                   destination=joint,
+				                   destinationAttr='rigInterface',
+				                   )
 
 		for joint in joints:
 			if joint not in self._joint:
@@ -593,10 +582,10 @@ class INTERFACE_CONTROL(RIGCONTROL):
 	def set(self, set):
 		if self.isValid():
 			createRelationship(source=self.longName,
-							   sourceAttr=Component.set,
-							   destination=set,
-							   destinationAttr='rigInterface',
-							   )
+			                   sourceAttr=Component.set,
+			                   destination=set,
+			                   destinationAttr='rigInterface',
+			                   )
 		self._set = set
 		return
 
@@ -615,10 +604,10 @@ class INTERFACE_CONTROL(RIGCONTROL):
 	def opposite(self, opposite):
 		if self.isValid():
 			createMonoRelationship(source=self.longName,
-								   sourceAttr=Component.opposite,
-								   destination=opposite,
-								   destinationAttr=Component.opposite,
-								   )
+			                       sourceAttr=Component.opposite,
+			                       destination=opposite,
+			                       destinationAttr=Component.opposite,
+			                       )
 
 		self._opposite = opposite
 		return
@@ -645,10 +634,10 @@ class INTERFACE_CONTROL(RIGCONTROL):
 		if self.isValid():
 			for child in children:
 				createRelationship(source=self.longName,
-								   sourceAttr=Component.child,
-								   destination=child,
-								   destinationAttr='rigInterface',
-								   )
+				                   sourceAttr=Component.child,
+				                   destination=child,
+				                   destinationAttr='rigInterface',
+				                   )
 
 		for child in children:
 			if child not in self._childControl:
@@ -673,10 +662,10 @@ class INTERFACE_CONTROL(RIGCONTROL):
 		if self.isValid():
 			for grandchild in grandchildren:
 				createRelationship(source=self.longName,
-								   sourceAttr=Component.grandchildControl,
-								   destination=grandchild,
-								   destinationAttr='rigInterface',
-								   )
+				                   sourceAttr=Component.grandchildControl,
+				                   destination=grandchild,
+				                   destinationAttr='rigInterface',
+				                   )
 
 		for grandchild in grandchildren:
 			if grandchild not in self._grandchildControl:
@@ -705,10 +694,10 @@ class INTERFACE_CONTROL(RIGCONTROL):
 		if self.isValid():
 			for fkControl in fkControls:
 				createRelationship(source=self.longName,
-								   sourceAttr=Component.fkControl,
-								   destination=fkControl,
-								   destinationAttr='rigInterface',
-								   )
+				                   sourceAttr=Component.fkControl,
+				                   destination=fkControl,
+				                   destinationAttr='rigInterface',
+				                   )
 
 		for fkControl in fkControls:
 			if fkControl not in self._fkControl:
@@ -730,10 +719,10 @@ class INTERFACE_CONTROL(RIGCONTROL):
 	def fkPoleVector(self, fkPoleVector):
 		if self.isValid():
 			createRelationship(source=self.longName,
-							   sourceAttr=Component.fkPoleVector,
-							   destination=fkPoleVector,
-							   destinationAttr='rigInterface',
-							   )
+			                   sourceAttr=Component.fkPoleVector,
+			                   destination=fkPoleVector,
+			                   destinationAttr='rigInterface',
+			                   )
 
 		self._fkPoleVector = fkPoleVector
 		return
@@ -762,10 +751,10 @@ class INTERFACE_CONTROL(RIGCONTROL):
 	def fkTopNode(self, fkTopNode):
 		if self.isValid():
 			createRelationship(source=self.longName,
-							   sourceAttr=Component.fkTopNode,
-							   destination=fkTopNode,
-							   destinationAttr='rigInterface',
-							   )
+			                   sourceAttr=Component.fkTopNode,
+			                   destination=fkTopNode,
+			                   destinationAttr='rigInterface',
+			                   )
 
 		self._fkTopNode = fkTopNode
 		return
@@ -792,10 +781,10 @@ class INTERFACE_CONTROL(RIGCONTROL):
 		if self.isValid():
 			for ikJoint in ikJoints:
 				createRelationship(source=self.longName,
-								   sourceAttr=Component.ikJoint,
-								   destination=ikJoint,
-								   destinationAttr='rigInterface',
-								   )
+				                   sourceAttr=Component.ikJoint,
+				                   destination=ikJoint,
+				                   destinationAttr='rigInterface',
+				                   )
 
 		for ikJoint in ikJoints:
 			if ikJoint not in self._ikJoint:
@@ -820,10 +809,10 @@ class INTERFACE_CONTROL(RIGCONTROL):
 		if self.isValid():
 			for ikControl in ikControls:
 				createRelationship(source=self.longName,
-								   sourceAttr=Component.ikControl,
-								   destination=ikControl,
-								   destinationAttr='rigInterface',
-								   )
+				                   sourceAttr=Component.ikControl,
+				                   destination=ikControl,
+				                   destinationAttr='rigInterface',
+				                   )
 
 		for ikControl in ikControls:
 			if ikControl not in self._ikControl:
@@ -845,10 +834,10 @@ class INTERFACE_CONTROL(RIGCONTROL):
 	def ikPoleVector(self, ikPoleVector):
 		if self.isValid():
 			createRelationship(source=self.longName,
-							   sourceAttr=Component.ikPoleVector,
-							   destination=ikPoleVector,
-							   destinationAttr='rigInterface',
-							   )
+			                   sourceAttr=Component.ikPoleVector,
+			                   destination=ikPoleVector,
+			                   destinationAttr='rigInterface',
+			                   )
 
 		self._ikPoleVector = ikPoleVector
 		return
@@ -877,10 +866,10 @@ class INTERFACE_CONTROL(RIGCONTROL):
 	def ikTopNode(self, ikTopNode):
 		if self.isValid():
 			createRelationship(source=self.longName,
-							   sourceAttr=Component.ikTopNode,
-							   destination=ikTopNode,
-							   destinationAttr='rigInterface',
-							   )
+			                   sourceAttr=Component.ikTopNode,
+			                   destination=ikTopNode,
+			                   destinationAttr='rigInterface',
+			                   )
 
 		self._ikTopNode = ikTopNode
 		return
@@ -894,38 +883,38 @@ class INTERFACE_CONTROL(RIGCONTROL):
 
 		# Array Attribute
 		for attr in [Component.joint,
-					 Component.fkControl,
-					 Component.ikControl,
-					 Component.ikJoint,
-					 Component.childControl,
-					 Component.grandchildControl,
-					 ]:
+		             Component.fkControl,
+		             Component.ikControl,
+		             Component.ikJoint,
+		             Component.childControl,
+		             Component.grandchildControl,
+		             ]:
 
 			if not attributeExist(self.longName, attr):
 				addAttribute(node=self.longName, attribute=attr, kind=MayaAttrType.string, array=True)
 
 		for attr in [Component.childTwist,
-					 Component.fkStretch,
-					 Component.ikStretch,
-					 Component.childStretch,
-					 Component.childSns,
-					 ]:
+		             Component.fkStretch,
+		             Component.ikStretch,
+		             Component.childStretch,
+		             Component.childSns,
+		             ]:
 
 			if not attributeExist(self.longName, attr):
 				addAttribute(node=self.longName, attribute=attr, kind=MayaAttrType.float, array=True,
-							 keyable=False)
+				             keyable=False)
 
 		# Float Attributes
 		for attr in [Component.fkik,
-					 Component.fkLocalWorld,
-					 Component.ikLocalWorld,
-					 Component.twistAuto,
-					 Component.twist,
-					 Component.stretchAuto,
-					 Component.stretch,
-					 Component.snsAuto,
-					 Component.sns,
-					 ]:
+		             Component.fkLocalWorld,
+		             Component.ikLocalWorld,
+		             Component.twistAuto,
+		             Component.twist,
+		             Component.stretchAuto,
+		             Component.stretch,
+		             Component.snsAuto,
+		             Component.sns,
+		             ]:
 
 			if not attributeExist(self.longName, attr):
 				minValue = None
@@ -948,41 +937,41 @@ class INTERFACE_CONTROL(RIGCONTROL):
 					defaultValue = 0
 
 				addAttribute(node=self.longName,
-							 attribute=attr,
-							 kind=MayaAttrType.float,
-							 minValue=minValue,
-							 maxValue=maxValue,
-							 value=defaultValue,
-							 channelBox=False,
-							 keyable=True
-							 )
+				             attribute=attr,
+				             kind=MayaAttrType.float,
+				             minValue=minValue,
+				             maxValue=maxValue,
+				             value=defaultValue,
+				             channelBox=False,
+				             keyable=True
+				             )
 
 		# Message Attriibutes
 		for attr in [Component.opposite,
-					 Component.topNode,
-					 Component.fkTopNode,
-					 Component.ikTopNode,
-					 Component.fkPoleVector,
-					 Component.ikPoleVector,
-					 Component.ikHandle,
-					 Component.set,
-					 ]:
+		             Component.topNode,
+		             Component.fkTopNode,
+		             Component.ikTopNode,
+		             Component.fkPoleVector,
+		             Component.ikPoleVector,
+		             Component.ikHandle,
+		             Component.set,
+		             ]:
 
 			if not attributeExist(self.longName, attr):
 				addAttribute(node=self.longName, attribute=attr, kind=MayaAttrType.message)
 
 		# Bool Attributes
 		for attr in [Component.jointDisplay,
-					 Component.controlDisplay,
-					 Component.childControlDisplay,
-					 ]:
+		             Component.controlDisplay,
+		             Component.childControlDisplay,
+		             ]:
 			if not attributeExist(self.longName, attr):
 				addAttribute(node=self.longName,
-							 attribute=attr,
-							 kind=MayaAttrType.bool,
-							 channelBox=True,
-							 keyable=False,
-							 )
+				             attribute=attr,
+				             kind=MayaAttrType.bool,
+				             channelBox=True,
+				             keyable=False,
+				             )
 		return
 
 	####################################################################################################################
@@ -1012,20 +1001,18 @@ class INTERFACE_CONTROL(RIGCONTROL):
 
 class FKCONTROL(RIGCONTROL):
 	def __init__(self,
-				 name=Component.rig,
-				 parent=None,
-				 prefix=None,
-				 item=None,
-				 wireType=WireType.circleRotate,
-				 axis=None,
-				 scale=1.0,
-				 index=None,
-				 side=None,
-				 sector=None,
-				 color=None,
-				 *args,
-				 **kwargs
-				 ):
+	             name=Component.rig,
+	             parent=None,
+	             prefix=None,
+	             item=None,
+	             wire=WireType.circleRotate,
+	             axis=None,
+	             scale=1.0,
+	             index=None,
+	             side=None,
+	             sector=None,
+	             color=None,
+	             ):
 
 		if color is None:
 			if side == Position.left:
@@ -1038,22 +1025,20 @@ class FKCONTROL(RIGCONTROL):
 				color = WireColor.blue
 
 		RIGCONTROL.__init__(self,
-							name=name,
-							parent=parent,
-							prefix=prefix,
-							item=item,
-							wireType=wireType,
-							axis=axis,
-							scale=scale,
-							index=index,
-							side=side,
-							sector=sector,
-							offset=True,
-							kind=Component.fk,
-							color=color,
-							*args,
-							**kwargs
-							)
+		                    name=name,
+		                    parent=parent,
+		                    prefix=prefix,
+		                    item=item,
+		                    wire=wire,
+		                    axis=axis,
+		                    scale=scale,
+		                    index=index,
+		                    side=side,
+		                    sector=sector,
+		                    offset=True,
+		                    kind=Component.fk,
+		                    color=color,
+		                    )
 
 
 ########################################################################################################################
@@ -1066,20 +1051,18 @@ class FKCONTROL(RIGCONTROL):
 
 class IKCONTROL(RIGCONTROL):
 	def __init__(self,
-				 name=Component.rig,
-				 parent=None,
-				 prefix=None,
-				 item=None,
-				 wireType=WireType.sphere,
-				 axis=None,
-				 scale=1.0,
-				 index=None,
-				 side=None,
-				 sector=None,
-				 color=None,
-				 *args,
-				 **kwargs
-				 ):
+	             name=Component.rig,
+	             parent=None,
+	             prefix=None,
+	             item=None,
+	             wire=WireType.sphere,
+	             axis=None,
+	             scale=1.0,
+	             index=None,
+	             side=None,
+	             sector=None,
+	             color=None,
+	             ):
 
 		if color is None:
 			if side == Position.left:
@@ -1092,22 +1075,20 @@ class IKCONTROL(RIGCONTROL):
 				color = WireColor.red
 
 		RIGCONTROL.__init__(self,
-							name=name,
-							parent=parent,
-							prefix=prefix,
-							item=item,
-							wireType=wireType,
-							axis=axis,
-							scale=scale,
-							index=index,
-							side=side,
-							sector=sector,
-							color=color,
-							offset=True,
-							kind=Component.ik,
-							*args,
-							**kwargs
-							)
+		                    name=name,
+		                    parent=parent,
+		                    prefix=prefix,
+		                    item=item,
+		                    wire=wire,
+		                    axis=axis,
+		                    scale=scale,
+		                    index=index,
+		                    side=side,
+		                    sector=sector,
+		                    color=color,
+		                    offset=True,
+		                    kind=Component.ik,
+		                    )
 
 
 ########################################################################################################################
@@ -1119,35 +1100,31 @@ class IKCONTROL(RIGCONTROL):
 ########################################################################################################################
 class CHILDCONTROL(RIGCONTROL):
 	def __init__(self,
-				 name=Component.rig,
-				 parent=None,
-				 prefix=None,
-				 item=None,
-				 wireType=WireType.doubleLollipop,
-				 axis=None,
-				 scale=1.0,
-				 index=None,
-				 side=None,
-				 sector=None,
-				 *args,
-				 **kwargs
-				 ):
+	             name=Component.rig,
+	             parent=None,
+	             prefix=None,
+	             item=None,
+	             wire=WireType.doubleLollipop,
+	             axis=None,
+	             scale=1.0,
+	             index=None,
+	             side=None,
+	             sector=None,
+	             ):
 		RIGCONTROL.__init__(self,
-							name=name,
-							parent=parent,
-							prefix=prefix,
-							item=item,
-							wireType=wireType,
-							axis=axis,
-							scale=scale * 1.5,
-							index=index,
-							side=side,
-							sector=sector,
-							color=[.5, 1, 1],
-							kind=Component.child,
-							*args,
-							**kwargs
-							)
+		                    name=name,
+		                    parent=parent,
+		                    prefix=prefix,
+		                    item=item,
+		                    wire=wire,
+		                    axis=axis,
+		                    scale=scale * 1.5,
+		                    index=index,
+		                    side=side,
+		                    sector=sector,
+		                    color=[.5, 1, 1],
+		                    kind=Component.child,
+		                    )
 
 
 ########################################################################################################################
@@ -1160,32 +1137,28 @@ class CHILDCONTROL(RIGCONTROL):
 
 class GRANDCHILDCONTROL(RIGCONTROL):
 	def __init__(self,
-				 name=Component.rig,
-				 parent=None,
-				 prefix=None,
-				 item=None,
-				 wireType=WireType.diamond,
-				 axis=None,
-				 scale=1.0,
-				 index=None,
-				 side=None,
-				 sector=None,
-				 *args,
-				 **kwargs
-				 ):
+	             name=Component.rig,
+	             parent=None,
+	             prefix=None,
+	             item=None,
+	             wire=WireType.diamond,
+	             axis=None,
+	             scale=1.0,
+	             index=None,
+	             side=None,
+	             sector=None,
+	             ):
 		RIGCONTROL.__init__(self,
-							name=name,
-							parent=parent,
-							prefix=prefix,
-							item=item,
-							wireType=wireType,
-							axis=axis,
-							scale=scale,
-							index=index,
-							side=side,
-							sector=sector,
-							color=[.5, 1, 1],
-							kind=Component.grandChild,
-							*args,
-							**kwargs
-							)
+		                    name=name,
+		                    parent=parent,
+		                    prefix=prefix,
+		                    item=item,
+		                    wire=wire,
+		                    axis=axis,
+		                    scale=scale,
+		                    index=index,
+		                    side=side,
+		                    sector=sector,
+		                    color=[.5, 1, 1],
+		                    kind=Component.grandChild,
+		                    )

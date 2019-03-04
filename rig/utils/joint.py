@@ -28,70 +28,70 @@ Notes:
 '''
 
 MAYAJOINTLABELS = ['None',
-				   'Root',
-				   'Hip',
-				   'Knee',
-				   'Foot',
-				   'Toe',
-				   'Spine',
-				   'Neck',
-				   'Head',
-				   'Collar',
-				   'Shoulder',
-				   'Elbow',
-				   'Hand',
-				   'Finger',
-				   'Thumb',
-				   'PropA',
-				   'PropB',
-				   'PropC',
-				   'Other',
-				   'Index Finger',
-				   'Middle Finger',
-				   'Ring Finger',
-				   'Pinky Finger',
-				   'Extra Finger'
-				   'Big Toe',
-				   'Index Toe',
-				   'Middle Toe',
-				   'Ring Toe',
-				   'Pinky Toe',
-				   'Foot Thumb',
-				   ]
+                   'Root',
+                   'Hip',
+                   'Knee',
+                   'Foot',
+                   'Toe',
+                   'Spine',
+                   'Neck',
+                   'Head',
+                   'Collar',
+                   'Shoulder',
+                   'Elbow',
+                   'Hand',
+                   'Finger',
+                   'Thumb',
+                   'PropA',
+                   'PropB',
+                   'PropC',
+                   'Other',
+                   'Index Finger',
+                   'Middle Finger',
+                   'Ring Finger',
+                   'Pinky Finger',
+                   'Extra Finger'
+                   'Big Toe',
+                   'Index Toe',
+                   'Middle Toe',
+                   'Ring Toe',
+                   'Pinky Toe',
+                   'Foot Thumb',
+                   ]
 
 jointLabelGlobalList = ['None',
-						'Root',
-						'Spine',
-						'Neck',
-						'Head',
-						'Collar',
-						'Shoulder',
-						'Elbow',
-						'Hand',
-						'Thumb',
-						'Index Finger',
-						'Middle Finger',
-						'Ring Finger',
-						'Pinky Finger',
-						'Hip',
-						'Knee',
-						'Foot',
-						'Toe',
-						'Big Toe',
-						'Index Toe',
-						'Middle Toe',
-						'Ring Toe',
-						'Pinky Toe',
-						'Other',
-						'Bind',
-						'Limbs'
-						]
+                        'Root',
+                        'Spine',
+                        'Neck',
+                        'Head',
+                        'Collar',
+                        'Shoulder',
+                        'Elbow',
+                        'Hand',
+                        'Thumb',
+                        'Index Finger',
+                        'Middle Finger',
+                        'Ring Finger',
+                        'Pinky Finger',
+                        'Hip',
+                        'Knee',
+                        'Foot',
+                        'Toe',
+                        'Big Toe',
+                        'Index Toe',
+                        'Middle Toe',
+                        'Ring Toe',
+                        'Pinky Toe',
+                        'Other',
+                        'Bind',
+                        'Limbs'
+                        ]
 
 jointLabelLimbGlobalList = ['arms',
-							'legs',
-							'finger',
-							'toe',
-							]
+                            'legs',
+                            'finger',
+                            'toe',
+                            ]
 
 
 def zeroJointOrient(joint, *args, **kwargs):
@@ -428,15 +428,15 @@ class jointLabel():
 
 			if x != 'None':
 				self.masterDict[x] = {
-					'None': noneList, 'Left': sortJointHierarchy(leftList),
+					'None'  : noneList, 'Left': sortJointHierarchy(leftList),
 					'Center': sortJointHierarchy(centerList),
-					'Right': sortJointHierarchy(rightList, )
+					'Right' : sortJointHierarchy(rightList, )
 				}
 			else:
 				self.masterDict[x] = {
-					'None': noneList, 'Left': leftList,
+					'None'  : noneList, 'Left': leftList,
 					'Center': centerList,
-					'Right': rightList
+					'Right' : rightList
 				}
 
 	def isDebug(self):
@@ -451,7 +451,7 @@ class jointLabel():
 
 				if cmds.objectType(obj, isType='joint'):
 					if self.masterList[index - 1] in ['COG', 'Shoulder Bind', 'Elbow Bind', 'Hand Bind', 'Hip Bind',
-													  'Knee Bind', 'Foot Bind']:
+					                                  'Knee Bind', 'Foot Bind']:
 						setEnumByString(obj, 'type', 'Other')
 						cmds.setAttr('{}.otherType'.format(obj), self.masterList[index - 1], type='string')
 					else:
@@ -569,7 +569,7 @@ def getSkeletonTree(root, tree={}):
 	if children:
 		for child in children:
 			tree[child] = {
-				'children': getSkeletonTree(child, {}),
+				'children'  : getSkeletonTree(child, {}),
 				'attributes': getJointAttributes(child),
 			}
 
@@ -637,12 +637,12 @@ def createBindPosePrompt(*args):
 			return
 		else:
 			result = cmds.promptDialog(
-				title='Create Joint Pose'.format(root),
-				message='Enter Name:',
-				button=['OK', 'Cancel'],
-				defaultButton='OK',
-				cancelButton='Cancel',
-				dismissString='Cancel')
+					title='Create Joint Pose'.format(root),
+					message='Enter Name:',
+					button=['OK', 'Cancel'],
+					defaultButton='OK',
+					cancelButton='Cancel',
+					dismissString='Cancel')
 
 			if result == 'OK':
 				name = cmds.promptDialog(query=True, text=True)
@@ -658,7 +658,7 @@ def restoreBindPoseUI(poseList):
 	cmds.columnLayout(adj=True)
 	textVar = cmds.textScrollList(append=poseList)
 	cmds.button(l='Select',
-				c=lambda x: cmds.layoutDialog(dismiss=str(cmds.textScrollList(textVar, q=True, si=True)[0])))
+	            c=lambda x: cmds.layoutDialog(dismiss=str(cmds.textScrollList(textVar, q=True, si=True)[0])))
 	cmds.setParent('..')
 	return
 
@@ -932,16 +932,16 @@ def createJointChain(objects, name=Component.joint):
 
 
 def removeJointSegmentScale(joint):
-	if nodeType(joint) != 'joint':
-		raise TypeError('Must provide a joint.')
+	# if nodeType(joint) != 'joint':
+	# 	raise TypeError('Must provide a joint.')
+	if attributeExist(joint, MayaAttr.segmentScaleCompensate):
+		setAttribute(joint, MayaAttr.segmentScaleCompensate, 0)
 
-	setAttribute(joint, 'segmentScaleCompensate', 0)
-
-	destination = '{}.inverseScale'.format(joint)
-	if cmds.connectionInfo(destination, isDestination=True):
-		source = cmds.connectionInfo('{}.inverseScale'.format(joint), sourceFromDestination=True)
-		cmds.disconnectAttr(source, destination)
-		return True
+		destination = '{}.inverseScale'.format(joint)
+		if cmds.connectionInfo(destination, isDestination=True):
+			source = cmds.connectionInfo('{}.inverseScale'.format(joint), sourceFromDestination=True)
+			cmds.disconnectAttr(source, destination)
+			return True
 	return False
 
 
@@ -970,8 +970,8 @@ def mirrorJoint(joint, *args, **kwargs):
 	data = {
 		'left': 'right',
 		'Left': 'Right',
-		'_l_': '_r_',
-		'_L_': '_R_',
+		'_l_' : '_r_',
+		'_L_' : '_R_',
 	}
 
 	for x in data:
@@ -1024,13 +1024,13 @@ def aimAtObject(*args, **kwargs):
 			reparent = True
 
 		cmds.delete(cmds.aimConstraint(parent,
-									   child,
-									   aimVector=[1, 0, 0],
-									   upVector=[0, 1, 0],
-									   worldUpType='none',
-									   worldUpVector=[0, 1, 0],
-									   )
-					)
+		                               child,
+		                               aimVector=[1, 0, 0],
+		                               upVector=[0, 1, 0],
+		                               worldUpType='none',
+		                               worldUpVector=[0, 1, 0],
+		                               )
+		            )
 		freezeTransform(args[1])
 
 		if reparent:
@@ -1054,34 +1054,34 @@ def aimAtSelected(*args, **kwargs):
 
 class Joint(DagNode):
 	def __init__(self,
-				 prefix=None,
-				 side=None,
-				 name='rigJoint',
-				 sector=None,
-				 index=None,
-				 kind=Component.joint,
-				 parent=None,
-				 radius=1.0,
-				 drawStyle=JointDrawStyle.bone,
-				 type=None,
-				 otherType=None,
-				 color=None,
-				 *args,
-				 **kwargs
-				 ):
+	             prefix=None,
+	             side=None,
+	             name='rigJoint',
+	             sector=None,
+	             index=None,
+	             kind=Component.joint,
+	             parent=None,
+	             radius=1.0,
+	             drawStyle=JointDrawStyle.bone,
+	             type=None,
+	             otherType=None,
+	             color=None,
+	             *args,
+	             **kwargs
+	             ):
 
 		DagNode.__init__(self,
-						 name=name,
-						 prefix=prefix,
-						 parent=parent,
-						 color=color,
-						 index=index,
-						 sector=sector,
-						 kind=kind,
-						 side=side,
-						 *args,
-						 **kwargs,
-						 )
+		                 name=name,
+		                 prefix=prefix,
+		                 parent=parent,
+		                 color=color,
+		                 index=index,
+		                 sector=sector,
+		                 kind=kind,
+		                 side=side,
+		                 *args,
+		                 **kwargs
+		                 )
 
 		'''
 		Base Joint class to be used in all parts classes.
@@ -1101,7 +1101,6 @@ class Joint(DagNode):
 			self.drawStyle = drawStyle
 			self.type = type
 			self.otherType = otherType
-
 
 	def create(self, *args, **kwargs):
 		cmds.select(d=True)
@@ -1226,8 +1225,6 @@ class Joint(DagNode):
 				setAttribute(self.longName, attribute=MayaAttr.radius, value=radius)
 			else:
 				raise TypeError('Radius must be numeric value.')
-		else:
-			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
 
 	@property
@@ -1255,14 +1252,12 @@ class Joint(DagNode):
 				raise ValueError('Draw style "{}" not valid type: {}'.format(drawStyle, type(drawStyle)))
 
 			setAttribute(self.longName, attribute=MayaAttr.drawStyle, value=value, force=True)
-		else:
-			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
 
 	@property
 	def type(self):
 		if self.isValid():
-			return cmds.getAttr(attributeName(self.longName, MayaAttr.type), asString=True).lower()
+			return str(cmds.getAttr(attributeName(self.longName, MayaAttr.type), asString=True)).lower()
 		return None
 
 	@type.setter
@@ -1283,14 +1278,12 @@ class Joint(DagNode):
 				raise ValueError('Type "{}" not valid type: {}'.format(typeValue, type(typeValue)))
 
 			setAttribute(self.longName, attribute=MayaAttr.type, value=value, force=True)
-		else:
-			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
 
 	@property
 	def otherType(self):
 		if self.isValid():
-			return cmds.getAttr(attributeName(self.longName, MayaAttr.otherType))
+			return str(cmds.getAttr(attributeName(self.longName, MayaAttr.otherType))).lower()
 		return None
 
 	@otherType.setter
@@ -1305,8 +1298,6 @@ class Joint(DagNode):
 				raise ValueError('Other type "{}" not valid. Must be str or None.'.format(otherType))
 
 			setAttribute(self.longName, attribute=MayaAttr.otherType, value=value, force=True)
-		else:
-			raise NodeExistsError('{} "{}" is not a valid object.'.format(self.__class__.__name__, self.longName))
 		return
 
 	####################################################################################################################

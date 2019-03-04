@@ -88,7 +88,7 @@ def presetWireColor(selected, typ):
 	return
 
 
-def overrideColor(selected=[], color=[], reset=False, index=False, *args):
+def overrideColor(selected, color=None, reset=False, index=False, *args, **kwargs):
 	attrList = ['useObjectColor', 'overrideEnabled', 'overrideRGBColors']
 
 	selected = listCheck(selected)
@@ -130,6 +130,7 @@ def overrideColor(selected=[], color=[], reset=False, index=False, *args):
 								for x in ['R', 'G', 'B']:
 									cmds.setAttr('{0}.overrideColor{1}'.format(shape, x), color[i])
 									i += 1
+	return
 
 
 def overrideColorFromParent(parent, child, *args, **kwargs):

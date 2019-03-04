@@ -35,7 +35,7 @@ def createRelationship(source,
 		addAttribute(node=destination, attribute=destinationAttr, kind=MayaAttrType.message)
 
 	# Connection
-	cmds.connectAttr(sourceName, destinationName, force=True, nextAvailable=True)
+	cmds.connectAttr(sourceName, destinationName, force=True)
 	return
 
 

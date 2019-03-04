@@ -4,6 +4,8 @@ from general import *
 from naming import *
 from customError import *
 from network import *
+from curve import overrideColor
+from wire import WireColor
 
 # Python Modules
 import re
@@ -104,24 +106,24 @@ def createNull(*args, **kwargs):
 
 class AbstractNode(object):
 	def __init__(self,
-				 name=None,
-				 prefix=None,
-				 parent=None,
-				 side=None,
-				 index=None,
-				 sector=None,
-				 kind=None,
-				 wrapper=False,
-				 *args,
-				 **kwargs
-				 ):
+	             name=None,
+	             prefix=None,
+	             parent=None,
+	             side=None,
+	             index=None,
+	             sector=None,
+	             kind=None,
+	             wrapper=False,
+	             *args,
+	             **kwargs
+	             ):
 		'''
 		Abstract Node to be sub-classed by all dag node related classes.
 
 		:param str name:            Name of Node.
 		:param str prefix:          Prefix name of the control
 		:param object str parent:   Parent of Node.
-		:param list color:          RGB Color.
+		:param list int color:      RGB Color or Color Index.
 		:param str side:            Side of the controls origin.
 		:param int index:           Used to determined rig priority.
 		:param str sector:          Sector of control. Possible Sectors: "A", "B", "C"
@@ -217,12 +219,12 @@ class AbstractNode(object):
 			return self._name
 		else:
 			return longName(self._prefix,
-							self._side[0].upper() if self._side else None,
-							self._name,
-							self._sector,
-							self._index,
-							self._kind,
-							)
+			                self._side[0].upper() if self._side else None,
+			                self._name,
+			                self._sector,
+			                self._index,
+			                self._kind,
+			                )
 
 	####################################################################################################################
 	# Hierarchy
@@ -272,9 +274,9 @@ class AbstractNode(object):
 		return hasattr(self, attribute)
 
 	def addAttribute(self,
-					 attribute,
-					 value,
-					 ):
+	                 attribute,
+	                 value,
+	                 ):
 
 		if hasattr(self, attribute):
 			raise AttributeError('Attribute "{}" already exists.'.format(attribute))
@@ -315,10 +317,18 @@ class DagNode(AbstractNode):
 			self.transform = self.name
 			self.shape = nodeShapes(self.name)
 		else:
+			index = self.nextAvailableIndex(prefix=kwargs.get('prefix', None),
+			                                side=kwargs.get('side', None),
+			                                name=kwargs.get('name', None),
+			                                sector=kwargs.get('sector', None),
+			                                index=kwargs.get('index', None),
+			                                kind=kwargs.get('kind', None),
+			                                )
+			self._index = index
 			self.create()
 			self.setDefaults()
 			self.side = kwargs.get('side', None)
-			self.index = kwargs.get('index', None)
+			self.index = index
 			self.sector = kwargs.get('sector', None)
 			self.kind = kwargs.get('kind', None)
 			self.parent = kwargs.get('parent', None)
@@ -336,6 +346,38 @@ class DagNode(AbstractNode):
 	def create(self, *args, **kwargs):
 		self.transform = cmds.group(name=self.longName, empty=True)
 		return
+
+	@staticmethod
+	def nextAvailableIndex(prefix=None,
+	                       side=None,
+	                       name=None,
+	                       sector=None,
+	                       index=None,
+	                       kind=None,
+	                       ):
+
+		nodeName = longName(prefix,
+		                    side[0].upper() if side else None,
+		                    name,
+		                    sector,
+		                    index,
+		                    kind,
+		                    )
+
+		if not nodeExists(nodeName):
+			return index
+		else:
+			index = 0
+			while nodeExists(longName(prefix,
+			                          side[0].upper() if side else None,
+			                          name,
+			                          sector,
+			                          index,
+			                          kind,
+			                          )
+			                 ):
+				index += 1
+			return index
 
 	####################################################################################################################
 	# Attributes
@@ -372,11 +414,11 @@ class DagNode(AbstractNode):
 		return attributeExist(self, attribute)
 
 	def addAttribute(self,
-					 attribute,
-					 value,
-					 *args,
-					 **kwargs
-					 ):
+	                 attribute,
+	                 value,
+	                 *args,
+	                 **kwargs
+	                 ):
 		AbstractNode.addAttribute(self, attribute, value)
 
 		kind = kwargs.get('kind', MayaAttrType.float)
@@ -388,16 +430,16 @@ class DagNode(AbstractNode):
 		array = kwargs.get('array', False)
 
 		addAttribute(self.longName,
-					 attribute=attribute,
-					 kind=kind,
-					 value=value,
-					 minValue=minValue,
-					 maxValue=maxValue,
-					 keyable=keyable,
-					 channelBox=channelBox,
-					 lock=lock,
-					 array=array,
-					 )
+		             attribute=attribute,
+		             kind=kind,
+		             value=value,
+		             minValue=minValue,
+		             maxValue=maxValue,
+		             keyable=keyable,
+		             channelBox=channelBox,
+		             lock=lock,
+		             array=array,
+		             )
 		return
 
 	####################################################################################################################
@@ -640,10 +682,16 @@ class DagNode(AbstractNode):
 	####################################################################################################################
 	@property
 	def side(self):
+		if self._side:
+			if self._side.lower() == 'none':
+				return None
+			else:
+				return self._side
+
 		if attributeExist(self.longName, MayaAttr.side):
-			return cmds.getAttr(attributeName(self.longName, MayaAttr.side), asString=True).lower()
-		else:
-			return self._side
+			result = str(cmds.getAttr(attributeName(self.longName, MayaAttr.side), asString=True).lower())
+			return result if result.lower() != 'none' else None
+		return self._side
 
 	@side.setter
 	def side(self, side):
@@ -652,21 +700,19 @@ class DagNode(AbstractNode):
 		if self.isValid():
 			if not attributeExist(self.longName, MayaAttr.side):
 				addAttribute(node=self.longName,
-							 attribute=MayaAttr.side,
-							 kind=MayaAttrType.enum,
-							 value=sideList,
-							 keyable=False,
-							 channelBox=False,
-							 )
+				             attribute=MayaAttr.side,
+				             kind=MayaAttrType.enum,
+				             value=sideList,
+				             keyable=False,
+				             channelBox=False,
+				             )
 
 			if side is None:
 				value = JointLabelSide.none
-				self._side = None
 
 			elif isinstance(side, str):
 				if hasattr(JointLabelSide, side):
 					value = getattr(JointLabelSide, side)
-					self._side = side
 				else:
 					raise ValueError('Side "{}" is not valid.'.format(side))
 
@@ -676,74 +722,90 @@ class DagNode(AbstractNode):
 			else:
 				raise ValueError('Invalid side type provided: {}'.format(type(side)))
 			setAttribute(self.longName, attribute=MayaAttr.side, value=value)
-		else:
-			self._side = side
+
+		self._side = side
 		return
 
 	@property
 	def sector(self):
+		if self._sector:
+			return self._sector
+
+		if attributeExist(self.longName, UserAttr.sector):
+			result = getAttribute(self.longName, UserAttr.sector)
+			return result if result else None
+
 		return self._sector
 
 	@sector.setter
 	def sector(self, sector):
 		if self.isValid():
 			if sector is None:
-				return
+				value = ''
 			elif isinstance(sector, str):
 				value = sector
 			else:
-				value = str(sector)
+				raise TypeError('Must provide str or None type.')
 
 			if not attributeExist(self.longName, UserAttr.sector):
 				addAttribute(node=self.longName,
-							 attribute=UserAttr.sector,
-							 kind=MayaAttrType.string,
-							 value=value,
-							 keyable=False,
-							 channelBox=False,
-							 lock=True,
-							 )
+				             attribute=UserAttr.sector,
+				             kind=MayaAttrType.string,
+				             value=value,
+				             keyable=False,
+				             channelBox=False,
+				             lock=True,
+				             )
 			else:
 				setAttribute(self.longName, attribute=UserAttr.sector, value=value, force=True)
-
-		self._sector = str(sector)
-
+		self._sector = sector
 		return
 
 	@property
 	def index(self):
+		if self._index is not None:
+			return self._index
+
+		if attributeExist(self.longName, UserAttr.index):
+			return getAttribute(self.longName, UserAttr.index)
+
 		return self._index
 
 	@index.setter
 	def index(self, index):
 		if self.isValid():
-			if index is None:
-				return
-			elif not isinstance(index, (int, float)):
-				raise ValueError('Index must be a numeric value.'.format(index))
-			else:
-				value = int(index)
+			if index is not None:
+				if not isinstance(index, (int, float)):
+					raise ValueError('Index must be a numeric value.'.format(index))
+				else:
+					value = int(index)
+
 				if not attributeExist(self.longName, UserAttr.index):
 					addAttribute(node=self.longName,
-								 attribute=UserAttr.index,
-								 kind=MayaAttrType.int,
-								 value=value,
-								 minValue=0,
-								 keyable=False,
-								 channelBox=False,
-								 lock=True,
-								 )
+					             attribute=UserAttr.index,
+					             kind=MayaAttrType.int,
+					             value=value,
+					             minValue=0,
+					             keyable=False,
+					             channelBox=False,
+					             lock=True,
+					             )
 
 				else:
 					setAttribute(self.longName, attribute=UserAttr.index, value=value, force=True)
 
-		self._index = int(index)
+		self._index = index
 		return
 
 	@property
 	def kind(self):
+		if self._kind:
+			return self._kind
+
 		if attributeExist(self.longName, UserAttr.kind):
-			return getAttribute(self.longName, UserAttr.kind)
+			result = getAttribute(self.longName, UserAttr.kind)
+			return result if result else None
+
 		return self._kind
 
 	@kind.setter
@@ -758,13 +820,13 @@ class DagNode(AbstractNode):
 
 			if not attributeExist(self.longName, UserAttr.kind):
 				addAttribute(node=self.longName,
-							 attribute=UserAttr.kind,
-							 kind=MayaAttrType.string,
-							 value=value,
-							 keyable=False,
-							 channelBox=False,
-							 lock=True,
-							 )
+				             attribute=UserAttr.kind,
+				             kind=MayaAttrType.string,
+				             value=value,
+				             keyable=False,
+				             channelBox=False,
+				             lock=True,
+				             )
 			else:
 				setAttribute(self.longName, attribute=UserAttr.kind, value=value, force=True)
 
@@ -776,6 +838,12 @@ class DagNode(AbstractNode):
 	####################################################################################################################
 	@property
 	def rigPart(self):
+		if self._rigPart:
+			return self._rigPart
+
+		if attributeExist(self.longName, 'rigPart'):
+			return getAttribute(self.longName, 'rigPart')
+
 		return self._rigPart
 
 	@rigPart.setter
@@ -788,10 +856,10 @@ class DagNode(AbstractNode):
 				setAttribute(self.longName, attr, value=part, force=True)
 			else:
 				addAttribute(node=self.longName,
-							 attribute=Component.rigPart,
-							 value=part,
-							 kind=MayaAttrType.string,
-							 lock=True)
+				             attribute=Component.rigPart,
+				             value=part,
+				             kind=MayaAttrType.string,
+				             lock=True)
 
 		self._rigPart = part
 		return
@@ -809,10 +877,10 @@ class DagNode(AbstractNode):
 	def rigParent(self, parent):
 		if self.isValid():
 			createRelationship(source=parent,
-							   sourceAttr='rigChildren',
-							   destination=self.longName,
-							   destinationAttr='rigParent',
-							   )
+			                   sourceAttr='rigChildren',
+			                   destination=self.longName,
+			                   destinationAttr='rigParent',
+			                   )
 
 		self._rigParent = parent
 		return
@@ -830,10 +898,10 @@ class DagNode(AbstractNode):
 	def rigRoot(self, root):
 		if self.isValid():
 			createRelationship(source=root,
-							   sourceAttr='rigChildren',
-							   destination=self.longName,
-							   destinationAttr='rigRoot',
-							   )
+			                   sourceAttr='rigChildren',
+			                   destination=self.longName,
+			                   destinationAttr='rigRoot',
+			                   )
 
 		self._rigRoot = root
 		return
@@ -866,18 +934,19 @@ class DagNode(AbstractNode):
 	def rigInterface(self, interface):
 		if self.isValid():
 			createRelationship(source=interface,
-							   sourceAttr='rigChildren',
-							   destination=self.longName,
-							   destinationAttr='rigInterface',
-							   )
+			                   sourceAttr='rigChildren',
+			                   destination=self.longName,
+			                   destinationAttr='rigInterface',
+			                   )
 
 		self._rigInterface = interface
 		return
 
 	def setDefaults(self):
 		# Rig Part
-		addAttribute(node=self.longName, attribute=Component.rigPart, value=self.prefix, kind=MayaAttrType.string,
-					 lock=True)
+		if not attributeExist(self.longName, 'rigPart'):
+			addAttribute(node=self.longName, attribute=Component.rigPart, value=self.prefix, kind=MayaAttrType.string,
+			             lock=True)
 
 		# Parent
 		for attr in ['rigParent', 'rigRoot', 'rigInterface']:
@@ -901,10 +970,10 @@ class DagNode(AbstractNode):
 
 	@parent.setter
 	def parent(self, parent):
-		self._parent = str(parent)
-
-		if self.isValid() and nodeExists(parent):
-			cmds.parent(self.longName, parent)
+		if self.isValid():
+			if parent and nodeExists(parent):
+				cmds.parent(self.longName, parent)
+		self._parent = parent
 		return
 
 	@property
@@ -937,11 +1006,12 @@ class DagNode(AbstractNode):
 	def color(self, color):
 		if self.isValid() and color is not None:
 			if isinstance(color, int):
-				pass
+				overrideColor(self.transform, color=color, index=True)
 			elif isinstance(color, list) and len(color) == 3:
-				pass
+				overrideColor(self.transform, color=color)
 			elif isinstance(color, str):
-				pass
+				if hasattr(WireColor, color):
+					overrideColor(self.transform, color=getattr(WireColor, color))
 			else:
 				raise ValueError('No valid color was provided: "{}"'.format(color))
 		self._color = color

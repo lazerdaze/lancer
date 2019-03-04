@@ -336,10 +336,10 @@ class JointLabelOtherType(object):
 
 
 AnimCurves = ['animCurveUL',
-			  'animCurveUU',
-			  'animCurveUA',
-			  'animCurveUT'
-			  ]
+              'animCurveUU',
+              'animCurveUA',
+              'animCurveUT'
+              ]
 
 
 def longName(*args):
@@ -553,3 +553,6 @@ class TokenizeLongName(object):
 		else:
 			raise TypeError('Must provide str.')
 		return
+
+
+

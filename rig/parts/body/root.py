@@ -8,10 +8,10 @@ from maya import cmds
 
 class ROOT(BASERIG):
 	def __init__(self,
-				 root=None,
-				 cog=None,
-				 hip=None,
-				 ):
+	             root=None,
+	             cog=None,
+	             hip=None,
+	             ):
 
 		'''
 		Central Rigging Part used in all rigging hierarchies.
@@ -29,11 +29,10 @@ class ROOT(BASERIG):
 				items.append(x)
 
 		BASERIG.__init__(self,
-						 prefix=Part.root,
-						 side=Position.center,
-						 kind=Part.root,
-						 items=items,
-						 )
+		                 prefix=Part.root,
+		                 name=Component.Global,
+		                 items=items,
+		                 )
 
 		# Items
 		self.rootItem = root
@@ -54,13 +53,20 @@ class ROOT(BASERIG):
 
 		for ctrl in [self.interface, self.repoControl, self.cogControl, self.hipControl]:
 			if isinstance(ctrl, object):
-				for attr in ['transform', 'offsetTransform']:
-					if hasattr(ctrl, attr):
-						value = getattr(ctrl, attr)
-						if value:
-							result.append(value)
+				if hasattr(ctrl, 'transform'):
+					value = getattr(ctrl, 'transform')
+					if value:
+						result.append(value)
+
+				if hasattr(ctrl, 'offset'):
+					value = ctrl.offset.transform
+
+					if value:
+						result.append(value)
+
 			elif ctrl is not None:
-				result.append(self.interface)
+				if ctrl not in result:
+					result.append(self.interface)
 		return result
 
 	def create(self):
@@ -73,7 +79,7 @@ class ROOT(BASERIG):
 			self.createHipControl()
 
 		self.set = self.createSet(self.allControls)
-		self.finalize()
+		# self.finalize()
 		return
 
 	def createRootControl(self, item=None):
@@ -88,37 +94,42 @@ class ROOT(BASERIG):
 			scale = self.scaleByHeight(self.items) * .35
 
 		# Controls
-		self.interface = INTERFACE_CONTROL(name=Component.Global,
-										   prefix=self.prefix,
-										   item=item,
-										   wireType=WireType.gearMover,
-										   axis=[0, 0, 0],
-										   scale=scale,
-										   color=WireColor.purple,
-										   kind=Component.rig,
-										   offset=WireType.circleRotate
-										   )
+		self.interface = INTERFACE_CONTROL(name=self.name,
+		                                   prefix=self.prefix,
+		                                   item=item,
+		                                   wire=WireType.gearMover,
+		                                   axis=[0, 0, 0],
+		                                   scale=scale,
+		                                   offset=WireType.circleRotate
+		                                   )
 
+		self.interface.offset.rigInterface = self.interface
 		self.world = self.interface.offset.transform
 
 		# createRootOffset
 		attrName = 'repoVisibility'
 
-		self.repoControl = RIGCONTROL(name=Component.Global,
-									  prefix=self.prefix,
-									  item=item,
-									  wireType=WireType.sphere,
-									  axis=[0, 0, 0],
-									  scale=scale * .25,
-									  color=WireColor.purple,
-									  kind='repo',
-									  )
+		self.repoControl = Control(prefix=self.prefix,
+		                           name=self.name,
+		                           item=item,
+		                           wireType=WireType.sphere,
+		                           axis=[0, 0, 0],
+		                           scale=scale * .25,
+		                           color=WireColor.purple,
+		                           kind=camelCase('repo', Component.control, capitalize=False),
+		                           )
 
 		addAttribute(node=self.interface, attribute=attrName, kind=MayaAttrType.bool, channelBox=True, keyable=False)
 		cmds.connectAttr('{}.{}'.format(self.interface, attrName), '{}.v'.format(self.repoControl.shape))
 
-		# Hierarchy
 		self.repoControl.parent = self.interface.offset.transform
+		self.repoControl.rigInterface = self.interface
+
+		createMonoRelationship(source=self.interface,
+		                       sourceAttr='repo',
+		                       destination=self.repoControl.transform,
+		                       destinationAttr='rigParent',
+		                       )
 
 		# Constrain
 		if item:
@@ -151,24 +162,27 @@ class ROOT(BASERIG):
 			scale = distanceFromOrigin(item)
 
 		self.cogControl = INTERFACE_CONTROL(name=Component.rig,
-											prefix=Part.cog,
-											item=item,
-											wireType=WireType.gear,
-											axis=[0, 2, 0],
-											scale=scale * .3,
-											color=WireColor.purple,
-											offset=WireType.circleRotate,
-											)
+		                                    prefix=Part.cog,
+		                                    item=item,
+		                                    wire=WireType.gear,
+		                                    axis=[0, 2, 0],
+		                                    scale=scale * .3,
+		                                    offset=WireType.circleRotate,
+		                                    )
 
 		self.local = self.cogControl.offset.transform
 
 		# Hierarchy
-		self.cogControl.parent = self.interface.offset.tranform
+		self.cogControl.offset.rigInterface = self.cogControl
+
+		self.cogControl.parent = self.interface.offset.transform
 		self.cogControl.snapTo(item, True, False)
+		self.cogControl.rigParent = self.interface
+		self.cogControl.rigRoot = self.interface
 
 		# Constrain
-		cmds.parentConstraint(self.cogControl.offset.tranform, item, mo=True)
-		cmds.scaleConstraint(self.cogControl.offset.tranform, item, mo=True)
+		cmds.parentConstraint(self.cogControl.offset.transform, item, mo=True)
+		cmds.scaleConstraint(self.cogControl.offset.transform, item, mo=True)
 
 		return
 
@@ -187,18 +201,20 @@ class ROOT(BASERIG):
 			scale = distanceFromOrigin(item)
 
 		self.hipControl = RIGCONTROL(name=Component.rig,
-									 prefix=Part.hip,
-									 item=item,
-									 side=Position.center,
-									 wireType=WireType.circleRotate,
-									 scale=scale * .2,
-									 color=WireColor.yellow,
-									 offset=True,
-									 axis=[1, 1, 0]
-									 )
+		                             prefix=Part.hip,
+		                             item=item,
+		                             side=Position.center,
+		                             wireType=WireType.circleRotate,
+		                             scale=scale * .2,
+		                             color=WireColor.yellow,
+		                             offset=True,
+		                             axis=[1, 1, 0]
+		                             )
 		# Hierarchy
-		self.hipControl.parent = self.cogControl.offsetTransform
+		self.hipControl.parent = self.cogControl.offset.transform
 		self.hipControl.snapTo(item)
+		self.hipControl.rigParent = self.interface
+		self.hipControl.rigRoot = self.interface
 
 		# Constrain
 		cmds.parentConstraint(self.hipControl.offset.transform, item, mo=True)

@@ -263,8 +263,6 @@ class BASERIG(AbstractRig):
 							 index=index,
 							 side=self.side,
 							 sector=self.sector,
-							 type=label,
-							 otherType=otherLabel,
 							 )
 
 			ctrl.snapTo(item)
@@ -388,8 +386,6 @@ class BASERIG(AbstractRig):
 							 index=index,
 							 side=self.side,
 							 sector=self.sector,
-							 type=label,
-							 otherType=otherLabel,
 							 )
 
 			ctrl.snapTo(item)
@@ -541,7 +537,7 @@ class BASERIG(AbstractRig):
 							cmds.parentConstraint(leaf, grandChild, mo=True)
 							cmds.scaleConstraint(leaf, grandChild, mo=True)
 							leafControls.append(leaf)
-							self.leafControls.append(leaf)
+							self.grandchildControl.append(leaf)
 							grandIndex += 1
 
 					childIndex += 1
