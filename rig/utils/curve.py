@@ -177,3 +177,44 @@ def colorIndexList(*args):
 		indexColor.append(c)
 
 	return indexColor
+
+
+def createCurveOnPivots(items, name='curve', degree=3, *args, **kwargs):
+	'''
+	Degree
+	1 == Linear / 3 == Curve
+
+	:param items:
+	:param name:
+	:param degree:
+	:return:
+	'''
+
+	pointList = []
+	for item in items:
+		if type(item) == str or type(item) == unicode:
+			var = cmds.xform(item, q=True, ws=True, rp=True)
+		elif type(item) == list:
+			var = item
+		pointList.append(var)
+
+	curve = cmds.curve(n=name, d=degree, p=pointList)
+
+	shape = cmds.listRelatives(curve, shapes=True)
+	cmds.rename(shape, '{}Shape'.format(curve))
+	cmds.setAttr('{}.v'.format(curve), 0)
+	return curve
+
+
+def clusterCurve(curve, name='cluster', *args, **kwargs):
+	clusterList = []
+	curveCVs = cmds.ls('{}.cv[:]'.format(curve), fl=True)
+	i = 1
+	for cv in curveCVs:
+		clusterList.append(cmds.cluster(cv, n='{}_{}'.format(name, i))[1])
+		i += 1
+
+	for c in clusterList:
+		cmds.setAttr('{}.v'.format(c), 0)
+
+	return clusterList
