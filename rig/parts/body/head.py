@@ -22,16 +22,6 @@ class HEAD(BASERIG):
 
 		items.append(head)
 
-		BASERIG.__init__(self,
-						 prefix=Part.head,
-						 side=Position.center,
-						 kind=Part.head,
-						 items=items,
-						 parent=parent,
-						 axis=[1, 1, 0],
-						 root=rootRig,
-						 )
-
 		# Items
 		self.headItem = head
 		self.neckItems = neck
@@ -40,8 +30,15 @@ class HEAD(BASERIG):
 		self.fkHeadControl = None
 		self.ikHeadControl = None
 
-		# Init
-		self.create()
+		BASERIG.__init__(self,
+						 prefix=Part.head,
+						 side=Position.center,
+						 items=items,
+						 parent=parent,
+						 axis=[1, 1, 0],
+						 root=rootRig,
+						 )
+
 
 	def create(self):
 		# Top Node
@@ -101,7 +98,7 @@ class HEAD(BASERIG):
 		ik = IKCONTROL(prefix=self.prefix,
 					   side=self.side,
 					   item=self.headItem,
-					   wireType=WireType.sphere,
+					   wire=WireType.sphere,
 					   axis=[0, 0, 0],
 					   scale=self.scale * 0.05,
 					   )
@@ -138,7 +135,7 @@ class HEAD(BASERIG):
 					   )
 
 		neck.createFKChain(interface=self.interface, autoName=False)
-		neck.createBindChain(self.neckItems)
+		neck.createChildChain(self.neckItems)
 		neck.constrainChain(neck.fkControl, self.neckItems)
 		self.fkControl += neck.fkControl
 		self.childControl += neck.childControl
