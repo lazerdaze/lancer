@@ -179,7 +179,7 @@ def colorIndexList(*args):
 	return indexColor
 
 
-def createCurveOnPivots(items, name='curve', degree=3, *args, **kwargs):
+def createCurveOnPivots(items, prefix='rig', degree=3, *args, **kwargs):
 	'''
 	Degree
 	1 == Linear / 3 == Curve
@@ -192,13 +192,17 @@ def createCurveOnPivots(items, name='curve', degree=3, *args, **kwargs):
 
 	pointList = []
 	for item in items:
-		if type(item) == str or type(item) == unicode:
-			var = cmds.xform(item, q=True, ws=True, rp=True)
-		elif type(item) == list:
-			var = item
-		pointList.append(var)
+		var = None
 
-	curve = cmds.curve(n=name, d=degree, p=pointList)
+		if isinstance(item, list):
+			var = item
+		else:
+			var = cmds.xform(item, q=True, ws=True, rp=True)
+
+		if var is not None:
+			pointList.append(var)
+
+	curve = cmds.curve(n='{}_curve'.format(prefix), d=degree, p=pointList)
 
 	shape = cmds.listRelatives(curve, shapes=True)
 	cmds.rename(shape, '{}Shape'.format(curve))
@@ -206,12 +210,12 @@ def createCurveOnPivots(items, name='curve', degree=3, *args, **kwargs):
 	return curve
 
 
-def clusterCurve(curve, name='cluster', *args, **kwargs):
+def clusterCurve(curve, prefix='cluster', *args, **kwargs):
 	clusterList = []
 	curveCVs = cmds.ls('{}.cv[:]'.format(curve), fl=True)
 	i = 1
 	for cv in curveCVs:
-		clusterList.append(cmds.cluster(cv, n='{}_{}'.format(name, i))[1])
+		clusterList.append(cmds.cluster(cv, n='{}_cluster_{}'.format(prefix, i))[1])
 		i += 1
 
 	for c in clusterList:
