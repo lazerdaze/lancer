@@ -1,3 +1,15 @@
+# Lancer Modules
+from naming import *
+from control import *
+from curve import *
+from constraint import *
+from joint import *
+from wire import *
+from curve import *
+
+# Maya Modules
+import maya.cmds as cmds
+
 '''
 Notes:
 	- "Math is fun solving triangles"
@@ -5,17 +17,6 @@ Notes:
 
 	- There's six elements to a triangle (3 sides / 3 amgles).
 '''
-
-# Lancer
-from naming import *
-from control import *
-from curve import *
-from constraint import *
-from joint import *
-from wire import *
-
-# Maya Modules
-import maya.cmds as cmds
 
 
 def createTriangleSolver(*args, **kwargs):
@@ -95,10 +96,10 @@ def createFKIK(items, fkControls, ikControls, parent, attrName=Component.fkik):
 	i = 0
 	for item in items:
 		pc = cmds.parentConstraint(fkControls[i],
-		                           ikControls[i],
-		                           item,
-		                           n='{}_{}_pc0'.format(item, attrName),
-		                           mo=True)[0]
+								   ikControls[i],
+								   item,
+								   n='{}_{}_pc0'.format(item, attrName),
+								   mo=True)[0]
 
 		pcAttr = cmds.parentConstraint(pc, q=True, wal=True)
 		cmds.connectAttr('{}.{}'.format(parent, attrName), '{}.{}'.format(pc, pcAttr[-1]), f=True)
@@ -218,11 +219,11 @@ class createFlexiPlane:
 		cmds.addAttr(globalGrp, ln='startTwistAdd', k=True, at='doubleAngle')
 		cmds.addAttr(globalGrp, ln='endTwistAdd', k=True, at='doubleAngle')
 		cmds.addAttr(globalGrp, ln='twistSide',
-		             min=-1,
-		             max=1,
-		             dv=-1 if side == Position.left else 1,
-		             k=True,
-		             )
+					 min=-1,
+					 max=1,
+					 dv=-1 if side == Position.left else 1,
+					 k=True,
+					 )
 
 		mirror = cmds.createNode('multiplyDivide', name='{}_mirror_mult0'.format(name))
 
@@ -293,7 +294,7 @@ class createFlexiPlane:
 
 		# Hierarchy
 		extrasGrp = cmds.group(clusterGrp, curve, twistTransform, dup, wireBaseTransform,
-		                       name='{}_extras_grp'.format(name))
+							   name='{}_extras_grp'.format(name))
 		cmds.setAttr('{}.v'.format(extrasGrp), 0)
 		cmds.setAttr('{}.inheritsTransform'.format(extrasGrp), 0)
 
@@ -475,12 +476,12 @@ class createIKFootRollNulls:
 		for attr in partName:
 			i = partName.index(attr)
 			cmds.addAttr(self.control,
-			             ln='angle{}'.format(attr.capitalize()),
-			             k=True,
-			             min=-180,
-			             max=180,
-			             dv=rollAngle[i],
-			             )
+						 ln='angle{}'.format(attr.capitalize()),
+						 k=True,
+						 min=-180,
+						 max=180,
+						 dv=rollAngle[i],
+						 )
 
 		# Foot Roll - Heel
 		mul = cmds.createNode('multDoubleLinear', name='{}_heel_multiply0'.format(self.name))
@@ -575,8 +576,8 @@ class createIKFootRollNulls:
 		snap(self.rock[0], self.wire, r=True, t=True)
 
 		var = [getDistance(self.bank[0], self.bank[1]),
-		       getDistance(self.parent, self.start),
-		       getDistance(self.rock[0], self.rock[1])]
+			   getDistance(self.parent, self.start),
+			   getDistance(self.rock[0], self.rock[1])]
 
 		i = 0
 		for axis in ['x', 'y', 'z']:
@@ -630,3 +631,45 @@ class getDefaultIKFootRollPositions:
 		cmds.parent(self.outter, self.parent)
 		zeroAttrs(self.outter)
 		cmds.setAttr('{}.tx'.format(self.outter), (distance / 3) * outterM)
+
+
+def createSpline(startJoint, endJoint, nurbsCurve):
+	if nodeType(startJoint) != 'joint':
+		raise NodeTypeError('Start must be a joint: "{}"'.format(nodeType(startJoint)))
+
+	if nodeType(endJoint) != 'joint':
+		raise NodeTypeError('End must be a joint: "{}"'.format(nodeType(endJoint)))
+
+	ik = cmds.ikHandle(n='ikTail_spline',
+					   sj=startJoint,
+					   ee=endJoint,
+					   c=nurbsCurve,
+					   sol='ikSplineSolver',
+					   ccv=False,
+					   rootOnCurve=True,
+					   parentCurve=False)[0]
+	cmds.setAttr('{}.v'.format(ik), 0)
+	return ik
+
+
+def createSplineIK(joints, *args, **kwargs):
+	'''
+
+	:param joints:
+	:param args:
+	:param kwargs:
+	:return: [ik, curve, clusterList]
+	'''
+
+	# Curve
+	curve = createCurveOnPivots(joints)
+
+	# Cluster
+	clusters = clusterCurve(curve)
+
+	# Spline
+	spline = createSpline(joints[0], joints[-1], curve)
+
+	return [spline, curve, clusters]
+
+
