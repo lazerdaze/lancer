@@ -633,43 +633,31 @@ class getDefaultIKFootRollPositions:
 		cmds.setAttr('{}.tx'.format(self.outter), (distance / 3) * outterM)
 
 
-def createSpline(startJoint, endJoint, nurbsCurve):
-	if nodeType(startJoint) != 'joint':
-		raise NodeTypeError('Start must be a joint: "{}"'.format(nodeType(startJoint)))
-
-	if nodeType(endJoint) != 'joint':
-		raise NodeTypeError('End must be a joint: "{}"'.format(nodeType(endJoint)))
-
-	ik = cmds.ikHandle(n='ikTail_spline',
-					   sj=startJoint,
-					   ee=endJoint,
-					   c=nurbsCurve,
-					   sol='ikSplineSolver',
-					   ccv=False,
-					   rootOnCurve=True,
-					   parentCurve=False)[0]
-	cmds.setAttr('{}.v'.format(ik), 0)
-	return ik
-
-
-def createSplineIK(joints, *args, **kwargs):
+def createSplineIK(joints, prefix='rig', *args, **kwargs):
 	'''
 
 	:param joints:
+	:param prefix:
 	:param args:
 	:param kwargs:
 	:return: [ik, curve, clusterList]
 	'''
 
 	# Curve
-	curve = createCurveOnPivots(joints)
+	curve = createCurveOnPivots(items=joints, prefix=prefix)
 
 	# Cluster
-	clusters = clusterCurve(curve)
+	clusters = clusterCurve(curve=curve, prefix=prefix)
 
 	# Spline
-	spline = createSpline(joints[0], joints[-1], curve)
+	ik = cmds.ikHandle(n='{}_splineIK'.format(prefix),
+					   sj=joints[0],
+					   ee=joints[-1],
+					   c=curve,
+					   sol='ikSplineSolver',
+					   ccv=False,
+					   rootOnCurve=True,
+					   parentCurve=False)[0]
+	cmds.setAttr('{}.v'.format(ik), 0)
 
-	return [spline, curve, clusters]
-
-
+	return [ik, curve, clusters]
