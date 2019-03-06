@@ -36,6 +36,10 @@ def createRelationship(source,
 
 	# Connection
 	cmds.connectAttr(sourceName, destinationName, force=True)
+
+	if kind == MayaAttrType.message:
+		cmds.connectAttr(destinationName, sourceName, force=True)
+
 	return
 
 
