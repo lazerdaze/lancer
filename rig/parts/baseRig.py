@@ -12,20 +12,20 @@ from maya import cmds
 
 class BASERIG(AbstractNode):
 	def __init__(self,
-				 prefix=None,
-				 side=None,
-				 name=Component.rig,
-				 sector=None,
-				 index=None,
-				 kind=None,
-				 items=None,
-				 parent=None,
-				 root=None,
-				 axis=None,
-				 scale=1.0,
-				 opposite=None,
-				 wrapper=False,
-				 ):
+	             prefix=None,
+	             side=None,
+	             name=Component.rig,
+	             sector=None,
+	             index=None,
+	             kind=None,
+	             items=None,
+	             parent=None,
+	             root=None,
+	             axis=None,
+	             scale=1.0,
+	             opposite=None,
+	             wrapper=False,
+	             ):
 		'''
 		Naming convention:
 		[prefix][side][name/itemLabel][sector][index][kind]
@@ -47,14 +47,14 @@ class BASERIG(AbstractNode):
 		'''
 
 		AbstractNode.__init__(self,
-							  name=name,
-							  prefix=prefix,
-							  parent=parent,
-							  side=side,
-							  index=index,
-							  sector=sector,
-							  kind=kind,
-							  )
+		                      name=name,
+		                      prefix=prefix,
+		                      parent=parent,
+		                      side=side,
+		                      index=index,
+		                      sector=sector,
+		                      kind=kind,
+		                      )
 
 		self.wrapper = wrapper
 
@@ -124,11 +124,11 @@ class BASERIG(AbstractNode):
 		result = []
 
 		for ctrl in flatList(self.interface,
-							 self.fkControl,
-							 self.ikControl,
-							 self.childControl,
-							 self.grandchildControl
-							 ):
+		                     self.fkControl,
+		                     self.ikControl,
+		                     self.childControl,
+		                     self.grandchildControl
+		                     ):
 			if isinstance(ctrl, object):
 				for attr in ['transform', 'offsetTransform']:
 					if hasattr(ctrl, attr):
@@ -155,17 +155,17 @@ class BASERIG(AbstractNode):
 	def local(self, control):
 		if self.interface:
 			createRelationship(source=self.interface,
-							   sourceAttr='local',
-							   destination=control,
-							   destinationAttr='rigRelationship'
-							   )
+			                   sourceAttr='local',
+			                   destination=control,
+			                   destinationAttr='rigRelationship'
+			                   )
 
 			createRelationship(source=self.interface,
-							   sourceAttr='rigChildren',
-							   destination=control,
-							   destinationAttr='rigInterface',
-							   kind=MayaAttrType.string
-							   )
+			                   sourceAttr='rigChildren',
+			                   destination=control,
+			                   destinationAttr='rigInterface',
+			                   kind=MayaAttrType.string
+			                   )
 		self._local = control
 		return
 
@@ -183,17 +183,17 @@ class BASERIG(AbstractNode):
 	def world(self, control):
 		if self.interface:
 			createRelationship(source=self.interface,
-							   sourceAttr='world',
-							   destination=control,
-							   destinationAttr='rigRelationship'
-							   )
+			                   sourceAttr='world',
+			                   destination=control,
+			                   destinationAttr='rigRelationship'
+			                   )
 
 			createRelationship(source=self.interface,
-							   sourceAttr='rigChildren',
-							   destination=control,
-							   destinationAttr='rigInterface',
-							   kind=MayaAttrType.string
-							   )
+			                   sourceAttr='rigChildren',
+			                   destination=control,
+			                   destinationAttr='rigInterface',
+			                   kind=MayaAttrType.string
+			                   )
 		self._world = control
 		return
 
@@ -248,15 +248,15 @@ class BASERIG(AbstractNode):
 				index = i
 
 			joint = Joint(prefix=self.prefix,
-						  name=name.lower(),
-						  side=self.side,
-						  sector=self.sector,
-						  index=index,
-						  kind=camelCase(kind, Component.joint, capitalize=False),
-						  drawStyle=JointDrawStyle.none,
-						  type=label,
-						  otherType=otherLabel,
-						  )
+			              name=name.lower(),
+			              side=self.side,
+			              sector=self.sector,
+			              index=index,
+			              kind=camelCase(kind, Component.joint, capitalize=False),
+			              drawStyle=JointDrawStyle.none,
+			              type=label,
+			              otherType=otherLabel,
+			              )
 
 			joint.snapTo(item)
 			joint.freezeTransforms()
@@ -318,14 +318,14 @@ class BASERIG(AbstractNode):
 				index = i
 
 			ctrl = FKCONTROL(name=name,
-							 prefix=self.prefix,
-							 item=item,
-							 axis=self.axis,
-							 scale=self.scale,
-							 index=index,
-							 side=self.side,
-							 sector=self.sector,
-							 )
+			                 prefix=self.prefix,
+			                 item=item,
+			                 axis=self.axis,
+			                 scale=self.scale,
+			                 index=index,
+			                 side=self.side,
+			                 sector=self.sector,
+			                 )
 
 			ctrl.snapTo(item)
 			self.fkControl.append(ctrl)
@@ -366,26 +366,26 @@ class BASERIG(AbstractNode):
 		for null in [x.nullPosition for x in self.fkControl]:
 			if i != 0:
 				offsetNode = cmds.createNode(MayaNodeType.addDoubleLinear,
-											 name=longName(interface, Component.fkStretch, Component.offset, 0),
-											 )
+				                             name=longName(interface, Component.fkStretch, Component.offset, 0),
+				                             )
 
 				offsetValue = cmds.getAttr('{}.tx'.format(null))
 				cmds.setAttr(attributeName(offsetNode, 'input2'), offsetValue)
 
 				# Connect Offset
 				cmds.connectAttr('{}.{}[{}]'.format(interface, attrName, i),
-								 attributeName(offsetNode, 'input1'),
-								 force=True
-								 )
+				                 attributeName(offsetNode, 'input1'),
+				                 force=True
+				                 )
 
 				cmds.connectAttr(attributeName(offsetNode, 'output'),
-								 '{}.tx'.format(null),
-								 force=True
-								 )
+				                 '{}.tx'.format(null),
+				                 force=True
+				                 )
 				cmds.connectAttr('{}.{}'.format(interface, Component.stretch),
-								 '{}.{}[{}]'.format(interface, attrName, i),
-								 force=True,
-								 )
+				                 '{}.{}[{}]'.format(interface, attrName, i),
+				                 force=True,
+				                 )
 			i += 1
 		return
 
@@ -441,14 +441,14 @@ class BASERIG(AbstractNode):
 				index = i
 
 			ctrl = IKCONTROL(name=name,
-							 prefix=self.prefix,
-							 item=item,
-							 axis=self.axis,
-							 scale=self.scale,
-							 index=index,
-							 side=self.side,
-							 sector=self.sector,
-							 )
+			                 prefix=self.prefix,
+			                 item=item,
+			                 axis=self.axis,
+			                 scale=self.scale,
+			                 index=index,
+			                 side=self.side,
+			                 sector=self.sector,
+			                 )
 
 			ctrl.snapTo(item)
 			chainNames.append(name)
@@ -463,9 +463,9 @@ class BASERIG(AbstractNode):
 
 		# IK Handle
 		self.ikHandle = cmds.ikHandle(name=longName(self.longName, Component.ikHandle),
-									  sj=self.ikJoint[0].transform,
-									  ee=self.ikJoint[-1].transform,
-									  sol='ikRPsolver')[0]
+		                              sj=self.ikJoint[0].transform,
+		                              ee=self.ikJoint[-1].transform,
+		                              sol='ikRPsolver')[0]
 
 		cmds.parent(self.ikHandle, self.ikControl[-1].offset.transform)
 		cmds.orientConstraint(self.ikHandle, self.ikJoint[-1].transform, mo=True)
@@ -474,15 +474,15 @@ class BASERIG(AbstractNode):
 
 		# Pole Vector
 		pvPos = getPoleVectorPosition(self.ikJoint[0].transform,
-									  self.ikJoint[1].transform,
-									  self.ikJoint[2].transform
-									  )
+		                              self.ikJoint[1].transform,
+		                              self.ikJoint[2].transform
+		                              )
 		cmds.xform(self.ikControl[1].nullPosition, ws=True, t=pvPos)
 		poleVector = createPoleVector(name=longName(self.longName, Component.ikPoleVector),
-									  joint=self.ikJoint[1].transform,
-									  ctl=self.ikControl[1].offset.transform,
-									  ik=self.ikHandle,
-									  )
+		                              joint=self.ikJoint[1].transform,
+		                              ctl=self.ikControl[1].offset.transform,
+		                              ik=self.ikHandle,
+		                              )
 		self.ikPoleVector = poleVector
 
 		# IK Stretch
@@ -496,27 +496,27 @@ class BASERIG(AbstractNode):
 		i = 0
 		for joint in self.ikJoint:
 			null = cmds.group(joint, em=True, n=longName(joint,
-														 Component.stretch,
-														 ))
+			                                             Component.stretch,
+			                                             ))
 			snap(joint, null, t=True, r=True)
 			if i != 0:
 				cmds.parent(null, stretchGroup[i - 1])
 				cmds.connectAttr('{}.tx'.format(null), '{}.tx'.format(joint))
 
 				offsetNode = cmds.createNode(MayaNodeType.addDoubleLinear,
-											 name=longName(interface, Component.fkStretch, Component.offset, 0),
-											 )
+				                             name=longName(interface, Component.fkStretch, Component.offset, 0),
+				                             )
 				offsetValue = cmds.getAttr('{}.tx'.format(null))
 				cmds.setAttr(attributeName(offsetNode, 'input2'), offsetValue)
 
 				cmds.connectAttr('{}.{}[{}]'.format(interface, attrName, i),
-								 attributeName(offsetNode, 'input1'),
-								 force=True
-								 )
+				                 attributeName(offsetNode, 'input1'),
+				                 force=True
+				                 )
 
 				cmds.connectAttr(attributeName(offsetNode, 'output'), '{}.tx'.format(null), force=True)
 				cmds.connectAttr('{}.{}'.format(interface, Component.stretch),
-								 '{}.{}[{}]'.format(interface, attrName, i))
+				                 '{}.{}[{}]'.format(interface, attrName, i))
 			stretchGroup.append(null)
 			i += 1
 
@@ -560,14 +560,14 @@ class BASERIG(AbstractNode):
 				childIndex = 0
 				for child in children:
 					bind = CHILDCONTROL(name=name,
-										prefix=self.prefix,
-										item=child,
-										scale=self.scale,
-										index=childIndex,
-										side=self.side,
-										sector=sectors[itemIndex].upper(),
-										axis=self.axis,
-										)
+					                    prefix=self.prefix,
+					                    item=child,
+					                    scale=self.scale,
+					                    index=childIndex,
+					                    side=self.side,
+					                    sector=sectors[itemIndex].upper(),
+					                    axis=self.axis,
+					                    )
 
 					bind.snapTo(child)
 
@@ -586,13 +586,13 @@ class BASERIG(AbstractNode):
 						grandIndex = 0
 						for grandChild in grandChildren:
 							leaf = GRANDCHILDCONTROL(name=name,
-													 prefix=self.prefix,
-													 item=grandChild,
-													 scale=self.scale * .25,
-													 index=grandIndex,
-													 side=self.side,
-													 sector=sectors[itemIndex].upper(),
-													 )
+							                         prefix=self.prefix,
+							                         item=grandChild,
+							                         scale=self.scale * .25,
+							                         index=grandIndex,
+							                         side=self.side,
+							                         sector=sectors[itemIndex].upper(),
+							                         )
 
 							leaf.snapTo(grandChild)
 							leaf.parent(bind)
@@ -621,7 +621,7 @@ class BASERIG(AbstractNode):
 
 		if len(parentItems) != len(childItems):
 			raise ValueError('Must provide same number of parentItems({}) to childItems({}).'.format(len(parentItems),
-																									 len(childItems)))
+			                                                                                         len(childItems)))
 
 		result = []
 
@@ -671,16 +671,16 @@ class BASERIG(AbstractNode):
 				axis = [1, 1, 0]
 
 		ctl = INTERFACE_CONTROL(name=self.name,
-								prefix=self.prefix,
-								item=child,
-								axis=axis,
-								scale=self.scale,
-								index=self.index,
-								side=self.side,
-								sector=self.sector,
-								wire=wireType,
-								offset=False,
-								)
+		                        prefix=self.prefix,
+		                        item=child,
+		                        axis=axis,
+		                        scale=self.scale,
+		                        index=self.index,
+		                        side=self.side,
+		                        sector=self.sector,
+		                        wire=wireType,
+		                        offset=False,
+		                        )
 
 		if child:
 			ctl.snapTo(child)
@@ -777,21 +777,21 @@ class BASERIG(AbstractNode):
 			self.midObject = self.lowerObject[0]
 
 			self.upperChain = DETAILCHAIN(joint=self.start,
-										  scale=self.scale,
-										  axis=self.axis,
-										  name=longName(self.name,
-														'upper',
-														Component.detail,
-														)
-										  )
+			                              scale=self.scale,
+			                              axis=self.axis,
+			                              name=longName(self.name,
+			                                            'upper',
+			                                            Component.detail,
+			                                            )
+			                              )
 			self.lowerChain = DETAILCHAIN(joint=self.mid,
-										  scale=self.scale,
-										  axis=self.axis,
-										  name=longName(self.name,
-														'lower',
-														Component.detail
-														)
-										  )
+			                              scale=self.scale,
+			                              axis=self.axis,
+			                              name=longName(self.name,
+			                                            'lower',
+			                                            Component.detail
+			                                            )
+			                              )
 
 		self.objects = self.upperObject + self.lowerObject
 		self.control = self.upperChain.control + self.lowerChain.control
@@ -804,27 +804,27 @@ class BASERIG(AbstractNode):
 
 		self.createIKTwist()
 		self.createTwistStretch(objects=self.upperChain.control, start=self.start, end=self.mid, typ='upper',
-								ctl=self.upperTwist.parent)
+		                        ctl=self.upperTwist.parent)
 		self.createTwistStretch(objects=self.lowerChain.control, start=self.mid, end=self.end, typ='lower',
-								ctl=self.lowerTwist.parent)
+		                        ctl=self.lowerTwist.parent)
 
 		self.createSnS()
 
 	def createIKTwist(self):
 		self.upperTwist = createIKTwist(start=self.start,
-										end=self.mid,
-										name=longName(self.name, 'upper_twist'),
-										)
+		                                end=self.mid,
+		                                name=longName(self.name, 'upper_twist'),
+		                                )
 
 		self.lowerTwist = createIKTwist(start=self.end,
-										end=self.mid,
-										name=longName(self.name, 'lower_twist'),
-										)
+		                                end=self.mid,
+		                                name=longName(self.name, 'lower_twist'),
+		                                )
 
 		self.createTwistConnections(self.upperChain.group, self.upperTwist.joint[0], self.upperTwist.parent,
-									typ='upper')
+		                            typ='upper')
 		self.createTwistConnections(self.lowerChain.group, self.lowerTwist.joint[0], self.lowerTwist.parent,
-									typ='lower')
+		                            typ='lower')
 		cmds.parent(self.lowerTwist.ikHandle, self.end)
 		cmds.parent(self.lowerTwist.parent, self.mid)
 		return
@@ -850,7 +850,7 @@ class BASERIG(AbstractNode):
 		attrName = Component.stretch
 		cmds.addAttr(ctl, ln=attrName, m=True, at='double', k=True)
 		distance = createDistanceNode(start=start, end=end,
-									  n=longName(self.name, '{}_distance0'.format(typ)))
+		                              n=longName(self.name, '{}_distance0'.format(typ)))
 
 		max = 1.0
 		if typ == 'upper':
@@ -988,10 +988,10 @@ class BASERIG(AbstractNode):
 
 			if cog:
 				localWorldConstraint(obj=obj,
-									 local=local,
-									 world=cog,
-									 n=attrName,
-									 )
+				                     local=local,
+				                     world=cog,
+				                     n=attrName,
+				                     )
 		return
 
 	def createFKIKConnections(self, items=None, parent=None):
@@ -1016,17 +1016,17 @@ class BASERIG(AbstractNode):
 
 		if len(self.items) != len(self.fkControl) != len(self.ikControl):
 			raise ValueError(
-				'Items({}), FK({}), and IK({}) do not have same length.'.format(len(self.items),
-																				len(self.fkControl),
-																				len(self.ikControl)))
+					'Items({}), FK({}), and IK({}) do not have same length.'.format(len(self.items),
+					                                                                len(self.fkControl),
+					                                                                len(self.ikControl)))
 
 		# Constraints
 		fkik = createFKIK(items=items,
-						  fkControls=self.fkControl,
-						  ikControls=self.ikJoint,
-						  parent=parent,
-						  attrName=Component.fkik,
-						  )
+		                  fkControls=self.fkControl,
+		                  ikControls=self.ikJoint,
+		                  parent=parent,
+		                  attrName=Component.fkik,
+		                  )
 
 		# Visibility
 		i = 0
@@ -1164,17 +1164,17 @@ class BASERIG(AbstractNode):
 
 class RIBBONLIMB:
 	def __init__(self,
-				 start,
-				 mid,
-				 end,
-				 upperObjects,
-				 midObject,
-				 lowerObjects,
-				 name=Component.ribbon,
-				 scale=1,
-				 axis=None,
-				 side=Position.left,
-				 ):
+	             start,
+	             mid,
+	             end,
+	             upperObjects,
+	             midObject,
+	             lowerObjects,
+	             name=Component.ribbon,
+	             scale=1,
+	             axis=None,
+	             side=Position.left,
+	             ):
 		self.start = start
 		self.startParent = self.getStartParent()
 		self.mid = mid
@@ -1222,16 +1222,16 @@ class RIBBONLIMB:
 		for obj in self.objects:
 			i = self.objects.index(obj)
 			ctl = CONTROL(name=longName(self.name,
-										'main',
-										i,
-										Component.control,
-										),
-						  typ=WireType.octagon,
-						  scale=self.scale,
-						  axis=self.axis,
-						  child=obj,
-						  color=self.color,
-						  )
+			                            'main',
+			                            i,
+			                            Component.control,
+			                            ),
+			              typ=WireType.octagon,
+			              scale=self.scale,
+			              axis=self.axis,
+			              child=obj,
+			              color=self.color,
+			              )
 
 			cmds.parent(ctl.group, obj)
 			self.mainControl.append(ctl.transform)
@@ -1245,15 +1245,15 @@ class RIBBONLIMB:
 	def createIntermediateControls(self):
 		for i in range(2):
 			ctl = CONTROL(name=longName(self.name,
-										'intermediate',
-										i,
-										Component.control,
-										),
-						  typ=WireType.hexigon,
-						  scale=self.scale,
-						  axis=self.axis,
-						  color=self.color,
-						  )
+			                            'intermediate',
+			                            i,
+			                            Component.control,
+			                            ),
+			              typ=WireType.hexigon,
+			              scale=self.scale,
+			              axis=self.axis,
+			              color=self.color,
+			              )
 
 			cmds.parent(ctl.group, self.objects[i])
 
@@ -1280,14 +1280,14 @@ class RIBBONLIMB:
 		for obj in objects:
 			i = objects.index(obj)
 			ctl = CHILDCONTROL(name=longName(self.name,
-											 'detail',
-											 i,
-											 Component.control,
-											 ),
-							   scale=self.scale,
-							   axis=self.axis,
-							   child=obj,
-							   )
+			                                 'detail',
+			                                 i,
+			                                 Component.control,
+			                                 ),
+			                   scale=self.scale,
+			                   axis=self.axis,
+			                   child=obj,
+			                   )
 
 			cmds.parentConstraint(ctl.transform, obj, mo=True)
 			cmds.scaleConstraint(ctl.transform, obj, mo=True)
@@ -1313,29 +1313,29 @@ class RIBBONLIMB:
 	def createFlexiPlane(self, start, end, amount, name):
 		distance = getDistance(start, end)
 		flex = createFlexiPlane(name=name,
-								amount=amount,
-								width=distance,
-								side=self.side,
-								)
+		                        amount=amount,
+		                        width=distance,
+		                        side=self.side,
+		                        )
 
 		cmds.delete(cmds.parentConstraint(start, end, flex.parent))
 		return flex
 
 	def createRibbon(self):
 		self.upperFlexiPlane = self.createFlexiPlane(start=self.start,
-													 end=self.mid,
-													 amount=len(self.upperObjects + listCheck(self.midObject)),
-													 name=longName(self.name,
-																   'upper',
-																   ),
-													 )
+		                                             end=self.mid,
+		                                             amount=len(self.upperObjects + listCheck(self.midObject)),
+		                                             name=longName(self.name,
+		                                                           'upper',
+		                                                           ),
+		                                             )
 		self.lowerFlexiPlane = self.createFlexiPlane(start=self.mid,
-													 end=self.end,
-													 amount=len(self.upperObjects + listCheck(self.midObject)),
-													 name=longName(self.name,
-																   'lower',
-																   ),
-													 )
+		                                             end=self.end,
+		                                             amount=len(self.upperObjects + listCheck(self.midObject)),
+		                                             name=longName(self.name,
+		                                                           'lower',
+		                                                           ),
+		                                             )
 		return
 
 	def createHierarchy(self):

@@ -14,7 +14,7 @@ class ARM(BASERIG):
 				 shoulder,
 				 elbow,
 				 hand,
-				 side=Position.left,
+				 side,
 				 parent=None,
 				 root=None,
 				 ):
@@ -36,7 +36,6 @@ class ARM(BASERIG):
 		BASERIG.__init__(self,
 						 prefix=Part.arm,
 						 side=side,
-						 kind=Part.arm,
 						 items=items,
 						 parent=parent,
 						 root=root,
@@ -88,14 +87,35 @@ class ARM(BASERIG):
 		# Hand
 		self.createHandControl()
 
-		# Local World
-		# TODO: Arm Local World
-		if self.root and self.parent:
-			pass
+		# Hierarchy
+		# TODO: Simplify: Parent, Root, Hierarchy
 
-		# self.createLocalWorld(obj=self.fkControl[0],
-		# 					  local=self.fkGroup[0],
-		# 					  )
+		local = None
+
+		if self.parent:
+			if isinstance(self.parent, object):
+				if hasattr(self.parent, Component.local):
+					local = getattr(self.parent, Component.local)
+
+		if local:
+			cmds.parent(self.topNode, local)
+
+		world = None
+
+		if self.root:
+			if isinstance(self.root, object):
+				if hasattr(self.root, Component.local):
+					world = getattr(self.root, Component.local)
+
+			else:
+				if attributeExist(self.root, 'cogControl'):
+					cog = getConnectedNode(self.root, 'cogControl')
+
+					if attributeExist(cog, 'offset'):
+						world = getConnectedNode(cog, 'offset')
+
+		if world and self.ikTopNode:
+			cmds.parent(self.ikTopNode, world)
 		return
 
 	def createCollarControl(self):

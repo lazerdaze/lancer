@@ -8,13 +8,9 @@ from maya import cmds
 
 
 class DIGIT(BASERIG):
-	def __init__(self,
-				 items,
-				 parent=None,
-				 root=None,
-				 *args,
-				 **kwargs
-				 ):
+	def __init__(self, *args, **kwargs):
+
+		items = kwargs.get('items', [])
 
 		metacarpal = None
 
@@ -25,13 +21,7 @@ class DIGIT(BASERIG):
 		self.metacarpalItem = metacarpal
 		self._metacarpalJoint = None
 
-		BASERIG.__init__(self,
-						 items=items,
-						 parent=parent,
-						 root=root,
-						 *args,
-						 **kwargs
-						 )
+		BASERIG.__init__(self, *args, **kwargs)
 
 	####################################################################################################################
 	# Properties
@@ -52,24 +42,23 @@ class DIGIT(BASERIG):
 	def metacarpalJoint(self, joint):
 		if self.interface:
 			createRelationship(source=self.interface,
-							   sourceAttr='cogControl',
-							   destination=joint,
-							   destinationAttr='rigParent'
-							   )
+			                   sourceAttr='cogControl',
+			                   destination=joint,
+			                   destinationAttr='rigParent'
+			                   )
 
 			createRelationship(source=self.interface,
-							   sourceAttr='rigChildren',
-							   destination=joint,
-							   destinationAttr='rigInterface',
-							   kind=MayaAttrType.string,
-							   )
+			                   sourceAttr='rigChildren',
+			                   destination=joint,
+			                   destinationAttr='rigInterface',
+			                   kind=MayaAttrType.string,
+			                   )
 		self._metacarpalJoint = joint
 		return
 
 	####################################################################################################################
 	# Methods
 	####################################################################################################################
-
 
 	def create(self):
 		# Scale
@@ -128,12 +117,12 @@ class DIGIT(BASERIG):
 
 	def createMetacarpal(self):
 		self.metacarpalJoint = Joint(prefix=self.prefix,
-									 name='metacarpal',
-									 side=self.side,
-									 kind=camelCase(Component.rig, Component.joint, capitalize=False),
-									 drawStyle=JointDrawStyle.none,
-									 item=self.metacarpalItem
-									 )
+		                             name='metacarpal',
+		                             side=self.side,
+		                             kind=camelCase(Component.rig, Component.joint, capitalize=False),
+		                             drawStyle=JointDrawStyle.none,
+		                             item=self.metacarpalItem
+		                             )
 
 		self.metacarpalJoint.snapTo(self.metacarpalItem)
 		self.metacarpalJoint.freezeTransforms()

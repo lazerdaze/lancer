@@ -1,12 +1,138 @@
 # Lancer Modules
 from rig.utils import *
 from rigBase import RIGBASE
+from rig.parts.baseRig import BASERIG
+from digit import DIGIT
 
 # Maya Moudles
 from maya import cmds
 
 
-class LEG(RIGBASE):
+class LEG(BASERIG):
+	def __init__(self,
+	             hip,
+	             knee,
+	             foot,
+	             side,
+	             parent=None,
+	             root=None,
+	             ):
+		items = [hip, knee, foot]
+
+		# Items
+		self.hipItem = hip
+		self.kneeItem = knee
+		self.footItem = foot
+
+		BASERIG.__init__(self,
+		                 prefix=Part.leg,
+		                 side=side,
+		                 items=items,
+		                 parent=parent,
+		                 root=root,
+		                 axis=[1, 1, 0],
+		                 )
+
+	####################################################################################################################
+	# Methods
+	####################################################################################################################
+
+	def create(self, *args, **kwargs):
+		# Scale
+		self.scale = self.scaleByDistance(self.items) * 1.5
+
+		# Interface
+		self.interface = self.createInterfaceControl(child=self.items[-1])
+
+		# Arm
+		self.create3PointFKIK(items=self.items)
+
+		# Child Controls
+		self.createChildChain(self.items)
+
+		# Foot
+		self.createFootControl()
+
+		# Hierarchy
+		# TODO: Simplify: Parent, Root, Hierarchy
+
+		local = None
+
+		if self.parent:
+			if isinstance(self.parent, object):
+				if hasattr(self.parent, Component.local):
+					local = getattr(self.parent, Component.local)
+
+		if local:
+			cmds.parent(self.topNode, local)
+
+		world = None
+
+		if self.root:
+			if isinstance(self.root, object):
+				if hasattr(self.root, Component.local):
+					world = getattr(self.root, Component.local)
+
+			else:
+				if attributeExist(self.root, 'cogControl'):
+					cog = getConnectedNode(self.root, 'cogControl')
+
+					if attributeExist(cog, 'offset'):
+						world = getConnectedNode(cog, 'offset')
+
+		if world and self.ikTopNode:
+			cmds.parent(self.ikTopNode, world)
+
+	def createFootControl(self):
+		return
+
+
+class FOOT(AbstractNode):
+	def __init__(self,
+	             hand,
+	             interface=None,
+	             *args,
+	             **kwargs
+	             ):
+
+		AbstractNode.__init__(self, *args, **kwargs)
+
+		self.hand = hand
+		self.interface = interface
+		self.thumb = None
+		self.indexFinger = None
+		self.middleFinger = None
+		self.ringFinger = None
+		self.pinkyFinger = None
+
+		self.finger = []
+
+		self.create()
+		self.finalize()
+
+	def create(self):
+		children = getJointChildren(self.hand)
+
+		i = 0
+		for child in children:
+			joints = getJointOrder(child)
+			finger = DIGIT(items=joints,
+			               name=Part.finger,
+			               side=self.side,
+			               networkRoot=self.networkRoot,
+			               index=i,
+			               )
+			self.finger.append(finger)
+			i += 1
+		return
+
+	def finalize(self):
+		if self.interface:
+			pass
+		return
+
+
+class LEG_LEGACY(RIGBASE):
 	def __init__(self,
 	             side,
 	             hip,
@@ -17,12 +143,7 @@ class LEG(RIGBASE):
 	             name=Part.leg,
 	             index=0,
 	             ):
-		RIGBASE.__init__(self,
-		                 networkRoot=networkRoot,
-		                 name=name,
-		                 side=side,
-		                 index=index,
-		                 )
+		RIGBASE.__init__(self)
 
 		self.toe = toe
 		self.toeFKControl = None
@@ -110,14 +231,14 @@ class LEG(RIGBASE):
 
 	def createFootRoll(self):
 		self.roll = createIKFootRollNulls(foot=self.foot,
-		                                          toe=self.toe,
-		                                          control=self.ikControl[-1],
-		                                          name=longName(self.name,
-		                                                        self.side[0],
-		                                                        self.index,
-		                                                        Component.ik,
-		                                                        'footRoll'),
-		                                          )
+		                                  toe=self.toe,
+		                                  control=self.ikControl[-1],
+		                                  name=longName(self.name,
+		                                                self.side[0],
+		                                                self.index,
+		                                                Component.ik,
+		                                                'footRoll'),
+		                                  )
 
 		# self.roll.accuratePositions()
 		self.roll.createWire()
@@ -160,9 +281,9 @@ class LEG(RIGBASE):
 
 class LEFTLEG(LEG):
 	def __init__(self, *args, **kwargs):
-		LEG.__init__(self, side=Position.left, *args, **kwargs)
+		LEG.__init__(self, *args, **kwargs)
 
 
 class RIGHTLEG(LEG):
 	def __init__(self, *args, **kwargs):
-		LEG.__init__(self, side=Position.right, *args, **kwargs)
+		LEG.__init__(self, *args, **kwargs)
