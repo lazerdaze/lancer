@@ -11,6 +11,7 @@ class SPINE(BASERIG):
 				 items,
 				 root=None,
 				 ):
+
 		BASERIG.__init__(self,
 						 prefix=Part.spine,
 						 side=Position.center,
@@ -19,7 +20,6 @@ class SPINE(BASERIG):
 						 axis=[1, 1, 0],
 						 root=root,
 						 )
-		self.create()
 
 	def create(self):
 		# Scale
@@ -32,7 +32,7 @@ class SPINE(BASERIG):
 		self.joint = self.createJointChain(self.items, hierarchy=True)
 
 		# Bind Controls
-		self.createBindChain(self.items)
+		self.createChildChain(self.items)
 
 		# Parent
 		if self.root:
@@ -63,8 +63,4 @@ class SPINE(BASERIG):
 					local = getattr(self.root, Component.local)
 		if local:
 			cmds.parent(self.topNode, local)
-
-		# Cleanup
-		self.set = self.createSet(self.allControls)
-		self.finalize()
 		return
