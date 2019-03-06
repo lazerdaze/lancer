@@ -10,7 +10,7 @@ from maya import cmds
 
 # TODO: Rigging Logger
 
-class AbstractRig(AbstractNode):
+class BASERIG(AbstractNode):
 	def __init__(self,
 				 prefix=None,
 				 side=None,
@@ -24,8 +24,7 @@ class AbstractRig(AbstractNode):
 				 axis=None,
 				 scale=1.0,
 				 opposite=None,
-				 *args,
-				 **kwargs
+				 wrapper=False,
 				 ):
 		'''
 		Naming convention:
@@ -33,7 +32,8 @@ class AbstractRig(AbstractNode):
 		"arm_L_shoulder_A_0_fkControl"
 		"arm_L_shoulder_A_0_bindControl"
 
-		:param str None name:
+		First Create Interface. Then each property creates a relationship.
+
 		:param str object None parent:
 		:param str object None root:
 		:param str None prefix:
@@ -54,9 +54,9 @@ class AbstractRig(AbstractNode):
 							  index=index,
 							  sector=sector,
 							  kind=kind,
-							  *args,
-							  **kwargs
 							  )
+
+		self.wrapper = wrapper
 
 		# Interface
 		self.interface = None
@@ -68,8 +68,8 @@ class AbstractRig(AbstractNode):
 		self.joint = []
 		self.set = None
 		self.opposite = opposite
-		self.local = None
-		self.world = None
+		self._local = None
+		self._world = None
 
 		# Items
 		self.items = items
@@ -98,10 +98,15 @@ class AbstractRig(AbstractNode):
 		self.childControl = []
 		self.grandchildControl = []
 
+		if self.wrapper:
+			pass
+		else:
+			self.create()
+			self.set = self.createSet(self.allControls)
+			self.finalize()
 
-class BASERIG(AbstractRig):
-	def __init__(self, *args, **kwargs):
-		AbstractRig.__init__(self, *args, **kwargs)
+	def create(self, *args, **kwargs):
+		return
 
 	def printAttributes(self):
 		var = ''
@@ -131,9 +136,66 @@ class BASERIG(AbstractRig):
 						if value:
 							result.append(value)
 			elif ctrl is not None:
-				result.append(self.interface)
+				result.append(ctrl)
 
 		return result
+
+	@property
+	def local(self):
+		if self._local:
+			return self._local
+
+		if self.interface:
+			if attributeExist(self.interface, 'local'):
+				return getConnectedNode(self.interface, 'local')
+
+		return self._local
+
+	@local.setter
+	def local(self, control):
+		if self.interface:
+			createRelationship(source=self.interface,
+							   sourceAttr='local',
+							   destination=control,
+							   destinationAttr='rigRelationship'
+							   )
+
+			createRelationship(source=self.interface,
+							   sourceAttr='rigChildren',
+							   destination=control,
+							   destinationAttr='rigInterface',
+							   kind=MayaAttrType.string
+							   )
+		self._local = control
+		return
+
+	@property
+	def world(self):
+		if self._world:
+			return self._world
+
+		if self.interface:
+			if attributeExist(self.interface, 'world'):
+				return getConnectedNode(self.interface, 'world')
+		return self._world
+
+	@world.setter
+	def world(self, control):
+		if self.interface:
+			createRelationship(source=self.interface,
+							   sourceAttr='world',
+							   destination=control,
+							   destinationAttr='rigRelationship'
+							   )
+
+			createRelationship(source=self.interface,
+							   sourceAttr='rigChildren',
+							   destination=control,
+							   destinationAttr='rigInterface',
+							   kind=MayaAttrType.string
+							   )
+		self._world = control
+		return
 
 	####################################################################################################################
 	# Scale
@@ -466,10 +528,10 @@ class BASERIG(AbstractRig):
 		return
 
 	####################################################################################################################
-	# Bind Chain
+	# Child Chain
 	####################################################################################################################
 
-	def createBindChain(self, items):
+	def createChildChain(self, items):
 		bindDict = {}
 		sectors = CHARACTERSTR
 
@@ -510,7 +572,7 @@ class BASERIG(AbstractRig):
 					bind.snapTo(child)
 
 					if self.joint:
-						bind.parentTo(self.joint[itemIndex])
+						bind.parent(self.joint[itemIndex])
 
 					cmds.parentConstraint(bind, child, mo=True)
 					cmds.scaleConstraint(bind, child, mo=True)
@@ -533,7 +595,7 @@ class BASERIG(AbstractRig):
 													 )
 
 							leaf.snapTo(grandChild)
-							leaf.parentTo(bind)
+							leaf.parent(bind)
 							cmds.parentConstraint(leaf, grandChild, mo=True)
 							cmds.scaleConstraint(leaf, grandChild, mo=True)
 							leafControls.append(leaf)
@@ -586,7 +648,7 @@ class BASERIG(AbstractRig):
 
 		if isinstance(items, (list, dict, tuple)):
 			child = items[0]
-		elif isinstance(items, str):
+		else:
 			child = items
 
 		topNode = cmds.group(name=longName(self.longName, camelCase(kind, Component.group, capitalize=False)), em=True)
@@ -599,7 +661,7 @@ class BASERIG(AbstractRig):
 	# Master
 	####################################################################################################################
 
-	def createRigControl(self, child=None, wireType=WireType.master):
+	def createInterfaceControl(self, child=None, wireType=WireType.master):
 		axis = [0, 0, 0]
 
 		if wireType == WireType.master:
@@ -616,7 +678,8 @@ class BASERIG(AbstractRig):
 								index=self.index,
 								side=self.side,
 								sector=self.sector,
-								wireType=wireType,
+								wire=wireType,
+								offset=False,
 								)
 
 		if child:
@@ -654,7 +717,7 @@ class BASERIG(AbstractRig):
 	# FKIK
 	####################################################################################################################
 
-	def create3PointFKIK(self, items=None, parent=None):
+	def create3PointFKIK(self, items=None, interface=None):
 		# Edge Cases
 		if items is None:
 			items = self.items
@@ -665,36 +728,35 @@ class BASERIG(AbstractRig):
 		if len(items) != 3:
 			raise ValueError('Must provide 3 items.')
 
-		if parent is None:
+		if interface is None:
 			if self.interface:
-				parent = self.interface
+				interface = self.interface
 			else:
-				self.interface = self.createRigControl(items[-1])
-				parent = self.interface
+				self.interface = self.createInterfaceControl(child=items[-1])
+				interface = self.interface
 
-		if not parent:
-			raise ValueError('No parent provided.')
+		if not interface:
+			raise ValueError('No interface provided.')
 
 		# Rig
-		self.topNode = self.createTopNode(items)
+		if not self.topNode:
+			self.topNode = self.createTopNode(items)
+
 		self.joint = self.createJointChain(items=items, kind=Component.rig, hierarchy=True)
-		self.createFKChain(items, parent)
-		self.createIKChain(items, parent)
+		self.createFKChain(items, interface)
+		self.createIKChain(items, interface)
 
 		# Hierarchy
 		for x in [self.joint[0], self.fkTopNode, self.ikJoint[0], self.ikStretch[0], self.ikControl[0].nullPosition]:
 			cmds.parent(x, self.topNode)
 
-		if hasattr(parent, 'nullPosition'):
-			parent.parentTo(self.joint[-1])
-		else:
-			cmds.parent(parent, self.joint[-1])
+		cmds.parent(interface, self.joint[-1])
 
-		self.createFKIKConnections(self.joint, parent)
-		# self.parentToRootControl(self.ikGroup[1])
-		# self.parentToRootControl(self.ikGroup[2])
+		# FKIK Switch Connections
+		self.createFKIKConnections(self.joint, interface)
 		return
 
+	# TODO; Spline FKIK
 	def createSplineFKIK(self, items):
 		return
 
