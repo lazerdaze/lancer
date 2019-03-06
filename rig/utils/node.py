@@ -114,8 +114,6 @@ class AbstractNode(object):
 	             sector=None,
 	             kind=None,
 	             wrapper=False,
-	             *args,
-	             **kwargs
 	             ):
 		'''
 		Abstract Node to be sub-classed by all dag node related classes.
@@ -849,7 +847,7 @@ class DagNode(AbstractNode):
 	@rigPart.setter
 	def rigPart(self, part):
 		attr = 'rigPart'
-		part = '' if part is None else part
+		part = '' if part is None else part.upper()
 
 		if self.isValid():
 			if attributeExist(self.longName, attr):
@@ -868,6 +866,9 @@ class DagNode(AbstractNode):
 	def rigParent(self):
 		attr = 'rigParent'
 
+		if self._rigParent:
+			return self._rigParent
+
 		if self.isValid():
 			if attributeExist(self.longName, attr):
 				return getConnectedNode(self.longName, attr)
@@ -880,6 +881,7 @@ class DagNode(AbstractNode):
 			                   sourceAttr='rigChildren',
 			                   destination=self.longName,
 			                   destinationAttr='rigParent',
+							   kind=MayaAttrType.string,
 			                   )
 
 		self._rigParent = parent
@@ -888,6 +890,9 @@ class DagNode(AbstractNode):
 	@property
 	def rigRoot(self):
 		attr = 'rigRoot'
+
+		if self._rigRoot:
+			return self._rigRoot
 
 		if self.isValid():
 			if attributeExist(self.longName, attr):
@@ -901,6 +906,7 @@ class DagNode(AbstractNode):
 			                   sourceAttr='rigChildren',
 			                   destination=self.longName,
 			                   destinationAttr='rigRoot',
+							   kind=MayaAttrType.string,
 			                   )
 
 		self._rigRoot = root
@@ -909,6 +915,9 @@ class DagNode(AbstractNode):
 	@property
 	def rigChildren(self):
 		attr = 'rigChildren'
+
+		if self._rigChildren:
+			return self._rigChildren
 
 		if self.isValid():
 			if attributeExist(self.longName, attr):
@@ -925,6 +934,9 @@ class DagNode(AbstractNode):
 	def rigInterface(self):
 		attr = 'rigInterface'
 
+		if self._rigInterface:
+			return self._rigInterface
+
 		if self.isValid():
 			if attributeExist(self.longName, attr):
 				return getConnectedNode(self.longName, attr)
@@ -937,6 +949,7 @@ class DagNode(AbstractNode):
 			                   sourceAttr='rigChildren',
 			                   destination=self.longName,
 			                   destinationAttr='rigInterface',
+							   kind=MayaAttrType.string
 			                   )
 
 		self._rigInterface = interface
@@ -954,7 +967,7 @@ class DagNode(AbstractNode):
 				addAttribute(node=self.longName, attribute=attr, kind=MayaAttrType.message)
 
 		# Children
-		for attr in ['rigChildren']:
+		for attr in ['rigChildren', 'rigRelationship']:
 			if not attributeExist(self.longName, attr):
 				addAttribute(node=self.longName, attribute=attr, kind=MayaAttrType.string, lock=True)
 		return
@@ -1058,7 +1071,7 @@ class DagNode(AbstractNode):
 					cmds.rotate(z, self.longName, z=True, worldSpace=worldSpace)
 		return
 
-	def snapTo(self, item, translation=True, rotation=True):
+	def snapTo(self, item=None, translation=True, rotation=True):
 		if self.isValid():
 			snap(item, self.longName, t=translation, r=rotation)
 		return
@@ -1067,3 +1080,12 @@ class DagNode(AbstractNode):
 		if self.isValid():
 			freezeTransform(self.longName, True, True, True)
 		return
+
+	def getConnected(self, attribute):
+		if self.isValid():
+			if hasattr(self, attribute):
+				return getattr(self, attribute)
+			if self.transform:
+				if attributeExist(self, attribute):
+					return getConnectedNode(self.transform, attribute)
+		return None
