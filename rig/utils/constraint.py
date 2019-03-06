@@ -18,7 +18,7 @@ def loadMatrixPlugin(*agrs, **kwargs):
 		try:
 			cmds.loadPlugin(plugin)
 			isLoaded = True
-			#print 'Plugin "{}" was loaded successfully.'.format(plugin)
+		# print 'Plugin "{}" was loaded successfully.'.format(plugin)
 		except:
 			raise PluginError('Unable to load plugin "{}".'.format(plugin))
 
@@ -107,30 +107,16 @@ def localWorldConstraint(obj, local, world, n='localWorld', t=False, r=True):
 	return [null, pc]
 
 
-def clusterCurve(curve, n='cluster', *args):
-	clusterList = []
-	curveCVs = cmds.ls('{0}.cv[:]'.format(curve), fl=True)
-	i = 1
-	for cv in curveCVs:
-		clusterList.append(cmds.cluster(cv, n='{0}_{1}'.format(n, i))[1])
-		i += 1
-
-	for c in clusterList:
-		cmds.setAttr('{}.v'.format(c), 0)
-
-	return clusterList
-
-
 def setOnMotionPath(selected, curve, name='motionPath', uValue=0, *args):
 	# Create Nodes
 	mp = cmds.createNode('motionPath', n='{}_mp'.format(name))
 
 	mpAttr = {
-		'follow'      : 1,
+		'follow': 1,
 		'fractionMode': 0,
-		'worldUpType' : 3,
-		'frontAxis'   : 2,
-		'upAxis'      : 1,
+		'worldUpType': 3,
+		'frontAxis': 2,
+		'upAxis': 1,
 	}
 	for attr in mpAttr:
 		cmds.setAttr('{}.{}'.format(mp, attr), mpAttr[attr])
@@ -181,7 +167,7 @@ def createAimVectorHelper(start, end, name='poleVector_helper'):
 	# Create Curve
 	curve = cmds.curve(n=name, d=1, p=[[0, 0, 0], [0, 0, 0]])
 	curveShape = cmds.rename(cmds.listRelatives(curve, shapes=True)[0],
-	                         '{}Shape'.format(name))
+							 '{}Shape'.format(name))
 	cmds.parent(curveShape, end, r=True, s=True)
 	cmds.delete(curve)
 
@@ -222,15 +208,15 @@ def createAimVector(parent, child, name='aimVector', aimVector=None):
 		aimVector = [0, 0, 1]
 
 	aim = cmds.aimConstraint(parent,
-	                         child,
-	                         name='{}_constraint0'.format(name),
-	                         mo=True,
-	                         aimVector=aimVector,
-	                         upVector=[0, 1, 0],
-	                         worldUpType='objectrotation',
-	                         worldUpVector=[0, 1, 0],
-	                         worldUpObject=parent,
-	                         )
+							 child,
+							 name='{}_constraint0'.format(name),
+							 mo=True,
+							 aimVector=aimVector,
+							 upVector=[0, 1, 0],
+							 worldUpType='objectrotation',
+							 worldUpVector=[0, 1, 0],
+							 worldUpObject=parent,
+							 )
 
 	shape = createAimVectorHelper(child, parent, name='{}_helper'.format(name))
 
