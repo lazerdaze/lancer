@@ -8,10 +8,10 @@ from maya import cmds
 
 class ROOT(BASERIG):
 	def __init__(self,
-	             root=None,
-	             cog=None,
-	             hip=None,
-	             ):
+				 root=None,
+				 cog=None,
+				 hip=None,
+				 ):
 
 		'''
 		Central Rigging Part used in all rigging hierarchies.
@@ -28,30 +28,31 @@ class ROOT(BASERIG):
 			if x is not None:
 				items.append(x)
 
-		BASERIG.__init__(self,
-		                 prefix=Part.root,
-		                 name=Component.Global,
-		                 items=items,
-		                 )
-
 		# Items
 		self.rootItem = root
 		self.cogItem = cog
 		self.hipItem = hip
 
 		# Controls
-		self.repoControl = None
-		self.cogControl = None
-		self.hipControl = None
+		self._repoControl = None
+		self._cogControl = None
+		self._hipControl = None
 
-		# Init
-		self.create()
+		BASERIG.__init__(self,
+						 prefix=Part.root,
+						 name=Component.Global,
+						 items=items,
+						 )
+
+	####################################################################################################################
+	# Properties
+	####################################################################################################################
 
 	@property
 	def allControls(self):
 		result = []
 
-		for ctrl in [self.interface, self.repoControl, self.cogControl, self.hipControl]:
+		for ctrl in [self.interface, self._repoControl, self._cogControl, self._hipControl]:
 			if isinstance(ctrl, object):
 				if hasattr(ctrl, 'transform'):
 					value = getattr(ctrl, 'transform')
@@ -66,8 +67,102 @@ class ROOT(BASERIG):
 
 			elif ctrl is not None:
 				if ctrl not in result:
-					result.append(self.interface)
+					result.append(ctrl)
 		return result
+
+	@property
+	def cogControl(self):
+		if self._cogControl:
+			return self._cogControl
+
+		if self.interface:
+			if attributeExist(self.interface, 'cogControl'):
+				return getConnectedNode(self.interface, 'cogControl')
+
+		return self._cogControl
+
+	@cogControl.setter
+	def cogControl(self, control):
+		if self.interface:
+			createRelationship(source=self.interface,
+							   sourceAttr='cogControl',
+							   destination=control,
+							   destinationAttr='rigParent'
+							   )
+
+			createRelationship(source=self.interface,
+							   sourceAttr='rigChildren',
+							   destination=control,
+							   destinationAttr='rigInterface',
+							   kind=MayaAttrType.string,
+							   )
+		self._cogControl = control
+		return
+
+	@property
+	def hipControl(self):
+		if self._hipControl:
+			return self._hipControl
+
+		if self.interface:
+			if attributeExist(self.interface, 'hipControl'):
+				return getConnectedNode(self.interface, 'hipControl')
+
+		return self._hipControl
+
+	@hipControl.setter
+	def hipControl(self, control):
+		if self.interface:
+			createRelationship(source=self.interface,
+							   sourceAttr='hipControl',
+							   destination=control,
+							   destinationAttr='rigParent'
+							   )
+
+			createRelationship(source=self.interface,
+							   sourceAttr='rigChildren',
+							   destination=control,
+							   destinationAttr='rigInterface',
+							   kind=MayaAttrType.string,
+							   )
+
+		self._hipControl = control
+		return
+
+	@property
+	def repoControl(self):
+		if self._repoControl:
+			return self._repoControl
+
+		if self.interface:
+			if attributeExist(self.interface, 'repoControl'):
+				return getConnectedNode(self.interface, 'repoControl')
+
+		return self._repoControl
+
+	@repoControl.setter
+	def repoControl(self, control):
+		if self.interface:
+			createRelationship(source=self.interface,
+							   sourceAttr='repoControl',
+							   destination=control,
+							   destinationAttr='rigParent'
+							   )
+
+			createRelationship(source=self.interface,
+							   sourceAttr='rigChildren',
+							   destination=control,
+							   destinationAttr='rigInterface',
+							   kind=MayaAttrType.string
+							   )
+
+		self._repoControl = control
+		return
+
+	####################################################################################################################
+	# Methods
+	####################################################################################################################
+
 
 	def create(self):
 		self.createRootControl()
@@ -79,7 +174,6 @@ class ROOT(BASERIG):
 			self.createHipControl()
 
 		self.set = self.createSet(self.allControls)
-		# self.finalize()
 		return
 
 	def createRootControl(self, item=None):
@@ -88,20 +182,20 @@ class ROOT(BASERIG):
 			item = self.rootItem
 
 		# Scale
-		scale = 1.0
+		self.scale = 1.0
 
 		if self.items:
-			scale = self.scaleByHeight(self.items) * .35
+			self.scale = self.scaleByHeight(self.items) * .35
 
 		# Controls
 		self.interface = INTERFACE_CONTROL(name=self.name,
-		                                   prefix=self.prefix,
-		                                   item=item,
-		                                   wire=WireType.gearMover,
-		                                   axis=[0, 0, 0],
-		                                   scale=scale,
-		                                   offset=WireType.circleRotate
-		                                   )
+										   prefix=self.prefix,
+										   item=item,
+										   wire=WireType.gearMover,
+										   axis=[0, 0, 0],
+										   scale=self.scale,
+										   offset=WireType.circleRotate
+										   )
 
 		self.interface.offset.rigInterface = self.interface
 		self.world = self.interface.offset.transform
@@ -110,26 +204,21 @@ class ROOT(BASERIG):
 		attrName = 'repoVisibility'
 
 		self.repoControl = Control(prefix=self.prefix,
-		                           name=self.name,
-		                           item=item,
-		                           wireType=WireType.sphere,
-		                           axis=[0, 0, 0],
-		                           scale=scale * .25,
-		                           color=WireColor.purple,
-		                           kind=camelCase('repo', Component.control, capitalize=False),
-		                           )
+								   name=self.name,
+								   item=item,
+								   wireType=WireType.sphere,
+								   axis=[0, 0, 0],
+								   scale=self.scale * .25,
+								   color=WireColor.purple,
+								   kind=camelCase('repo', Component.control, capitalize=False),
+								   )
 
+		# Visibility
 		addAttribute(node=self.interface, attribute=attrName, kind=MayaAttrType.bool, channelBox=True, keyable=False)
 		cmds.connectAttr('{}.{}'.format(self.interface, attrName), '{}.v'.format(self.repoControl.shape))
 
+		# Hierarchy
 		self.repoControl.parent = self.interface.offset.transform
-		self.repoControl.rigInterface = self.interface
-
-		createMonoRelationship(source=self.interface,
-		                       sourceAttr='repo',
-		                       destination=self.repoControl.transform,
-		                       destinationAttr='rigParent',
-		                       )
 
 		# Constrain
 		if item:
@@ -162,22 +251,20 @@ class ROOT(BASERIG):
 			scale = distanceFromOrigin(item)
 
 		self.cogControl = INTERFACE_CONTROL(name=Component.rig,
-		                                    prefix=Part.cog,
-		                                    item=item,
-		                                    wire=WireType.gear,
-		                                    axis=[0, 2, 0],
-		                                    scale=scale * .3,
-		                                    offset=WireType.circleRotate,
-		                                    )
+											prefix=Part.cog,
+											item=item,
+											wire=WireType.gear,
+											axis=[0, 2, 0],
+											scale=scale * .3,
+											offset=WireType.circleRotate,
+											)
 
 		self.local = self.cogControl.offset.transform
 
 		# Hierarchy
-		self.cogControl.offset.rigInterface = self.cogControl
 
 		self.cogControl.parent = self.interface.offset.transform
 		self.cogControl.snapTo(item, True, False)
-		self.cogControl.rigParent = self.interface
 		self.cogControl.rigRoot = self.interface
 
 		# Constrain
@@ -201,29 +288,20 @@ class ROOT(BASERIG):
 			scale = distanceFromOrigin(item)
 
 		self.hipControl = RIGCONTROL(name=Component.rig,
-		                             prefix=Part.hip,
-		                             item=item,
-		                             side=Position.center,
-		                             wireType=WireType.circleRotate,
-		                             scale=scale * .2,
-		                             color=WireColor.yellow,
-		                             offset=True,
-		                             axis=[1, 1, 0]
-		                             )
+									  prefix=Part.hip,
+									  item=item,
+									  side=Position.center,
+									  wireType=WireType.circleRotate,
+									  scale=scale * .2,
+									  color=WireColor.yellow,
+									  offset=True,
+									  axis=[1, 1, 0]
+									  )
 		# Hierarchy
-		self.hipControl.parent = self.cogControl.offset.transform
+		self.hipControl.parent = self._cogControl.offset.transform
 		self.hipControl.snapTo(item)
-		self.hipControl.rigParent = self.interface
 		self.hipControl.rigRoot = self.interface
 
 		# Constrain
 		cmds.parentConstraint(self.hipControl.offset.transform, item, mo=True)
-		return
-
-	def finalize(self, items=None, parent=None):
-		BASERIG.finalize(self, items, parent)
-
-		self.connectToRig(self.repoControl, self.interface, 'repoControl')
-		self.connectToRig(self.cogControl, self.interface, 'cogControl')
-		self.connectToRig(self.hipControl, self.interface, 'hipControl')
 		return
