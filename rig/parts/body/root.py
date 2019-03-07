@@ -84,18 +84,11 @@ class ROOT(BASERIG):
 	@cogControl.setter
 	def cogControl(self, control):
 		if self.interface:
-			createRelationship(source=self.interface,
-							   sourceAttr='cogControl',
-							   destination=control,
-							   destinationAttr='rigParent'
-							   )
+			self.connectToInterface(child=control,
+									interface=self.interface,
+									attribute='cogControl',
+									)
 
-			createRelationship(source=self.interface,
-							   sourceAttr='rigChildren',
-							   destination=control,
-							   destinationAttr='rigInterface',
-							   kind=MayaAttrType.string,
-							   )
 		self._cogControl = control
 		return
 
@@ -113,18 +106,10 @@ class ROOT(BASERIG):
 	@hipControl.setter
 	def hipControl(self, control):
 		if self.interface:
-			createRelationship(source=self.interface,
-							   sourceAttr='hipControl',
-							   destination=control,
-							   destinationAttr='rigParent'
-							   )
-
-			createRelationship(source=self.interface,
-							   sourceAttr='rigChildren',
-							   destination=control,
-							   destinationAttr='rigInterface',
-							   kind=MayaAttrType.string,
-							   )
+			self.connectToInterface(child=control,
+									interface=self.interface,
+									attribute='hipControl',
+									)
 
 		self._hipControl = control
 		return
@@ -143,18 +128,10 @@ class ROOT(BASERIG):
 	@repoControl.setter
 	def repoControl(self, control):
 		if self.interface:
-			createRelationship(source=self.interface,
-							   sourceAttr='repoControl',
-							   destination=control,
-							   destinationAttr='rigParent'
-							   )
-
-			createRelationship(source=self.interface,
-							   sourceAttr='rigChildren',
-							   destination=control,
-							   destinationAttr='rigInterface',
-							   kind=MayaAttrType.string
-							   )
+			self.connectToInterface(child=control,
+									interface=self.interface,
+									attribute='repoControl',
+									)
 
 		self._repoControl = control
 		return
@@ -162,7 +139,6 @@ class ROOT(BASERIG):
 	####################################################################################################################
 	# Methods
 	####################################################################################################################
-
 
 	def create(self):
 		self.createRootControl()
@@ -288,15 +264,15 @@ class ROOT(BASERIG):
 			scale = distanceFromOrigin(item)
 
 		self.hipControl = RIGCONTROL(name=Component.rig,
-									  prefix=Part.hip,
-									  item=item,
-									  side=Position.center,
-									  wireType=WireType.circleRotate,
-									  scale=scale * .2,
-									  color=WireColor.yellow,
-									  offset=True,
-									  axis=[1, 1, 0]
-									  )
+									 prefix=Part.hip,
+									 item=item,
+									 side=Position.center,
+									 wireType=WireType.circleRotate,
+									 scale=scale * .2,
+									 color=WireColor.yellow,
+									 offset=True,
+									 axis=[1, 1, 0]
+									 )
 		# Hierarchy
 		self.hipControl.parent = self._cogControl.offset.transform
 		self.hipControl.snapTo(item)

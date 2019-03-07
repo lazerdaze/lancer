@@ -336,10 +336,10 @@ class JointLabelOtherType(object):
 
 
 AnimCurves = ['animCurveUL',
-              'animCurveUU',
-              'animCurveUA',
-              'animCurveUT'
-              ]
+			  'animCurveUU',
+			  'animCurveUA',
+			  'animCurveUT'
+			  ]
 
 
 def longName(*args):
@@ -555,4 +555,26 @@ class TokenizeLongName(object):
 		return
 
 
+def sectorGenerator(value):
+	chars = CHARACTERSTR.upper()
+	charsLength = len(chars)
 
+	baseIndex = 0
+	setIndex = 0
+	setSuffix = 1
+
+	for x in range(value):
+		if baseIndex < charsLength:
+			yield chars[baseIndex]
+			baseIndex += 1
+		else:
+			if setIndex >= charsLength:
+				setIndex = 0
+				setSuffix += 1
+
+			yield '{}{}'.format(chars[setIndex], setSuffix)
+			setIndex += 1
+
+
+def createSector(length):
+	return [x for x in sectorGenerator(length)]

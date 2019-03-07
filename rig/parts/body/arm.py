@@ -88,34 +88,23 @@ class ARM(BASERIG):
 		self.createHandControl()
 
 		# Hierarchy
-		# TODO: Simplify: Parent, Root, Hierarchy
-
-		local = None
-
+		# Local
 		if self.parent:
-			if isinstance(self.parent, object):
-				if hasattr(self.parent, Component.local):
-					local = getattr(self.parent, Component.local)
+			local = self.getLocal(self.parent)
 
-		if local:
-			cmds.parent(self.topNode, local)
+			if local:
+				cmds.parent(self.topNode, local)
 
-		world = None
+		# World
+		if not self.root:
+			if self.parent:
+				self.root = self.getRoot(self.parent)
 
 		if self.root:
-			if isinstance(self.root, object):
-				if hasattr(self.root, Component.local):
-					world = getattr(self.root, Component.local)
+			world = self.getWorld(self.root)
 
-			else:
-				if attributeExist(self.root, 'cogControl'):
-					cog = getConnectedNode(self.root, 'cogControl')
-
-					if attributeExist(cog, 'offset'):
-						world = getConnectedNode(cog, 'offset')
-
-		if world and self.ikTopNode:
-			cmds.parent(self.ikTopNode, world)
+			if world:
+				cmds.parent(self.ikTopNode, world)
 		return
 
 	def createCollarControl(self):
@@ -189,31 +178,21 @@ class HAND(AbstractNode):
 
 		self.finger = []
 
-		self.create()
-		self.finalize()
-
 	def create(self):
 		children = getJointChildren(self.hand)
+		charString = createSector(len(children))
 
 		i = 0
 		for child in children:
 			joints = getJointOrder(child)
-			finger = DIGIT(items=joints,
-						   name=Part.finger,
+			finger = DIGIT(prefix=self.prefix,
 						   side=self.side,
-						   networkRoot=self.networkRoot,
-						   index=i,
+						   name=Part.finger,
+						   sector=charString[i].upper(),
+						   items=joints,
 						   )
+
 			self.finger.append(finger)
 			i += 1
 		return
-
-	def finalize(self):
-		if self.interface:
-			pass
-		return
-
-
-
-
 

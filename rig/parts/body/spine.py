@@ -52,15 +52,16 @@ class SPINE(BASERIG):
 		# Hierarchy
 		cmds.parent(self.fkTopNode, self.joint[0], self.topNode)
 
-		local = None
-		world = None
-
 		if self.root:
-			if isinstance(self.root, object):
-				if hasattr(self.root, Component.world):
-					world = getattr(self.root, Component.world)
-				if hasattr(self.root, Component.local):
-					local = getattr(self.root, Component.local)
-		if local:
-			cmds.parent(self.topNode, local)
+			# Local
+			local = self.getLocal(self.parent)
+
+			if local:
+				cmds.parent(self.topNode, local)
+
+			# World
+			world = self.getWorld(self.root)
+
+			if world:
+				cmds.parent(self.ikTopNode, world)
 		return

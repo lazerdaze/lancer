@@ -1,6 +1,5 @@
 # Lancer Modules
 from rig.utils import *
-from rigBase import RIGBASE
 from rig.parts.baseRig import BASERIG
 
 # Maya Modules
@@ -8,9 +7,16 @@ from maya import cmds
 
 
 class DIGIT(BASERIG):
-	def __init__(self, *args, **kwargs):
-
-		items = kwargs.get('items', [])
+	def __init__(self,
+				 prefix=Part.digit,
+				 side=Position.left,
+				 name=None,
+				 sector=None,
+				 index=None,
+				 items=None,
+				 parent=None,
+				 root=None,
+				 ):
 
 		metacarpal = None
 
@@ -21,12 +27,21 @@ class DIGIT(BASERIG):
 		self.metacarpalItem = metacarpal
 		self._metacarpalJoint = None
 
-		BASERIG.__init__(self, *args, **kwargs)
+		BASERIG.__init__(self,
+						 prefix=prefix,
+						 side=side,
+						 name=name,
+						 sector=sector,
+						 index=index,
+						 items=items,
+						 parent=parent,
+						 root=root,
+						 axis=[1, 1, 0],
+						 )
 
 	####################################################################################################################
 	# Properties
 	####################################################################################################################
-
 	@property
 	def metacarpalJoint(self):
 		if self._metacarpalJoint:
@@ -41,18 +56,11 @@ class DIGIT(BASERIG):
 	@metacarpalJoint.setter
 	def metacarpalJoint(self, joint):
 		if self.interface:
-			createRelationship(source=self.interface,
-			                   sourceAttr='cogControl',
-			                   destination=joint,
-			                   destinationAttr='rigParent'
-			                   )
+			self.connectToInterface(child=joint,
+									interface=self.interface,
+									attribute='metacarpalJoint'
+									)
 
-			createRelationship(source=self.interface,
-			                   sourceAttr='rigChildren',
-			                   destination=joint,
-			                   destinationAttr='rigInterface',
-			                   kind=MayaAttrType.string,
-			                   )
 		self._metacarpalJoint = joint
 		return
 
@@ -81,34 +89,23 @@ class DIGIT(BASERIG):
 		self.createChildChain(self.items)
 
 		# Hierarchy
-		# TODO: Simplify: Parent, Root, Hierarchy
-
-		local = None
-
+		# Local
 		if self.parent:
-			if isinstance(self.parent, object):
-				if hasattr(self.parent, Component.local):
-					local = getattr(self.parent, Component.local)
+			local = self.getLocal(self.parent)
 
-		if local:
-			cmds.parent(self.topNode, local)
+			if local:
+				cmds.parent(self.topNode, local)
 
-		world = None
+		# World
+		if not self.root:
+			if self.parent:
+				self.root = self.getRoot(self.parent)
 
 		if self.root:
-			if isinstance(self.root, object):
-				if hasattr(self.root, Component.local):
-					world = getattr(self.root, Component.local)
+			world = self.getWorld(self.root)
 
-			else:
-				if attributeExist(self.root, 'cogControl'):
-					cog = getConnectedNode(self.root, 'cogControl')
-
-					if attributeExist(cog, 'offset'):
-						world = getConnectedNode(cog, 'offset')
-
-		if world and self.ikTopNode:
-			cmds.parent(self.ikTopNode, world)
+			if world:
+				cmds.parent(self.ikTopNode, world)
 		return
 
 	def createPhalanges(self):
@@ -117,12 +114,12 @@ class DIGIT(BASERIG):
 
 	def createMetacarpal(self):
 		self.metacarpalJoint = Joint(prefix=self.prefix,
-		                             name='metacarpal',
-		                             side=self.side,
-		                             kind=camelCase(Component.rig, Component.joint, capitalize=False),
-		                             drawStyle=JointDrawStyle.none,
-		                             item=self.metacarpalItem
-		                             )
+									 name='metacarpal',
+									 side=self.side,
+									 kind=camelCase(Component.rig, Component.joint, capitalize=False),
+									 drawStyle=JointDrawStyle.none,
+									 item=self.metacarpalItem
+									 )
 
 		self.metacarpalJoint.snapTo(self.metacarpalItem)
 		self.metacarpalJoint.freezeTransforms()
