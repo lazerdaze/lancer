@@ -8,15 +8,16 @@ from digit import DIGIT
 from maya import cmds
 
 
+# TODO: IK Foot Rolls
 class LEG(BASERIG):
 	def __init__(self,
-	             hip,
-	             knee,
-	             foot,
-	             side,
-	             parent=None,
-	             root=None,
-	             ):
+				 hip,
+				 knee,
+				 foot,
+				 side=Position.left,
+				 parent=None,
+				 root=None,
+				 ):
 		items = [hip, knee, foot]
 
 		# Items
@@ -25,13 +26,13 @@ class LEG(BASERIG):
 		self.footItem = foot
 
 		BASERIG.__init__(self,
-		                 prefix=Part.leg,
-		                 side=side,
-		                 items=items,
-		                 parent=parent,
-		                 root=root,
-		                 axis=[1, 1, 0],
-		                 )
+						 prefix=Part.leg,
+						 side=side,
+						 items=items,
+						 parent=parent,
+						 root=root,
+						 axis=[1, 1, 0],
+						 )
 
 	####################################################################################################################
 	# Methods
@@ -54,46 +55,49 @@ class LEG(BASERIG):
 		self.createFootControl()
 
 		# Hierarchy
-		# TODO: Simplify: Parent, Root, Hierarchy
 
-		local = None
-
+		# Hierarchy
+		# Local
 		if self.parent:
-			if isinstance(self.parent, object):
-				if hasattr(self.parent, Component.local):
-					local = getattr(self.parent, Component.local)
+			local = self.getLocal(self.parent)
 
-		if local:
-			cmds.parent(self.topNode, local)
+			if local:
+				cmds.parent(self.topNode, local)
 
-		world = None
+		# World
+		if not self.root:
+			if self.parent:
+				self.root = self.getRoot(self.parent)
 
 		if self.root:
-			if isinstance(self.root, object):
-				if hasattr(self.root, Component.local):
-					world = getattr(self.root, Component.local)
+			world = self.getWorld(self.root)
 
-			else:
-				if attributeExist(self.root, 'cogControl'):
-					cog = getConnectedNode(self.root, 'cogControl')
-
-					if attributeExist(cog, 'offset'):
-						world = getConnectedNode(cog, 'offset')
-
-		if world and self.ikTopNode:
-			cmds.parent(self.ikTopNode, world)
+			if world:
+				cmds.parent(self.ikTopNode, world)
 
 	def createFootControl(self):
 		return
 
 
+class LEFTLEG(LEG):
+	def __init__(self, *args, **kwargs):
+		kwargs['side'] = Position.left
+		LEG.__init__(self, *args, **kwargs)
+
+
+class RIGHTLEG(LEG):
+	def __init__(self, *args, **kwargs):
+		kwargs['side'] = Position.right
+		LEG.__init__(self, *args, **kwargs)
+
+
 class FOOT(AbstractNode):
 	def __init__(self,
-	             hand,
-	             interface=None,
-	             *args,
-	             **kwargs
-	             ):
+				 hand,
+				 interface=None,
+				 *args,
+				 **kwargs
+				 ):
 
 		AbstractNode.__init__(self, *args, **kwargs)
 
@@ -117,11 +121,11 @@ class FOOT(AbstractNode):
 		for child in children:
 			joints = getJointOrder(child)
 			finger = DIGIT(items=joints,
-			               name=Part.finger,
-			               side=self.side,
-			               networkRoot=self.networkRoot,
-			               index=i,
-			               )
+						   name=Part.finger,
+						   side=self.side,
+						   networkRoot=self.networkRoot,
+						   index=i,
+						   )
 			self.finger.append(finger)
 			i += 1
 		return
@@ -134,15 +138,15 @@ class FOOT(AbstractNode):
 
 class LEG_LEGACY(RIGBASE):
 	def __init__(self,
-	             side,
-	             hip,
-	             knee,
-	             foot,
-	             toe,
-	             networkRoot=None,
-	             name=Part.leg,
-	             index=0,
-	             ):
+				 side,
+				 hip,
+				 knee,
+				 foot,
+				 toe,
+				 networkRoot=None,
+				 name=Part.leg,
+				 index=0,
+				 ):
 		RIGBASE.__init__(self)
 
 		self.toe = toe
@@ -172,14 +176,14 @@ class LEG_LEGACY(RIGBASE):
 
 		self.createGrandchildren([self.hip, self.knee, self.foot])
 		self.createLocalWorld(obj=self.fkControl[0],
-		                      local=self.fkGroup[0],
-		                      )
+							  local=self.fkGroup[0],
+							  )
 		self.createSet(self.fkControl + self.ikControl)
 		self.createNetwork(typ=longName(self.name,
-		                                self.side.upper()[0],
-		                                self.index,
-		                                )
-		                   )
+										self.side.upper()[0],
+										self.index,
+										)
+						   )
 		self.createNetworkConnections()
 
 	def getScale(self):
@@ -204,20 +208,20 @@ class LEG_LEGACY(RIGBASE):
 
 	def createToe(self):
 		ctl = CONTROL(name=longName(self.name,
-		                            self.side[0],
-		                            self.index,
-		                            Component.fk,
-		                            Part.toe.capitalize(),
-		                            Component.control,
-		                            ),
-		              typ=WireType.circleRotate,
-		              scale=self.scale,
-		              axis=[1, 0, 0],
-		              child=self.toe,
-		              side=self.side,
-		              label=Part.collar,
-		              color=WireColor.blue,
-		              )
+									self.side[0],
+									self.index,
+									Component.fk,
+									Part.toe.capitalize(),
+									Component.control,
+									),
+					  typ=WireType.circleRotate,
+					  scale=self.scale,
+					  axis=[1, 0, 0],
+					  child=self.toe,
+					  side=self.side,
+					  label=Part.collar,
+					  color=WireColor.blue,
+					  )
 		lockScale(ctl.transform)
 
 		parent = cmds.listRelatives(self.toe, parent=True)
@@ -231,14 +235,14 @@ class LEG_LEGACY(RIGBASE):
 
 	def createFootRoll(self):
 		self.roll = createIKFootRollNulls(foot=self.foot,
-		                                  toe=self.toe,
-		                                  control=self.ikControl[-1],
-		                                  name=longName(self.name,
-		                                                self.side[0],
-		                                                self.index,
-		                                                Component.ik,
-		                                                'footRoll'),
-		                                  )
+										  toe=self.toe,
+										  control=self.ikControl[-1],
+										  name=longName(self.name,
+														self.side[0],
+														self.index,
+														Component.ik,
+														'footRoll'),
+										  )
 
 		# self.roll.accuratePositions()
 		self.roll.createWire()
@@ -261,10 +265,10 @@ class LEG_LEGACY(RIGBASE):
 
 	def createToeFKIK(self):
 		pc = cmds.parentConstraint(self.toeFKControl,
-		                           self.toeIKControl,
-		                           self.toe,
-		                           n='{}_fkik_pc0'.format(self.toe),
-		                           mo=True)[0]
+								   self.toeIKControl,
+								   self.toe,
+								   n='{}_fkik_pc0'.format(self.toe),
+								   mo=True)[0]
 
 		for axis in ['X', 'Y', 'Z']:
 			cmds.disconnectAttr('{}.constraintTranslate{}'.format(pc, axis), '{}.translate{}'.format(self.toe, axis))
@@ -277,13 +281,3 @@ class LEG_LEGACY(RIGBASE):
 		cmds.connectAttr('{}.outputX'.format(reverse), '{}.{}'.format(pc, pcAttr[0]), f=True)
 		cmds.connectAttr('{}.outputX'.format(reverse), '{}.v'.format(self.toeFKGroup), f=True)
 		return
-
-
-class LEFTLEG(LEG):
-	def __init__(self, *args, **kwargs):
-		LEG.__init__(self, *args, **kwargs)
-
-
-class RIGHTLEG(LEG):
-	def __init__(self, *args, **kwargs):
-		LEG.__init__(self, *args, **kwargs)

@@ -45,7 +45,9 @@ class SPINE(BASERIG):
 
 		# Controls
 		self.createFKChain(self.items, autoName=False)
-		# self.createSplineFKIK(self.items)  # TODO: SPLINE IK
+
+		# TODO: SPLINE IK
+		# self.createSplineFKIK(self.items)
 		self.constrainChain(self.fkControl, self.joint)
 		self.constrainChain(self.joint, self.items)
 

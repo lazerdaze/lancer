@@ -84,9 +84,6 @@ class ARM(BASERIG):
 		# Child Controls
 		self.createChildChain(self.items)
 
-		# Hand
-		self.createHandControl()
-
 		# Hierarchy
 		# Local
 		if self.parent:
@@ -129,7 +126,6 @@ class ARM(BASERIG):
 										 item=self.collarJoint,
 										 )
 
-		# TODO: Arm Collar IK Control
 		self.collarIKControl = None
 
 		# Constrain
@@ -143,56 +139,17 @@ class ARM(BASERIG):
 										   )
 		return
 
-	def createHandControl(self):
-		HAND(hand=self.handItem, interface=self.interface)
-		return
 
 
 class LEFTARM(ARM):
-	def __init__(self, side=Position.left, *args, **kwargs):
-		ARM.__init__(self, side=side, *args, **kwargs)
+	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.arm
+		kwargs['side'] = Position.left
+		ARM.__init__(self, *args, **kwargs)
 
 
 class RIGHTARM(ARM):
-	def __init__(self, side=Position.right, *args, **kwargs):
-		ARM.__init__(self, side=side, *args, **kwargs)
-
-
-class HAND(AbstractNode):
-	def __init__(self,
-				 hand,
-				 interface=None,
-				 *args,
-				 **kwargs
-				 ):
-
-		AbstractNode.__init__(self, *args, **kwargs)
-
-		self.hand = hand
-		self.interface = interface
-		self.thumb = None
-		self.indexFinger = None
-		self.middleFinger = None
-		self.ringFinger = None
-		self.pinkyFinger = None
-
-		self.finger = []
-
-	def create(self):
-		children = getJointChildren(self.hand)
-		charString = createSector(len(children))
-
-		i = 0
-		for child in children:
-			joints = getJointOrder(child)
-			finger = DIGIT(prefix=self.prefix,
-						   side=self.side,
-						   name=Part.finger,
-						   sector=charString[i].upper(),
-						   items=joints,
-						   )
-
-			self.finger.append(finger)
-			i += 1
-		return
-
+	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.arm
+		kwargs['side'] = Position.right
+		ARM.__init__(self, *args, **kwargs)

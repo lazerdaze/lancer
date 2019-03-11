@@ -559,7 +559,6 @@ class BASERIG(AbstractNode):
 		self.ikStretch = stretchGroup
 		return
 
-	# TODO: IK Spline
 	def createIKSplineChain(self):
 		return
 
@@ -568,6 +567,7 @@ class BASERIG(AbstractNode):
 	####################################################################################################################
 
 	def createChildChain(self, items):
+		items = flatList(items)
 		bindDict = {}
 		sectors = CHARACTERSTR
 
@@ -792,7 +792,6 @@ class BASERIG(AbstractNode):
 		self.createFKIKConnections(self.joint, interface)
 		return
 
-	# TODO; Spline FKIK
 	def createSplineFKIK(self, items):
 		return
 

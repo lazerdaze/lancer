@@ -270,6 +270,19 @@ class Part(object):
 	pinky = 'pinky'
 	digit = 'digit'
 
+	# Finger
+	indexFinger = 'indexFinger'
+	middleFinger = 'middleFinger'
+	ringFinger = 'ringFinger'
+	pinkyFinger = 'pinkyFinger'
+
+	# Toe
+	bigToe = 'bigToe'
+	indexToe = 'indexToe'
+	middleToe = 'middleToe'
+	ringToe = 'ringToe'
+	pinkyToe = 'pinkyToe'
+
 	# Misc
 	prop = 'prop'
 	tail = 'tail'

@@ -6,14 +6,16 @@ from rig.parts.baseRig import BASERIG
 from maya import cmds
 
 
+# TODO: Create "Uber" Plugin Node that handles Curl, Spread, etc - Pose SDK
+
 class DIGIT(BASERIG):
 	def __init__(self,
+				 items,
 				 prefix=Part.digit,
 				 side=Position.left,
 				 name=None,
 				 sector=None,
 				 index=None,
-				 items=None,
 				 parent=None,
 				 root=None,
 				 ):
@@ -25,6 +27,8 @@ class DIGIT(BASERIG):
 			items.remove(metacarpal)
 
 		self.metacarpalItem = metacarpal
+		self.metacarpalChild = []
+		self.metacarpalGrandchild = []
 		self._metacarpalJoint = None
 
 		BASERIG.__init__(self,
@@ -78,12 +82,21 @@ class DIGIT(BASERIG):
 		# Interface
 		self.interface = self.createInterfaceControl(child=self.items[0])
 
+		# Phalanges
+		self.createPhalanges()
+
 		# MetaCarpel
 		if self.metacarpalItem:
 			self.createMetacarpal()
-
-		# Phalanges
-		self.createPhalanges()
+			cmds.aimConstraint(self.joint[0],
+							   self.metacarpalJoint,
+							   name='{}_constraint0'.format(self.metacarpalJoint),
+							   mo=True,
+							   aimVector=[1, 0, 0],
+							   upVector=[0, 1, 0],
+							   worldUpType='none',
+							   worldUpVector=[0, 1, 0],
+							   )
 
 		# Child Controls
 		self.createChildChain(self.items)
@@ -133,51 +146,153 @@ class DIGIT(BASERIG):
 		return
 
 
-def THUMBFINGER(DIGIT):
+class FINGER(DIGIT):
 	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.finger
 		DIGIT.__init__(self, *args, **kwargs)
 
 
-def INDEXFINGER(DIGIT):
+class TOE(DIGIT):
 	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.toe
 		DIGIT.__init__(self, *args, **kwargs)
 
 
-def MIDDLEFINGER(DIGIT):
+class LEFTTHUMB(DIGIT):
 	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.thumb
+		kwargs['side'] = Position.left
 		DIGIT.__init__(self, *args, **kwargs)
 
 
-def RINGFINGER(DIGIT):
+class LEFTINDEXFINGER(DIGIT):
 	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.indexFinger
+		kwargs['side'] = Position.left
 		DIGIT.__init__(self, *args, **kwargs)
 
 
-def PINKYFINGER(DIGIT):
+class LEFTMIDDLEFINGER(DIGIT):
 	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.middleFinger
+		kwargs['side'] = Position.left
 		DIGIT.__init__(self, *args, **kwargs)
 
 
-def BIGTOE(DIGIT):
+class LEFTRINGFINGER(DIGIT):
 	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.ringFinger
+		kwargs['side'] = Position.left
 		DIGIT.__init__(self, *args, **kwargs)
 
 
-def INDEXTOE(DIGIT):
+class LEFTPINKYFINGER(DIGIT):
 	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.pinkyFinger
+		kwargs['side'] = Position.left
 		DIGIT.__init__(self, *args, **kwargs)
 
 
-def MIDDLETOE(DIGIT):
+class LEFTBIGTOE(DIGIT):
 	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.bigToe
+		kwargs['side'] = Position.left
 		DIGIT.__init__(self, *args, **kwargs)
 
 
-def RINGTOE(DIGIT):
+class LEFTINDEXTOE(DIGIT):
 	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.indexToe
+		kwargs['side'] = Position.left
 		DIGIT.__init__(self, *args, **kwargs)
 
 
-def PINKYTOE(DIGIT):
+class LEFTMIDDLETOE(DIGIT):
 	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.middleToe
+		kwargs['side'] = Position.left
+		DIGIT.__init__(self, *args, **kwargs)
+
+
+class LEFTRINGTOE(DIGIT):
+	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.ringToe
+		kwargs['side'] = Position.left
+		DIGIT.__init__(self, *args, **kwargs)
+
+
+class LEFTPINKYTOE(DIGIT):
+	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.pinkyToe
+		kwargs['side'] = Position.left
+		DIGIT.__init__(self, *args, **kwargs)
+
+
+class RIGHTTHUMB(DIGIT):
+	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.thumb
+		kwargs['side'] = Position.right
+		DIGIT.__init__(self, *args, **kwargs)
+
+
+class RIGHTINDEXFINGER(DIGIT):
+	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.indexFinger
+		kwargs['side'] = Position.right
+		DIGIT.__init__(self, *args, **kwargs)
+
+
+class RIGHTMIDDLEFINGER(DIGIT):
+	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.middleFinger
+		kwargs['side'] = Position.right
+		DIGIT.__init__(self, *args, **kwargs)
+
+
+class RIGHTRINGFINGER(DIGIT):
+	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.ringFinger
+		kwargs['side'] = Position.right
+		DIGIT.__init__(self, *args, **kwargs)
+
+
+class RIGHTPINKYFINGER(DIGIT):
+	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.pinkyFinger
+		kwargs['side'] = Position.right
+		DIGIT.__init__(self, *args, **kwargs)
+
+
+class RIGHTBIGTOE(DIGIT):
+	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.bigToe
+		kwargs['side'] = Position.right
+		DIGIT.__init__(self, *args, **kwargs)
+
+
+class RIGHTINDEXTOE(DIGIT):
+	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.indexToe
+		kwargs['side'] = Position.right
+		DIGIT.__init__(self, *args, **kwargs)
+
+
+class RIGHTMIDDLETOE(DIGIT):
+	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.middleToe
+		kwargs['side'] = Position.right
+		DIGIT.__init__(self, *args, **kwargs)
+
+
+class RIGHTRINGTOE(DIGIT):
+	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.ringToe
+		kwargs['side'] = Position.right
+		DIGIT.__init__(self, *args, **kwargs)
+
+
+class RIGHTPINKYTOE(DIGIT):
+	def __init__(self, *args, **kwargs):
+		kwargs['prefix'] = Part.pinkyToe
+		kwargs['side'] = Position.right
 		DIGIT.__init__(self, *args, **kwargs)
