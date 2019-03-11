@@ -1066,9 +1066,9 @@ class Joint(DagNode):
 	             type=None,
 	             otherType=None,
 	             color=None,
-	             *args,
-	             **kwargs
 	             ):
+
+
 
 		DagNode.__init__(self,
 		                 name=name,
@@ -1079,9 +1079,8 @@ class Joint(DagNode):
 		                 sector=sector,
 		                 kind=kind,
 		                 side=side,
-		                 *args,
-		                 **kwargs
 		                 )
+
 
 		'''
 		Base Joint class to be used in all parts classes.
@@ -1263,9 +1262,16 @@ class Joint(DagNode):
 	@type.setter
 	def type(self, typeValue):
 		if self.isValid():
+			if isinstance(typeValue, unicode):
+				typeValue = str(typeValue)
+
 			if isinstance(typeValue, str):
 				if hasattr(JointLabelType, typeValue):
 					value = getattr(JointLabelType, typeValue)
+
+				elif hasattr(JointLabelType, typeValue.lower()):
+					value = getattr(JointLabelType, typeValue.lower())
+
 				else:
 					raise ValueError('Type "{}" not valid.'.format(typeValue))
 
@@ -1289,10 +1295,13 @@ class Joint(DagNode):
 	@otherType.setter
 	def otherType(self, otherType):
 		if self.isValid():
+			if isinstance(otherType, unicode):
+				otherType = str(otherType)
+
 			if isinstance(otherType, str):
 				value = otherType
 				self.type = JointLabelType.other
-			elif otherType is None:
+			elif otherType is None or otherType == '':
 				value = ''
 			else:
 				raise ValueError('Other type "{}" not valid. Must be str or None.'.format(otherType))

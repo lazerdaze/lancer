@@ -44,6 +44,15 @@ def createControl(name='control', shape=WireType.circle, axis=None, scale=1.0, c
 		             lock=True,
 		             )
 
+	# Scale
+	attrName = 'globalScale'
+
+	cmds.addAttr(node, ln=attrName, dv=1, k=True)
+
+	for axis in ['x', 'y', 'z']:
+		cmds.connectAttr('{}.{}'.format(node, attrName), '{}.s{}'.format(node, axis))
+		cmds.setAttr('{}.s{}'.format(node, axis), lock=True, keyable=False, channelBox=False)
+
 	# Color
 	if color and isinstance(color, list):
 		cmds.setAttr(attributeName(curveShape, MayaAttr.useObjectColor), 0)
@@ -85,9 +94,9 @@ class Control(Joint):
 	             axis=None,
 	             scale=1.0,
 	             color=WireColor.blue,
-	             *args,
-	             **kwargs
 	             ):
+
+
 
 		'''
 		Base Control class to be used in all parts classes.
@@ -119,9 +128,8 @@ class Control(Joint):
 		               type=type,
 		               otherType=otherType,
 		               color=color,
-		               *args,
-		               **kwargs
 		               )
+
 
 	def create(self, *args, **kwargs):
 		# Main Control
@@ -228,9 +236,10 @@ class RIGCONTROL(Control):
 	             scale=1.0,
 	             color=WireColor.blue,
 	             offset=False,
-	             *args,
-	             **kwargs
 	             ):
+
+
+
 		# Null Groups
 		self._nullPosition = None
 		self._nullConnection = None
@@ -255,9 +264,8 @@ class RIGCONTROL(Control):
 		                 color=color,
 		                 type=type,
 		                 otherType=otherType,
-		                 *args,
-		                 **kwargs
 		                 )
+
 
 		if not self.wrapper:
 			self.createNulls()
@@ -277,7 +285,7 @@ class RIGCONTROL(Control):
 			                      name=self.name,
 			                      sector=self.sector,
 			                      index=self.index,
-			                      kind=Component.offsetControl,
+			                      kind='{}{}'.format(self.kind, Component.offset.capitalize()),
 			                      axis=self.axis,
 			                      scale=self.wireScale * .8,
 			                      color=self.color,
@@ -305,7 +313,7 @@ class RIGCONTROL(Control):
 			                   name=self.name,
 			                   sector=self.sector,
 			                   index=self.index,
-			                   kind=null,
+			                   kind=longName(self.kind, null),
 			                   )
 
 			if i != 0:
@@ -349,6 +357,9 @@ class RIGCONTROL(Control):
 	def nullConnection(self):
 		attr = Component.connection
 
+		if self._nullConnection:
+			return self._nullConnection
+
 		if self.isValid():
 			if attributeExist(self.longName, attr):
 				return getConnectedNode(self.longName, attr)
@@ -369,6 +380,9 @@ class RIGCONTROL(Control):
 	@property
 	def nullZero(self):
 		attr = Component.zero
+
+		if self._nullZero:
+			return self._nullZero
 
 		if self.isValid():
 			if attributeExist(self.longName, attr):
@@ -513,6 +527,7 @@ class INTERFACE_CONTROL(RIGCONTROL):
 		                    kind=kind,
 		                    offset=offset,
 		                    )
+
 
 		# Hierarchy
 		self._joint = []

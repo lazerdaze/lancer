@@ -145,11 +145,21 @@ class ROOT(BASERIG):
 
 		if self.cogItem:
 			self.createCOGControl()
+		else:
+			# Local
+			self.local = DagNode(prefix=self.prefix,
+			                     side=self.side,
+			                     name=self.name,
+			                     sector=self.sector,
+			                     index=self.index,
+			                     kind=Component.local,
+			                     )
+
+			self.local.parent = self.interface.offset.transform
 
 		if self.hipItem:
 			self.createHipControl()
 
-		self.set = self.createSet(self.allControls)
 		return
 
 	def createRootControl(self, item=None):
@@ -174,7 +184,17 @@ class ROOT(BASERIG):
 										   )
 
 		self.interface.offset.rigInterface = self.interface
-		self.world = self.interface.offset.transform
+
+		# World
+		self.world = DagNode(prefix=self.prefix,
+		                     side=self.side,
+		                     name=self.name,
+		                     sector=self.sector,
+		                     index=self.index,
+		                     kind=Component.world,
+		                     )
+
+		self.world.parent = self.interface.offset.transform
 
 		# createRootOffset
 		attrName = 'repoVisibility'
@@ -182,7 +202,7 @@ class ROOT(BASERIG):
 		self.repoControl = Control(prefix=self.prefix,
 								   name=self.name,
 								   item=item,
-								   wireType=WireType.sphere,
+								   wire=WireType.sphere,
 								   axis=[0, 0, 0],
 								   scale=self.scale * .25,
 								   color=WireColor.purple,
@@ -200,16 +220,6 @@ class ROOT(BASERIG):
 		if item:
 			cmds.parentConstraint(self.repoControl, item, mo=True)
 			cmds.scaleConstraint(self.repoControl, item, mo=True)
-
-		# Global
-		globalNode = self.interface.nullConnection
-		attrName = 'globalScale'
-
-		cmds.addAttr(self.interface, ln=attrName, dv=1)
-		cmds.setAttr('{}.{}'.format(self.interface, attrName), k=False, channelBox=True)
-
-		for axis in ['x', 'y', 'z']:
-			cmds.connectAttr('{}.{}'.format(self.interface, attrName), '{}.s{}'.format(globalNode, axis))
 		return
 
 	def createCOGControl(self, item=None):
@@ -235,7 +245,16 @@ class ROOT(BASERIG):
 											offset=WireType.circleRotate,
 											)
 
-		self.local = self.cogControl.offset.transform
+		# Local
+		self.local = DagNode(prefix=self.prefix,
+			                   side=self.side,
+			                   name=self.name,
+			                   sector=self.sector,
+			                   index=self.index,
+			                   kind=Component.local,
+			                   )
+
+		self.local.parent = self.cogControl.offset.transform
 
 		# Hierarchy
 
@@ -267,7 +286,7 @@ class ROOT(BASERIG):
 									 prefix=Part.hip,
 									 item=item,
 									 side=Position.center,
-									 wireType=WireType.circleRotate,
+									 wire=WireType.circleRotate,
 									 scale=scale * .2,
 									 color=WireColor.yellow,
 									 offset=True,

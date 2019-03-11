@@ -204,7 +204,7 @@ def createPoleVector(joint, ctl, ik, name='ik_poleVector'):
 
 
 def createAimVector(parent, child, name='aimVector', aimVector=None):
-	if aimVector is not None:
+	if aimVector is None:
 		aimVector = [0, 0, 1]
 
 	aim = cmds.aimConstraint(parent,

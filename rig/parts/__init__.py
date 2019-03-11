@@ -5,11 +5,14 @@
 #
 #
 from baseRig import BASERIG
-from body.arm import ARM, LEFTARM, RIGHTARM, HAND
+from body.arm import ARM, LEFTARM, RIGHTARM
 from body.rigBase import RIGBASE
-from body.digit import DIGIT
+from body.digit import DIGIT, LEFTDIGIT, RIGHTDIGIT
+from body.digit import LEFTTHUMB, LEFTINDEXFINGER, LEFTMIDDLEFINGER, LEFTRINGFINGER, LEFTPINKYFINGER 
+from body.digit import RIGHTTHUMB, RIGHTINDEXFINGER, RIGHTMIDDLEFINGER, RIGHTRINGFINGER, RIGHTPINKYFINGER
+from body.digit import LEFTBIGTOE, LEFTINDEXTOE, LEFTMIDDLETOE, LEFTRINGTOE, LEFTPINKYTOE
+from body.digit import RIGHTBIGTOE, RIGHTINDEXTOE, RIGHTMIDDLETOE, RIGHTRINGTOE, RIGHTPINKYTOE
 from body.head import HEAD
 from body.leg import LEG, LEFTLEG, RIGHTLEG
 from body.root import ROOT
-from body.spine import SPINE
-
+from body.spine import SPINE, NECK

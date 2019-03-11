@@ -15,7 +15,14 @@ from maya import cmds
 
 
 def nodeExists(node):
-	return cmds.objExists(node)
+	if isinstance(node, (str, unicode)):
+		return cmds.objExists(node)
+	if isinstance(node, object):
+		if hasattr(node, 'transform'):
+			result = getattr(node, 'transform')
+			if result:
+				return cmds.objExists(result)
+	return False
 
 
 def replacementNodeName(name):
@@ -114,7 +121,9 @@ class AbstractNode(object):
 	             sector=None,
 	             kind=None,
 	             wrapper=False,
+	             color=None,
 	             ):
+
 		'''
 		Abstract Node to be sub-classed by all dag node related classes.
 
@@ -140,6 +149,7 @@ class AbstractNode(object):
 		self._sector = sector
 		self._index = index
 		self._kind = kind
+		self._color = color
 
 		# Attributes
 		self.wrapper = wrapper
@@ -186,7 +196,7 @@ class AbstractNode(object):
 
 	@property
 	def sector(self):
-		return self._prefix
+		return self._sector
 
 	@sector.setter
 	def sector(self, sector):
@@ -282,6 +292,18 @@ class AbstractNode(object):
 		setattr(self, attribute, value)
 		return
 
+	####################################################################################################################
+	# Color
+	####################################################################################################################
+	@property
+	def color(self):
+		return self._color
+
+	@color.setter
+	def color(self, color):
+		self._color = color
+		return
+
 
 ########################################################################################################################
 #
@@ -292,11 +314,27 @@ class AbstractNode(object):
 ########################################################################################################################
 
 class DagNode(AbstractNode):
-	def __init__(self, *args, **kwargs):
-		AbstractNode.__init__(self, *args, **kwargs)
-
-		# Dag Node Attributes
-		self._color = None
+	def __init__(self,
+	             name=None,
+	             prefix=None,
+	             parent=None,
+	             side=None,
+	             index=None,
+	             sector=None,
+	             kind=None,
+	             wrapper=False,
+	             color=None, ):
+		AbstractNode.__init__(self,
+		                      name=name,
+		                      prefix=prefix,
+		                      parent=parent,
+		                      side=side,
+		                      index=index,
+		                      sector=sector,
+		                      kind=kind,
+		                      wrapper=wrapper,
+		                      color=color,
+		                      )
 
 		# Rig Relationships
 		self._rigPart = None
@@ -315,22 +353,22 @@ class DagNode(AbstractNode):
 			self.transform = self.name
 			self.shape = nodeShapes(self.name)
 		else:
-			index = self.nextAvailableIndex(prefix=kwargs.get('prefix', None),
-			                                side=kwargs.get('side', None),
-			                                name=kwargs.get('name', None),
-			                                sector=kwargs.get('sector', None),
-			                                index=kwargs.get('index', None),
-			                                kind=kwargs.get('kind', None),
+			index = self.nextAvailableIndex(prefix=prefix,
+			                                side=side,
+			                                name=name,
+			                                sector=sector,
+			                                index=index,
+			                                kind=kind,
 			                                )
 			self._index = index
 			self.create()
 			self.setDefaults()
-			self.side = kwargs.get('side', None)
+			self.side = side
 			self.index = index
-			self.sector = kwargs.get('sector', None)
-			self.kind = kwargs.get('kind', None)
-			self.parent = kwargs.get('parent', None)
-			self.color = kwargs.get('color', None)
+			self.sector = sector
+			self.kind = kind
+			self.parent = parent
+			self.color = color
 
 	def isValid(self):
 		return nodeExists(self.longName)
@@ -881,7 +919,7 @@ class DagNode(AbstractNode):
 			                   sourceAttr='rigChildren',
 			                   destination=self.longName,
 			                   destinationAttr='rigParent',
-							   kind=MayaAttrType.string,
+			                   kind=MayaAttrType.string,
 			                   )
 
 		self._rigParent = parent
@@ -906,7 +944,7 @@ class DagNode(AbstractNode):
 			                   sourceAttr='rigChildren',
 			                   destination=self.longName,
 			                   destinationAttr='rigRoot',
-							   kind=MayaAttrType.string,
+			                   kind=MayaAttrType.string,
 			                   )
 
 		self._rigRoot = root
@@ -949,7 +987,7 @@ class DagNode(AbstractNode):
 			                   sourceAttr='rigChildren',
 			                   destination=self.longName,
 			                   destinationAttr='rigInterface',
-							   kind=MayaAttrType.string
+			                   kind=MayaAttrType.string
 			                   )
 
 		self._rigInterface = interface
@@ -958,16 +996,16 @@ class DagNode(AbstractNode):
 	def setDefaults(self):
 		# Rig Part
 		if not attributeExist(self.longName, 'rigPart'):
-			addAttribute(node=self.longName, attribute=Component.rigPart, value=self.prefix, kind=MayaAttrType.string,
+			addAttribute(node=self.longName, attribute=Component.rigPart, value=self.prefix.upper(), kind=MayaAttrType.string,
 			             lock=True)
 
 		# Parent
-		for attr in ['rigParent', 'rigRoot', 'rigInterface']:
+		for attr in ['rigParent', 'rigRoot', 'rigInterface', 'rigRelationship']:
 			if not attributeExist(self.longName, attr):
 				addAttribute(node=self.longName, attribute=attr, kind=MayaAttrType.message)
 
 		# Children
-		for attr in ['rigChildren', 'rigRelationship']:
+		for attr in ['rigChildren']:
 			if not attributeExist(self.longName, attr):
 				addAttribute(node=self.longName, attribute=attr, kind=MayaAttrType.string, lock=True)
 		return
@@ -985,7 +1023,7 @@ class DagNode(AbstractNode):
 	def parent(self, parent):
 		if self.isValid():
 			if parent and nodeExists(parent):
-				cmds.parent(self.longName, parent)
+				cmds.parent(self.transform, parent)
 		self._parent = parent
 		return
 

@@ -369,19 +369,19 @@ def lockKeyableAttributes(node, hide=False):
 
 def lockTranslate(node, hide=False):
 	for axis in ['x', 'y', 'z']:
-		cmds.setAttr('{}.t{}'.format(node, axis), lock=True, keyable=hide, channelBox=hide)
+		cmds.setAttr('{}.t{}'.format(node, axis), lock=True, keyable=not hide, channelBox=not hide)
 	return
 
 
 def lockRotate(node, hide=False):
 	for axis in ['x', 'y', 'z']:
-		cmds.setAttr('{}.r{}'.format(node, axis), lock=True, keyable=hide, channelBox=hide)
+		cmds.setAttr('{}.r{}'.format(node, axis), lock=True, keyable=not hide, channelBox=not hide)
 	return
 
 
 def lockScale(node, hide=False):
 	for axis in ['x', 'y', 'z']:
-		cmds.setAttr('{}.s{}'.format(node, axis), lock=True, keyable=hide, channelBox=hide)
+		cmds.setAttr('{}.s{}'.format(node, axis), lock=True, keyable=not hide, channelBox=not hide)
 	return
 
 

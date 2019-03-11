@@ -8,18 +8,18 @@ from maya import cmds
 
 class SPINE(BASERIG):
 	def __init__(self,
-				 items,
-				 root=None,
-				 ):
+	             items,
+	             root=None,
+	             ):
 
 		BASERIG.__init__(self,
-						 prefix=Part.spine,
-						 side=Position.center,
-						 kind=Part.spine,
-						 items=items,
-						 axis=[1, 1, 0],
-						 root=root,
-						 )
+		                 prefix=Part.spine,
+		                 side=Position.center,
+		                 kind=Part.spine,
+		                 items=items,
+		                 axis=[1, 1, 0],
+		                 root=root,
+		                 )
 
 	def create(self):
 		# Scale
@@ -29,7 +29,7 @@ class SPINE(BASERIG):
 		self.topNode = self.createTopNode(self.items)
 
 		# Rig Joints
-		self.joint = self.createJointChain(self.items, hierarchy=True)
+		self.joint = self.createJointChain(self.items, hierarchy=True, autoName=False)
 
 		# Bind Controls
 		self.createChildChain(self.items)
@@ -66,4 +66,66 @@ class SPINE(BASERIG):
 
 			if world:
 				cmds.parent(self.ikTopNode, world)
+		return
+
+
+class NECK(BASERIG):
+	def __init__(self,
+	             items,
+	             root=None,
+	             ):
+
+		BASERIG.__init__(self,
+		                 prefix=Part.neck,
+		                 side=None,
+		                 kind=Part.neck,
+		                 items=items,
+		                 axis=[1, 1, 0],
+		                 root=root,
+		                 )
+
+	def create(self):
+		# Scale
+		self.scale = distanceFromOrigin(self.items) * .06
+
+		# Top Node
+		self.topNode = self.createTopNode(self.items)
+
+		# Rig Joints
+		self.joint = self.createJointChain(self.items, hierarchy=True, autoName=False)
+
+		# Bind Controls
+		self.createChildChain(self.items)
+
+		# Parent
+		if self.root:
+			if isinstance(self.root, object):
+				self.interface = getattr(self.root, 'cogControl')
+			else:
+				self.interface = self.root
+		else:
+			self.interface = self.topNode
+
+		# Controls
+		self.createFKChain(self.items, autoName=False)
+
+		# Hierarchy
+		cmds.parent(self.fkTopNode, self.joint[0], self.topNode)
+
+		if self.root:
+			# Local
+			local = self.getLocal(self.parent)
+
+			if local:
+				cmds.parent(self.topNode, local)
+
+			# World
+			world = self.getWorld(self.root)
+
+			if world:
+				cmds.parent(self.ikTopNode, world)
+
+		# Controls
+		self.constrainChain(self.fkControl, self.joint)
+		self.constrainChain(self.joint, self.items)
 		return

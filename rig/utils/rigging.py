@@ -96,17 +96,28 @@ def createFKIK(items, fkControls, ikControls, parent, attrName=Component.fkik):
 	i = 0
 	for item in items:
 		pc = cmds.parentConstraint(fkControls[i],
-								   ikControls[i],
-								   item,
-								   n='{}_{}_pc0'.format(item, attrName),
-								   mo=True)[0]
+		                           ikControls[i],
+		                           item,
+		                           n='{}_{}_pc0'.format(item, attrName),
+		                           mo=True)[0]
 
 		pcAttr = cmds.parentConstraint(pc, q=True, wal=True)
 		cmds.connectAttr('{}.{}'.format(parent, attrName), '{}.{}'.format(pc, pcAttr[-1]), f=True)
 
+		sc = cmds.scaleConstraint(fkControls[i],
+		                          ikControls[i],
+		                          item,
+		                          n='{}_{}_sc0'.format(item, attrName),
+		                          mo=True)[0]
+
+		pcAttr = cmds.scaleConstraint(sc, q=True, wal=True)
+		cmds.connectAttr('{}.{}'.format(parent, attrName), '{}.{}'.format(sc, pcAttr[-1]), f=True)
+
+
 		reverse = cmds.createNode('reverse', n='{}_{}_re1'.format(item, attrName))
 		cmds.connectAttr('{}.{}'.format(parent, attrName), '{}.inputX'.format(reverse), f=True)
 		cmds.connectAttr('{}.outputX'.format(reverse), '{}.{}'.format(pc, pcAttr[0]), f=True)
+		cmds.connectAttr('{}.outputX'.format(reverse), '{}.{}'.format(sc, pcAttr[0]), f=True)
 
 		pcList.append(pc)
 		reList.append(reverse)
@@ -219,11 +230,11 @@ class createFlexiPlane:
 		cmds.addAttr(globalGrp, ln='startTwistAdd', k=True, at='doubleAngle')
 		cmds.addAttr(globalGrp, ln='endTwistAdd', k=True, at='doubleAngle')
 		cmds.addAttr(globalGrp, ln='twistSide',
-					 min=-1,
-					 max=1,
-					 dv=-1 if side == Position.left else 1,
-					 k=True,
-					 )
+		             min=-1,
+		             max=1,
+		             dv=-1 if side == Position.left else 1,
+		             k=True,
+		             )
 
 		mirror = cmds.createNode('multiplyDivide', name='{}_mirror_mult0'.format(name))
 
@@ -294,7 +305,7 @@ class createFlexiPlane:
 
 		# Hierarchy
 		extrasGrp = cmds.group(clusterGrp, curve, twistTransform, dup, wireBaseTransform,
-							   name='{}_extras_grp'.format(name))
+		                       name='{}_extras_grp'.format(name))
 		cmds.setAttr('{}.v'.format(extrasGrp), 0)
 		cmds.setAttr('{}.inheritsTransform'.format(extrasGrp), 0)
 
@@ -476,12 +487,12 @@ class createIKFootRollNulls:
 		for attr in partName:
 			i = partName.index(attr)
 			cmds.addAttr(self.control,
-						 ln='angle{}'.format(attr.capitalize()),
-						 k=True,
-						 min=-180,
-						 max=180,
-						 dv=rollAngle[i],
-						 )
+			             ln='angle{}'.format(attr.capitalize()),
+			             k=True,
+			             min=-180,
+			             max=180,
+			             dv=rollAngle[i],
+			             )
 
 		# Foot Roll - Heel
 		mul = cmds.createNode('multDoubleLinear', name='{}_heel_multiply0'.format(self.name))
@@ -576,8 +587,8 @@ class createIKFootRollNulls:
 		snap(self.rock[0], self.wire, r=True, t=True)
 
 		var = [getDistance(self.bank[0], self.bank[1]),
-			   getDistance(self.parent, self.start),
-			   getDistance(self.rock[0], self.rock[1])]
+		       getDistance(self.parent, self.start),
+		       getDistance(self.rock[0], self.rock[1])]
 
 		i = 0
 		for axis in ['x', 'y', 'z']:
@@ -651,13 +662,13 @@ def createSplineIK(joints, prefix='rig', *args, **kwargs):
 
 	# Spline
 	ik = cmds.ikHandle(n='{}_splineIK'.format(prefix),
-					   sj=joints[0],
-					   ee=joints[-1],
-					   c=curve,
-					   sol='ikSplineSolver',
-					   ccv=False,
-					   rootOnCurve=True,
-					   parentCurve=False)[0]
+	                   sj=joints[0],
+	                   ee=joints[-1],
+	                   c=curve,
+	                   sol='ikSplineSolver',
+	                   ccv=False,
+	                   rootOnCurve=True,
+	                   parentCurve=False)[0]
 	cmds.setAttr('{}.v'.format(ik), 0)
 
 	return [ik, curve, clusters]
