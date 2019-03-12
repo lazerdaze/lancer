@@ -427,4 +427,3 @@ def createRibbon(*args):
         cmds.connectAttr((sumPma + '.output1D'), (follicleXform + '.scaleZ'))
     
 
-jh_proceduralRibbon()

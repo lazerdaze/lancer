@@ -6,6 +6,7 @@ from constraint import *
 from joint import *
 from wire import *
 from curve import *
+from library import mathUtils
 
 # Maya Modules
 import maya.cmds as cmds
@@ -112,7 +113,6 @@ def createFKIK(items, fkControls, ikControls, parent, attrName=Component.fkik):
 
 		pcAttr = cmds.scaleConstraint(sc, q=True, wal=True)
 		cmds.connectAttr('{}.{}'.format(parent, attrName), '{}.{}'.format(sc, pcAttr[-1]), f=True)
-
 
 		reverse = cmds.createNode('reverse', n='{}_{}_re1'.format(item, attrName))
 		cmds.connectAttr('{}.{}'.format(parent, attrName), '{}.inputX'.format(reverse), f=True)
@@ -672,3 +672,156 @@ def createSplineIK(joints, prefix='rig', *args, **kwargs):
 	cmds.setAttr('{}.v'.format(ik), 0)
 
 	return [ik, curve, clusters]
+
+
+# TODO: Polymer Auto Attribute / Add Attribute
+class PolymerRig(object):
+	def __init__(self,
+	             start,
+	             end,
+	             children=None,
+	             prefix='rig',
+	             ):
+		'''
+		Assumes that down axis is X.
+
+		:param str unicode object start:
+		:param str unicode object end:
+		:param str prefix:
+		'''
+
+		self.start = start
+		self.end = end
+		self.children = children
+		self.prefix = longName(prefix, 'polymer')
+		self.twistOutput = []
+		self.stretchOutput = []
+		self.maxDistance = getDistance(self.start, self.end)
+
+		# Get Side
+		sideQuery = getSide(self.end)
+
+		self.side = -1 if sideQuery == Position.right else 1
+
+		# Create Locators
+		self.startLoctor = cmds.spaceLocator(name=longName(self.prefix, 'start', 'locator'))[0]
+		snap(self.start, self.startLoctor, True, True)
+
+		self.endLocator = cmds.spaceLocator(name=longName(self.prefix, 'end', 'locator'))[0]
+		snap(self.end, self.endLocator, True, True)
+		cmds.parent(self.endLocator, self.end)
+
+		# Create Distance Between
+		self.distanceNode = cmds.createNode('distanceBetween', name=longName(self.prefix, 'distance'))
+
+		cmds.connectAttr('{}.worldPosition[0]'.format(self.startLoctor),
+		                 attributeName(self.distanceNode, 'point1')
+		                 )
+
+		cmds.connectAttr('{}.worldPosition[0]'.format(self.endLocator),
+		                 attributeName(self.distanceNode, 'point2')
+		                 )
+
+		# Create Aim
+		self.aimConstraint = cmds.aimConstraint(self.endLocator,
+		                                        self.startLoctor,
+		                                        aimVector=[self.side, 0, 0],
+		                                        upVector=[0, 1, 0],
+		                                        worldUpType='none',
+		                                        )
+
+		# Create Twist Extractor
+		self.extractor = cmds.group(name=longName(self.prefix, 'extractor'), em=True)
+		snap(self.start, self.extractor)
+		cmds.parent(self.extractor, self.start)
+
+		addAttribute(self.extractor, 'scaleFactor', kind=MayaAttrType.float)
+		addAttribute(self.extractor, 'maxDistance', kind=MayaAttrType.float, value=self.maxDistance, lock=True)
+		addAttribute(self.extractor, 'currentDistance', kind=MayaAttrType.float)
+		addAttribute(self.extractor, 'twist', kind=MayaAttrType.float)
+		# addAttribute(self.extractor, 'twistAuto', kind=MayaAttrType.float, minValue=0, maxValue=1, value=1)
+		# addAttribute(self.extractor, 'twistAdd', kind=MayaAttrType.float)
+		addAttribute(self.extractor, 'twistAmount', kind=MayaAttrType.float, array=True)
+		addAttribute(self.extractor, 'stretchAmount', kind=MayaAttrType.float, array=True)
+
+
+		cmds.connectAttr(attributeName(self.extractor, 'rx'),
+		                 attributeName(self.extractor, 'twist')
+		                 )
+
+		# Scale Extractor
+
+
+		# Create Orient Constraint
+		self.orientConstraint = cmds.orientConstraint(self.startLoctor, self.extractor, mo=True)
+
+		# Children
+		if self.children:
+			i = 0
+			for child in self.children:
+				distance = getDistance(self.extractor, child)
+
+				# Twist Percentage
+				twistAmount = mathUtils.setRange(value=distance,
+				                                 oldMin=0,
+				                                 oldMax=self.maxDistance,
+				                                 newMin=1,
+				                                 newMax=0
+				                                 ) * self.side
+
+				twistAttr = '{}.{}[{}]'.format(self.extractor, 'twistAmount', i)
+				cmds.setAttr(twistAttr, twistAmount, lock=True)
+
+				twistNode = cmds.createNode('multDoubleLinear', name=longName(self.prefix,
+				                                                              'multiply',
+				                                                              i,
+				                                                              'twistOutput'
+				                                                              ))
+
+				cmds.connectAttr(twistAttr,
+				                 attributeName(twistNode, 'input1'),
+				                 force=True,
+				                 )
+
+				cmds.connectAttr(attributeName(self.extractor, 'twist'),
+				                 attributeName(twistNode, 'input2'),
+				                 force=True,
+				                 )
+
+				cmds.connectAttr(attributeName(twistNode, 'output'),
+				                 attributeName(child, 'rx'))
+
+				self.twistOutput.append(twistNode)
+
+				# Stretch Percentage
+				stretchAmount = mathUtils.setRange(value=distance,
+				                                   oldMin=0,
+				                                   oldMax=self.maxDistance,
+				                                   newMin=0,
+				                                   newMax=1
+				                                   ) * self.side
+
+				stretchAttr = '{}.{}[{}]'.format(self.extractor, 'stretchAmount', i)
+				cmds.setAttr(stretchAttr, stretchAmount, lock=True)
+
+				stretchNode = cmds.createNode('multDoubleLinear', name=longName(self.prefix,
+				                                                                'multiply',
+				                                                                i,
+				                                                                'stretchOutput'
+				                                                                ))
+
+				cmds.connectAttr(stretchAttr,
+				                 attributeName(stretchNode, 'input1'),
+				                 force=True,
+				                 )
+
+				cmds.connectAttr(attributeName(self.extractor, 'currentDistance'),
+				                 attributeName(stretchNode, 'input2'),
+				                 force=True,
+				                 )
+
+				cmds.connectAttr(attributeName(stretchNode, 'output'),
+				                 attributeName(child, 'tx'))
+
+				self.stretchOutput.append(stretchNode)
+				i += 1
