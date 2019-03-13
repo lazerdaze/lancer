@@ -222,3 +222,44 @@ def clusterCurve(curve, prefix='cluster', *args, **kwargs):
 		cmds.setAttr('{}.v'.format(c), 0)
 
 	return clusterList
+
+
+def matchCurve(source, destination, *args, **kwargs):
+	# Source
+	if cmds.objectType(source) == 'transform':
+		try:
+			source = cmds.listRelatives(source, shapes=True)[0]
+		except RuntimeError:
+			raise TypeError('Source must be a nurbs curve.')
+
+	sourceMin = cmds.getAttr('{}.minMaxValue.minValue'.format(source))
+	sourceMax = cmds.getAttr('{}.minMaxValue.maxValue'.format(source))
+	sourceSpans = cmds.getAttr('{}.spans'.format(source))
+	sourceDegree = cmds.getAttr('{}.degree'.format(source))
+	sourceCVs = cmds.ls('{}.cv[:]'.format(source), fl=True)
+
+	# Destination
+	if cmds.objectType(destination) == 'transform':
+		try:
+			destination = cmds.listRelatives(destination, shapes=True)[0]
+		except RuntimeError:
+			raise TypeError('Source must be a nurbs curve.')
+
+	destinationMin = cmds.getAttr('{}.minMaxValue.minValue'.format(destination))
+	destinationMax = cmds.getAttr('{}.minMaxValue.maxValue'.format(destination))
+	destinationSpans = cmds.getAttr('{}.spans'.format(destination))
+	destinationDegree = cmds.getAttr('{}.degree'.format(destination))
+
+	# Rebuild
+	cmds.rebuildCurve(destination, rebuildType=0, spans=sourceSpans, degree=sourceDegree, ch=False)
+
+	destinationCVs = cmds.ls('{}.cv[:]'.format(destination), fl=True)
+
+	i = 0
+	for cv in destinationCVs:
+		position = cmds.xform(sourceCVs[i], q=True, ws=True, t=True)
+		cmds.xform(cv, ws=True, t=position)
+		i += 1
+
+	cmds.rebuildCurve(destination, rebuildType=0, spans=destinationSpans, degree=destinationDegree, ch=False)
+	return
