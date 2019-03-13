@@ -224,6 +224,20 @@ def clusterCurve(curve, prefix='cluster', *args, **kwargs):
 	return clusterList
 
 
+def createCurveFromList(points, name='curve', degree=3,  *args, **kwargs):
+	if not isinstance(points, (list, tuple)):
+		raise TypeError('Points must be an iter.')
+
+	curve = cmds.curve(n=name, d=degree, p=points)
+
+	shape = cmds.listRelatives(curve, shapes=True)
+	cmds.rename(shape, '{}Shape'.format(curve))
+
+	# Center Pivot
+	cmds.xform(curve, cpc=True)
+	return curve
+
+
 def matchCurve(source, destination, *args, **kwargs):
 	# Source
 	if cmds.objectType(source) == 'transform':
@@ -263,3 +277,25 @@ def matchCurve(source, destination, *args, **kwargs):
 
 	cmds.rebuildCurve(destination, rebuildType=0, spans=destinationSpans, degree=destinationDegree, ch=False)
 	return
+
+
+def curveFromMotionPath(motionPath, name='motionPath_curve', *args, **kwargs):
+	if cmds.objectType(motionPath) == 'transform':
+		try:
+			motionPath = cmds.listRelatives(motionPath, type='motionTrailShape', shapes=True)[0]
+		except RuntimeError:
+			raise TypeError('Must provide a motion path node.')
+
+	if cmds.objectType(motionPath) == 'motionTrail':
+		try:
+			motionPath = cmds.listRelatives(motionPath, type='motionTrailShape', shapes=True)[0]
+		except RuntimeError:
+			raise TypeError('Must provide a motion path node')
+
+	points = cmds.getAttr('{}.points'.format(motionPath))
+	pointList = []
+
+	for point in points:
+		pointList.append([point[0], point[1], point[2]])
+
+	return createCurveFromList(points=pointList, name=name, degree=3)
