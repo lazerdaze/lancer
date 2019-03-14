@@ -59,3 +59,18 @@ def matrixAsArray(matrix):
 	for i in range(16):
 		array.append(matrix[i])
 	return array
+
+
+def addMatrix(*args):
+	result = 0.0
+	return result
+
+
+def multiplyMatrix(*args):
+	result = 0.0
+	return result
+
+
+def decomposeMatrix(matrix):
+	result = 0.0
+	return result

@@ -996,7 +996,8 @@ class DagNode(AbstractNode):
 	def setDefaults(self):
 		# Rig Part
 		if not attributeExist(self.longName, 'rigPart'):
-			addAttribute(node=self.longName, attribute=Component.rigPart, value=self.prefix.upper(), kind=MayaAttrType.string,
+			addAttribute(node=self.longName, attribute=Component.rigPart, value=self.prefix.upper(),
+			             kind=MayaAttrType.string,
 			             lock=True)
 
 		# Parent

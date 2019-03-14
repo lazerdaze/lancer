@@ -670,16 +670,46 @@ def createSplineIK(joints, prefix='rig', *args, **kwargs):
 	                   rootOnCurve=True,
 	                   parentCurve=False)[0]
 	cmds.setAttr('{}.v'.format(ik), 0)
-
 	return [ik, curve, clusters]
 
 
-# TODO: Polymer Auto Attribute / Add Attribute
+# TODO: Custom Plug-in Node: Auto On Valve
+def valveNode(prefix='rig', *args, **kwargs):
+	'''
+	inputNode.auto = setRangeNode.valueX
+	inputNode.auto = multiplyNode.input2
+
+	inputNode.max = setRangeNode.maxX
+	Output = multiplyNode.output
+
+	:param prefix:
+	:param args:
+	:param kwargs:
+	:return:
+	'''
+
+	# Set Range
+	rangeNode = cmds.createNode('setRange', name=longName(prefix, 'valve', 'setRange'))
+	cmds.setAttr(attributeName(rangeNode, 'oldMaxX'), 1)
+
+	# Mult
+	multNode = cmds.createNode('multDoubleLinear', name=longName(prefix, 'valve', 'mutiply'))
+
+	# Connect
+	cmds.connectAttr(attributeName(rangeNode, 'outValueX'),
+	                 attributeName(multNode, 'input1')
+	                 )
+
+	return [rangeNode, multNode]
+
+
+# TODO: Polymer Plug-in Node
 class PolymerRig(object):
 	def __init__(self,
 	             start,
 	             end,
 	             children=None,
+	             twister='start',
 	             prefix='rig',
 	             ):
 		'''
@@ -697,6 +727,11 @@ class PolymerRig(object):
 		self.twistOutput = []
 		self.stretchOutput = []
 		self.maxDistance = getDistance(self.start, self.end)
+
+		self.twister = self.start
+
+		if twister == 'end':
+			self.twister = self.end
 
 		# Get Side
 		sideQuery = getSide(self.end)
@@ -732,37 +767,82 @@ class PolymerRig(object):
 
 		# Create Twist Extractor
 		self.extractor = cmds.group(name=longName(self.prefix, 'extractor'), em=True)
-		snap(self.start, self.extractor)
+		snap(self.start, self.extractor, True, True)
 		cmds.parent(self.extractor, self.start)
 
 		addAttribute(self.extractor, 'scaleFactor', kind=MayaAttrType.float)
 		addAttribute(self.extractor, 'maxDistance', kind=MayaAttrType.float, value=self.maxDistance, lock=True)
 		addAttribute(self.extractor, 'currentDistance', kind=MayaAttrType.float)
 		addAttribute(self.extractor, 'twist', kind=MayaAttrType.float)
-		# addAttribute(self.extractor, 'twistAuto', kind=MayaAttrType.float, minValue=0, maxValue=1, value=1)
-		# addAttribute(self.extractor, 'twistAdd', kind=MayaAttrType.float)
+		addAttribute(self.extractor, 'twistAuto', kind=MayaAttrType.float, minValue=0, maxValue=1, value=1)
+		addAttribute(self.extractor, 'twistAdd', kind=MayaAttrType.float, keyable=True, channelBox=False)
 		addAttribute(self.extractor, 'twistAmount', kind=MayaAttrType.float, array=True)
 		addAttribute(self.extractor, 'stretchAmount', kind=MayaAttrType.float, array=True)
 
+		cmds.connectAttr(attributeName(self.distanceNode, 'distance'),
+		                 attributeName(self.extractor, 'currentDistance')
+		                 )
+
+		# Auto / Add
+		self.twistValve = valveNode(prefix=longName(self.prefix,
+		                                            'twist',
+		                                            ))
+
+		self.twistAdd = cmds.createNode('addDoubleLinear', name=longName(self.prefix,
+		                                                                 'twist',
+		                                                                 'add'
+		                                                                 ))
+
+		cmds.connectAttr(attributeName(self.extractor, 'twistAuto'),
+		                 attributeName(self.twistValve[0], 'valueX')
+		                 )
+
+		cmds.connectAttr(attributeName(self.extractor, 'twistAuto'),
+		                 attributeName(self.twistValve[1], 'input2')
+		                 )
 
 		cmds.connectAttr(attributeName(self.extractor, 'rx'),
+		                 attributeName(self.twistValve[0], 'maxX')
+		                 )
+
+		cmds.connectAttr(attributeName(self.twistValve[1], 'output'),
+		                 attributeName(self.twistAdd, 'input1')
+		                 )
+
+		cmds.connectAttr(attributeName(self.extractor, 'twistAdd'),
+		                 attributeName(self.twistAdd, 'input2')
+		                 )
+
+		cmds.connectAttr(attributeName(self.twistAdd, 'output'),
 		                 attributeName(self.extractor, 'twist')
 		                 )
 
-		# Scale Extractor
 
+
+		# Scale Extractor
+		self.scaleExtractor = cmds.group(name=longName(self.prefix, 'scale_extractor'), em=True)
+		cmds.setAttr(attributeName(self.scaleExtractor, 'inheritsTransform'), 0)
+		cmds.parent(self.scaleExtractor, self.start)
+		self.scaleConstraint = cmds.scaleConstraint(self.start, self.scaleExtractor, mo=True)
+
+		scaleFactor = cmds.createNode('multDoubleLinear', name=longName(self.prefix,
+		                                                                'multiply',
+		                                                                'scaleExtractor'
+		                                                                ))
+
+		cmds.connectAttr(attributeName(self.scaleExtractor, 'sx'), attributeName(scaleFactor, 'input1'))
+		cmds.connectAttr(attributeName(self.extractor, 'maxDistance'), attributeName(scaleFactor, 'input2'))
+		cmds.connectAttr(attributeName(scaleFactor, 'output'), attributeName(self.extractor, 'scaleFactor'))
 
 		# Create Orient Constraint
-		self.orientConstraint = cmds.orientConstraint(self.startLoctor, self.extractor, mo=True)
+		self.orientConstraint = cmds.orientConstraint(self.twister, self.extractor, mo=True)
 
 		# Children
 		if self.children:
 			i = 0
 			for child in self.children:
-				distance = getDistance(self.extractor, child)
-
 				# Twist Percentage
-				twistAmount = mathUtils.setRange(value=distance,
+				twistAmount = mathUtils.setRange(value=getDistance(self.twister, child),
 				                                 oldMin=0,
 				                                 oldMax=self.maxDistance,
 				                                 newMin=1,
@@ -794,15 +874,25 @@ class PolymerRig(object):
 				self.twistOutput.append(twistNode)
 
 				# Stretch Percentage
-				stretchAmount = mathUtils.setRange(value=distance,
-				                                   oldMin=0,
-				                                   oldMax=self.maxDistance,
-				                                   newMin=0,
-				                                   newMax=1
-				                                   ) * self.side
+				stretchAmount = getDistance(self.start, child) * self.side
 
 				stretchAttr = '{}.{}[{}]'.format(self.extractor, 'stretchAmount', i)
 				cmds.setAttr(stretchAttr, stretchAmount, lock=True)
+
+				stretchRange = cmds.createNode('setRange', name=longName(self.prefix,
+				                                                         'range',
+				                                                         i,
+				                                                         'stretchOutput'
+				                                                         ))
+
+				cmds.setAttr(attributeName(stretchRange, 'maxX'), 1)
+				cmds.connectAttr(attributeName(self.extractor, 'scaleFactor'),
+				                 attributeName(stretchRange, 'oldMaxX')
+				                 )
+
+				cmds.connectAttr(stretchAttr,
+				                 attributeName(stretchRange, 'valueX')
+				                 )
 
 				stretchNode = cmds.createNode('multDoubleLinear', name=longName(self.prefix,
 				                                                                'multiply',
@@ -810,7 +900,7 @@ class PolymerRig(object):
 				                                                                'stretchOutput'
 				                                                                ))
 
-				cmds.connectAttr(stretchAttr,
+				cmds.connectAttr(attributeName(stretchRange, 'outValueX'),
 				                 attributeName(stretchNode, 'input1'),
 				                 force=True,
 				                 )
