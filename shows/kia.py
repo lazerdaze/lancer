@@ -40,7 +40,7 @@ def matchCurveCallback(*args, **kwargs):
 	selected = cmds.ls(sl=True)
 
 	if len(selected) == 2:
-		matchCurve(selected[0], selected[1])
+		matchCurve(source=selected[0], destination=selected[1])
 	return
 
 
@@ -49,4 +49,27 @@ def curveFromMotionPathCallback(*args, **kwargs):
 
 	if selected:
 		curveFromMotionPath(selected[0])
+	return
+
+
+def createJointInbetween(start, end, amount):
+	distance = getDistance(start, end)
+	step = float(distance) / float(amount - 1.0)
+
+	startPos = cmds.xform(start, q=True, ws=True, rp=True)
+
+	currentStep = 0.0
+
+	for x in range(amount):
+		joint = cmds.joint()
+		cmds.xform(joint, ws=True, t=[startPos[0], startPos[1], currentStep])
+
+		if x == 0:
+			cmds.setAttr('{}.jointOrientY'.format(joint), -90)
+
+		currentStep += step
+	return
+
+
+def tongueRig(*args, **kwargs):
 	return
