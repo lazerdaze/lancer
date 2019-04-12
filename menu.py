@@ -22,6 +22,7 @@ import rig.menu
 import anim.stickyFeet
 import anim.refPlayer.ui
 import anim.refman
+import shows
 
 # Python Modules
 import os
@@ -116,6 +117,8 @@ def show(*args):
 	cmds.menuItem(l='Facial', subMenu=True, to=True)
 	rig.poseSDK.ui.menu()
 	cmds.setParent('..', menu=True)
+
+	shows.sub_menu()
 
 	cmds.menuItem(d=True, l='Animation')
 	cmds.menuItem(l='Tween Key', c=channelBox.tweenKey.windowQt)
