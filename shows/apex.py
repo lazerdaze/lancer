@@ -8,6 +8,7 @@ PREVIZ_SOURCE = '/jobs/ads/ea_games_apex_seasonal_J406897/mill_in/data/FROM_PROO
 PREVIZ_DESTINATION = '/jobs/ads/ea_apex_J406395/mill_in/data/FROM_PROOF_2019'
 PROOF_CSV = '/jobs/ads/ea_apex_J406395/shared/data/EA Apex 2 Archive Deliveries - Sheet1.csv'
 ASSET_CAMERA_PATH = '//jobs//ads//ea_apex_J406395//build//camera//.common//miasma//cameraRig//base//cameraRig_base_v008.mb'
+PROOF_PROJECT_DIR = '/jobs/ads/ea_apex_J406395/mill_in/data/FROM_PROOF_2019/Work/Mill_EA_Apex2'
 
 
 def find_all_file(directory, extension='.zip', *args, **kwargs):
@@ -137,6 +138,7 @@ class Ingest_UI(object):
 		cmds.showWindow(self.winName)
 		return
 
+	# Fixme: Overwrites existing nodes in file. Causes issue with Mill Retargeter
 	def import_fbx(self, filepath, *args, **kwargs):
 		import_path = None
 
@@ -169,8 +171,8 @@ class Ingest_UI(object):
 
 		return
 
+	# Todo: Set Project Dir?
 	def open_maya_file(self, file_name, is_zip=False, is_skip=False, *args, **kwargs):
-		# Todo: Mutiple Zip Files (Same Names)
 		# Find zip
 		if is_zip:
 			zip_file = None
@@ -204,4 +206,3 @@ class Ingest_UI(object):
 		return
 
 
-Ingest_UI()
