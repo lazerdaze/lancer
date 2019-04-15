@@ -1,0 +1,1215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="a6e36410-8fc8-4303-896d-38efe536e161" name="Default" comment="No comment">
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/custom.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/reference.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/copy_100.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/edit_100.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/export_100.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/file_100.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/filter_100.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/folder_100.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icon_gear.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icon_logo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icon_pane_splitter.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/import_100.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/lock_100.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/refresh_100.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/resource.qrc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/search_100.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/settings_100.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/theme.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/trash_100.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/visible_off_100.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/visible_on_100.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/settings.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resource/resource.qrc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim/refPlayer/ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim_mancer/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim_mancer/tools/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim_mancer/ui/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/ui/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim_mancer/ui/widgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/ui/widgets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim_mancer/utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/utils/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim_mancer/utils/maya_qt.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/utils/maya_qt.py" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>playblast</find>
+      <find>startTime</find>
+      <find>sequence</find>
+      <find>difflib</find>
+      <find>mel</find>
+      <find>\n</find>
+      <find>QtCore.</find>
+      <find>mainWindow</find>
+      <find>wrapInstance</find>
+      <find>maya_window</find>
+      <find>pushbutton</find>
+      <find>toolButton_3</find>
+      <find>wrapinstance</find>
+      <find>widget_main.</find>
+      <find>widget_main_layout</find>
+      <find>self.widget_main</find>
+      <find>signal</find>
+      <find>clicked</find>
+      <find>toolbutton</find>
+      <find>clicked.connect</find>
+      <find>iconButton</find>
+      <find>.css</find>
+      <find>QtGui.</find>
+      <find>Form</find>
+      <find>emit</find>
+      <find>-&gt;</find>
+      <find>new</find>
+      <find>self.verticalLayout_4</find>
+      <find>icon</find>
+      <find>custom</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>Part.</replace>
+      <replace>Component.</replace>
+      <replace>template</replace>
+      <replace>skeletonTemplate</replace>
+      <replace>&quot;</replace>
+      <replace>(</replace>
+      <replace>)</replace>
+      <replace>,</replace>
+      <replace>&gt;</replace>
+      <replace>&lt;</replace>
+      <replace>leg</replace>
+      <replace>pinkyToe</replace>
+      <replace>left</replace>
+      <replace>LancerNode</replace>
+      <replace>self.master</replace>
+      <replace>self.masterParent</replace>
+      <replace>:</replace>
+      <replace>self.rigControl</replace>
+      <replace>sector</replace>
+      <replace>index</replace>
+      <replace>rigPart</replace>
+      <replace>wire</replace>
+      <replace>transform</replace>
+      <replace>offset.transform</replace>
+      <replace>toe</replace>
+      <replace>right</replace>
+      <replace>layout()</replace>
+      <replace>self</replace>
+      <replace>.</replace>
+      <replace>self.layout()</replace>
+    </replaceStrings>
+    <dirStrings>
+      <dir>I:\prism\pyplayer</dir>
+      <dir>I:\prism\studiolibrary</dir>
+      <dir>I:\lancer\external\ngSkinTools</dir>
+      <dir>I:\prism</dir>
+      <dir>I:\lancer\external\studiolibrary</dir>
+      <dir>I:\lancer\rig\piece</dir>
+      <dir>I:\lancer\rig\parts</dir>
+      <dir>I:\lancer\rig\parts\body</dir>
+      <dir>I:\lancer\rig</dir>
+      <dir>I:\lancer\rig\utils</dir>
+      <dir>I:\lancer</dir>
+    </dirStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="PUSH_AUTO_UPDATE" value="true" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="partsUpdate" />
+      </map>
+    </option>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/rig/parts/body/fkik.py" />
+        <option value="$PROJECT_DIR$/rig/utils/wire.py" />
+        <option value="$PROJECT_DIR$/rig/templates/biped.xml" />
+        <option value="$PROJECT_DIR$/rig/utils/general.py" />
+        <option value="$PROJECT_DIR$/rig/utils/dagnode.py" />
+        <option value="$PROJECT_DIR$/rig/utils/naming.py" />
+        <option value="$PROJECT_DIR$/shows/__init__.py" />
+        <option value="$PROJECT_DIR$/rig/parts/body/leg.py" />
+        <option value="$PROJECT_DIR$/rig/parts/body/arm.py" />
+        <option value="$PROJECT_DIR$/rig/utils/network.py" />
+        <option value="$PROJECT_DIR$/rig/utils/control.py" />
+        <option value="$PROJECT_DIR$/rig/utils/attribute.py" />
+        <option value="$PROJECT_DIR$/rig/parts/body/digit.py" />
+        <option value="$PROJECT_DIR$/rig/parts/body/root.py" />
+        <option value="$PROJECT_DIR$/rig/utils/joint.py" />
+        <option value="$PROJECT_DIR$/rig/utils/constraint.py" />
+        <option value="$PROJECT_DIR$/rig/parts/__init__.py" />
+        <option value="$PROJECT_DIR$/rig/parts/body/head.py" />
+        <option value="$PROJECT_DIR$/rig/parts/body/spine.py" />
+        <option value="$PROJECT_DIR$/rig/parts/baseRig.py" />
+        <option value="$PROJECT_DIR$/external/jh_proceduralRibbon.py" />
+        <option value="$PROJECT_DIR$/rig/utils/curve.py" />
+        <option value="$PROJECT_DIR$/rig/utils/node.py" />
+        <option value="$PROJECT_DIR$/rig/utils/rigging.py" />
+        <option value="$PROJECT_DIR$/library/mathUtils.py" />
+        <option value="$PROJECT_DIR$/test.py" />
+        <option value="$PROJECT_DIR$/channelBox/ui.py" />
+        <option value="$PROJECT_DIR$/channelBox/ghost.py" />
+        <option value="$PROJECT_DIR$/anim/gif_maker/ui.py" />
+        <option value="$PROJECT_DIR$/anim/gif_maker/__init__.py" />
+        <option value="$PROJECT_DIR$/anim/gif_maker.py" />
+        <option value="$PROJECT_DIR$/gif_maker/gif_maker.py" />
+        <option value="$PROJECT_DIR$/gif_maker/__init__.py" />
+        <option value="$PROJECT_DIR$/anim/playblast.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/ui.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/color.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/__init__.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/tools/__init__.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/resource/theme.css" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/anim_mancer.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/utils/__init__.py" />
+        <option value="$PROJECT_DIR$/anim/refPlayer/ui.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/utils/maya_qt.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/reference.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/custom.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/__init__.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/settings.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/main.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/widgets.py" />
+        <option value="$PROJECT_DIR$/.gitignore" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="23" />
+    <option name="y" value="133" />
+    <option name="width" value="2611" />
+    <option name="height" value="1240" />
+  </component>
+  <component name="ProjectInspectionProfilesVisibleTreeState">
+    <entry key="Project Default">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id />
+          </State>
+          <State>
+            <id>General</id>
+          </State>
+          <State>
+            <id>Python</id>
+          </State>
+          <State>
+            <id>ReST</id>
+          </State>
+        </expanded-state>
+        <selected-state>
+          <State>
+            <id>PyUnusedLocalInspection</id>
+          </State>
+        </selected-state>
+      </profile-state>
+    </entry>
+  </component>
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="lancer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="lancer" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://I:/lancer/rig/utils/control.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/anim_mancer/ui/widgets.py" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.splitter.proportion" value="0.013620913" />
+  </component>
+  <component name="PyConsoleOptionsProvider">
+    <option name="myPythonConsoleState">
+      <console-settings module-name="lancer" is-module-sdk="true">
+        <option name="myUseModuleSdk" value="true" />
+        <option name="myModuleName" value="lancer" />
+      </console-settings>
+    </option>
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="I:\lancer\anim_mancer\ui" />
+      <recent name="I:\lancer\gif_maker" />
+      <recent name="I:\lancer\rig\parts" />
+      <recent name="I:\lancer\plugins" />
+      <recent name="I:\lancer\library" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="I:\lancer\rig\templates" />
+      <recent name="I:\lancer\anim\axel\core" />
+      <recent name="I:\lancer\anim\axel" />
+      <recent name="I:\lancer\anim\animLibrary" />
+      <recent name="I:\lancer\library" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Python.reference">
+    <configuration name="__init__" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="lancer" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/rig/templates" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="com.brainwy.pyvmmonitor.PyVmMonitorRunExtension">
+        <option name="PyVmMonitorInitialProfileMode" value="INHERIT_GLOBAL" />
+      </EXTENSION>
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/rig/templates/__init__.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="biped" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="lancer" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/rig/templates" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="com.brainwy.pyvmmonitor.PyVmMonitorRunExtension">
+        <option name="PyVmMonitorInitialProfileMode" value="INHERIT_GLOBAL" />
+      </EXTENSION>
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/rig/templates/biped.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="reference" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="lancer" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/anim_mancer/ui" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="com.brainwy.pyvmmonitor.PyVmMonitorRunExtension">
+        <option name="PyVmMonitorInitialProfileMode" value="INHERIT_GLOBAL" />
+      </EXTENSION>
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/anim_mancer/ui/reference.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="lancer" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="com.brainwy.pyvmmonitor.PyVmMonitorRunExtension">
+        <option name="PyVmMonitorInitialProfileMode" value="INHERIT_GLOBAL" />
+      </EXTENSION>
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="tweenKey_2" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="lancer" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/channelBox" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="com.brainwy.pyvmmonitor.PyVmMonitorRunExtension">
+        <option name="PyVmMonitorInitialProfileMode" value="INHERIT_GLOBAL" />
+      </EXTENSION>
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/channelBox/tweenKey_2.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.__init__" />
+      <item itemvalue="Python.biped" />
+      <item itemvalue="Python.test" />
+      <item itemvalue="Python.reference" />
+      <item itemvalue="Python.tweenKey_2" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.reference" />
+        <item itemvalue="Python.tweenKey_2" />
+        <item itemvalue="Python.test" />
+        <item itemvalue="Python.__init__" />
+        <item itemvalue="Python.biped" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a6e36410-8fc8-4303-896d-38efe536e161" name="Default" comment="" />
+      <created>1522376714442</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1522376714442</updated>
+    </task>
+    <task id="LOCAL-00023" summary="No comment">
+      <created>1530117986803</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1530117986803</updated>
+    </task>
+    <task id="LOCAL-00024" summary="No comment">
+      <created>1530118117726</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1530118117726</updated>
+    </task>
+    <task id="LOCAL-00025" summary="No comment">
+      <created>1530119844615</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1530119844615</updated>
+    </task>
+    <task id="LOCAL-00026" summary="No comment">
+      <created>1530121529356</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1530121529356</updated>
+    </task>
+    <task id="LOCAL-00027" summary="No comment">
+      <created>1530129363569</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1530129363569</updated>
+    </task>
+    <task id="LOCAL-00028" summary="No comment">
+      <created>1532718219693</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1532718219693</updated>
+    </task>
+    <task id="LOCAL-00029" summary="No comment">
+      <created>1532744861188</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1532744861188</updated>
+    </task>
+    <task id="LOCAL-00030" summary="No comment">
+      <created>1533357414448</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1533357414448</updated>
+    </task>
+    <task id="LOCAL-00031" summary="No comment">
+      <created>1533412002127</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1533412002127</updated>
+    </task>
+    <task id="LOCAL-00032" summary="No comment">
+      <created>1537847674667</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1537847674667</updated>
+    </task>
+    <task id="LOCAL-00033" summary="No comment">
+      <created>1537848723011</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1537848723011</updated>
+    </task>
+    <task id="LOCAL-00034" summary="No comment">
+      <created>1537848741880</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1537848741880</updated>
+    </task>
+    <task id="LOCAL-00035" summary="No comment">
+      <created>1538532916435</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1538532916435</updated>
+    </task>
+    <task id="LOCAL-00036" summary="No comment">
+      <created>1538578773918</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1538578773918</updated>
+    </task>
+    <task id="LOCAL-00037" summary="No comment">
+      <created>1541958141013</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1541958141013</updated>
+    </task>
+    <task id="LOCAL-00038" summary="No comment">
+      <created>1542150413763</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1542150413763</updated>
+    </task>
+    <task id="LOCAL-00039" summary="No comment">
+      <created>1542150945263</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1542150945264</updated>
+    </task>
+    <task id="LOCAL-00040" summary="No comment">
+      <created>1542231576577</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1542231576577</updated>
+    </task>
+    <task id="LOCAL-00041" summary="No comment">
+      <created>1545237873142</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1545237873142</updated>
+    </task>
+    <task id="LOCAL-00042" summary="No comment">
+      <created>1546648531396</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1546648531396</updated>
+    </task>
+    <task id="LOCAL-00043" summary="No comment">
+      <created>1546665558921</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1546665558921</updated>
+    </task>
+    <task id="LOCAL-00044" summary="No comment">
+      <created>1546735034556</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1546735034556</updated>
+    </task>
+    <task id="LOCAL-00045" summary="No comment">
+      <created>1546813358988</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1546813358988</updated>
+    </task>
+    <task id="LOCAL-00046" summary="No comment">
+      <created>1546931166725</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1546931166725</updated>
+    </task>
+    <task id="LOCAL-00047" summary="No comment">
+      <created>1546978189462</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1546978189462</updated>
+    </task>
+    <task id="LOCAL-00048" summary="No comment">
+      <created>1547100487582</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1547100487582</updated>
+    </task>
+    <task id="LOCAL-00049" summary="No comment">
+      <created>1547107122660</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1547107122660</updated>
+    </task>
+    <task id="LOCAL-00050" summary="No comment">
+      <created>1547241833951</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1547241833952</updated>
+    </task>
+    <task id="LOCAL-00051" summary="No comment">
+      <created>1547367726601</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1547367726601</updated>
+    </task>
+    <task id="LOCAL-00052" summary="No comment">
+      <created>1547430629007</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1547430629007</updated>
+    </task>
+    <task id="LOCAL-00053" summary="No comment">
+      <created>1547449620278</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1547449620278</updated>
+    </task>
+    <task id="LOCAL-00054" summary="No comment">
+      <created>1548043046685</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1548043046686</updated>
+    </task>
+    <task id="LOCAL-00055" summary="No comment">
+      <created>1548307080515</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1548307080516</updated>
+    </task>
+    <task id="LOCAL-00056" summary="No comment">
+      <created>1549605954877</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1549605954878</updated>
+    </task>
+    <task id="LOCAL-00057" summary="No comment">
+      <created>1549749155137</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1549749155137</updated>
+    </task>
+    <task id="LOCAL-00058" summary="No comment">
+      <created>1549814636859</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1549814636859</updated>
+    </task>
+    <task id="LOCAL-00059" summary="No comment">
+      <created>1549836622105</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1549836622105</updated>
+    </task>
+    <task id="LOCAL-00060" summary="No comment">
+      <created>1550632346469</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1550632346469</updated>
+    </task>
+    <task id="LOCAL-00061" summary="No comment">
+      <created>1550904733279</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1550904733279</updated>
+    </task>
+    <task id="LOCAL-00062" summary="No comment">
+      <created>1551415503753</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1551415503754</updated>
+    </task>
+    <task id="LOCAL-00063" summary="No comment">
+      <created>1551689412879</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1551689412879</updated>
+    </task>
+    <task id="LOCAL-00064" summary="No comment">
+      <created>1551849383593</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1551849383593</updated>
+    </task>
+    <task id="LOCAL-00065" summary="No comment">
+      <created>1552297458443</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1552297458443</updated>
+    </task>
+    <task id="LOCAL-00066" summary="No comment">
+      <created>1552381278924</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1552381278924</updated>
+    </task>
+    <task id="LOCAL-00067" summary="No comment">
+      <created>1552464078301</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1552464078301</updated>
+    </task>
+    <task id="LOCAL-00068" summary="No comment">
+      <created>1552574332029</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1552574332029</updated>
+    </task>
+    <task id="LOCAL-00069" summary="No comment">
+      <created>1554882074144</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1554882074144</updated>
+    </task>
+    <task id="LOCAL-00070" summary="No comment">
+      <created>1555053845842</created>
+      <option name="number" value="00070" />
+      <option name="presentableId" value="LOCAL-00070" />
+      <option name="project" value="LOCAL" />
+      <updated>1555053845843</updated>
+    </task>
+    <task id="LOCAL-00071" summary="No comment">
+      <created>1555054150850</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1555054150850</updated>
+    </task>
+    <option name="localTasksCounter" value="72" />
+    <servers />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
+    <layout>
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20179136" />
+      <window_info id="Structure" order="1" weight="0.24973656" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Messages" order="0" weight="0.3296131" />
+      <window_info anchor="bottom" id="Message" order="1" />
+      <window_info anchor="bottom" id="Find" order="2" weight="0.32441112" />
+      <window_info anchor="bottom" id="Run" order="3" weight="0.23768736" />
+      <window_info anchor="bottom" id="Debug" order="4" weight="0.39828694" />
+      <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="6" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="7" weight="0.32976446" />
+      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.51738673" side_tool="true" weight="0.32655245" />
+      <window_info anchor="bottom" id="Version Control" order="9" sideWeight="0.48261327" weight="0.47965738" />
+      <window_info anchor="bottom" id="Python Console" order="10" weight="0.3296131" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.3296131" />
+      <window_info anchor="bottom" id="Maya Log" order="12" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+    </layout>
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.css" />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ORDER">
+      <list>
+        <option value="0" />
+        <option value="2" />
+        <option value="3" />
+        <option value="1" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
+              <option name="COLUMN_ORDER">
+                <list>
+                  <option value="0" />
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                </list>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list />
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Ignore pyc files" />
+    <MESSAGE value="add jt_maya_ui.py" />
+    <MESSAGE value="No comment" />
+    <option name="LAST_COMMIT_MESSAGE" value="No comment" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/rig/parts/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="6" column="27" lean-forward="true" selection-start-line="6" selection-start-column="27" selection-end-line="6" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rig/parts/body/head.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="442">
+          <caret line="36" column="25" lean-forward="true" selection-start-line="36" selection-start-column="25" selection-end-line="36" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rig/parts/body/spine.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="102" column="65" lean-forward="true" selection-start-line="102" selection-start-column="65" selection-end-line="102" selection-end-column="65" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rig/parts/baseRig.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="449">
+          <caret line="876" lean-forward="true" selection-start-line="876" selection-end-line="876" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/external/jh_proceduralRibbon.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="284">
+          <caret line="243" column="19" selection-start-line="243" selection-start-column="14" selection-end-line="243" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rig/parts/body/rigBase.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="374">
+          <caret line="189" column="28" selection-start-line="189" selection-start-column="28" selection-end-line="189" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rig/utils/naming.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="47">
+          <caret line="172" column="31" lean-forward="true" selection-start-line="172" selection-start-column="31" selection-end-line="172" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rig/utils/general.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="407">
+          <caret line="175" lean-forward="true" selection-start-line="175" selection-end-line="175" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rig/utils/joint.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1631">
+          <caret line="868" lean-forward="true" selection-start-line="868" selection-end-line="868" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rig/utils/attribute.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="211">
+          <caret line="68" column="22" selection-start-line="68" selection-start-column="17" selection-end-line="68" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rig/utils/network.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="199" lean-forward="true" selection-start-line="199" selection-end-line="199" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rig/utils/curve.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="462">
+          <caret line="223" column="22" selection-start-line="223" selection-start-column="22" selection-end-line="223" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rig/utils/constraint.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3248">
+          <caret line="206" column="25" lean-forward="true" selection-start-line="206" selection-start-column="25" selection-end-line="206" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/library/mathUtils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="987">
+          <caret line="66" lean-forward="true" selection-start-line="66" selection-end-line="66" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rig/utils/node.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="748">
+          <caret line="104" selection-start-line="104" selection-end-line="104" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rig/utils/rigging.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3228">
+          <caret line="705" column="24" selection-start-line="705" selection-start-column="24" selection-end-line="705" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.py" />
+    <entry file="file://$PROJECT_DIR$/channelBox/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/channelBox/keys.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="614">
+          <caret line="148" column="2" selection-start-line="148" selection-start-column="2" selection-end-line="148" selection-end-column="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/channelBox/ghost.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="64" column="29" selection-start-line="64" selection-start-column="29" selection-end-line="64" selection-end-column="29" />
+          <folding>
+            <element signature="e#52#56#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="51">
+          <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim/gif_maker/__init__.py" />
+    <entry file="file://$PROJECT_DIR$/anim/gif_maker/ui.py" />
+    <entry file="file://$PROJECT_DIR$/anim/stickyFeet.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="329">
+          <caret line="600" column="10" selection-start-line="600" selection-start-column="10" selection-end-line="600" selection-end-column="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gif_maker/gif_maker.py" />
+    <entry file="file://$PROJECT_DIR$/anim/playblast.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="53">
+          <caret line="4" selection-start-line="4" selection-end-line="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gif_maker/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="87">
+          <caret line="17" selection-start-line="17" selection-end-line="17" />
+          <folding>
+            <element signature="e#36#45#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/channelBoxCommand.mel" />
+    <entry file="file://$PROJECT_DIR$/anim_mancer/channelBoxCommand.res.mel" />
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/ui.py" />
+    <entry file="file://$PROJECT_DIR$/reprTest.py" />
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor />
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/color.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="10" column="31" selection-start-line="10" selection-start-column="31" selection-end-line="10" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/resource/resource.qrc">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/resource/theme.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="6" column="1" lean-forward="true" selection-start-line="6" selection-start-column="1" selection-end-line="6" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/channelBox/tweenKey_2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1613">
+          <folding>
+            <element signature="e#17#27#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/utils/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="1" column="108" selection-start-line="1" selection-start-column="108" selection-end-line="1" selection-end-column="108" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/utils/maya_qt.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="442">
+          <caret line="137" selection-start-line="137" selection-end-line="137" />
+          <folding>
+            <element signature="e#34#82#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="20" column="10" selection-start-line="20" selection-start-column="10" selection-end-line="20" selection-end-column="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim/refPlayer/ui.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="643">
+          <caret line="135" lean-forward="true" selection-start-line="135" selection-end-line="135" />
+          <folding>
+            <element signature="e#722#731#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/resource/anim_mancer_stacked.py" />
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/custom.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="17" selection-start-column="17" selection-end-column="17" />
+          <folding>
+            <element signature="e#49#77#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/reference.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="15" column="53" lean-forward="true" selection-start-line="15" selection-start-column="53" selection-end-line="15" selection-end-column="53" />
+          <folding>
+            <element signature="e#13#41#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="51">
+          <caret line="3" column="4" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="452">
+          <caret line="172" column="45" selection-start-line="172" selection-start-column="45" selection-end-line="172" selection-end-column="45" />
+          <folding>
+            <element signature="e#18#66#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/channelBox/ui.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="408">
+          <caret line="42" lean-forward="true" selection-start-line="42" selection-end-line="42" />
+          <folding>
+            <element signature="e#43#54#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/widgets.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="363">
+          <caret line="582" column="33" selection-start-line="582" selection-start-column="33" selection-end-line="582" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="11" lean-forward="true" selection-start-line="11" selection-end-line="11" />
+          <folding>
+            <element signature="e#18#64#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="23" column="51" selection-start-line="23" selection-start-column="51" selection-end-line="23" selection-end-column="51" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

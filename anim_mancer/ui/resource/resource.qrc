@@ -1,0 +1,21 @@
+<RCC>
+  <qresource prefix="icon">
+    <file>copy_100.png</file>
+    <file>edit_100.png</file>
+    <file>export_100.png</file>
+    <file>file_100.png</file>
+    <file>filter_100.png</file>
+    <file>folder_100.png</file>
+    <file>import_100.png</file>
+    <file>lock_100.png</file>
+    <file>refresh_100.png</file>
+    <file>search_100.png</file>
+    <file>settings_100.png</file>
+    <file>trash_100.png</file>
+    <file>visible_off_100.png</file>
+    <file>visible_on_100.png</file>
+    <file>icon_gear.png</file>
+    <file>icon_logo.png</file>
+    <file>icon_pane_splitter.png</file>
+  </qresource>
+</RCC>

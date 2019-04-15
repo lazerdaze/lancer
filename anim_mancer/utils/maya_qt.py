@@ -20,8 +20,10 @@ import difflib
 #
 # ======================================================================================================================
 
+
 CHANNELBOX = "mainChannelBox"
 CHANNELBOX_SEARCH = "mainChannelBoxSearch"
+CHANNELBOX_EDITOR = 'ChannelBoxLayerEditor'
 
 
 # ======================================================================================================================
@@ -61,6 +63,10 @@ def qt_to_maya(widget, *args, **kwargs):
 	return OpenMayaUI.MQtUtil.fullName(long(shiboken.getCppPointer(widget)[0]))
 
 
+def get_channelbox_editor(*args, **kwargs):
+	return maya_to_qt(CHANNELBOX_EDITOR)
+
+
 def get_channelbox(*args, **kwargs):
 	"""
 	Get ChannelBox, convert the main channel box to QT.
@@ -68,8 +74,7 @@ def get_channelbox(*args, **kwargs):
 	:return: Maya's main channel box
 	:rtype: QWidget
 	"""
-	channelBox = maya_to_qt(CHANNELBOX)
-	return channelBox
+	return maya_to_qt(CHANNELBOX)
 
 
 def get_channelbox_menu():
@@ -99,6 +104,44 @@ def search_mel_variables(searchString=None, *args, **kwargs):
 	for var in sorted(mel.eval("env")):
 		if not searchString or var.lower().count(searchString):
 			yield var
+
+
+def maya_recurse_children(root, *args, **kwargs):
+	tree = kwargs.get('tree', {})
+	
+	children = []
+	
+	try:
+		children = cmds.layout(root, q=True, ca=True)
+	except RuntimeError:
+		pass
+	
+	if children:
+		for child in children:
+			name = child
+			
+			try:
+				name = cmds.layout(child, q=True, fpn=True)
+			except RuntimeError:
+				try:
+					name = cmds.control(child, q=True, fpn=True)
+				except RuntimeError:
+					pass
+			tree[name] = maya_recurse_children(child)
+			print name
+	
+	return tree
+
+
+def qt_recurse_children(*args, **kwargs):
+	return
+
+
+def get_maya_window():
+	ptr = OpenMayaUI.MQtUtil.mainWindow()
+	if ptr is not None:
+		return shiboken.wrapInstance(long(ptr), QWidget)
+
 
 # ======================================================================================================================
 #

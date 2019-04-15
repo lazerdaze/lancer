@@ -1,0 +1,80 @@
+QMainWindow{
+background:black;
+}
+
+QWidget{
+color: white;
+}
+
+QSplitter::handle {
+image: url(icon_pane_splitter.png);
+}
+
+QSplitter::handle:horizontal {
+width: 5px;
+}
+
+QSplitter::handle:vertical {
+height: 5px;
+}
+
+QTabWidget{
+}
+
+QTabWidget QWidget{
+}
+
+QTabWidget::pane > QWidget{
+background:#282f37;
+}
+
+QTabWidget::pane{
+border-top: 40px solid #121619;
+position: absolute;
+top: -40px;
+background:#282f37;
+}
+
+QTabBar{
+background:rgb(75, 75, 75);
+}
+
+QTabBar::tab {
+color:rgb(120, 120, 120);
+background:#121619;
+}
+
+QTabBar::tab:selected{
+color:white;
+background:#282f37;
+}
+
+QTabBar::tab:hover {
+color:white;
+}
+
+QTabBar::tab:selected:hover {
+color:white;
+}
+
+QPushButton{
+background: #38e3ed;
+border-style: solid;
+border-color: #38e3ed;
+border-width: 5px;
+border-radius: 10px;
+}
+QToolButton{
+background:none;
+border:none;
+}
+QTreeWidget{
+background:#282f37;
+}
+QLineEdit{
+background:#282f37;
+border:none;
+}
+QScrollArea{
+background:#282f37;
+}

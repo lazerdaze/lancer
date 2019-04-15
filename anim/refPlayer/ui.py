@@ -43,7 +43,7 @@ import os
 import sys
 
 # Maya Modules
-from maya import cmds, mel, OpenMayaUI
+from maya import cmds, OpenMayaUI
 
 ########################################################################################################################
 #

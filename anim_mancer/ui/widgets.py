@@ -1,19 +1,24 @@
-"""
-"""
-
 # Project Modules
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
+
 from color import USER_COLOR, DIVIDER_COLOR
 from anim_mancer.utils import *
 
 # Python Modules
+import os
+from os import path
 
 # Python Modules
 import difflib
 
 # Maya Modules
-from maya import OpenMaya, OpenMayaUI, cmds, mel
+from maya import OpenMaya, OpenMayaUI, cmds
 
 # Qt Modules
+from PySide2.QtCore import *
+from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 import shiboken2 as shiboken
 
@@ -26,6 +31,11 @@ import shiboken2 as shiboken
 # ======================================================================================================================
 
 CHANNELBOX_PLUS = None
+
+DIR_PATH = path.dirname(os.path.abspath(__file__))
+RESOURCE_PATH = path.join(DIR_PATH, 'resource')
+ICON_GEAR = path.join(RESOURCE_PATH, 'icon_gear.png')
+ICON_LOGO = path.join(RESOURCE_PATH, 'icon_logo.png')
 
 
 # ======================================================================================================================
@@ -297,6 +307,313 @@ class ChannelBox_Search_Widget(QWidget):
 				)
 
 
+class TabBarPlus(QTabBar):
+	"""Tab bar that has a plus button floating to the right of the tabs."""
+	
+	plusClicked = Signal()
+	
+	def __init__(self):
+		QTabBar.__init__(self)
+		
+		# Plus Button
+		self.plusButton = QPushButton("+")
+		self.plusButton.setParent(self)
+		self.plusButton.setFixedSize(20, 20)  # Small Fixed size
+		self.plusButton.clicked.connect(self.plusClicked.emit)
+		self.movePlusButton()  # Move to the correct location
+	
+	# end Constructor
+	
+	def sizeHint(self):
+		"""Return the size of the TabBar with increased width for the plus button."""
+		sizeHint = QTabBar.sizeHint(self)
+		width = sizeHint.width()
+		height = sizeHint.height()
+		return QSize(width + 25, height)
+	
+	# end tabSizeHint
+	
+	def resizeEvent(self, event):
+		"""Resize the widget and make sure the plus button is in the correct location."""
+		QTabBar.resizeEvent(self, event)
+		
+		self.movePlusButton()
+	
+	# end resizeEvent
+	
+	def tabLayoutChange(self):
+		"""This virtual handler is called whenever the tab layout changes.
+		If anything changes make sure the plus button is in the correct location.
+		"""
+		QTabBar.tabLayoutChange(self)
+		
+		self.movePlusButton()
+	
+	# end tabLayoutChange
+	
+	def movePlusButton(self):
+		"""Move the plus button to the correct location."""
+		# Find the width of all of the tabs
+		size = sum([self.tabRect(i).width() for i in range(self.count())])
+		# size = 0
+		# for i in range(self.count()):
+		#     size += self.tabRect(i).width()
+		
+		# Set the plus button location in a visible area
+		h = self.geometry().top()
+		w = self.width()
+		if size > w:  # Show just to the left of the scroll buttons
+			self.plusButton.move(w - 54, h)
+		else:
+			self.plusButton.move(size, h)
+
+
+class Custom_Tab_Widget(QTabWidget):
+	"""Tab Widget that that can have new tabs easily added to it."""
+	
+	def __init__(self):
+		QTabWidget.__init__(self)
+		
+		# Tab Bar
+		self.tab = TabBarPlus()
+		self.setTabBar(self.tab)
+		
+		# Properties
+		self.setMovable(True)
+		self.setTabsClosable(True)
+		
+		# Signals
+		self.tab.plusClicked.connect(self.addTab)
+		self.tab.tabMoved.connect(self.moveTab)
+		self.tabCloseRequested.connect(self.removeTab)
+
+
+class Icon_Tool_Button(QToolButton):
+	def __init__(self, parent, offFilepath, onFilepath=None, *args, **kwargs):
+		QToolButton.__init__(self, parent)
+		self.onFilepath = onFilepath
+		self.offFilepath = offFilepath
+		self.defaultOpacity = 0.75
+		self.hoverOpacity = 1
+		self.painter = None
+		self.active = False
+		
+		self.offPixmap = QPixmap(self.offFilepath)
+		if self.onFilepath:
+			self.onPixmap = QPixmap(self.onFilepath)
+		self.pixmap = self.offPixmap
+		self.updatePaintEvent(self.defaultOpacity)
+	
+	def setActive(self, value):
+		if self.offFilepath:
+			if value:
+				self.pixmap = self.onPixmap
+			else:
+				self.pixmap = self.offPixmap
+			self.active = value
+			self.updatePaintEvent(self.defaultOpacity)
+		return
+	
+	def updatePaintEvent(self, opacity):
+		result = QPixmap(self.pixmap.size())
+		result.fill(Qt.transparent)
+		
+		self.painter = QPainter(result)
+		self.painter.setOpacity(opacity)
+		self.painter.drawPixmap(0, 0, self.pixmap)
+		self.painter.end()
+		self.setIcon(QIcon(result))
+	
+	def enterEvent(self, event):
+		self.updatePaintEvent(self.hoverOpacity)
+		return
+	
+	def leaveEvent(self, event):
+		self.updatePaintEvent(self.defaultOpacity)
+		return
+
+
+class Sliding_Stacked_Widget(QStackedWidget):
+	animation_finished = Signal()
+	
+	def __init__(self, speed=500, animation=QEasingCurve.InOutCubic, vertical=False, wrap=False, *args, **kwargs):
+		QStackedWidget.__init__(self, *args, **kwargs)
+		
+		self.vertical = vertical
+		self.speed = speed
+		self.animation_type = animation
+		self.current = 0
+		self.next = 0
+		self.wrap = wrap
+		self.pnow = QPoint(0, 0)
+		self.active = False
+	
+	class direction(object):
+		left_to_right = 'left to right'
+		right_to_left = 'right to left'
+		top_to_bottom = 'top to bottom'
+		bottom_to_top = 'bottom to top'
+		automatic = 'automatic'
+	
+	def set_wrap(self, wrap):
+		self.wrap = wrap
+		return
+	
+	def set_vertical(self, vertical):
+		self.vertical = vertical
+		return
+	
+	def set_speed(self, speed):
+		self.speed = speed
+		return
+	
+	def slide_in_next(self, *args, **kwargs):
+		current = self.currentIndex()
+		
+		if self.wrap and current < self.count() - 1:
+			self.slide_in_index(current + 1, self.direction.automatic)
+		return
+	
+	def slide_in_prev(self, *args, **kwargs):
+		current = self.currentIndex()
+		
+		if self.wrap and current > 0:
+			self.slide_in_index(current - 1, self.direction.automatic)
+		return
+	
+	def slide_in_index(self, index, direction='automatic'):
+		if index > self.count() - 1:
+			direction = self.direction.top_to_bottom if self.vertical else self.direction.right_to_left
+			index = index % self.count()
+		elif index < 0:
+			direction = self.direction.bottom_to_top if self.vertical else self.direction.left_to_right
+			index = (index + self.count()) % self.count()
+		
+		self.slide_in_widget(self.widget(index), direction)
+		return
+	
+	def slide_in_widget(self, new_widget, direction, *args, **kwargs):
+		if self.active:
+			return
+		else:
+			self.active = True
+		
+		direction_hint = None
+		current = self.currentIndex()
+		next = self.indexOf(new_widget)
+		
+		if current == next:
+			self.active = False
+			return
+		
+		elif current < next:
+			direction_hint = self.direction.top_to_bottom if self.vertical else self.direction.right_to_left
+		
+		else:
+			direction_hint = self.direction.bottom_to_top if self.vertical else self.direction.left_to_right
+		
+		if direction == self.direction.automatic:
+			direction = direction_hint
+		
+		offsetx = self.frameRect().width()
+		offsety = self.frameRect().height()
+		
+		self.widget(next).setGeometry(0, 0, offsetx, offsety)
+		
+		if direction == self.direction.bottom_to_top:
+			offsetx = 0
+			offsety = - offsety
+		
+		elif direction == self.direction.top_to_bottom:
+			offsetx = 0
+		
+		elif direction == self.direction.right_to_left:
+			offsetx = - offsetx
+			offsety = 0
+		
+		elif direction == self.direction.left_to_right:
+			offsety = 0
+		
+		pnext = QPoint(self.widget(next).pos())
+		pnow = QPoint(self.widget(current).pos())
+		self.pnow = pnow
+		
+		self.widget(next).move(pnext.x() - offsetx, pnext.y() - offsety)
+		self.widget(next).show()
+		self.widget(next).raise_()
+		
+		animnow = QPropertyAnimation(self.widget(current), "pos")
+		
+		animnow.setDuration(self.speed)
+		animnow.setEasingCurve(self.animation_type)
+		animnow.setStartValue(QPoint(pnow.x(), pnow.y()))
+		animnow.setEndValue(QPoint(offsetx + pnow.x(), offsety + pnow.y()))
+		animnext = QPropertyAnimation(self.widget(next), "pos")
+		animnext.setDuration(self.speed)
+		animnext.setEasingCurve(self.animation_type)
+		animnext.setStartValue(QPoint(-offsetx + pnext.x(), offsety + pnext.y()))
+		animnext.setEndValue(QPoint(pnext.x(), pnext.y()))
+		
+		animgroup = QParallelAnimationGroup()
+		
+		animgroup.addAnimation(animnow)
+		animgroup.addAnimation(animnext)
+		animgroup.finished.connect(self.animation_done)
+		
+		self.next = next
+		self.current = current
+		self.active = True
+		animgroup.start()
+		return
+	
+	def animation_done(self, *args, **kwargs):
+		self.setCurrentIndex(self.next)
+		self.widget(self.current).hide()
+		self.widget(self.current).move(self.pnow)
+		self.active = False
+		self.animation_finished.emit()
+		return
+
+
+class Settings_Tool_Button(Icon_Tool_Button):
+	def __init__(self, parent, offFilepath=ICON_GEAR, *args, **kwargs):
+		Icon_Tool_Button.__init__(self, parent, offFilepath=offFilepath, onFilepath=None, *args, **kwargs)
+		self.setMinimumSize(QSize(25, 25))
+		self.setMaximumSize(QSize(25, 25))
+		self.setIconSize(QSize(25, 25))
+
+
+class Header_Widget(QFrame):
+	def __init__(self, *args, **kwargs):
+		QFrame.__init__(self, *args, **kwargs)
+		
+		# Size Policy
+		sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+		sizePolicy.setHorizontalStretch(0)
+		sizePolicy.setVerticalStretch(0)
+		sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
+		self.setSizePolicy(sizePolicy)
+		self.setMinimumSize(QSize(200, 20))
+		self.setMaximumSize(QSize(16777215, 16777215))
+		
+		# Layout
+		self.setLayout(QHBoxLayout())
+		self.layout().setSpacing(5)
+		self.layout().setContentsMargins(5, 5, 5, 5)
+		
+		# Logo
+		self.label_logo = QLabel()
+		self.label_logo.setMinimumSize(QSize(114, 14))
+		self.label_logo.setPixmap(QPixmap(path.join(RESOURCE_PATH, "icon_logo.png")))
+		self.layout().addWidget(self.label_logo)
+		
+		# Settings Button
+		self.button_settings = Settings_Tool_Button(self)
+		self.layout().addWidget(self.button_settings)
+		
+		# Style Sheet
+		self.setStyleSheet('background:black;')
+
 # ======================================================================================================================
 #
 #
@@ -307,3 +624,5 @@ class ChannelBox_Search_Widget(QWidget):
 
 if __name__ == '__main__':
 	pass
+
+
