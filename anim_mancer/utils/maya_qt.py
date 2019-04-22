@@ -133,7 +133,7 @@ def maya_recurse_children(root, *args, **kwargs):
 	return tree
 
 
-def qt_recurse_children(*args, **kwargs):
+def qt_recurse_children(root, *args, **kwargs):
 	return
 
 

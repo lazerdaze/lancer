@@ -1,26 +1,18 @@
 # Project Modules
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
-
-from color import USER_COLOR, DIVIDER_COLOR
 from anim_mancer.utils import *
 
 # Python Modules
 import os
 from os import path
-
-# Python Modules
 import difflib
 
 # Maya Modules
-from maya import OpenMaya, OpenMayaUI, cmds
+from maya import OpenMaya, cmds
 
 # Qt Modules
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
-import shiboken2 as shiboken
 
 # ======================================================================================================================
 #
@@ -31,11 +23,6 @@ import shiboken2 as shiboken
 # ======================================================================================================================
 
 CHANNELBOX_PLUS = None
-
-DIR_PATH = path.dirname(os.path.abspath(__file__))
-RESOURCE_PATH = path.join(DIR_PATH, 'resource')
-ICON_GEAR = path.join(RESOURCE_PATH, 'icon_gear.png')
-ICON_LOGO = path.join(RESOURCE_PATH, 'icon_logo.png')
 
 
 # ======================================================================================================================
@@ -94,6 +81,116 @@ def install_channelbox_search(threshold=0.75):
 #
 #
 # ======================================================================================================================
+
+class VGroupBox(QGroupBox):
+	def __init__(self, *args, **kwargs):
+		QGroupBox.__init__(self, *args, **kwargs)
+		self.setLayout(QVBoxLayout())
+
+
+class HLine(QFrame):
+	def __init__(self, *args, **kwargs):
+		QFrame.__init__(self, *args, **kwargs)
+		self.setFrameShape(QFrame.HLine)
+		self.setFrameShadow(QFrame.Plain)
+
+
+class FlowLayout(QLayout):
+	def __init__(self, parent=None, margin=0, spacing=-1):
+		super(FlowLayout, self).__init__(parent)
+		
+		if parent is not None:
+			self.setMargin(margin)
+		
+		self.setSpacing(spacing)
+		
+		self.itemList = []
+	
+	def __del__(self):
+		item = self.takeAt(0)
+		while item:
+			item = self.takeAt(0)
+	
+	def addItem(self, item):
+		self.itemList.append(item)
+	
+	def count(self):
+		return len(self.itemList)
+	
+	def itemAt(self, index):
+		if index >= 0 and index < len(self.itemList):
+			return self.itemList[index]
+		
+		return None
+	
+	def takeAt(self, index):
+		if index >= 0 and index < len(self.itemList):
+			return self.itemList.pop(index)
+		
+		return None
+	
+	def expandingDirections(self):
+		return Qt.Orientations(Qt.Orientation(0))
+	
+	def hasHeightForWidth(self):
+		return True
+	
+	def heightForWidth(self, width):
+		height = self._doLayout(QRect(0, 0, width, 0), True)
+		return height
+	
+	def setGeometry(self, rect):
+		super(FlowLayout, self).setGeometry(rect)
+		self._doLayout(rect, False)
+	
+	def sizeHint(self):
+		return self.minimumSize()
+	
+	def minimumSize(self):
+		size = QSize()
+		
+		for item in self.itemList:
+			size = size.expandedTo(item.minimumSize())
+		
+		size += QSize(2 * self.margin(), 2 * self.margin())
+		return size
+	
+	def _doLayout(self, rect, testOnly):
+		x = rect.x()
+		y = rect.y()
+		lineHeight = 0
+		
+		for item in self.itemList:
+			wid = item.widget()
+			wid_h_add = 0
+			wid_v_add = 0
+			
+			# try:
+			# 	wid_h_add = wid.style().layoutSpacing(QSizePolicy.PushButton, QSizePolicy.PushButton, Qt.Horizontal)
+			# 	wid_v_add = wid.style().layoutSpacing(QSizePolicy.PushButton, QSizePolicy.PushButton, Qt.Vertical)
+			#
+			# except AttributeError:
+			# 	pass
+			
+			spaceX = self.spacing() + wid_h_add
+			spaceY = self.spacing() + wid_v_add
+			
+			nextX = x + item.sizeHint().width() + spaceX
+			if nextX - spaceX > rect.right() and lineHeight > 0:
+				x = rect.x()
+				y = y + lineHeight + spaceY
+				nextX = x + item.sizeHint().width() + spaceX
+				lineHeight = 0
+			
+			if not testOnly:
+				item.setGeometry(
+						QRect(QPoint(x, y), item.sizeHint()))
+			
+			x = nextX
+			lineHeight = max(lineHeight, item.sizeHint().height())
+		
+		return y + lineHeight - rect.y()
+
 
 class ChannelBox_Search_Widget(QWidget):
 	def __init__(self, parent, threshold=0.75):
@@ -576,43 +673,12 @@ class Sliding_Stacked_Widget(QStackedWidget):
 
 
 class Settings_Tool_Button(Icon_Tool_Button):
-	def __init__(self, parent, offFilepath=ICON_GEAR, *args, **kwargs):
+	def __init__(self, parent, offFilepath=IconPath.gear, *args, **kwargs):
 		Icon_Tool_Button.__init__(self, parent, offFilepath=offFilepath, onFilepath=None, *args, **kwargs)
 		self.setMinimumSize(QSize(25, 25))
 		self.setMaximumSize(QSize(25, 25))
 		self.setIconSize(QSize(25, 25))
 
-
-class Header_Widget(QFrame):
-	def __init__(self, *args, **kwargs):
-		QFrame.__init__(self, *args, **kwargs)
-		
-		# Size Policy
-		sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
-		self.setSizePolicy(sizePolicy)
-		self.setMinimumSize(QSize(200, 20))
-		self.setMaximumSize(QSize(16777215, 16777215))
-		
-		# Layout
-		self.setLayout(QHBoxLayout())
-		self.layout().setSpacing(5)
-		self.layout().setContentsMargins(5, 5, 5, 5)
-		
-		# Logo
-		self.label_logo = QLabel()
-		self.label_logo.setMinimumSize(QSize(114, 14))
-		self.label_logo.setPixmap(QPixmap(path.join(RESOURCE_PATH, "icon_logo.png")))
-		self.layout().addWidget(self.label_logo)
-		
-		# Settings Button
-		self.button_settings = Settings_Tool_Button(self)
-		self.layout().addWidget(self.button_settings)
-		
-		# Style Sheet
-		self.setStyleSheet('background:black;')
 
 # ======================================================================================================================
 #
@@ -624,5 +690,3 @@ class Header_Widget(QFrame):
 
 if __name__ == '__main__':
 	pass
-
-

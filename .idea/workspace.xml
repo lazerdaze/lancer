@@ -2,40 +2,99 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a6e36410-8fc8-4303-896d-38efe536e161" name="Default" comment="No comment">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/custom.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/reference.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/copy_100.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/edit_100.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/export_100.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/file_100.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/filter_100.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/folder_100.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icon_gear.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icon_logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icon_pane_splitter.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/import_100.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/lock_100.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/refresh_100.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/resource.qrc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/search_100.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/settings_100.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/theme.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/trash_100.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/visible_off_100.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/visible_on_100.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/settings.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resource/resource.qrc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/timeline_editor/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/tools/animFilters/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/tools/animFilters/animFilters.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/tools/colorKey/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/tools/colorKey/colorKey.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/tools/colorKey/color_keys.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/tools/manipulator/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/tools/motion_path/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/tools/motion_trail/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/tools/offset/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/tools/offset/global_offset.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/tools/pivot/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/tools/viewport/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/tools/viewport/viewport_suspend.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/header.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/dark_theme.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icons_bake.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icons_fk.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icons_ghost.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icons_grid.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icons_ik.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icons_key.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icons_key_all.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icons_locate.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icons_motion.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icons_path.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icons_set.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icons_set_add.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icons_set_remove.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icons_snap.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/icons_time.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/theme.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/ui/toolbox.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/utils/general.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/utils/global_strings.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/anim_mancer/utils/tracking.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/startup/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/anim/refPlayer/ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim/refPlayer/ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/fkikMatch.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/fkikMatch.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/picker/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/picker/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/picker/jt_cup.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/picker/jt_cup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/picker/jt_cup_pref.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/picker/jt_cup_pref.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/playblast.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/playblast.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/images/connect_100.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/images/disconnect_100.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/images/end_100.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/images/loopOnce_100.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/images/loop_100.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/images/nextFrame_100.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/images/paused_100.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/images/play_100.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/images/prevFrame_100.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/images/start_100.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/images/stop_100.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/images/volumeMuted_100.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/images/volumeOff_100.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/images/volumeOn_100.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refPlayer/ui.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/refman.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/refman.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/retarget.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/retarget.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/stickyFeet.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/stickyFeet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim/switcheroo.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/switcheroo.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/anim_mancer/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/anim_mancer/tools/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/anim_mancer/ui/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/ui/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim_mancer/ui/color.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/utils/color.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim_mancer/ui/custom.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/ui/custom.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim_mancer/ui/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/ui/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim_mancer/ui/reference.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim_mancer/ui/resource/resource.qrc" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/resource.qrc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim_mancer/ui/resource/theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/ui/resource/theme.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anim_mancer/ui/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/ui/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/anim_mancer/ui/widgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/ui/widgets.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/anim_mancer/utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/utils/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/anim_mancer/utils/maya_qt.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/utils/maya_qt.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/channelBox/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/channelBox/ghost.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/ghost.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/channelBox/keys.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/keys.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/channelBox/legacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/legacy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/channelBox/motionTrail.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/motionTrail.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/channelBox/note.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/note.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/channelBox/tweenKey.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/tweenKey.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/channelBox/tweenKey_2.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/tweenKey_2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/channelBox/ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/ui/channelbox_legacy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gif_maker/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/tools/gif_maker/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphEditor/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/graph_editor/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphEditor/customGraphEditorMenu.py" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/graph_editor/customGraphEditorMenu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphEditor/graphEditorPanel.mel" beforeDir="false" afterPath="$PROJECT_DIR$/anim_mancer/graph_editor/graphEditorPanel.mel" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphEditor/lancerMenu.mel" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/menu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shows/apex.py" beforeDir="false" afterPath="$PROJECT_DIR$/shows/apex.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -44,7 +103,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
+    <leaf />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -55,52 +114,38 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>playblast</find>
-      <find>startTime</find>
-      <find>sequence</find>
-      <find>difflib</find>
-      <find>mel</find>
-      <find>\n</find>
+      <find>QtWidgets.</find>
+      <find>group_grid.</find>
+      <find>button_snap</find>
+      <find>button_locate</find>
+      <find>button_grid</find>
+      <find>motion</find>
+      <find>button_motion</find>
+      <find>button_path</find>
+      <find>button_ik</find>
+      <find>spacer</find>
       <find>QtCore.</find>
-      <find>mainWindow</find>
-      <find>wrapInstance</find>
-      <find>maya_window</find>
-      <find>pushbutton</find>
-      <find>toolButton_3</find>
-      <find>wrapinstance</find>
-      <find>widget_main.</find>
-      <find>widget_main_layout</find>
-      <find>self.widget_main</find>
-      <find>signal</find>
-      <find>clicked</find>
-      <find>toolbutton</find>
-      <find>clicked.connect</find>
-      <find>iconButton</find>
-      <find>.css</find>
-      <find>QtGui.</find>
-      <find>Form</find>
-      <find>emit</find>
-      <find>-&gt;</find>
-      <find>new</find>
-      <find>self.verticalLayout_4</find>
-      <find>icon</find>
+      <find>vertical</find>
       <find>custom</find>
+      <find>Custom</find>
+      <find>filter</find>
+      <find>filterUICreateMenu</find>
+      <find>show</find>
+      <find>graphEditorFilterCategories</find>
+      <find>$graphEd</find>
+      <find>$outlineEd</find>
+      <find>-f</find>
+      <find>animCurveEditor</find>
+      <find>radio</find>
+      <find>butter</find>
+      <find>np</find>
+      <find>spacing</find>
+      <find>RESOURCE_PATH</find>
+      <find>CHANNELBOX_PANE_LAYOUT</find>
+      <find>label</find>
+      <find>delete</find>
     </findStrings>
     <replaceStrings>
-      <replace>Part.</replace>
-      <replace>Component.</replace>
-      <replace>template</replace>
-      <replace>skeletonTemplate</replace>
-      <replace>&quot;</replace>
-      <replace>(</replace>
-      <replace>)</replace>
-      <replace>,</replace>
-      <replace>&gt;</replace>
-      <replace>&lt;</replace>
-      <replace>leg</replace>
-      <replace>pinkyToe</replace>
-      <replace>left</replace>
-      <replace>LancerNode</replace>
       <replace>self.master</replace>
       <replace>self.masterParent</replace>
       <replace>:</replace>
@@ -117,6 +162,20 @@
       <replace>self</replace>
       <replace>.</replace>
       <replace>self.layout()</replace>
+      <replace>filepath</replace>
+      <replace>group_tangents</replace>
+      <replace>radioGroup_tangents</replace>
+      <replace>radio_Auto</replace>
+      <replace>radio_auto</replace>
+      <replace>button_locate</replace>
+      <replace>button_grid</replace>
+      <replace>button_motion</replace>
+      <replace>path</replace>
+      <replace>button_path</replace>
+      <replace>button_ghost</replace>
+      <replace>button_set</replace>
+      <replace>directory</replace>
+      <replace>UI.channelbox_pane</replace>
     </replaceStrings>
     <dirStrings>
       <dir>I:\prism\pyplayer</dir>
@@ -130,6 +189,8 @@
       <dir>I:\lancer\rig</dir>
       <dir>I:\lancer\rig\utils</dir>
       <dir>I:\lancer</dir>
+      <dir>I:\lancer\anim_mancer</dir>
+      <dir>I:\lancer\anim</dir>
     </dirStrings>
   </component>
   <component name="Git.Settings">
@@ -137,43 +198,13 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="partsUpdate" />
+        <entry key="$PROJECT_DIR$" value="anim_mancer_v1" />
       </map>
     </option>
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/rig/parts/body/fkik.py" />
-        <option value="$PROJECT_DIR$/rig/utils/wire.py" />
-        <option value="$PROJECT_DIR$/rig/templates/biped.xml" />
-        <option value="$PROJECT_DIR$/rig/utils/general.py" />
-        <option value="$PROJECT_DIR$/rig/utils/dagnode.py" />
-        <option value="$PROJECT_DIR$/rig/utils/naming.py" />
-        <option value="$PROJECT_DIR$/shows/__init__.py" />
-        <option value="$PROJECT_DIR$/rig/parts/body/leg.py" />
-        <option value="$PROJECT_DIR$/rig/parts/body/arm.py" />
-        <option value="$PROJECT_DIR$/rig/utils/network.py" />
-        <option value="$PROJECT_DIR$/rig/utils/control.py" />
-        <option value="$PROJECT_DIR$/rig/utils/attribute.py" />
-        <option value="$PROJECT_DIR$/rig/parts/body/digit.py" />
-        <option value="$PROJECT_DIR$/rig/parts/body/root.py" />
-        <option value="$PROJECT_DIR$/rig/utils/joint.py" />
-        <option value="$PROJECT_DIR$/rig/utils/constraint.py" />
-        <option value="$PROJECT_DIR$/rig/parts/__init__.py" />
-        <option value="$PROJECT_DIR$/rig/parts/body/head.py" />
-        <option value="$PROJECT_DIR$/rig/parts/body/spine.py" />
-        <option value="$PROJECT_DIR$/rig/parts/baseRig.py" />
-        <option value="$PROJECT_DIR$/external/jh_proceduralRibbon.py" />
-        <option value="$PROJECT_DIR$/rig/utils/curve.py" />
-        <option value="$PROJECT_DIR$/rig/utils/node.py" />
-        <option value="$PROJECT_DIR$/rig/utils/rigging.py" />
-        <option value="$PROJECT_DIR$/library/mathUtils.py" />
-        <option value="$PROJECT_DIR$/test.py" />
-        <option value="$PROJECT_DIR$/channelBox/ui.py" />
-        <option value="$PROJECT_DIR$/channelBox/ghost.py" />
-        <option value="$PROJECT_DIR$/anim/gif_maker/ui.py" />
-        <option value="$PROJECT_DIR$/anim/gif_maker/__init__.py" />
         <option value="$PROJECT_DIR$/anim/gif_maker.py" />
         <option value="$PROJECT_DIR$/gif_maker/gif_maker.py" />
         <option value="$PROJECT_DIR$/gif_maker/__init__.py" />
@@ -182,27 +213,57 @@
         <option value="$PROJECT_DIR$/anim_mancer/ui/ui.py" />
         <option value="$PROJECT_DIR$/anim_mancer/ui/color.py" />
         <option value="$PROJECT_DIR$/anim_mancer/ui/__init__.py" />
-        <option value="$PROJECT_DIR$/anim_mancer/tools/__init__.py" />
         <option value="$PROJECT_DIR$/anim_mancer/resource/theme.css" />
         <option value="$PROJECT_DIR$/anim_mancer/ui/anim_mancer.py" />
-        <option value="$PROJECT_DIR$/anim_mancer/utils/__init__.py" />
         <option value="$PROJECT_DIR$/anim/refPlayer/ui.py" />
-        <option value="$PROJECT_DIR$/anim_mancer/utils/maya_qt.py" />
         <option value="$PROJECT_DIR$/anim_mancer/ui/reference.py" />
-        <option value="$PROJECT_DIR$/anim_mancer/ui/custom.py" />
-        <option value="$PROJECT_DIR$/anim_mancer/__init__.py" />
-        <option value="$PROJECT_DIR$/anim_mancer/ui/settings.py" />
-        <option value="$PROJECT_DIR$/anim_mancer/ui/main.py" />
-        <option value="$PROJECT_DIR$/anim_mancer/ui/widgets.py" />
+        <option value="$PROJECT_DIR$/channelBox/ui.py" />
+        <option value="$PROJECT_DIR$/shows/apex.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/utils/maya_qt.py" />
+        <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/anim_mancer/tools/viewport_suspend.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/tools/color_keys.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/tools/globalOffset.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/theme.css" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/resource/theme.css" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/resource/dark_theme.css" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/custom.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/settings.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/utils/tracking.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/graph_editor.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/graphEditor/graph_editor.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/graphEditor/customGraphEditorMenu.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/graphEditor/graphEditorPanel.mel" />
+        <option value="$PROJECT_DIR$/anim_mancer/graph_editor/graphEditorPanel.mel" />
+        <option value="$PROJECT_DIR$/anim_mancer/tools/colorKey/__init__.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/tools/motion_path.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/tools/__init__.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/utils/general.py" />
+        <option value="$PROJECT_DIR$/anim/__init__.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/utils/naming.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/__init__.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/header.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/widgets.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/toolbox.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/theme.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/channelbox_legacy.py" />
+        <option value="$PROJECT_DIR$/__init__.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/utils/__init__.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/ui/main.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/utils/global_strings.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/tools/animFilters/animFilters.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/tools/animFilters/__init__.py" />
+        <option value="$PROJECT_DIR$/anim_mancer/graph_editor/customGraphEditorMenu.py" />
+        <option value="$PROJECT_DIR$/userSetup.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="23" />
-    <option name="y" value="133" />
-    <option name="width" value="2611" />
-    <option name="height" value="1240" />
+    <option name="x" value="1912" />
+    <option name="y" value="-8" />
+    <option name="width" value="916" />
+    <option name="height" value="1456" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -237,24 +298,14 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="lancer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="lancer" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
+      <pane id="ProjectPane" />
       <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://I:/lancer/rig/utils/control.py" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/anim_mancer/ui/widgets.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../axel" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
     <property name="settings.editor.splitter.proportion" value="0.013620913" />
@@ -269,11 +320,11 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="I:\lancer\anim_mancer\tools" />
       <recent name="I:\lancer\anim_mancer\ui" />
-      <recent name="I:\lancer\gif_maker" />
-      <recent name="I:\lancer\rig\parts" />
-      <recent name="I:\lancer\plugins" />
-      <recent name="I:\lancer\library" />
+      <recent name="I:\lancer\anim_mancer\utils" />
+      <recent name="I:\lancer\anim_mancer" />
+      <recent name="I:\lancer\anim_mancer\tools\offset" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="I:\lancer\rig\templates" />
@@ -295,7 +346,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.reference">
+  <component name="RunManager" selected="Python.test">
     <configuration name="__init__" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="lancer" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -344,30 +395,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="reference" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="lancer" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/anim_mancer/ui" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="com.brainwy.pyvmmonitor.PyVmMonitorRunExtension">
-        <option name="PyVmMonitorInitialProfileMode" value="INHERIT_GLOBAL" />
-      </EXTENSION>
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/anim_mancer/ui/reference.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="lancer" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -383,31 +410,7 @@
       <EXTENSION ID="com.brainwy.pyvmmonitor.PyVmMonitorRunExtension">
         <option name="PyVmMonitorInitialProfileMode" value="INHERIT_GLOBAL" />
       </EXTENSION>
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="tweenKey_2" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="lancer" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/channelBox" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="com.brainwy.pyvmmonitor.PyVmMonitorRunExtension">
-        <option name="PyVmMonitorInitialProfileMode" value="INHERIT_GLOBAL" />
-      </EXTENSION>
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/channelBox/tweenKey_2.py" />
+      <option name="SCRIPT_NAME" value="I:\lancer\uncompyle.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -417,19 +420,19 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Python.test" />
       <item itemvalue="Python.__init__" />
       <item itemvalue="Python.biped" />
-      <item itemvalue="Python.test" />
       <item itemvalue="Python.reference" />
       <item itemvalue="Python.tweenKey_2" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.reference" />
         <item itemvalue="Python.tweenKey_2" />
+        <item itemvalue="Python.reference" />
         <item itemvalue="Python.test" />
-        <item itemvalue="Python.__init__" />
         <item itemvalue="Python.biped" />
+        <item itemvalue="Python.__init__" />
       </list>
     </recent_temporary>
   </component>
@@ -443,13 +446,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1522376714442</updated>
-    </task>
-    <task id="LOCAL-00023" summary="No comment">
-      <created>1530117986803</created>
-      <option name="number" value="00023" />
-      <option name="presentableId" value="LOCAL-00023" />
-      <option name="project" value="LOCAL" />
-      <updated>1530117986803</updated>
     </task>
     <task id="LOCAL-00024" summary="No comment">
       <created>1530118117726</created>
@@ -787,7 +783,14 @@
       <option name="project" value="LOCAL" />
       <updated>1555054150850</updated>
     </task>
-    <option name="localTasksCounter" value="72" />
+    <task id="LOCAL-00072" summary="No comment">
+      <created>1555315542036</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1555315542036</updated>
+    </task>
+    <option name="localTasksCounter" value="73" />
     <servers />
   </component>
   <component name="TodoView">
@@ -800,15 +803,15 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
+    <frame x="1912" y="-8" width="916" height="1456" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20179136" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.30182233" />
       <window_info id="Structure" order="1" weight="0.24973656" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Messages" order="0" weight="0.3296131" />
       <window_info anchor="bottom" id="Message" order="1" />
-      <window_info anchor="bottom" id="Find" order="2" weight="0.32441112" />
-      <window_info anchor="bottom" id="Run" order="3" weight="0.23768736" />
+      <window_info anchor="bottom" id="Find" order="2" weight="0.32326284" />
+      <window_info anchor="bottom" id="Run" order="3" weight="0.23716012" />
       <window_info anchor="bottom" id="Debug" order="4" weight="0.39828694" />
       <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="6" weight="0.4" />
@@ -894,177 +897,133 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/rig/parts/__init__.py">
+    <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="6" column="27" lean-forward="true" selection-start-line="6" selection-start-column="27" selection-end-line="6" selection-end-column="27" />
+        <state relative-caret-position="221">
+          <caret line="13" column="13" lean-forward="true" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="13" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/rig/parts/body/head.py">
+    <entry file="file://$PROJECT_DIR$/anim_mancer/utils/maya_qt.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="442">
-          <caret line="36" column="25" lean-forward="true" selection-start-line="36" selection-start-column="25" selection-end-line="36" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rig/parts/body/spine.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="102" column="65" lean-forward="true" selection-start-line="102" selection-start-column="65" selection-end-line="102" selection-end-column="65" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rig/parts/baseRig.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="449">
-          <caret line="876" lean-forward="true" selection-start-line="876" selection-end-line="876" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/external/jh_proceduralRibbon.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="284">
-          <caret line="243" column="19" selection-start-line="243" selection-start-column="14" selection-end-line="243" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rig/parts/body/rigBase.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="189" column="28" selection-start-line="189" selection-start-column="28" selection-end-line="189" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rig/utils/naming.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="47">
-          <caret line="172" column="31" lean-forward="true" selection-start-line="172" selection-start-column="31" selection-end-line="172" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rig/utils/general.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="407">
-          <caret line="175" lean-forward="true" selection-start-line="175" selection-end-line="175" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rig/utils/joint.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1631">
-          <caret line="868" lean-forward="true" selection-start-line="868" selection-end-line="868" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rig/utils/attribute.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="211">
-          <caret line="68" column="22" selection-start-line="68" selection-start-column="17" selection-end-line="68" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rig/utils/network.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="199" lean-forward="true" selection-start-line="199" selection-end-line="199" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rig/utils/curve.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="462">
-          <caret line="223" column="22" selection-start-line="223" selection-start-column="22" selection-end-line="223" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rig/utils/constraint.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3248">
-          <caret line="206" column="25" lean-forward="true" selection-start-line="206" selection-start-column="25" selection-end-line="206" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/library/mathUtils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="987">
-          <caret line="66" lean-forward="true" selection-start-line="66" selection-end-line="66" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rig/utils/node.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="748">
-          <caret line="104" selection-start-line="104" selection-end-line="104" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/rig/utils/rigging.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3228">
-          <caret line="705" column="24" selection-start-line="705" selection-start-column="24" selection-end-line="705" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test.py" />
-    <entry file="file://$PROJECT_DIR$/channelBox/__init__.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/channelBox/keys.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="614">
-          <caret line="148" column="2" selection-start-line="148" selection-start-column="2" selection-end-line="148" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/channelBox/ghost.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="64" column="29" selection-start-line="64" selection-start-column="29" selection-end-line="64" selection-end-column="29" />
+        <state relative-caret-position="17">
+          <caret line="31" selection-start-line="31" selection-end-line="31" />
           <folding>
-            <element signature="e#52#56#0" expanded="true" />
+            <element signature="e#34#82#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/anim/__init__.py">
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/offset/global_offset.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/uncompyle.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="6" column="41" selection-start-line="6" selection-start-column="41" selection-end-line="6" selection-end-column="41" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/legacy.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/resource/theme.css">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="51">
           <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/anim/gif_maker/__init__.py" />
-    <entry file="file://$PROJECT_DIR$/anim/gif_maker/ui.py" />
-    <entry file="file://$PROJECT_DIR$/anim/stickyFeet.py">
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/resource/dark_theme.css">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://E:/Program Files/Autodesk/Maya2018/devkit/other/pymel/extras/completion/py/maya/app/general/mayaMixin.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="329">
-          <caret line="600" column="10" selection-start-line="600" selection-start-column="10" selection-end-line="600" selection-end-column="52" />
+        <state relative-caret-position="688">
+          <caret line="66" column="6" selection-start-line="66" selection-start-column="6" selection-end-line="66" selection-end-column="6" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/gif_maker/gif_maker.py" />
-    <entry file="file://$PROJECT_DIR$/anim/playblast.py">
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/anim_mancer_settings.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="53">
-          <caret line="4" selection-start-line="4" selection-end-line="4" />
+        <state relative-caret-position="571">
+          <caret line="246" column="8" selection-start-line="246" selection-start-column="8" selection-end-line="249" selection-end-column="80" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/gif_maker/__init__.py">
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/anim_mancer_toolbox.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="87">
-          <caret line="17" selection-start-line="17" selection-end-line="17" />
+        <state relative-caret-position="511">
+          <caret line="50" column="8" lean-forward="true" selection-start-line="50" selection-start-column="8" selection-end-line="52" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/utils/tracking.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="442">
+          <caret line="27" column="20" lean-forward="true" selection-start-line="27" selection-start-column="20" selection-end-line="27" selection-end-column="20" />
           <folding>
-            <element signature="e#36#45#0" expanded="true" />
+            <element signature="e#558#567#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/anim_mancer/channelBoxCommand.mel" />
-    <entry file="file://$PROJECT_DIR$/anim_mancer/channelBoxCommand.res.mel" />
-    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/ui.py" />
-    <entry file="file://$PROJECT_DIR$/reprTest.py" />
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/colorKey/color_keys.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="374">
+          <caret line="22" column="58" selection-start-line="22" selection-start-column="58" selection-end-line="22" selection-end-column="58" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/graphEditor/graph_editor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="137">
+          <caret line="17" selection-start-line="17" selection-end-line="46" selection-end-column="10" />
+          <folding>
+            <element signature="e#18#54#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/graph_editor/lancerMenu.mel">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/graph_editor/graphEditorPanel.mel">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="422">
+          <caret line="38" column="23" selection-start-line="38" selection-start-column="8" selection-end-line="38" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/motion_path.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/colorKey/colorKey.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/viewport/viewport_suspend.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="6" selection-start-line="6" selection-end-line="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/colorKey/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/graph_editor/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-136">
+          <caret line="16" column="82" selection-start-line="16" selection-start-column="71" selection-end-line="16" selection-end-column="82" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
@@ -1073,79 +1032,72 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/color.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="10" column="31" selection-start-line="10" selection-start-column="31" selection-end-line="10" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/__init__.py">
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/picker/jt_cup_pref.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/resource/resource.qrc">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/resource/theme.css">
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/fkikMatch.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="6" column="1" lean-forward="true" selection-start-line="6" selection-start-column="1" selection-end-line="6" selection-end-column="1" />
-        </state>
+        <state relative-caret-position="-1067" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/channelBox/tweenKey_2.py">
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/picker/jt_cup.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1613">
+        <state>
           <folding>
-            <element signature="e#17#27#0" expanded="true" />
+            <element signature="e#33#42#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/anim_mancer/utils/__init__.py">
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/playblast.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/refman.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="1" column="108" selection-start-line="1" selection-start-column="108" selection-end-line="1" selection-end-column="108" />
+        <state relative-caret-position="85">
+          <caret line="5" selection-start-line="5" selection-end-line="5" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/anim_mancer/ui/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/anim_mancer/utils/maya_qt.py">
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/settings.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="442">
-          <caret line="137" selection-start-line="137" selection-end-line="137" />
+        <state relative-caret-position="799">
+          <caret line="47" column="34" selection-start-line="47" selection-start-column="34" selection-end-line="47" selection-end-column="34" />
           <folding>
-            <element signature="e#34#82#0" expanded="true" />
+            <element signature="e#18#94#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/__init__.py">
+    <entry file="file://$PROJECT_DIR$/anim_mancer/utils/color.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="20" column="10" selection-start-line="20" selection-start-column="10" selection-end-line="20" selection-end-column="52" />
+        <state relative-caret-position="17">
+          <caret line="1" column="10" selection-start-line="1" selection-end-line="1" selection-end-column="10" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/anim/refPlayer/ui.py">
+    <entry file="file://$PROJECT_DIR$/anim_mancer/utils/general.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="643">
-          <caret line="135" lean-forward="true" selection-start-line="135" selection-end-line="135" />
-          <folding>
-            <element signature="e#722#731#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="323">
+          <caret line="19" column="10" lean-forward="true" selection-start-line="19" selection-start-column="10" selection-end-line="19" selection-end-column="10" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/resource/anim_mancer_stacked.py" />
     <entry file="file://$PROJECT_DIR$/anim_mancer/ui/custom.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="17" selection-start-column="17" selection-end-column="17" />
+        <state relative-caret-position="289">
+          <caret line="17" lean-forward="true" selection-start-line="17" selection-end-line="17" />
           <folding>
-            <element signature="e#49#77#0" expanded="true" />
+            <element signature="e#50#78#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1160,54 +1112,129 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/header.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="51">
-          <caret line="3" column="4" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="4" />
+          <caret line="3" selection-start-line="3" selection-end-line="3" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/main.py">
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/theme.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="452">
-          <caret line="172" column="45" selection-start-line="172" selection-start-column="45" selection-end-line="172" selection-end-column="45" />
-          <folding>
-            <element signature="e#18#66#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/channelBox/ui.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="408">
-          <caret line="42" lean-forward="true" selection-start-line="42" selection-end-line="42" />
-          <folding>
-            <element signature="e#43#54#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="51">
+          <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/anim_mancer/ui/widgets.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="363">
-          <caret line="582" column="33" selection-start-line="582" selection-start-column="33" selection-end-line="582" selection-end-column="33" />
+        <state relative-caret-position="68">
+          <caret line="4" selection-start-line="4" selection-end-line="4" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/anim_mancer/__init__.py">
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/toolbox.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="11" lean-forward="true" selection-start-line="11" selection-end-line="11" />
+        <state relative-caret-position="2642">
+          <caret line="227" column="42" lean-forward="true" selection-start-line="227" selection-start-column="42" selection-end-line="227" selection-end-column="42" />
           <folding>
-            <element signature="e#18#64#0" expanded="true" />
+            <element signature="e#509#530#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/settings.py">
+    <entry file="file://$PROJECT_DIR$/channelBox/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="23" column="51" selection-start-line="23" selection-start-column="51" selection-end-line="23" selection-end-column="51" />
+        <state relative-caret-position="102">
+          <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+          <folding>
+            <element signature="e#37#46#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/utils/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="51">
+          <caret line="3" column="70" selection-start-line="3" selection-start-column="70" selection-end-line="3" selection-end-column="70" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/menu.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="503">
+          <caret line="93" lean-forward="true" selection-start-line="93" selection-end-line="93" />
+          <folding>
+            <element signature="e#42#55#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="19" selection-start-line="19" selection-end-line="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/keys.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1055">
+          <caret line="151" lean-forward="true" selection-start-line="151" selection-end-line="151" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/ui/channelbox_legacy.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="415">
+          <caret line="184" column="78" selection-start-line="184" selection-start-column="69" selection-end-line="184" selection-end-column="84" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/utils/global_strings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="341">
+          <caret line="47" selection-start-line="47" selection-end-line="47" />
+          <folding>
+            <element signature="e#17#26#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/animFilters/animFilters.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1265">
+          <caret line="420" column="56" selection-start-line="420" selection-start-column="56" selection-end-line="420" selection-end-column="56" />
+          <folding>
+            <element signature="e#715#725#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/graph_editor/customGraphEditorMenu.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1105">
+          <caret line="65" column="52" selection-start-line="65" selection-start-column="52" selection-end-line="65" selection-end-column="52" />
+          <folding>
+            <element signature="e#120#156#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/anim_mancer/tools/animFilters/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="19" selection-start-column="19" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/userSetup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
         </state>
       </provider>
     </entry>

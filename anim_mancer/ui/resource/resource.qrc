@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icon">
+    <file>objects_100.png</file>
     <file>copy_100.png</file>
     <file>edit_100.png</file>
     <file>export_100.png</file>
@@ -17,5 +18,19 @@
     <file>icon_gear.png</file>
     <file>icon_logo.png</file>
     <file>icon_pane_splitter.png</file>
+    <file>icons_ghost.png</file>
+    <file>icons_grid.png</file>
+    <file>icons_ik.png</file>
+    <file>icons_key.png</file>
+    <file>icons_key_all.png</file>
+    <file>icons_time.png</file>
+    <file>icons_bake.png</file>
+    <file>icons_fk.png</file>
+    <file>icons_locate.png</file>
+    <file>icons_motion.png</file>
+    <file>icons_path.png</file>
+    <file>icons_set_add.png</file>
+    <file>icons_set_remove.png</file>
+    <file>icons_snap.png</file>
   </qresource>
 </RCC>

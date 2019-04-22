@@ -18,3 +18,4 @@ timeline_markers.py
 .mayaSwatches
 *.swatches
 workfiles
+uncompyle.py

@@ -7,8 +7,8 @@
 
 # Lancer Modules
 import lancer
-import channelBox.ui
-import channelBox.tweenKey
+import anim_mancer.ui.channelbox_legacy
+import anim_mancer.tools.tweenKey
 import rig
 import rig.parts
 import rig.legacy.ui
@@ -19,9 +19,9 @@ import rig.utils.control
 import rig.auto
 import rig.poseSDK.ui
 import rig.menu
-import anim.stickyFeet
-import anim.refPlayer.ui
-import anim.refman
+import anim_mancer.tools.stickyFeet
+import anim_mancer.tools.refPlayer.ui
+import anim_mancer.tools.refman
 import shows
 
 # Python Modules
@@ -53,8 +53,8 @@ def rigUI(*args):
 
 
 def channelBoxUI(*args):
-	reload(channelBox.ui)
-	channelBox.ui.show()
+	reload(anim_mancer.ui.channelbox_legacy)
+	anim_mancer.ui.channelbox_legacy.show()
 	return
 
 
@@ -98,8 +98,8 @@ def externalNGSkinTools(*args):
 	return
 
 def referencePlayer(*args):
-	reload(anim.refPlayer.ui)
-	anim.refPlayer.ui.windowUI()
+	reload(anim_mancer.tools.refPlayer.ui)
+	anim_mancer.tools.refPlayer.ui.windowUI()
 	return
 
 def show(*args):
@@ -121,9 +121,9 @@ def show(*args):
 	shows.sub_menu()
 
 	cmds.menuItem(d=True, l='Animation')
-	cmds.menuItem(l='Tween Key', c=channelBox.tweenKey.windowQt)
-	cmds.menuItem(l='Sticky Feet', c=anim.stickyFeet.ui)
-	cmds.menuItem(l='Reference Manager', c=anim.refman.show)
+	cmds.menuItem(l='Tween Key', c=anim_mancer.tools.tweenKey.windowQt)
+	cmds.menuItem(l='Sticky Feet', c=anim_mancer.tools.stickyFeet.ui)
+	cmds.menuItem(l='Reference Manager', c=anim_mancer.tools.refman.show)
 	cmds.menuItem(l='Reference Player', c=referencePlayer, enable=QTLOADED)
 
 	cmds.menuItem(d=True, l='External')

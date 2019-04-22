@@ -1,13 +1,5 @@
-QMainWindow{
-background:black;
-}
-
-QWidget{
-color: white;
-}
-
 QSplitter::handle {
-image: url(icon_pane_splitter.png);
+image: url(:icon_pane_splitter.png);
 }
 
 QSplitter::handle:horizontal {
@@ -77,4 +69,8 @@ border:none;
 }
 QScrollArea{
 background:#282f37;
+}
+
+Settings_Widget {
+background:black;
 }

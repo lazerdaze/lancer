@@ -1,12 +1,15 @@
 # Project Modules
-from anim_mancer.ui.widgets import Header_Widget
-from widgets import Sliding_Stacked_Widget
 from anim_mancer.utils import *
+from widgets import Sliding_Stacked_Widget
+from header import Header_Widget
 from settings import Settings_Widget
+from custom import Custom_Widget
+from theme import stylesheet_from_path
 
 # Python Modules
 import os
 from os import path
+import weakref
 
 # Maya Modules
 from maya import cmds
@@ -30,6 +33,7 @@ ChannelBoxLayerEditor|MainChannelsLayersLayout|ChannelButtonForm|cbManipsButton
 ChannelBoxLayerEditor|MainChannelsLayersLayout|ChannelButtonForm|cbSpeedButton
 ChannelBoxLayerEditor|MainChannelsLayersLayout|ChannelButtonForm|cbHyperbolicButton
 ChannelBoxLayerEditor|MainChannelsLayersLayout|ChannelsLayersPaneLayout
+ChannelBoxLayerEditor|MainChannelsLayersLayout|ChannelsLayersPaneLayout|mayaLayoutInternalWidget
 ChannelBoxLayerEditor|MainChannelsLayersLayout|ChannelsLayersPaneLayout|ChannelBoxForm
 ChannelBoxLayerEditor|MainChannelsLayersLayout|ChannelsLayersPaneLayout|ChannelBoxForm|menuBarLayout1
 ChannelBoxLayerEditor|MainChannelsLayersLayout|ChannelsLayersPaneLayout|ChannelBoxForm|menuBarLayout1|frameLayout1
@@ -60,10 +64,11 @@ ChannelBoxLayerEditor|MainChannelsLayersLayout|ChannelsLayersPaneLayout|LayerEdi
 ChannelBoxLayerEditor|MainChannelsLayersLayout|ChannelsLayersPaneLayout|LayerEditorForm|DisplayLayerUITabLayout|AnimLayerTab|formLayout3|AnimLayerTabanimLayerEditor
 '''
 
-ANIM_MANCER = 'anim_mancer_ui'
 DIR_PATH = path.dirname(os.path.abspath(__file__))
+UI_NAME = 'anim_mancer_ui'
 RESOURCE_PATH = path.join(DIR_PATH, 'resource')
-THEME_CSS = path.join(RESOURCE_PATH, 'theme.css')
+THEME = stylesheet_from_path(Path.theme)
+
 CHANNELBOX_WINDOW = 'ChannelBoxLayerEditor'
 CHANNELBOX_LAYOUT = 'ChannelBoxLayerEditor|MainChannelsLayersLayout'
 CHANNELBOX_BUTTON_LAYOUT = 'ChannelBoxLayerEditor|MainChannelsLayersLayout|ChannelButtonForm'
@@ -74,6 +79,7 @@ CHANNELBOX_LAYER_LAYOUT = 'ChannelBoxLayerEditor|MainChannelsLayersLayout|Channe
 CHANNELBOX_LAYER_TAB = 'ChannelBoxLayerEditor|MainChannelsLayersLayout|ChannelsLayersPaneLayout|LayerEditorForm|DisplayLayerUITabLayout'
 
 ANIM_MANCER_EXISTS = False
+ANIM_MANCER_INSTANCE = None
 
 
 # ======================================================================================================================
@@ -85,7 +91,7 @@ ANIM_MANCER_EXISTS = False
 # ======================================================================================================================
 
 def set_channelbox_label(name, *args, **kwargs):
-	return cmds.workspaceControl('ChannelBoxLayerEditor', e=True, label=name)
+	return cmds.workspaceControl(UI.channelbox_editor, e=True, label=name)
 
 
 # ======================================================================================================================
@@ -97,105 +103,110 @@ def set_channelbox_label(name, *args, **kwargs):
 # ======================================================================================================================
 
 
-class Anim_Mancer(QWidget):
-	def __init__(self, title='Anim-Mancer', *args, **kwargs):
-		QWidget.__init__(self, *args, **kwargs)
-		# Settings
-		self.title = title
+class Anim_Mancer(QObject):
+	_instances = set()
+	name = UI.name
+	title = UI.title
+	widget_header_name = '{}_widget_header'.format(name)
+	widget_stacked_name = '{}_widget_stacked'.format(name)
+	widget_settings_name = '{}_widget_settings'.format(name)
+	widget_name = '{}_widget_main'.format(name)
+	widget_custom_name = '{}_widget_custom'.format(name)
+	
+	def __init__(self, *args, **kwargs):
+		QObject.__init__(self, *args, **kwargs)
 		
+		# Settings
+		self._instances.add(weakref.ref(self))
+
 		# Channel Box Widgets
-		self.widget_central = maya_to_qt(CHANNELBOX_WINDOW)
-		self.widget_main = maya_to_qt(CHANNELBOX_LAYOUT)
-		self.widget_pane = maya_to_qt(CHANNELBOX_PANE_LAYOUT)
-		self.widget_layer = maya_to_qt(CHANNELBOX_LAYER_LAYOUT)
-		self.widget_channelbox_buttons = maya_to_qt(CHANNELBOX_BUTTON_LAYOUT)
+		self.widget_central = maya_to_qt(UI.channelbox_editor)
+		self.widget_main = maya_to_qt(UI.channelbox_main)
+		self.widget_pane = maya_to_qt(UI.channelbox_pane)
+		self.widget_layer = maya_to_qt(UI.channelbox_layer)
+		self.widget_channelbox_buttons = maya_to_qt(UI.channelbox_button)
 		
 		# Widgets
-		self.widget_name = '{}_widget_main'.format(ANIM_MANCER)
-		
 		self.widget_stacked = None
-		self.widget_stacked_name = '{}_widget_stacked'.format(ANIM_MANCER)
-		
 		self.widget_header = None
-		self.widget_header_name = '{}_widget_header'.format(ANIM_MANCER)
-
 		self.widget_settings = None
-		self.widget_settings_name = '{}_widget_settings'.format(ANIM_MANCER)
-		
 		self.widget_custom = None
-		self.widget_custom_name = '{}_widget_custom'.format(ANIM_MANCER)
+	
+	@classmethod
+	def getinstances(cls):
+		dead = set()
+		for ref in cls._instances:
+			obj = ref()
+			if obj is not None:
+				yield obj
+			else:
+				dead.add(ref)
+		cls._instances -= dead
+	
+	def install_custom_pane(self, *args, **kwargs):
+		cmds.paneLayout(UI.channelbox_pane, e=True, cn='horizontal3')
 		
+		if cmds.layout(self.widget_custom_name, exists=True):
+			cmds.deleteUI(self.widget_custom_name)
 		
+		self.widget_custom = Custom_Widget()
+		self.widget_custom.setObjectName(self.widget_custom_name)
+		self.widget_pane.layout().addWidget(self.widget_custom)
+		return
+	
+	def uninstall_custom_pane(self, *args, **kwargs):
+		try:
+			cmds.deleteUI(self.widget_custom_name)
+		except RuntimeError:
+			pass
+		cmds.paneLayout(UI.channelbox_pane, e=True, cn='horizontal2')
+		return
 	
 	def install(self, *args, **kwargs):
-		global ANIM_MANCER_EXISTS
-		
-		if ANIM_MANCER_EXISTS:
-			# self.uninstall()
-			pass
-		
 		if self.title:
 			set_channelbox_label(self.title)
-			
+		
 		# Hide
 		self.widget_channelbox_buttons.setHidden(True)
 		
+		# Initialize
+		self.setObjectName(self.name)
+		self.setParent(self.widget_central)
+		
 		# Custom Widget
-		self.setObjectName(self.widget_name)
-		self.setLayout(QVBoxLayout())
-		self.layout().setSpacing(0)
-		self.layout().setContentsMargins(0, 0, 0, 0)
-		self.widget_central.layout().insertWidget(0, self)
+		self.install_custom_pane()
 		
 		# Header
 		self.widget_header = Header_Widget()
 		self.widget_header.setObjectName(self.widget_header_name)
-		self.layout().addWidget(self.widget_header)
-		
-		# Reparent
-		self.layout().addWidget(self.widget_main)
-		
-		# Stacked Widget
-		self.widget_stacked = QStackedWidget(self.widget_central)
-		self.widget_stacked.setObjectName(self.widget_stacked_name)
-		self.widget_central.layout().addWidget(self.widget_stacked)
-		self.widget_stacked.addWidget(self)
+		self.widget_central.layout().insertWidget(0, self.widget_header)
 		
 		# Settings Widget
 		self.widget_settings = Settings_Widget()
 		self.widget_settings.setObjectName(self.widget_settings_name)
-		self.widget_stacked.addWidget(self.widget_settings)
+		self.widget_central.layout().addWidget(self.widget_settings)
+		self.widget_settings.setHidden(True)
 		
 		# Slots
 		self.widget_header.button_settings.clicked.connect(self.settings_callback)
-		self.widget_settings.widget_header.button_settings.clicked.connect(self.settings_callback)
 		
-		self.widget_stacked.setCurrentIndex(0)
-		
-		ANIM_MANCER_EXISTS = True
+		# Style Sheet
+		#self.widget_central.setStyleSheet(THEME)
+		# cmds.layout(CHANNELBOX_WINDOW, e=True, backgroundColor=[0.0, 0.0, 0.0])
 		return
 	
 	def settings_callback(self):
-		current = self.widget_stacked.currentIndex()
-		self.widget_stacked.setCurrentIndex(1 if current == 0 else 0)
-		return
-	
-	def clear_layout(self, layout, *args, **kwargs):
-		while layout.count():
-			child = layout.takeAt(0)
-			if child.widget() is not None:
-				child.widget().deleteLater()
-			elif child.layout() is not None:
-				self.clear_layout(child.layout())
+		hidden = self.widget_main.isHidden()
+		self.widget_main.setHidden(False if hidden else True)
+		self.widget_settings.setHidden(not self.widget_main.isHidden())
 		return
 	
 	def uninstall(self, *args, **kwargs):
-		global ANIM_MANCER_EXISTS
-		
 		self.widget_central.setStyleSheet('')
 		set_channelbox_label('Channel Box / Layer Editor')
 		
 		self.widget_channelbox_buttons.setHidden(False)
+		self.widget_main.setHidden(False)
 		
 		# Header
 		try:
@@ -208,13 +219,10 @@ class Anim_Mancer(QWidget):
 			cmds.deleteUI(self.widget_settings_name)
 		except RuntimeError:
 			pass
-	
+		
 		# Custom
-		try:
-			cmds.deleteUI(self.widget_custom_name)
-		except RuntimeError:
-			pass
-			
+		self.uninstall_custom_pane()
+		
 		# Stacked
 		self.widget_central.layout().addWidget(self.widget_main)
 		
@@ -229,10 +237,9 @@ class Anim_Mancer(QWidget):
 		except RuntimeError:
 			pass
 		
-		ANIM_MANCER_EXISTS = False
+		# Delete Self
+		self.deleteLater()
 		return
-	
-	
 
 
 class UI_MainWindow(QMainWindow):
@@ -244,92 +251,94 @@ class UI_MainWindow(QMainWindow):
 		self.layout_main = QVBoxLayout(self.widget_main)
 		self.layout_main.setSpacing(3)
 		self.layout_main.setContentsMargins(3, 3, 3, 3)
+		self.setCentralWidget(self.widget_main)
 		
 		# Header
 		self.widget_header = Header_Widget()
 		self.layout_main.addWidget(self.widget_header)
 		
 		# Pane
-		self.widget_pane = QSplitter(self.widget_main)
-		self.widget_pane.setLayoutDirection(Qt.LeftToRight)
-		self.widget_pane.setFrameShape(QFrame.NoFrame)
-		self.widget_pane.setFrameShadow(QFrame.Plain)
-		self.widget_pane.setOrientation(Qt.Vertical)
-		self.widget_pane.setHandleWidth(8)
-		self.widget_channelbox = QWidget(self.widget_pane)
-		self.layout_channelbox = QVBoxLayout(self.widget_channelbox)
-		self.layout_channelbox.setSpacing(0)
-		self.layout_channelbox.setContentsMargins(0, 0, 0, 0)
-		self.widget_tab_channelbox = QTabWidget(self.widget_channelbox)
-		self.tab_channelbox = QWidget()
-		self.layout_tab_channelbox = QVBoxLayout(self.tab_channelbox)
-		self.layout_tab_channelbox.setSpacing(3)
-		self.layout_tab_channelbox.setContentsMargins(3, 3, 3, 3)
-		
-		self.widget_tab_channelbox.addTab(self.tab_channelbox, "")
-		self.layout_channelbox.addWidget(self.widget_tab_channelbox)
-		self.widget_layers = QWidget(self.widget_pane)
-		self.layout_layers = QVBoxLayout(self.widget_layers)
-		self.layout_layers.setSpacing(0)
-		self.layout_layers.setContentsMargins(0, 0, 0, 0)
-		self.widget_tab_layers = QTabWidget(self.widget_layers)
-		self.tab_layers = QWidget()
-		self.layout_tab_layers = QVBoxLayout(self.tab_layers)
-		self.layout_tab_layers.setSpacing(3)
-		self.layout_tab_layers.setContentsMargins(3, 3, 3, 3)
-		
-		self.widget_layers_tools = QWidget(self.tab_layers)
-		sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
-		sizePolicy.setHorizontalStretch(0)
-		sizePolicy.setVerticalStretch(0)
-		sizePolicy.setHeightForWidth(self.widget_layers_tools.sizePolicy().hasHeightForWidth())
-		self.widget_layers_tools.setSizePolicy(sizePolicy)
-		self.widget_layers_tools.setLayoutDirection(Qt.RightToLeft)
-		self.layout_layers_tools = QHBoxLayout(self.widget_layers_tools)
-		self.layout_layers_tools.setSpacing(3)
-		self.layout_layers_tools.setContentsMargins(3, 3, 3, 3)
-		
-		self.widget_tab_layers.addTab(self.tab_layers, "")
-		self.tab_anim = QWidget()
-		self.widget_tab_layers.addTab(self.tab_anim, "")
-		self.layout_layers.addWidget(self.widget_tab_layers)
+		# self.widget_pane = QSplitter(self.widget_main)
+		# self.widget_pane.setLayoutDirection(Qt.LeftToRight)
+		# self.widget_pane.setFrameShape(QFrame.NoFrame)
+		# self.widget_pane.setFrameShadow(QFrame.Plain)
+		# self.widget_pane.setOrientation(Qt.Vertical)
+		# self.widget_pane.setHandleWidth(8)
+		# self.widget_channelbox = QWidget(self.widget_pane)
+		# self.layout_channelbox = QVBoxLayout(self.widget_channelbox)
+		# self.layout_channelbox.setSpacing(0)
+		# self.layout_channelbox.setContentsMargins(0, 0, 0, 0)
+		# self.widget_tab_channelbox = QTabWidget(self.widget_channelbox)
+		# self.tab_channelbox = QWidget()
+		# self.layout_tab_channelbox = QVBoxLayout(self.tab_channelbox)
+		# self.layout_tab_channelbox.setSpacing(3)
+		# self.layout_tab_channelbox.setContentsMargins(3, 3, 3, 3)
+		#
+		# self.widget_tab_channelbox.addTab(self.tab_channelbox, "")
+		# self.layout_channelbox.addWidget(self.widget_tab_channelbox)
+		# self.widget_layers = QWidget(self.widget_pane)
+		# self.layout_layers = QVBoxLayout(self.widget_layers)
+		# self.layout_layers.setSpacing(0)
+		# self.layout_layers.setContentsMargins(0, 0, 0, 0)
+		# self.widget_tab_layers = QTabWidget(self.widget_layers)
+		# self.tab_layers = QWidget()
+		# self.layout_tab_layers = QVBoxLayout(self.tab_layers)
+		# self.layout_tab_layers.setSpacing(3)
+		# self.layout_tab_layers.setContentsMargins(3, 3, 3, 3)
+		#
+		# self.widget_layers_tools = QWidget(self.tab_layers)
+		# sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+		# sizePolicy.setHorizontalStretch(0)
+		# sizePolicy.setVerticalStretch(0)
+		# sizePolicy.setHeightForWidth(self.widget_layers_tools.sizePolicy().hasHeightForWidth())
+		# self.widget_layers_tools.setSizePolicy(sizePolicy)
+		# self.widget_layers_tools.setLayoutDirection(Qt.RightToLeft)
+		# self.layout_layers_tools = QHBoxLayout(self.widget_layers_tools)
+		# self.layout_layers_tools.setSpacing(3)
+		# self.layout_layers_tools.setContentsMargins(3, 3, 3, 3)
+		#
+		# self.widget_tab_layers.addTab(self.tab_layers, "")
+		# self.tab_anim = QWidget()
+		# self.widget_tab_layers.addTab(self.tab_anim, "")
+		# self.layout_layers.addWidget(self.widget_tab_layers)
 		
 		# Custom Widget
-		self.widget_custom = QWidget(self.widget_pane)
-		self.layout_custom = QVBoxLayout(self.widget_custom)
-		self.layout_custom.setSpacing(0)
-		self.layout_custom.setContentsMargins(0, 0, 0, 0)
-		self.widget_tab_custom = QTabWidget(self.widget_custom)
-		self.tab_tools = QWidget()
-		self.verticalLayout_7 = QVBoxLayout(self.tab_tools)
-		self.verticalLayout_7.setSpacing(3)
-		self.verticalLayout_7.setContentsMargins(3, 3, 3, 3)
-		self.scrollArea = QScrollArea(self.tab_tools)
-		self.scrollArea.setWidgetResizable(True)
-		self.scrollAreaWidgetContents = QWidget()
-		self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 471, 75))
-		self.scrollAreaWidgetContents.setAutoFillBackground(True)
-		self.verticalLayout = QVBoxLayout(self.scrollAreaWidgetContents)
-		
-		self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-		self.verticalLayout_7.addWidget(self.scrollArea)
-		self.widget_tab_custom.addTab(self.tab_tools, "")
-		self.layout_custom.addWidget(self.widget_tab_custom)
-		self.layout_main.addWidget(self.widget_pane)
+		# self.widget_custom = QWidget(self.widget_pane)
+		# self.layout_custom = QVBoxLayout(self.widget_custom)
+		# self.layout_custom.setSpacing(0)
+		# self.layout_custom.setContentsMargins(0, 0, 0, 0)
+		# self.widget_tab_custom = QTabWidget(self.widget_custom)
+		# self.tab_tools = QWidget()
+		# self.verticalLayout_7 = QVBoxLayout(self.tab_tools)
+		# self.verticalLayout_7.setSpacing(3)
+		# self.verticalLayout_7.setContentsMargins(3, 3, 3, 3)
+		# self.scrollArea = QScrollArea(self.tab_tools)
+		# self.scrollArea.setWidgetResizable(True)
+		# self.scrollAreaWidgetContents = QWidget()
+		# self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 471, 75))
+		# self.scrollAreaWidgetContents.setAutoFillBackground(True)
+		# self.verticalLayout = QVBoxLayout(self.scrollAreaWidgetContents)
+		#
+		# self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+		# self.verticalLayout_7.addWidget(self.scrollArea)
+		# self.widget_tab_custom.addTab(self.tab_tools, "")
+		# self.layout_custom.addWidget(self.widget_tab_custom)
+		# self.layout_main.addWidget(self.widget_pane)
 		
 		# Settings Widget
 		self.widget_settings = Settings_Widget()
+		self.layout_main.addWidget(self.widget_settings)
 		
 		# Stacked Widget
-		self.widget_stacked = QStackedWidget()
-		self.widget_stacked.addWidget(self.widget_main)
-		self.widget_stacked.addWidget(self.widget_settings)
-		self.setCentralWidget(self.widget_stacked)
-		self.widget_stacked.setCurrentIndex(0)
+		# self.widget_stacked = QStackedWidget()
+		# self.widget_stacked.addWidget(self.widget_main)
+		# self.widget_stacked.addWidget(self.widget_settings)
+		# self.setCentralWidget(self.widget_stacked)
+		# self.widget_stacked.setCurrentIndex(0)
 		
 		# Slots
-		self.widget_header.button_settings.clicked.connect(self.settings_callback)
-		self.widget_settings.widget_header.button_settings.clicked.connect(self.settings_callback)
+		# self.widget_header.button_settings.clicked.connect(self.settings_callback)
+		# self.widget_settings.widget_header.button_settings.clicked.connect(self.settings_callback)
 	
 	def settings_callback(self):
 		current = self.widget_stacked.currentIndex()
